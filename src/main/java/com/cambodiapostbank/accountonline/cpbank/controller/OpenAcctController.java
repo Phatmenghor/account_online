@@ -4,7 +4,7 @@ package com.cambodiapostbank.accountonline.cpbank.controller;
 import com.cambodiapostbank.accountonline.cpbank.domain.customer.dto.CustomerRequestDto;
 import com.cambodiapostbank.accountonline.cpbank.domain.customer.dto.CustomerResponseDto;
 import com.cambodiapostbank.accountonline.cpbank.domain.customer.service.CustomerService;
-import com.cambodiapostbank.accountonline.cpbank.utils.http.HttpClient;
+import com.cambodiapostbank.accountonline.cpbank.utils.http.HttpClientRest;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -13,7 +13,10 @@ import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpSession;
 
@@ -24,6 +27,8 @@ public class OpenAcctController {
     private final Log logger = LogFactory.getLog(OpenAcctController.class);
     private final CustomerService customerService;
 
+    HttpClientRest httpClientRest = new HttpClientRest();
+
     @Value("${t24api.base_url}")
     String BaseUrl;
     @Value("${t24api.username}")
@@ -31,7 +36,7 @@ public class OpenAcctController {
     @Value("${t24api.password}")
     String PASSWORD;
 
-    private String jsonRequestVerifyOtp(CustomerRequestDto customerRequestDto) {
+    private String createJsonRequestVerifyOtp(CustomerRequestDto customerRequestDto) {
         JSONObject jsonObject = new JSONObject();
         try {
             jsonObject.put("phone_number", customerRequestDto.getPhoneNumber());
@@ -48,9 +53,9 @@ public class OpenAcctController {
         logger.info("Method Post incoming request.");
         logger.info("==================================================================\r\n");
 
-        String json = jsonRequestVerifyOtp(customerRequestDto);
-        String otpUrl = BaseUrl + "/api/IsVerifyOtp";
-        String otpResponse = HttpClient.postData(otpUrl, json, USERNAME, PASSWORD);
+        String JSON_DATA_OTP = createJsonRequestVerifyOtp(customerRequestDto);
+        String OTP_URL = BaseUrl + "/api/IsVerifyOtp";
+        String otpResponse = httpClientRest.postData(OTP_URL, JSON_DATA_OTP, USERNAME, PASSWORD);
 
         logger.info("==================================================================\r\n");
         logger.info("otpResponse: " + otpResponse);
@@ -65,7 +70,7 @@ public class OpenAcctController {
                 logger.info("JSON Request: " + jsonRequest);
 
                 String openAcctUrl = BaseUrl + "/api/OpenAcct";
-                String response = HttpClient.postData(openAcctUrl, jsonRequest, USERNAME, PASSWORD);
+                String response = httpClientRest.postData(openAcctUrl, jsonRequest, USERNAME, PASSWORD);
                 logger.info("Response: " + response);
 
                 JSONObject jsonObject = new JSONObject(response);
@@ -99,9 +104,9 @@ public class OpenAcctController {
         logger.info("Method Post incoming request.");
         logger.info("==================================================================\r\n");
 
-        String json = jsonRequestVerifyOtp(customerRequestDto);
-        String otpUrl = BaseUrl + "/api/IsVerifyOtp";
-        String otpResponse = HttpClient.postData(otpUrl, json, USERNAME, PASSWORD);
+        String JSON_DATA = createJsonRequestVerifyOtp(customerRequestDto);
+        String OTP_URL = BaseUrl + "/api/IsVerifyOtp";
+        String otpResponse = httpClientRest.postData(OTP_URL, JSON_DATA, USERNAME, PASSWORD);
 
         logger.info("==================================================================\r\n");
         logger.info("otpResponse: " + otpResponse);
@@ -109,15 +114,15 @@ public class OpenAcctController {
         int errorCodeOTP = jsonObjectOTP.getInt("ErrCode");
         String errorMsgOTP = jsonObjectOTP.getString("ErrMsg");
         logger.info("==================================================================\r\n");
-        if (errorCodeOTP == 200){
+        if (errorCodeOTP == 200) {
             try {
-                String jsonRequest = customerService.createJsonRequestStaffPost(customerRequestDto,session);
+                String jsonRequest = customerService.createJsonRequestStaffPost(customerRequestDto, session);
                 System.out.println("=======================================");
                 System.out.println(jsonRequest);
                 System.out.println("=======================================");
 
-                String url = BaseUrl + "/api/OpenAcctByStaff";
-                String response = HttpClient.postData(url, jsonRequest, USERNAME, PASSWORD);
+                String URL = BaseUrl + "/api/OpenAcctByStaff";
+                String response = httpClientRest.postData(URL, jsonRequest, USERNAME, PASSWORD);
 
                 System.out.println("============================================");
                 System.out.println("response: " + response);
@@ -139,7 +144,7 @@ public class OpenAcctController {
             } catch (Exception e) {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Something went wrong");
             }
-        }else{
+        } else {
             // Handle exceptions appropriately and return error response
             CustomerResponseDto customerResponseDto = new CustomerResponseDto();
             customerResponseDto.setContent("The Invalid OTP code.");

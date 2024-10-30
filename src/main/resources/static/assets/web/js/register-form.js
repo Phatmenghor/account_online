@@ -433,7 +433,7 @@ $('#legalIdImage').on('change', function(evt) {
         showLoading();
         $.ajax({
             type: "POST",
-            url: "api/v1/ekyc/send",
+            url: "api/v1/ekyc/extractNid",
             contentType: 'application/json',
             dataType: 'json',
             data: JSON.stringify(json),

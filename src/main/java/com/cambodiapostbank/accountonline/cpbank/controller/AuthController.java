@@ -2,7 +2,7 @@ package com.cambodiapostbank.accountonline.cpbank.controller;
 
 
 import com.cambodiapostbank.accountonline.cpbank.domain.staff_info.StaffRequestDTO;
-import com.cambodiapostbank.accountonline.cpbank.utils.http.HttpClient;
+import com.cambodiapostbank.accountonline.cpbank.utils.http.HttpClientRest;
 import lombok.RequiredArgsConstructor;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -18,11 +18,14 @@ import javax.servlet.http.HttpSession;
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/auth")
 public class AuthController {
-    HttpClient httpClient = new HttpClient();
+    HttpClientRest httpClientRest = new HttpClientRest();
+
     @Value("${t24api.base_url}")
     String BaseUrl;
+
     @Value("${t24api.username}")
     String USERNAME;
+
     @Value("${t24api.password}")
     String PASSWORD;
 
@@ -39,12 +42,9 @@ public class AuthController {
 
     @RequestMapping(value = "/check-login", method = RequestMethod.POST, produces = "application/json")
     public ResponseEntity<String> checkLogin(@RequestBody StaffRequestDTO staffRequestDTO, HttpSession session) throws Exception {
-        String jsonData = createJsonRequestBody(staffRequestDTO);
+        String jsonData = createJsonRequestLogin(staffRequestDTO);
         String url = BaseUrl + "/api/Auth/Login";
-        String response = HttpClient.postData(url, jsonData, USERNAME, PASSWORD);
-        System.out.println("=============");
-        System.out.println("Response: " + response);
-        System.out.println("============");
+        String response = httpClientRest.postData(url, jsonData, USERNAME, PASSWORD);
         try {
             JSONObject jsonObject = new JSONObject(response);
             int errCode = jsonObject.getInt("ErrCode");
@@ -52,7 +52,7 @@ public class AuthController {
                 session.setAttribute("IsLoginCode", staffRequestDTO.getIdCard());
             } else if (errCode == 2) {
                 session.setAttribute("IsChangePasswordCode", staffRequestDTO.getIdCard());
-            }else if(errCode == 3){
+            } else if (errCode == 3) {
                 session.setAttribute("IsExpiredPasswordCode", staffRequestDTO.getIdCard());
             }
         } catch (JSONException e) {
@@ -62,33 +62,21 @@ public class AuthController {
 
     @RequestMapping(value = "/change-password", method = RequestMethod.POST, produces = "application/json")
     public ResponseEntity<String> changePassword(@RequestBody StaffRequestDTO staffRequestDTO, HttpSession session) throws Exception {
-        String jsonData = createJsonRequestChangePassword(staffRequestDTO,session);
-        System.out.println("=============================");
-        System.out.println(jsonData);
-        System.out.println("=============================");
+        String jsonData = createJsonRequestChangePassword(staffRequestDTO, session);
         String url = BaseUrl + "/api/ChangeDefaultPassword";
-        String response = HttpClient.postData(url, jsonData, USERNAME, PASSWORD);
-        System.out.println("=============================");
-        System.out.println("Response: " + response);
-        System.out.println("=============================");
+        String response = httpClientRest.postData(url, jsonData, USERNAME, PASSWORD);
         return ResponseEntity.ok(response);
     }
 
     @RequestMapping(value = "/change-exp-password", method = RequestMethod.POST, produces = "application/json")
     public ResponseEntity<String> changeExpPassword(@RequestBody StaffRequestDTO staffRequestDTO, HttpSession session) throws Exception {
-        String jsonData = createJsonRequestExpChangePassword(staffRequestDTO,session);
-        System.out.println("=============================");
-        System.out.println(jsonData);
-        System.out.println("=============================");
+        String jsonData = createJsonRequestExpChangePassword(staffRequestDTO, session);
         String url = BaseUrl + "/api/ChangeDefaultPassword";
-        String response = HttpClient.postData(url, jsonData, USERNAME, PASSWORD);
-        System.out.println("=============================");
-        System.out.println("Response: " + response);
-        System.out.println("=============================");
+        String response = httpClientRest.postData(url, jsonData, USERNAME, PASSWORD);
         return ResponseEntity.ok(response);
     }
 
-    private String createJsonRequestChangePassword(StaffRequestDTO staffRequestDTO,HttpSession session) {
+    private String createJsonRequestChangePassword(StaffRequestDTO staffRequestDTO, HttpSession session) {
         JSONObject jsonObject = new JSONObject();
         String staffID = (String) session.getAttribute("IsChangePasswordCode");
         System.out.println(staffID);
@@ -101,7 +89,7 @@ public class AuthController {
         return jsonObject.toString();
     }
 
-    private String createJsonRequestExpChangePassword(StaffRequestDTO staffRequestDTO,HttpSession session) {
+    private String createJsonRequestExpChangePassword(StaffRequestDTO staffRequestDTO, HttpSession session) {
         JSONObject jsonObject = new JSONObject();
         String staffID = (String) session.getAttribute("IsExpiredPasswordCode");
         System.out.println(staffID);
@@ -114,7 +102,7 @@ public class AuthController {
         return jsonObject.toString();
     }
 
-    private String createJsonRequestBody(StaffRequestDTO staffRequestDTO) {
+    private String createJsonRequestLogin(StaffRequestDTO staffRequestDTO) {
         JSONObject jsonObject = new JSONObject();
         try {
             jsonObject.put("id_card", staffRequestDTO.getIdCard());
