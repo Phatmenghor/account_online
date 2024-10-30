@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="kh" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title layout:title-pattern="$LAYOUT_TITLE - $CONTENT_TITLE">Account Online</title>
+    <style th:replace="/shared/style"></style>
+    <script>
+        window.Toast = Swal.mixin({
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 3000,
+            timerProgressBar: true,
+            didOpen: (toast) => {
+                toast.addEventListener('mouseenter', Swal.stopTimer)
+                toast.addEventListener('mouseleave', Swal.resumeTimer)
+            }
+        })
+    </script>
+    <th:block layout:fragment="styles"></th:block>
+</head>
+<body>
+<section>
+    <div th:replace="/shared/staff_header"></div>
+    <div layout:fragment="content"> </div>
+    <!--    <div th:replace="/shared/footer"></div>-->
+</section>
+<!-- Call script -->
+<div th:replace="/shared/script"></div>
+<th:block layout:fragment="scripts"> </th:block>
+</body>
+</html>
