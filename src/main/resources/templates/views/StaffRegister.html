@@ -7,6 +7,7 @@
     <meta charset="UTF-8">
     <th:block layout:fragment="styles">
         <link rel="stylesheet" th:href="@{/assets/web/css/staff-register.css}">
+        <link rel="stylesheet" th:href="@{/assets/web/css/loading.css}">
     </th:block>
 </head>
 <body>
@@ -602,8 +603,8 @@
 
                         <div class="row text-end mt-4 mb-5">
                             <div class="col-sm">
-                                <button class="btn btn-primary ms-auto px-5 rounded-2" id="btnValidate" type="submit" th:text="#{register.validate}">Validate</button>
-                                <button class="btn btn-primary ms-auto px-5 rounded-2 disabled" id="btnSubmit" type="submit" th:text="#{register.submit}">Submit</button>
+<!--                                <button class="btn btn-primary ms-auto px-5 rounded-2" id="btnValidate" type="submit" th:text="#{register.validate}">Validate</button>-->
+                                <button class="btn btn-primary ms-auto px-5 rounded-2 " id="btnSubmit" type="submit" th:text="#{register.submit}">Submit</button>
                             </div>
                         </div>
                     </form>
@@ -872,10 +873,11 @@
     <script th:src="@{/assets/web/utils/idle-timeout.js}"></script>
     <script th:src="@{/assets/web/utils/custom-validation.js}"></script>
 <!--    <script th:src="@{/assets/web/utils/disable_developer_mode.js}"></script>-->
-    <script th:src="@{/assets/web/js/staff-register-form.js}"></script>
-    <script th:src="@{/assets/web/js/modal1.js}"></script>
-    <script th:src="@{/assets/web/js/modal2.js}"></script>
-    <script th:src="@{/assets/web/js/modal3.js}"></script>
+    <script th:src="@{/assets/web/js/staff/staff-register-form.js}"></script>
+    <script th:src="@{/assets/web/js/loading.js}"></script>
+    <script th:src="@{/assets/web/js/staff/modal1.js}"></script>
+    <script th:src="@{/assets/web/js/staff/modal2.js}"></script>
+    <script th:src="@{/assets/web/js/staff/modal3.js}"></script>
     <script th:inline="javascript">
         $(function (){
             const companyHiddenFieldId = $('#company').val() || 'CPBANK';

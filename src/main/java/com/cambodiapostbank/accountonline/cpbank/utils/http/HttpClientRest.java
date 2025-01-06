@@ -14,11 +14,8 @@ import java.security.cert.X509Certificate;
 import java.util.Base64;
 
 public class HttpClientRest {
-
     private static final Logger logger = LoggerFactory.getLogger(HttpClientRest.class);
-
     private final RestTemplate restTemplate;
-
     public HttpClientRest() {
         this.restTemplate = new RestTemplate();
         configureRestTemplate();
@@ -55,7 +52,6 @@ public class HttpClientRest {
     public String getData(String url, String username, String password) {
         HttpHeaders headers = createHeaders(username, password);
         HttpEntity<String> requestEntity = new HttpEntity<>(headers);
-
         ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.GET, requestEntity, String.class);
         return responseEntity.getBody();
     }
@@ -63,9 +59,7 @@ public class HttpClientRest {
     public String postData(String url, String postJsonData, String username, String password) {
         HttpHeaders headers = createHeaders(username, password);
         headers.setContentType(MediaType.APPLICATION_JSON);
-
         HttpEntity<String> requestEntity = new HttpEntity<>(postJsonData, headers);
-
         ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.POST, requestEntity, String.class);
         return responseEntity.getBody();
     }
@@ -73,7 +67,6 @@ public class HttpClientRest {
     private HttpHeaders createHeaders(String username, String password) {
         String credentials = username + ":" + password;
         String encodedCredentials = Base64.getEncoder().encodeToString(credentials.getBytes());
-
         HttpHeaders headers = new HttpHeaders();
         headers.set(HttpHeaders.AUTHORIZATION, "Basic " + encodedCredentials);
         headers.set(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE);

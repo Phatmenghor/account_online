@@ -1,9 +1,11 @@
 package com.cambodiapostbank.accountonline.cpbank.controller;
 
 
-import com.cambodiapostbank.accountonline.cpbank.domain.staff_info.StaffRequestDTO;
+import com.cambodiapostbank.accountonline.cpbank.model.StaffRequest;
 import com.cambodiapostbank.accountonline.cpbank.utils.http.HttpClientRest;
 import lombok.RequiredArgsConstructor;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,6 +21,7 @@ import javax.servlet.http.HttpSession;
 @RequestMapping("/api/v1/auth")
 public class AuthController {
     HttpClientRest httpClientRest = new HttpClientRest();
+    private static final Logger logger = LogManager.getLogger(AuthController.class);
 
     @Value("${t24api.base_url}")
     String BaseUrl;
@@ -40,73 +43,73 @@ public class AuthController {
         return redirectView;
     }
 
-    @RequestMapping(value = "/check-login", method = RequestMethod.POST, produces = "application/json")
-    public ResponseEntity<String> checkLogin(@RequestBody StaffRequestDTO staffRequestDTO, HttpSession session) throws Exception {
-        String jsonData = createJsonRequestLogin(staffRequestDTO);
-        String url = BaseUrl + "/api/Auth/Login";
-        String response = httpClientRest.postData(url, jsonData, USERNAME, PASSWORD);
+    @PostMapping("/check-login")
+    public ResponseEntity<String> checkLogin(@RequestBody StaffRequest staffRequest, HttpSession session) throws Exception {
+        String JSON_DATA = createJsonRequestLogin(staffRequest);
+        String URL = BaseUrl + "/api/Auth/Login";
+        String response = httpClientRest.postData(URL, JSON_DATA, USERNAME, PASSWORD);
+        logger.info(response);
         try {
             JSONObject jsonObject = new JSONObject(response);
             int errCode = jsonObject.getInt("ErrCode");
             if (errCode == 0) {
-                session.setAttribute("IsLoginCode", staffRequestDTO.getIdCard());
+                session.setAttribute("IsLoginCode", staffRequest.getIdCard());
             } else if (errCode == 2) {
-                session.setAttribute("IsChangePasswordCode", staffRequestDTO.getIdCard());
+                session.setAttribute("IsChangePasswordCode", staffRequest.getIdCard());
             } else if (errCode == 3) {
-                session.setAttribute("IsExpiredPasswordCode", staffRequestDTO.getIdCard());
+                session.setAttribute("IsExpiredPasswordCode", staffRequest.getIdCard());
             }
         } catch (JSONException e) {
         }
         return ResponseEntity.ok(response);
     }
 
-    @RequestMapping(value = "/change-password", method = RequestMethod.POST, produces = "application/json")
-    public ResponseEntity<String> changePassword(@RequestBody StaffRequestDTO staffRequestDTO, HttpSession session) throws Exception {
-        String jsonData = createJsonRequestChangePassword(staffRequestDTO, session);
-        String url = BaseUrl + "/api/ChangeDefaultPassword";
-        String response = httpClientRest.postData(url, jsonData, USERNAME, PASSWORD);
+    @PostMapping("/change-password")
+    public ResponseEntity<String> changePassword(@RequestBody StaffRequest staffRequest, HttpSession session) throws Exception {
+        String JSON_DATA = createJsonRequestChangePassword(staffRequest, session);
+        String URL = BaseUrl + "/api/ChangeDefaultPassword";
+        String response = httpClientRest.postData(URL, JSON_DATA, USERNAME, PASSWORD);
         return ResponseEntity.ok(response);
     }
 
-    @RequestMapping(value = "/change-exp-password", method = RequestMethod.POST, produces = "application/json")
-    public ResponseEntity<String> changeExpPassword(@RequestBody StaffRequestDTO staffRequestDTO, HttpSession session) throws Exception {
-        String jsonData = createJsonRequestExpChangePassword(staffRequestDTO, session);
-        String url = BaseUrl + "/api/ChangeDefaultPassword";
-        String response = httpClientRest.postData(url, jsonData, USERNAME, PASSWORD);
+    @PostMapping("/change-exp-password")
+    public ResponseEntity<String> changeExpPassword(@RequestBody StaffRequest staffRequest, HttpSession session) throws Exception {
+        String JSON_DATA = createJsonRequestExpChangePassword(staffRequest, session);
+        String URL = BaseUrl + "/api/ChangeDefaultPassword";
+        String response = httpClientRest.postData(URL, JSON_DATA, USERNAME, PASSWORD);
         return ResponseEntity.ok(response);
     }
 
-    private String createJsonRequestChangePassword(StaffRequestDTO staffRequestDTO, HttpSession session) {
+    private String createJsonRequestChangePassword(StaffRequest staffRequest, HttpSession session) {
         JSONObject jsonObject = new JSONObject();
         String staffID = (String) session.getAttribute("IsChangePasswordCode");
         System.out.println(staffID);
         try {
-
             jsonObject.put("id_card", staffID);
-            jsonObject.put("password", staffRequestDTO.getPassword());
+            jsonObject.put("password", staffRequest.getPassword());
         } catch (JSONException e) {
         }
         return jsonObject.toString();
     }
 
-    private String createJsonRequestExpChangePassword(StaffRequestDTO staffRequestDTO, HttpSession session) {
+    private String createJsonRequestExpChangePassword(StaffRequest staffRequest, HttpSession session) {
         JSONObject jsonObject = new JSONObject();
         String staffID = (String) session.getAttribute("IsExpiredPasswordCode");
         System.out.println(staffID);
         try {
 
             jsonObject.put("id_card", staffID);
-            jsonObject.put("password", staffRequestDTO.getPassword());
+            jsonObject.put("password", staffRequest.getPassword());
         } catch (JSONException e) {
         }
         return jsonObject.toString();
     }
 
-    private String createJsonRequestLogin(StaffRequestDTO staffRequestDTO) {
+    private String createJsonRequestLogin(StaffRequest staffRequest) {
         JSONObject jsonObject = new JSONObject();
         try {
-            jsonObject.put("id_card", staffRequestDTO.getIdCard());
-            jsonObject.put("password", staffRequestDTO.getPassword());
+            jsonObject.put("id_card", staffRequest.getIdCard());
+            jsonObject.put("password", staffRequest.getPassword());
         } catch (JSONException e) {
         }
         return jsonObject.toString();

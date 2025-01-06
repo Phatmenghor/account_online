@@ -1,0 +1,28 @@
+2025-01-03 15:41:42,379 INFO com.cambodiapostbank.accountonline.AccountOnlineApplication [restartedMain] Starting AccountOnlineApplication using Java 1.8.0_202 on GIT-SODA with PID 13908 (D:\sodaIT\CPBank\Project\In-House Development\Java\account-online\account-online-v3\FrontEnd\account-online\target\classes started by soda.kroes in D:\sodaIT\CPBank\Project\In-House Development\Java\account-online\account-online-v3\FrontEnd\account-online)
+2025-01-03 15:41:42,387 DEBUG com.cambodiapostbank.accountonline.AccountOnlineApplication [restartedMain] Running with Spring Boot v2.7.10, Spring v5.3.26
+2025-01-03 15:41:42,388 INFO com.cambodiapostbank.accountonline.AccountOnlineApplication [restartedMain] No active profile set, falling back to 1 default profile: "default"
+2025-01-03 15:41:47,380 INFO com.cambodiapostbank.accountonline.AccountOnlineApplication [restartedMain] Started AccountOnlineApplication in 5.699 seconds (JVM running for 8.203)
+2025-01-03 15:42:06,925 INFO com.cambodiapostbank.accountonline.cpbank.controller.AuthController [http-nio-8095-exec-2] {"ErrCode":0,"ErrMsg":"Login successfully."}
+2025-01-03 15:42:15,213 INFO com.cambodiapostbank.accountonline.cpbank.controller.HomeController [http-nio-8095-exec-8] errorCode: 1
+2025-01-03 15:42:15,213 INFO com.cambodiapostbank.accountonline.cpbank.controller.HomeController [http-nio-8095-exec-8] errorMsg: System Is Ok.
+2025-01-03 15:42:29,238 INFO com.cambodiapostbank.accountonline.cpbank.controller.HomeController [http-nio-8095-exec-10] errorCode: 1
+2025-01-03 15:42:29,238 INFO com.cambodiapostbank.accountonline.cpbank.controller.HomeController [http-nio-8095-exec-10] errorMsg: System Is Ok.
+2025-01-03 15:42:39,173 INFO com.cambodiapostbank.accountonline.cpbank.controller.HomeController [http-nio-8095-exec-5] errorCode: 1
+2025-01-03 15:42:39,174 INFO com.cambodiapostbank.accountonline.cpbank.controller.HomeController [http-nio-8095-exec-5] errorMsg: System Is Ok.
+2025-01-03 15:47:17,590 INFO com.cambodiapostbank.accountonline.AccountOnlineApplication [restartedMain] Starting AccountOnlineApplication using Java 1.8.0_202 on GIT-SODA with PID 8372 (D:\sodaIT\CPBank\Project\In-House Development\Java\account-online\account-online-v3\FrontEnd\account-online\target\classes started by soda.kroes in D:\sodaIT\CPBank\Project\In-House Development\Java\account-online\account-online-v3\FrontEnd\account-online)
+2025-01-03 15:47:17,593 DEBUG com.cambodiapostbank.accountonline.AccountOnlineApplication [restartedMain] Running with Spring Boot v2.7.10, Spring v5.3.26
+2025-01-03 15:47:17,594 INFO com.cambodiapostbank.accountonline.AccountOnlineApplication [restartedMain] No active profile set, falling back to 1 default profile: "default"
+2025-01-03 15:47:21,888 INFO com.cambodiapostbank.accountonline.AccountOnlineApplication [restartedMain] Started AccountOnlineApplication in 4.905 seconds (JVM running for 6.742)
+2025-01-03 15:47:42,308 INFO com.cambodiapostbank.accountonline.cpbank.controller.AuthController [http-nio-8095-exec-3] {"ErrCode":99999,"ErrMsg":"Idcard or password is incorrect."}
+2025-01-03 15:47:45,214 INFO com.cambodiapostbank.accountonline.cpbank.controller.AuthController [http-nio-8095-exec-5] {"ErrCode":99999,"ErrMsg":"Idcard or password is incorrect."}
+2025-01-03 15:47:46,601 INFO com.cambodiapostbank.accountonline.cpbank.controller.AuthController [http-nio-8095-exec-1] {"ErrCode":99999,"ErrMsg":"Idcard or password is incorrect."}
+2025-01-03 15:47:47,828 INFO com.cambodiapostbank.accountonline.cpbank.controller.AuthController [http-nio-8095-exec-8] {"ErrCode":99999,"ErrMsg":"Idcard or password is incorrect."}
+2025-01-03 15:47:49,079 INFO com.cambodiapostbank.accountonline.cpbank.controller.AuthController [http-nio-8095-exec-2] {"ErrCode":99999,"ErrMsg":"Idcard or password is incorrect."}
+2025-01-03 15:47:50,385 INFO com.cambodiapostbank.accountonline.cpbank.controller.AuthController [http-nio-8095-exec-4] {"ErrCode":99999,"ErrMsg":"Idcard or password is incorrect."}
+2025-01-03 15:47:51,613 INFO com.cambodiapostbank.accountonline.cpbank.controller.AuthController [http-nio-8095-exec-9] {"ErrCode":99999,"ErrMsg":"Idcard or password is incorrect."}
+2025-01-03 15:47:55,850 INFO com.cambodiapostbank.accountonline.cpbank.controller.AuthController [http-nio-8095-exec-10] {"ErrCode":0,"ErrMsg":"Login successfully."}
+2025-01-03 15:48:12,361 INFO com.cambodiapostbank.accountonline.cpbank.controller.HomeController [http-nio-8095-exec-9] errorCode: 1
+2025-01-03 15:48:12,361 INFO com.cambodiapostbank.accountonline.cpbank.controller.HomeController [http-nio-8095-exec-9] errorMsg: System Is Ok.
+2025-01-03 15:49:23,151 INFO com.cambodiapostbank.accountonline.AccountOnlineApplication [restartedMain] Starting AccountOnlineApplication using Java 1.8.0_202 on GIT-SODA with PID 22944 (D:\sodaIT\CPBank\Project\In-House Development\Java\account-online\account-online-v3\FrontEnd\account-online\target\classes started by soda.kroes in D:\sodaIT\CPBank\Project\In-House Development\Java\account-online\account-online-v3\FrontEnd\account-online)
+2025-01-03 15:49:23,159 DEBUG com.cambodiapostbank.accountonline.AccountOnlineApplication [restartedMain] Running with Spring Boot v2.7.10, Spring v5.3.26
+2025-01-03 15:49:23,163 INFO com.cambodiapostbank.accountonline.AccountOnlineApplication [restartedMain] No active profile set, falling back to 1 default profile: "default"

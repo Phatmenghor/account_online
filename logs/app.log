@@ -1,7 +1,14 @@
-2024-10-30 10:31:09,478 INFO com.cambodiapostbank.accountonline.cpbank.controller.OpenAcctController [http-nio-8095-exec-5] Response: {"ErrCode":"200","ErrMsg":"Account Create Success.","Content":"ការស្នើសុំជោគជ័យ។ លោកអ្នកនឹងទទួលបានលេខគណនី តាមសារទូរស័ព្ទ។ សូមភ្ជាប់សេវាធនាគារចល័តដើម្បីរីករាយជាមួយប្រតិបត្តិការដ៏សម្បូរបែប។","Status":"NEW"}
-2024-10-30 10:31:09,481 INFO com.cambodiapostbank.accountonline.cpbank.controller.OpenAcctController [http-nio-8095-exec-5] StatusCode: 200
-2024-10-30 10:31:09,481 INFO com.cambodiapostbank.accountonline.cpbank.controller.OpenAcctController [http-nio-8095-exec-5] Message: ការស្នើសុំជោគជ័យ។ លោកអ្នកនឹងទទួលបានលេខគណនី តាមសារទូរស័ព្ទ។ សូមភ្ជាប់សេវាធនាគារចល័តដើម្បីរីករាយជាមួយប្រតិបត្តិការដ៏សម្បូរបែប។
-2024-10-30 10:54:14,199 INFO com.cambodiapostbank.accountonline.AccountOnlineApplication [restartedMain] Starting AccountOnlineApplication using Java 1.8.0_202 on GIT-SODA with PID 12664 (D:\sodaIT\CPBank\Project\account-online-v3\FrontEnd\account-online\target\classes started by soda.kroes in D:\sodaIT\CPBank\Project\account-online-v3\FrontEnd\account-online)
-2024-10-30 10:54:14,201 DEBUG com.cambodiapostbank.accountonline.AccountOnlineApplication [restartedMain] Running with Spring Boot v2.7.10, Spring v5.3.26
-2024-10-30 10:54:14,208 INFO com.cambodiapostbank.accountonline.AccountOnlineApplication [restartedMain] No active profile set, falling back to 1 default profile: "default"
-2024-10-30 10:54:17,179 INFO com.cambodiapostbank.accountonline.AccountOnlineApplication [restartedMain] Started AccountOnlineApplication in 3.341 seconds (JVM running for 4.521)
+2025-01-06 08:17:47,298 INFO com.cambodiapostbank.accountonline.cpbank.controller.VerifyOTPController [http-nio-8095-exec-6] Send OTP Successfully: {"phone":"010987001","Text":"","App":"0"}
+2025-01-06 08:18:00,711 INFO com.cambodiapostbank.accountonline.cpbank.controller.VerifyOTPController [http-nio-8095-exec-8] Start Verify OTP: {"phone_number":"010987001","otp_code":"418529"}
+2025-01-06 08:18:00,767 INFO com.cambodiapostbank.accountonline.cpbank.controller.VerifyOTPController [http-nio-8095-exec-8] Verify OTP Successfully: {"phone_number":"010987001","otp_code":"418529"}
+2025-01-06 08:19:22,559 INFO com.cambodiapostbank.accountonline.AccountOnlineApplication [restartedMain] Starting AccountOnlineApplication using Java 1.8.0_202 on GIT-SODA with PID 13316 (D:\sodaIT\CPBank\Project\In-House Development\Java\account-online\account-online-v3\FrontEnd\account-online\target\classes started by soda.kroes in D:\sodaIT\CPBank\Project\In-House Development\Java\account-online\account-online-v3\FrontEnd\account-online)
+2025-01-06 08:19:22,565 DEBUG com.cambodiapostbank.accountonline.AccountOnlineApplication [restartedMain] Running with Spring Boot v2.7.10, Spring v5.3.26
+2025-01-06 08:19:22,567 INFO com.cambodiapostbank.accountonline.AccountOnlineApplication [restartedMain] No active profile set, falling back to 1 default profile: "default"
+2025-01-06 08:19:27,112 INFO com.cambodiapostbank.accountonline.AccountOnlineApplication [restartedMain] Started AccountOnlineApplication in 5.433 seconds (JVM running for 7.994)
+2025-01-06 08:19:36,027 INFO com.cambodiapostbank.accountonline.cpbank.controller.HomeController [http-nio-8095-exec-1] errorCode: 1
+2025-01-06 08:19:36,027 INFO com.cambodiapostbank.accountonline.cpbank.controller.HomeController [http-nio-8095-exec-1] errorMsg: System Is Ok.
+2025-01-06 08:19:42,894 INFO com.cambodiapostbank.accountonline.cpbank.controller.eKYC_Controller [http-nio-8095-exec-6] ========> ExtractNID
+2025-01-06 08:19:57,399 INFO com.cambodiapostbank.accountonline.cpbank.controller.eKYC_Controller [http-nio-8095-exec-10] ========> ExtractNID
+2025-01-06 08:20:11,537 INFO com.cambodiapostbank.accountonline.cpbank.controller.eKYC_Controller [http-nio-8095-exec-1] ========> ExtractNID
+2025-01-06 08:20:17,436 INFO com.cambodiapostbank.accountonline.cpbank.controller.HomeController [http-nio-8095-exec-2] errorCode: 1
+2025-01-06 08:20:17,436 INFO com.cambodiapostbank.accountonline.cpbank.controller.HomeController [http-nio-8095-exec-2] errorMsg: System Is Ok.

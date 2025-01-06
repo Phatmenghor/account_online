@@ -164,7 +164,7 @@ public class HomeController {
         if (IsChangePasswordCode == null) {
             return "redirect:/login-page";
         } else {
-            return "ChangePassword";
+            return "ChangeDefaultPassword";
         }
     }
 

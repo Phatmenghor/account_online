@@ -8,6 +8,8 @@
     <meta charset="UTF-8">
     <th:block layout:fragment="styles">
         <link rel="stylesheet" th:href="@{/assets/web/css/register-form.css}">
+        <link rel="stylesheet" th:href="@{/assets/web/css/loading.css}">
+
     </th:block>
 </head>
 <body>
@@ -658,10 +660,11 @@
 <th:block layout:fragment="scripts">
     <script th:src="@{/assets/web/utils/custom-validation.js}"></script>
     <!--    <script th:src="@{/assets/web/utils/disable_developer_mode.js}"></script>-->
-    <script th:src="@{/assets/web/js/register-form.js}"></script>
-    <script th:src="@{/assets/web/js/modal1.js}"></script>
-    <script th:src="@{/assets/web/js/modal2.js}"></script>
-    <script th:src="@{/assets/web/js/modal3.js}"></script>
+    <script th:src="@{/assets/web/js/customer/register-form.js}"></script>
+    <script th:src="@{/assets/web/js/loading.js}"></script>
+    <script th:src="@{/assets/web/js/customer/modal1.js}"></script>
+    <script th:src="@{/assets/web/js/customer/modal2.js}"></script>
+    <script th:src="@{/assets/web/js/customer/modal3.js}"></script>
     <script th:inline="javascript">
         $('#legalId').prop('readonly', true);
         $(function () {

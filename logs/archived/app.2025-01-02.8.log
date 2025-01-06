@@ -1,0 +1,29 @@
+2025-01-02 13:30:10,945 INFO com.cambodiapostbank.accountonline.cpbank.controller.HomeController [http-nio-8095-exec-10] errorCode: 1
+2025-01-02 13:30:10,948 INFO com.cambodiapostbank.accountonline.cpbank.controller.HomeController [http-nio-8095-exec-10] errorMsg: System Is Ok.
+2025-01-02 13:30:55,749 INFO com.cambodiapostbank.accountonline.cpbank.controller.VerifyOTPController [http-nio-8095-exec-9] Send OTP: {"phone":"010987001","Text":"","App":"0"}
+2025-01-02 13:30:55,937 INFO com.cambodiapostbank.accountonline.cpbank.controller.VerifyOTPController [http-nio-8095-exec-9] Send OTP Successfully: {"phone":"010987001","Text":"","App":"0"}
+2025-01-02 13:31:15,807 INFO com.cambodiapostbank.accountonline.cpbank.controller.VerifyOTPController [http-nio-8095-exec-7] Start Verify OTP: {"phone_number":"010987001","otp_code":"418529"}
+2025-01-02 13:31:15,843 INFO com.cambodiapostbank.accountonline.cpbank.controller.VerifyOTPController [http-nio-8095-exec-7] Verify OTP Successfully: {"phone_number":"010987001","otp_code":"418529"}
+2025-01-02 13:31:17,017 INFO com.cambodiapostbank.accountonline.cpbank.controller.eKYC_Controller [http-nio-8095-exec-1] json: {"customer_address":"ភូមិក្រសាំង ឃុំពោធិ៍រំចាក ស្រុកព្រៃកប្បាស តាកែវ"}
+2025-01-02 13:31:18,306 INFO com.cambodiapostbank.accountonline.cpbank.controller.eKYC_Controller [http-nio-8095-exec-1] response: {"VillageCode":"21060805","CommuneCode":"210608","DistrictCode":"2106","ProvinceCode":"21","IsFindAddress":1}
+2025-01-02 13:31:18,392 INFO com.cambodiapostbank.accountonline.cpbank.controller.eKYC_Controller [http-nio-8095-exec-10] json: {"customer_pob_address":"ឃុំពោធ៍រិចាក  ស្រុកព្រៃកប្បាស  តាកែវ"}
+2025-01-02 13:31:18,547 INFO com.cambodiapostbank.accountonline.cpbank.controller.eKYC_Controller [http-nio-8095-exec-10] response: {"VillageCode":"01020102","CommuneCode":"010201","DistrictCode":"0102","ProvinceCode":"01","IsFindAddress":0}
+2025-01-02 13:31:29,046 INFO com.cambodiapostbank.accountonline.cpbank.controller.eKYC_Controller [http-nio-8095-exec-5] json: {"customer_address":"ភូមិក្រសាំង ឃុំពោធិ៍រំចាក ស្រុកព្រៃកប្បាស តាកែវ"}
+2025-01-02 13:31:29,066 INFO com.cambodiapostbank.accountonline.cpbank.controller.eKYC_Controller [http-nio-8095-exec-5] response: {"VillageCode":"21060805","CommuneCode":"210608","DistrictCode":"2106","ProvinceCode":"21","IsFindAddress":1}
+2025-01-02 13:31:29,140 INFO com.cambodiapostbank.accountonline.cpbank.controller.eKYC_Controller [http-nio-8095-exec-8] json: {"customer_pob_address":"ឃុំពោធ៍រំចាក  ស្រុកព្រៃកប្បាស  តាកែវ"}
+2025-01-02 13:31:29,154 INFO com.cambodiapostbank.accountonline.cpbank.controller.eKYC_Controller [http-nio-8095-exec-8] response: {"VillageCode":"01020102","CommuneCode":"010201","DistrictCode":"0102","ProvinceCode":"01","IsFindAddress":0}
+2025-01-02 13:32:01,067 INFO com.cambodiapostbank.accountonline.cpbank.controller.eKYC_Controller [http-nio-8095-exec-6] json: {"customer_address":"ភូមិក្រសាំង ឃុំពោធិ៍រំចាក ស្រុកព្រៃកប្បាស តាកែវ"}
+2025-01-02 13:32:01,087 INFO com.cambodiapostbank.accountonline.cpbank.controller.eKYC_Controller [http-nio-8095-exec-6] response: {"VillageCode":"21060805","CommuneCode":"210608","DistrictCode":"2106","ProvinceCode":"21","IsFindAddress":1}
+2025-01-02 13:32:01,168 INFO com.cambodiapostbank.accountonline.cpbank.controller.eKYC_Controller [http-nio-8095-exec-7] json: {"customer_pob_address":"ឃុំពោធិ៍រំចាក  ស្រុកព្រៃកប្បាស  តាកែវ"}
+2025-01-02 13:32:01,324 INFO com.cambodiapostbank.accountonline.cpbank.controller.eKYC_Controller [http-nio-8095-exec-7] response: {"VillageCode":"","CommuneCode":"210608","DistrictCode":"2106","ProvinceCode":"21","IsFindAddress":1}
+2025-01-02 13:32:02,797 INFO com.cambodiapostbank.accountonline.cpbank.controller.OpenAcctController [http-nio-8095-exec-10] ==================================================================
+
+2025-01-02 13:32:02,797 INFO com.cambodiapostbank.accountonline.cpbank.controller.OpenAcctController [http-nio-8095-exec-10] Method Post incoming request.
+2025-01-02 13:32:02,797 INFO com.cambodiapostbank.accountonline.cpbank.controller.OpenAcctController [http-nio-8095-exec-10] ==================================================================
+
+2025-01-02 13:32:02,808 INFO com.cambodiapostbank.accountonline.cpbank.controller.OpenAcctController [http-nio-8095-exec-10] ==================================================================
+
+2025-01-02 13:32:02,808 INFO com.cambodiapostbank.accountonline.cpbank.controller.OpenAcctController [http-nio-8095-exec-10] otpResponse: {"ErrCode":200,"ErrMsg":"success"}
+2025-01-02 13:32:02,808 INFO com.cambodiapostbank.accountonline.cpbank.controller.OpenAcctController [http-nio-8095-exec-10] ==================================================================
+
+2025-01-02 13:32:02,831 INFO com.cambodiapostbank.accountonline.cpbank.domain.customer.service.CustomerServiceImpl [http-nio-8095-exec-10] ================================
