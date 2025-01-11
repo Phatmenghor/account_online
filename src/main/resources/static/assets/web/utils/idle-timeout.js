@@ -8,7 +8,7 @@ function resetTimer() {
 }
 
 function logout() {
-    location.href = "/OpenUat/sign-out";
+    location.href = "/OpenAcct/sign-out";
     // location.href = "/sign-out";
 }
 
