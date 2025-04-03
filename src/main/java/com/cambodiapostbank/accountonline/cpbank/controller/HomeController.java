@@ -1,18 +1,12 @@
 package com.cambodiapostbank.accountonline.cpbank.controller;
 
-import com.cambodiapostbank.accountonline.cpbank.utils.http.HttpClientRest;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.json.JSONObject;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import javax.servlet.http.HttpSession;
-import java.io.IOException;
-import java.net.URISyntaxException;
 
 @Controller
 @RequestMapping("/")
@@ -20,161 +14,64 @@ public class HomeController {
 
     private final Log logger = LogFactory.getLog(HomeController.class);
 
-    HttpClientRest httpClientRest = new HttpClientRest();
-
-    @Value("${t24api.base_url}")
-    String BaseUrl;
-
-    @Value("${t24api.username}")
-    String USERNAME;
-
-    @Value("${t24api.password}")
-    String PASSWORD;
-
-
     @GetMapping("/")
     public String index() {
+        logger.info("Redirecting to home page.");
         return "redirect:/home";
     }
 
     @GetMapping("/home")
     public String homePage() {
-        return "home";
+        logger.info("Rendering home page.");
+        return "pages/home";
     }
-
-    @GetMapping("/maintenanceOpenByStaff")
-    public String maintenanceOpenByStaff() {
-        System.out.println("Hello");
-        try {
-            String JSON_DATA = "{\"systemCode\": \"OAOSTAFF\"}"; // Corrected JSON format
-            String URL = BaseUrl + "/api/Maintenance";
-            String response = httpClientRest.postData(URL, JSON_DATA, USERNAME, PASSWORD);
-
-            JSONObject jsonObject = new JSONObject(response);
-            int errorCode = jsonObject.getInt("ErrCode");
-            String errorMsg = jsonObject.getString("ErrMsg");
-            logger.info("errorCode: " + errorCode);
-            logger.info("errorMsg: " + errorMsg);
-
-            if (errorCode == 0) {
-                return "maintenance";
-            } else {
-                return "redirect:/register-by-staff";
-            }
-        } catch (Exception ex) {
-            logger.error(ex.getMessage());
-            return "StaffRegister";
-        }
-    }
-
-    @GetMapping("/maintenanceOpenByCustomer")
-    public String maintenanceOpenByCustomer() {
-        System.out.println("Hello");
-        try {
-            String JSON_DATA = "{\"systemCode\": \"OAOCUS\"}"; // Corrected JSON format
-            String URL = BaseUrl + "/api/Maintenance";
-            String response = httpClientRest.postData(URL, JSON_DATA, USERNAME, PASSWORD);
-
-            JSONObject jsonObject = new JSONObject(response);
-            int errorCode = jsonObject.getInt("ErrCode");
-            String errorMsg = jsonObject.getString("ErrMsg");
-            logger.info("errorCode: " + errorCode);
-            logger.info("errorMsg: " + errorMsg);
-
-            if (errorCode == 0) {
-                return "maintenance";
-            } else {
-                return "redirect:/register-by-customer";
-            }
-        } catch (Exception ex) {
-            logger.error(ex.getMessage());
-            return "CustomerRegister";
-        }
-    }
-
 
     @GetMapping("/register-by-customer")
-    public String ShowCustomerPage() {
-        try {
-            String JSON_DATA = "{\"systemCode\": \"OAOCUS\"}"; // Corrected JSON format
-            String URL = BaseUrl + "/api/Maintenance";
-            String response = httpClientRest.postData(URL, JSON_DATA, USERNAME, PASSWORD);
-
-            JSONObject jsonObject = new JSONObject(response);
-            int errorCode = jsonObject.getInt("ErrCode");
-            String errorMsg = jsonObject.getString("ErrMsg");
-            logger.info("errorCode: " + errorCode);
-            logger.info("errorMsg: " + errorMsg);
-            if (errorCode == 0) {
-                return "redirect:/maintenanceOpenByCustomer";
-            } else {
-                return "CustomerRegister";
-            }
-        } catch (Exception ex) {
-            logger.error(ex.getMessage());
-            return "CustomerRegister";
-        }
+    public String showCustomerPage() {
+        logger.info("Rendering customer registration page.");
+        return "pages/customer-register";
     }
 
     @GetMapping("/register-by-staff")
-    public String showRegisterForm(Model model, HttpSession session) throws URISyntaxException, IOException, InterruptedException {
-        String IsLoginCode = (String) session.getAttribute("IsLoginCode");
-        // Check if user is logged in
-        if (IsLoginCode == null) {
-            return "redirect:/login-page"; // Redirect to login page if not logged in
-        } else {
-            try {
-                String JSON_DATA = "{\"systemCode\": \"OAOSTAFF\"}"; // Corrected JSON format
-                String URL = BaseUrl + "/api/Maintenance";
-                String response = httpClientRest.postData(URL, JSON_DATA, USERNAME, PASSWORD);
-
-                JSONObject jsonObject = new JSONObject(response);
-                int errorCode = jsonObject.getInt("ErrCode");
-                String errorMsg = jsonObject.getString("ErrMsg");
-                logger.info("errorCode: " + errorCode);
-                logger.info("errorMsg: " + errorMsg);
-                if (errorCode == 0) {
-                    return "redirect:/maintenanceOpenByStaff";
-                } else {
-                    return "StaffRegister";
-                }
-            } catch (Exception ex) {
-                System.out.println(ex.getMessage());
-                // Handle exceptions appropriately and return error response
-                return "StaffRegister";
-            }
+    public String showRegisterForm(HttpSession session) {
+        if (session.getAttribute("IsLoginCode") == null) {
+            logger.warn("Unauthorized access attempt to /register-by-staff. Redirecting to login page.");
+            return "redirect:/login-page";
         }
+        logger.info("Rendering staff registration page.");
+        return "pages/staff-register";
     }
 
     @GetMapping("/sign-out")
     public String logout(HttpSession session) {
-        // Invalidate the session
+        logger.info("User signing out. Invalidating session.");
         session.invalidate();
         return "redirect:/home";
     }
 
     @GetMapping("/login-page")
     public String showLoginPage() {
-        return "LoginPage";
+        logger.info("Rendering login page.");
+        return "pages/login-page";
     }
 
     @GetMapping("/change-password")
-    public String showFormChangePassword(HttpSession session) {
-        String IsChangePasswordCode = (String) session.getAttribute("IsChangePasswordCode");
-        if (IsChangePasswordCode == null) {
+    public String showChangePasswordForm(HttpSession session) {
+        if (session.getAttribute("IsChangePasswordCode") == null) {
+            logger.warn("Unauthorized access attempt to /change-password. Redirecting to login page.");
             return "redirect:/login-page";
-        } else {
-            return "ChangeDefaultPassword";
         }
+        logger.info("Rendering change default password page.");
+        return "pages/change-default-password";
     }
 
     @GetMapping("/expired-password")
-    public String showExpiredPassword(HttpSession session) {
-        String IsExpiredPasswordCode = (String) session.getAttribute("IsExpiredPasswordCode");
-        if (IsExpiredPasswordCode == null) {
+    public String showExpiredPasswordForm(HttpSession session) {
+        if (session.getAttribute("IsExpiredPasswordCode") == null) {
+            logger.warn("Unauthorized access attempt to /expired-password. Redirecting to login page.");
             return "redirect:/login-page";
-        } else {
-            return "ChangePassExpired";
         }
+        logger.info("Rendering change expired password page.");
+        return "pages/change-expired-password";
     }
 }

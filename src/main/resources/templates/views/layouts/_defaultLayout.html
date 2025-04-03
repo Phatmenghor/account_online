@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="kh" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title layout:title-pattern="$LAYOUT_TITLE - $CONTENT_TITLE">Account Online</title>
+
+    <style th:replace="/shared/style"></style>
+
+    <style>
+        /* Ensure full height layout */
+        html, body {
+            height: 100%;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+        }
+        /* Push content to take available space */
+        .main-content {
+            flex: 1;
+        }
+
+        body[data-layout=horizontal] .page-content {
+            margin-top: 20px !important;
+        }
+    </style>
+    <th:block layout:fragment="styles"></th:block>
+
+</head>
+
+<body data-layout="horizontal" data-topbar="light">
+
+<!-- Begin page -->
+<div id="layout-wrapper">
+
+    <header id="page-topbar" class="isvertical-topbar">
+
+    </header>
+    <!-- ========== Left Sidebar Start ========== -->
+    <div class="vertical-menu">
+
+    </div>
+
+    <!-- Left Sidebar End -->
+    <header class="ishorizontal-topbar">
+        <div th:replace="/shared/header_auth"></div>
+        <div class="topnav"></div>
+    </header>
+
+    <!-- ============================================================== -->
+    <!-- Start right Content here -->
+    <!-- ============================================================== -->
+    <div class="main-content">
+        <div class="page-content">
+            <div layout:fragment="content"></div>
+        </div>
+        <!-- End Page-content -->
+
+
+        <div th:replace="/shared/footer"></div>
+
+    </div>
+    <!-- end main content-->
+
+</div>
+<!-- END layout-wrapper -->
+
+
+<!-- Right Sidebar -->
+<div class="right-bar">
+
+</div>
+
+
+<!-- Call script -->
+<div th:replace="/shared/script"></div>
+
+<!--&lt;!&ndash; Add script directly inside the body &ndash;&gt;-->
+<!--<script type="text/javascript">-->
+<!--    // Function to change language-->
+<!--    function changeLanguage(lang) {-->
+<!--        // Check if the selected language is different from the current language-->
+<!--        if (lang === localStorage.getItem('selectedLang')) {-->
+<!--            return;  // Exit if the selected language is the same as the current one-->
+<!--        }-->
+
+<!--        var flagImage = document.getElementById('current-lang-flag');-->
+
+<!--        // Update the flag image based on the selected language-->
+<!--        if (lang === 'en') {-->
+<!--            flagImage.src = '/assets/cpbank/icon/us-flag.png';  // English flag-->
+<!--        } else if (lang === 'kh') {-->
+<!--            flagImage.src = '/assets/cpbank/icon/cambodia-flag.png';  // Khmer flag-->
+<!--        }-->
+
+<!--        // Store the selected language in localStorage-->
+<!--        localStorage.setItem('selectedLang', lang);-->
+
+<!--        // Make an AJAX request to change the language on the server side-->
+<!--        $.ajax({-->
+<!--            url: '/change-language',  // Your backend endpoint for changing language-->
+<!--            type: 'POST',-->
+<!--            contentType: 'application/json',-->
+<!--            data: JSON.stringify({ lang: lang }),  // Send selected language-->
+<!--            success: function(response) {-->
+<!--                console.log('Language changed to: ', response.lang);-->
+<!--                // Optionally, reload or refresh the page to apply the language change-->
+<!--                location.reload();-->
+<!--            },-->
+<!--            error: function(xhr, status, error) {-->
+<!--                console.error('Error changing language:', error);-->
+<!--            }-->
+<!--        });-->
+<!--    }-->
+
+<!--    // Initialize language and flag image on page load-->
+<!--    window.onload = function() {-->
+<!--        var lang = localStorage.getItem('selectedLang') || 'kh';  // Default to Khmer if no language is selected-->
+<!--        var flagImage = document.getElementById('current-lang-flag');-->
+
+<!--        // Check the stored language and update the flag image-->
+<!--        if (lang === 'en') {-->
+<!--            flagImage.src = '/assets/cpbank/icon/us-flag.png';  // English flag-->
+<!--        } else if (lang === 'kh') {-->
+<!--            flagImage.src = '/assets/cpbank/icon/cambodia-flag.png';  // Khmer flag-->
+<!--        }-->
+<!--    };-->
+<!--</script>-->
+
+<th:block layout:fragment="scripts"></th:block>
+
+
+</body>
+</html>

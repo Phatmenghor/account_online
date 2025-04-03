@@ -1,0 +1,31 @@
+2025-01-11 11:18:18,031 INFO com.cambodiapostbank.accountonline.AccountOnlineApplication [restartedMain] Starting AccountOnlineApplication using Java 1.8.0_202 on GIT-SODA with PID 5996 (D:\sodaIT\CPBank\Project\In-House Development\Java\account-online\account-online-v3\FrontEnd\account-online\target\classes started by soda.kroes in D:\sodaIT\CPBank\Project\In-House Development\Java\account-online\account-online-v3\FrontEnd\account-online)
+2025-01-11 11:18:18,068 DEBUG com.cambodiapostbank.accountonline.AccountOnlineApplication [restartedMain] Running with Spring Boot v2.7.10, Spring v5.3.26
+2025-01-11 11:18:18,069 INFO com.cambodiapostbank.accountonline.AccountOnlineApplication [restartedMain] No active profile set, falling back to 1 default profile: "default"
+2025-01-11 11:18:28,254 INFO com.cambodiapostbank.accountonline.AccountOnlineApplication [restartedMain] Started AccountOnlineApplication in 12.025 seconds (JVM running for 18.77)
+2025-01-11 11:21:26,960 INFO com.cambodiapostbank.accountonline.cpbank.controller.AuthController [http-nio-8095-exec-8] {"ErrCode":0,"ErrMsg":"Login successfully."}
+2025-01-11 11:22:01,933 INFO com.cambodiapostbank.accountonline.cpbank.controller.HomeController [http-nio-8095-exec-1] errorCode: 1
+2025-01-11 11:22:01,934 INFO com.cambodiapostbank.accountonline.cpbank.controller.HomeController [http-nio-8095-exec-1] errorMsg: System Is Ok.
+2025-01-11 11:22:31,599 INFO com.cambodiapostbank.accountonline.cpbank.controller.HomeController [http-nio-8095-exec-4] errorCode: 1
+2025-01-11 11:22:31,599 INFO com.cambodiapostbank.accountonline.cpbank.controller.HomeController [http-nio-8095-exec-4] errorMsg: System Is Ok.
+2025-01-11 11:24:43,529 INFO com.cambodiapostbank.accountonline.cpbank.controller.HomeController [http-nio-8095-exec-6] errorCode: 0
+2025-01-11 11:24:43,535 INFO com.cambodiapostbank.accountonline.cpbank.controller.HomeController [http-nio-8095-exec-6] errorMsg: Site is Under Maintenance
+2025-01-11 11:24:43,765 INFO com.cambodiapostbank.accountonline.cpbank.controller.HomeController [http-nio-8095-exec-2] errorCode: 0
+2025-01-11 11:24:43,765 INFO com.cambodiapostbank.accountonline.cpbank.controller.HomeController [http-nio-8095-exec-2] errorMsg: Site is Under Maintenance
+2025-01-11 11:24:55,568 INFO com.cambodiapostbank.accountonline.cpbank.controller.HomeController [http-nio-8095-exec-1] errorCode: 0
+2025-01-11 11:24:55,568 INFO com.cambodiapostbank.accountonline.cpbank.controller.HomeController [http-nio-8095-exec-1] errorMsg: Site is Under Maintenance
+2025-01-11 11:25:50,861 INFO com.cambodiapostbank.accountonline.cpbank.controller.HomeController [http-nio-8095-exec-4] errorCode: 1
+2025-01-11 11:25:50,861 INFO com.cambodiapostbank.accountonline.cpbank.controller.HomeController [http-nio-8095-exec-4] errorMsg: System Is Ok.
+2025-01-11 11:25:50,897 INFO com.cambodiapostbank.accountonline.cpbank.controller.HomeController [http-nio-8095-exec-2] errorCode: 1
+2025-01-11 11:25:50,897 INFO com.cambodiapostbank.accountonline.cpbank.controller.HomeController [http-nio-8095-exec-2] errorMsg: System Is Ok.
+2025-01-11 11:25:51,804 INFO com.cambodiapostbank.accountonline.cpbank.controller.HomeController [http-nio-8095-exec-6] errorCode: 1
+2025-01-11 11:25:51,804 INFO com.cambodiapostbank.accountonline.cpbank.controller.HomeController [http-nio-8095-exec-6] errorMsg: System Is Ok.
+2025-03-31 11:42:49,434 INFO com.cambodiapostbank.accountonline.AccountOnlineApplication [restartedMain] Starting AccountOnlineApplication using Java 1.8.0_202 on GIT-SODA with PID 16828 (D:\sodaIT\CPBank\Project\In-House Development\Java\account-online\account-online-v2\FrontEnd\account-online\target\classes started by soda.kroes in D:\sodaIT\CPBank\Project\In-House Development\Java\account-online\account-online-v2\FrontEnd\account-online)
+2025-03-31 11:42:49,438 DEBUG com.cambodiapostbank.accountonline.AccountOnlineApplication [restartedMain] Running with Spring Boot v2.7.10, Spring v5.3.26
+2025-03-31 11:42:49,439 INFO com.cambodiapostbank.accountonline.AccountOnlineApplication [restartedMain] No active profile set, falling back to 1 default profile: "default"
+2025-03-31 11:42:55,009 INFO com.cambodiapostbank.accountonline.AccountOnlineApplication [restartedMain] Started AccountOnlineApplication in 6.144 seconds (JVM running for 9.21)
+2025-03-31 11:43:41,056 INFO com.cambodiapostbank.accountonline.cpbank.controller.AuthController [http-nio-8095-exec-3] {"ErrCode":0,"ErrMsg":"Login successfully."}
+2025-03-31 11:44:02,766 INFO com.cambodiapostbank.accountonline.cpbank.controller.HomeController [http-nio-8095-exec-4] errorCode: 1
+2025-03-31 11:44:02,766 INFO com.cambodiapostbank.accountonline.cpbank.controller.HomeController [http-nio-8095-exec-4] errorMsg: System Is Ok.
+2025-03-31 11:45:38,950 INFO com.cambodiapostbank.accountonline.AccountOnlineApplication [restartedMain] Starting AccountOnlineApplication using Java 1.8.0_202 on GIT-SODA with PID 12116 (D:\sodaIT\CPBank\Project\In-House Development\Java\account-online\account-online-v2\FrontEnd\account-online\target\classes started by soda.kroes in D:\sodaIT\CPBank\Project\In-House Development\Java\account-online\account-online-v2\FrontEnd\account-online)
+2025-03-31 11:45:38,953 DEBUG com.cambodiapostbank.accountonline.AccountOnlineApplication [restartedMain] Running with Spring Boot v2.7.10, Spring v5.3.26
+2025-03-31 11:45:38,954 INFO com.cambodiapostbank.accountonline.AccountOnlineApplication [restartedMain] No active profile set, falling back to 1 default profile: "default"
