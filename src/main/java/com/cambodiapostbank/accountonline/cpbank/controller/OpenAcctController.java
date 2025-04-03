@@ -4,6 +4,7 @@ package com.cambodiapostbank.accountonline.cpbank.controller;
 import com.cambodiapostbank.accountonline.cpbank.domain.customer.dto.CustomerRequestDto;
 import com.cambodiapostbank.accountonline.cpbank.domain.customer.dto.CustomerResponseDto;
 import com.cambodiapostbank.accountonline.cpbank.domain.customer.service.CustomerService;
+
 import com.cambodiapostbank.accountonline.cpbank.utils.http.HttpClientRest;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.logging.Log;
@@ -31,8 +32,10 @@ public class OpenAcctController {
 
     @Value("${t24api.base_url}")
     private String BaseUrl;
+
     @Value("${t24api.username}")
     private String USERNAME;
+
     @Value("${t24api.password}")
     private String PASSWORD;
 
@@ -78,48 +81,6 @@ public class OpenAcctController {
             } catch (Exception e) {
                 logger.error("[Customer Creation] Unexpected error occurred", e);
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Unexpected error occurred");
-            }
-        } else {
-            logger.warn("[OTP Verification] Failed: " + errorMsgOTP);
-            CustomerResponseDto customerResponseDto = new CustomerResponseDto();
-            customerResponseDto.setContent("Invalid OTP code.");
-            customerResponseDto.setErrorCode("500");
-            customerResponseDto.setErrorMessage("OTP verification failed");
-            return ResponseEntity.ok(customerResponseDto);
-        }
-    }
-
-    @PostMapping("/staff-create")
-    public ResponseEntity<Object> registerByStaff(@RequestBody CustomerRequestDto customerRequestDto, HttpSession session) throws Exception {
-        logger.info("[Staff Creation] Incoming request to register a staff account.");
-
-        String JSON_DATA = createJsonRequestVerifyOtp(customerRequestDto);
-        String OTP_URL = BaseUrl + "/api/IsVerifyOtp";
-        logger.info("[OTP Verification] Sending request to: " + OTP_URL);
-        String otpResponse = httpClientRest.postData(OTP_URL, JSON_DATA, USERNAME, PASSWORD);
-        logger.info("[OTP Verification] Response received: " + otpResponse);
-
-        JSONObject jsonObjectOTP = new JSONObject(otpResponse);
-        int errorCodeOTP = jsonObjectOTP.getInt("ErrCode");
-        String errorMsgOTP = jsonObjectOTP.getString("ErrMsg");
-
-        if (errorCodeOTP == 200) {
-            try {
-                String jsonRequest = customerService.createJsonRequestStaffPost(customerRequestDto, session);
-                logger.info("[Staff Creation] Request Payload: " + jsonRequest);
-
-                String URL = BaseUrl + "/api/OpenAcctByStaff";
-                logger.info("[Staff Creation] Sending request to: " + URL);
-                String response = httpClientRest.postData(URL, jsonRequest, USERNAME, PASSWORD);
-                logger.info("[Staff Creation] Response received: " + response);
-
-                return ResponseEntity.ok(response);
-            } catch (JSONException e) {
-                logger.error("[Staff Creation] Error processing JSON response", e);
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Invalid response format");
-            } catch (Exception e) {
-                logger.error("[Staff Creation] Unexpected error occurred", e);
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Something went wrong");
             }
         } else {
             logger.warn("[OTP Verification] Failed: " + errorMsgOTP);

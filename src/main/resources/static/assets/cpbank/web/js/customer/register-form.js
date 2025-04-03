@@ -393,14 +393,14 @@ function handleAjaxNidValidateSuccess(response) {
                 }
                 // console.log(incorrectFieldsText);
                 if (lang === 'kh') {
-                    var html = '<div style="text-align: start;">' + '<img src="/OpenAcct/assets/icon/success.png" alt="success" style="width: 20px; height: 20px;" />' + 'រូបថត selfie របស់អ្នកត្រឹមត្រូវជាមួយអត្តសញ្ញាណប័ណ្ណ (' + score + '%)' + '</div>' + '<div style="text-align: start; margin-top: 10px;">' + '<img src="/OpenAcct/assets/icon/fail1.png" alt="fail" style="width: 16px; height: 16px;" />' + 'ព័ត៌មានមិនត្រឹមត្រូវ:' + '<div style="margin-left: 20px; margin-top: 5px;">' + incorrectFieldsText + '</div>' + '</div>';
+                    var html = '<div style="text-align: start;">' + '<img src="/assets/icon/success.png" alt="success" style="width: 20px; height: 20px;" />' + 'រូបថត selfie របស់អ្នកត្រឹមត្រូវជាមួយអត្តសញ្ញាណប័ណ្ណ (' + score + '%)' + '</div>' + '<div style="text-align: start; margin-top: 10px;">' + '<img src="/assets/icon/fail1.png" alt="fail" style="width: 16px; height: 16px;" />' + 'ព័ត៌មានមិនត្រឹមត្រូវ:' + '<div style="margin-left: 20px; margin-top: 5px;">' + incorrectFieldsText + '</div>' + '</div>';
                     Swal.fire({
                         icon: "warning",
                         title: "បរាជ័យ",
                         html: html
                     });
                 } else {
-                    var html = '<div style="text-align: start;">' + '<img src="/OpenAcct/assets/icon/success.png" alt="success" style="width: 20px; height: 20px;" />' + 'Your selfie image is valid with ID card (' + score + '%)' + '</div>' + '<div style="text-align: start; margin-top: 10px;">' + '<img src="/OpenAcct/assets/icon/fail1.png" alt="fail" style="width: 16px; height: 16px;" />' + 'Incorrect information:' + '<div style="margin-left: 20px; margin-top: 5px;">' + incorrectFieldsText + '</div>' + '</div>';
+                    var html = '<div style="text-align: start;">' + '<img src="/assets/icon/success.png" alt="success" style="width: 20px; height: 20px;" />' + 'Your selfie image is valid with ID card (' + score + '%)' + '</div>' + '<div style="text-align: start; margin-top: 10px;">' + '<img src="/assets/icon/fail1.png" alt="fail" style="width: 16px; height: 16px;" />' + 'Incorrect information:' + '<div style="margin-left: 20px; margin-top: 5px;">' + incorrectFieldsText + '</div>' + '</div>';
                     Swal.fire({
                         icon: "warning",
                         title: "Failed..!",
