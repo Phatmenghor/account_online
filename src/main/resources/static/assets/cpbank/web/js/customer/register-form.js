@@ -8,18 +8,6 @@ $(document).ready(function () {
     // Apply the initial language
     updateLanguageDisplay(currentLang);
 
-    // Initialize SweetAlert Toast
-    window.Toast = Swal.mixin({
-        toast: true,
-        position: 'top-end',
-        showConfirmButton: false,
-        timer: 3000,
-        timerProgressBar: true,
-        didOpen: (toast) => {
-            toast.addEventListener('mouseenter', Swal.stopTimer);
-            toast.addEventListener('mouseleave', Swal.resumeTimer);
-        }
-    });
 
     // Initialize flatpickr for dateOfBirth
     dateOfBirthPicker = $("#dateOfBirth").flatpickr({
@@ -36,6 +24,19 @@ $(document).ready(function () {
                 input.setCustomValidity(""); // Clear validation error
             }
             input.reportValidity(); // Force validation message display
+        }
+    });
+
+    // Initialize SweetAlert Toast
+    window.Toast = Swal.mixin({
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+            toast.addEventListener('mouseenter', Swal.stopTimer);
+            toast.addEventListener('mouseleave', Swal.resumeTimer);
         }
     });
 
