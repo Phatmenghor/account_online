@@ -8,7 +8,7 @@
     <meta charset="UTF-8">
     <th:block layout:fragment="styles">
         <link rel="stylesheet" th:href="@{/assets/cpbank/web/css/register-form.css}">
-<!--        <link rel="stylesheet" th:href="@{/assets/cpbank/web/css/loading.css}">-->
+        <link rel="stylesheet" th:href="@{/assets/cpbank/web/css/loading.css}">
     </th:block>
 </head>
 
@@ -36,8 +36,6 @@
                     </div>
                     <!-- START FORM -->
                     <form class="need-novalidate-new" id="idFormRegister" novalidate>
-                        <input autocomplete="off" class="form-control cpb-form-control" id="issuedDate" required th:attr="placeholder=#{register.issuedDate}" type="text" style="display: none">
-                        <input autocomplete="off" class="form-control cpb-form-control" id="expiredDate" required th:attr="placeholder=#{register.expiredDate}" type="text" style="display: none">
 
                         <input id="submitLabel" th:value="#{register.submitting}" type="hidden">
                         <div class="row gap-3 mb-3">
@@ -91,7 +89,7 @@
                                     <div class="form-group">
                                         <label class="form-label" for="firstNameKh"
                                                th:text="#{register.firstNameKh}"></label>
-                                        <input class="form-control" id="firstNameKh" name="familyNameKhmer"
+                                        <input class="form-control" id="firstNameKh" name="firstNameKh"
                                                required
                                                th:attr="placeholder=#{register.firstNameKh}"
                                                type="text"/>
@@ -647,10 +645,9 @@
 </th:block>
 
 <th:block layout:fragment="scripts">
-<!--    <script th:src="@{/assets/cpbank/web/utils/custom-validation.js}"></script>-->
-    <!--    <script th:src="@{/assets/web/utils/disable_developer_mode.js}"></script>-->
+<!--        <script th:src="@{/assets/cpbank/web/utils/disable_developer_mode.js}"></script>-->
     <script th:src="@{/assets/cpbank/web/js/customer/register-form.js}"></script>
-<!--    <script th:src="@{/assets/cpbank/web/js/loading.js}"></script>-->
+    <script th:src="@{/assets/cpbank/web/js/loading.js}"></script>
     <script th:src="@{/assets/cpbank/web/js/customer/modal1.js}"></script>
     <script th:src="@{/assets/cpbank/web/js/customer/modal2.js}"></script>
     <script th:src="@{/assets/cpbank/web/js/customer/modal3.js}"></script>

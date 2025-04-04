@@ -93,9 +93,9 @@ function updateLanguageDisplay(lang) {
 
     // Update the flag image based on the selected language
     if (lang === 'en') {
-        flagImage.src = '/OpenAcct/assets/cpbank/icon/us-flag.png';  // English flag
+        flagImage.src = '/assets/cpbank/icon/us-flag.png';  // English flag
     } else if (lang === 'kh') {
-        flagImage.src = '/OpenAcct/assets/cpbank/icon/cambodia-flag.png';  // Khmer flag
+        flagImage.src = '/assets/cpbank/icon/cambodia-flag.png';  // Khmer flag
     }
 }
 
@@ -276,9 +276,9 @@ var validation = Array.prototype.filter.call(form, function (forms) {
                         forms.reset();
                         forms.classList.remove('was-validated');
                         $('#legalIdImage').val(null);
-                        $('#legalIdImageDisplay').attr('src', '/OpenAcct/assets/cpbank/images/National_ID_selfie.png');
+                        $('#legalIdImageDisplay').attr('src', '/assets/cpbank/images/National_ID_selfie.png');
                         $('#frontImage').val(null);
-                        $('#imgFrontImageDisplay').attr('src', '/OpenAcct/assets/cpbank/images/image_selfie.jpg');
+                        $('#imgFrontImageDisplay').attr('src', '/assets/cpbank/images/image_selfie.jpg');
                     },
                     error: function (xhr, status, error) {
                         hideLoading();
@@ -393,14 +393,14 @@ function handleAjaxNidValidateSuccess(response) {
                 }
                 // console.log(incorrectFieldsText);
                 if (lang === 'kh') {
-                    var html = '<div style="text-align: start;">' + '<img src="/OpenAcct/OpenAcct/assets/icon/success.png" alt="success" style="width: 20px; height: 20px;" />' + 'រូបថត selfie របស់អ្នកត្រឹមត្រូវជាមួយអត្តសញ្ញាណប័ណ្ណ (' + score + '%)' + '</div>' + '<div style="text-align: start; margin-top: 10px;">' + '<img src="/OpenAcct/OpenAcct/assets/icon/fail1.png" alt="fail" style="width: 16px; height: 16px;" />' + 'ព័ត៌មានមិនត្រឹមត្រូវ:' + '<div style="margin-left: 20px; margin-top: 5px;">' + incorrectFieldsText + '</div>' + '</div>';
+                    var html = '<div style="text-align: start;">' + '<img src="/assets/icon/success.png" alt="success" style="width: 20px; height: 20px;" />' + 'រូបថត selfie របស់អ្នកត្រឹមត្រូវជាមួយអត្តសញ្ញាណប័ណ្ណ (' + score + '%)' + '</div>' + '<div style="text-align: start; margin-top: 10px;">' + '<img src="/assets/icon/fail1.png" alt="fail" style="width: 16px; height: 16px;" />' + 'ព័ត៌មានមិនត្រឹមត្រូវ:' + '<div style="margin-left: 20px; margin-top: 5px;">' + incorrectFieldsText + '</div>' + '</div>';
                     Swal.fire({
                         icon: "warning",
                         title: "បរាជ័យ",
                         html: html
                     });
                 } else {
-                    var html = '<div style="text-align: start;">' + '<img src="/OpenAcct/OpenAcct/assets/icon/success.png" alt="success" style="width: 20px; height: 20px;" />' + 'Your selfie image is valid with ID card (' + score + '%)' + '</div>' + '<div style="text-align: start; margin-top: 10px;">' + '<img src="/OpenAcct/OpenAcct/assets/icon/fail1.png" alt="fail" style="width: 16px; height: 16px;" />' + 'Incorrect information:' + '<div style="margin-left: 20px; margin-top: 5px;">' + incorrectFieldsText + '</div>' + '</div>';
+                    var html = '<div style="text-align: start;">' + '<img src="/assets/icon/success.png" alt="success" style="width: 20px; height: 20px;" />' + 'Your selfie image is valid with ID card (' + score + '%)' + '</div>' + '<div style="text-align: start; margin-top: 10px;">' + '<img src="/assets/icon/fail1.png" alt="fail" style="width: 16px; height: 16px;" />' + 'Incorrect information:' + '<div style="margin-left: 20px; margin-top: 5px;">' + incorrectFieldsText + '</div>' + '</div>';
                     Swal.fire({
                         icon: "warning",
                         title: "Failed..!",
@@ -521,7 +521,7 @@ $('#legalIdImage').on('change', function (evt) {
                 success: function (response) {
                     console.log(response);
                     hideLoading();
-                    if (response.error == 0) {
+                    if (response.error === 0) {
                         if (response.data !== null) {
                             $('#btnValidate').removeClass('disabled');
                             $('#btnSubmit').addClass('disabled');
@@ -529,7 +529,7 @@ $('#legalIdImage').on('change', function (evt) {
                         } else {
                             clearFormFields();
                             $('#legalIdImage').val(null);
-                            $('#legalIdImageDisplay').attr('src', '/OpenAcct/assets/cpbank/images/National_ID_selfie.png');
+                            $('#legalIdImageDisplay').attr('src', '/assets/cpbank/images/National_ID_selfie.png');
                             Swal.fire({
                                 title: "Failed...!",
                                 text: response.message,
@@ -540,7 +540,7 @@ $('#legalIdImage').on('change', function (evt) {
                         hideLoading();
                         clearFormFields();
                         $('#legalIdImage').val(null);
-                        $('#legalIdImageDisplay').attr('src', '/OpenAcct/assets/cpbank/images/National_ID_selfie.png');
+                        $('#legalIdImageDisplay').attr('src', '/assets/cpbank/images/National_ID_selfie.png');
                         Swal.fire({
                             title: "Failed...!",
                             text: response.message,
@@ -551,7 +551,7 @@ $('#legalIdImage').on('change', function (evt) {
                 error: function (xhr, status, error) {
                     hideLoading();
                     $('#legalIdImage').val(null);
-                    $('#legalIdImageDisplay').attr('src', '/OpenAcct/assets/cpbank/images/National_ID_selfie.png');
+                    $('#legalIdImageDisplay').attr('src', '/assets/cpbank/images/National_ID_selfie.png');
                     const lang = localStorage.getItem('selectedLang') || 'kh';
                     if (lang === 'kh') {
                         handleUploadFailure("បរាជ័យ..!", "មានបញ្ហាបានកើតឡើងសូមព្យាយាមម្ដងទៀតនៅពេលក្រោយ");
@@ -566,36 +566,31 @@ $('#legalIdImage').on('change', function (evt) {
 });
 
 function populateFormFields(data) {
-    // Populate form fields with initial data
+    $('#firstNameKh').val(data.firstNameKh);
+    $('#lastNameKh').val(data.lastNameKh);
+
     $('#familyName').val(data.lastNameEn);
     $('#givenName').val(data.firstNameEn);
+
     // Use Flatpickr's setDate method for dateOfBirth
     dateOfBirthPicker.setDate(data.dob, true); // Correct way to populate Flatpickr date field
+
     $('#gender').val(data.gender === "M" ? "MALE" : "FEMALE");
     $('#legalId').val(data.idNumber);
     document.getElementById("legalDocName").selectedIndex = 1;
     $("#customerPlaceOfBirth").val(data.pob);
     $('#customerAddress').val(data.address);
-    $('#firstNameKh').val(data.firstNameKh);
-    $('#lastNameKh').val(data.lastNameKh);
-    $('#issuedDate').val(data.issuedDate);
-    $('#expiredDate').val(data.expiredDate);
-
-    // Check and set default value for issuedDate
-    if (!isValidDateFormat(data.issuedDate)) {
-        data.issuedDate = '01/01/2021'; // Set default value if not in dd/MM/yyyy format
-    } else {
-        $('#issuedDate').val(data.issuedDate);
-    }
-
-    // Check and set default value for expiredDate
-    if (!isValidDateFormat(data.expiredDate)) {
-        data.expiredDate = '01/01/2031'; // Set default value if not in dd/MM/yyyy format
-    } else {
-        $('#expiredDate').val(data.expiredDate);
-    }
 
     // Event listeners for user input
+    $('#firstNameKh').on('input', function () {
+        data.firstNameKh = $(this).val();
+    });
+
+    $('#lastNameKh').on('input', function () {
+        data.lastNameKh = $(this).val();
+    });
+
+
     $('#familyName').on('input', function () {
         data.lastNameEn = $(this).val();
     });
@@ -625,21 +620,7 @@ function populateFormFields(data) {
         customerAddress = $(this).val();
     });
 
-    $('#firstNameKh').on('input', function () {
-        data.firstNameKh = $(this).val();
-    });
 
-    $('#lastNameKh').on('input', function () {
-        data.lastNameKh = $(this).val();
-    });
-
-    $('#issuedDate').on('input', function () {
-        data.issuedDate = $(this).val();
-    });
-
-    $('#expiredDate').on('input', function () {
-        data.expiredDate = $(this).val();
-    });
 }
 
 // Function to check if the date is in dd/MM/yyyy format
@@ -673,8 +654,7 @@ function undisableFormFields() {
     document.getElementById("dateOfBirth").disabled = false;
     $("#customerPlaceOfBirth").prop('readonly', false);
     $('#customerAddress').prop('readonly', false);
-    document.getElementById("expiredDate").disabled = false;
-    document.getElementById("issuedDate").disabled = false;
+
 }
 
 function disableFormFields() {
@@ -687,8 +667,6 @@ function disableFormFields() {
     document.getElementById("dateOfBirth").disabled = true;
     $("#customerPlaceOfBirth").prop('readonly', true);
     $('#customerAddress').prop('readonly', true);
-    document.getElementById("expiredDate").disabled = true;
-    document.getElementById("issuedDate").disabled = true;
 }
 
 function handleUploadFailure(title, message) {
