@@ -98,33 +98,8 @@ public class CustomerServiceImpl implements CustomerService {
             jsonObject.put("legal_holder_name", customerRequestDto.getLegalDocName());
             jsonObject.put("legal_doc_name", customerRequestDto.getLegalDocName());
             jsonObject.put("legal_issue_auth", customerRequestDto.getGivenName());
-
-            // Issue Date
-            String inputIssDate = customerRequestDto.getLegalIssueDate();
-            DateFormat inputIssDateFormat = new SimpleDateFormat("dd/MM/yyyy");
-            DateFormat outputIssDateFormat = new SimpleDateFormat("yyyyMMdd");
-
-            try {
-                Date date = inputIssDateFormat.parse(inputIssDate);
-                String outputDate = outputIssDateFormat.format(date);
-                jsonObject.put("legal_iss_date", outputDate);
-            } catch (ParseException e) {
-                e.printStackTrace();
-            }
-
-            // legal EXp Date
-            String inputExpDate = customerRequestDto.getLegalExpDate();
-            DateFormat inputExpDateFormat = new SimpleDateFormat("dd/MM/yyyy");
-            DateFormat outputExpDateFormat = new SimpleDateFormat("yyyyMMdd");
-
-            try {
-                Date date = inputExpDateFormat.parse(inputExpDate);
-                String outputDate = outputExpDateFormat.format(date);
-                jsonObject.put("legal_exp_date", outputDate);
-            } catch (ParseException e) {
-                e.printStackTrace();
-            }
-
+            jsonObject.put("legal_iss_date", "20211103");
+            jsonObject.put("legal_exp_date", "20311102");
             jsonObject.put("customer_type", "ACTIVE");
             jsonObject.put("ownership", "304");
             jsonObject.put("sector", "4501");

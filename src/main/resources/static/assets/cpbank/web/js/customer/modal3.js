@@ -39,7 +39,6 @@ function getProPOBM3() {
     // Assuming you have a variable named "loader" that references the loader element
     loader.classList.add("myloader");
 
-
     $.ajax({
         type: "GET",
         url: "api/v1/masterData/getPro",
@@ -76,6 +75,7 @@ function getDistrictPOBM3(id) {
     var loader = document.getElementById("loadingDistrictPOB3");
     // Add the class to show the loader
     loader.classList.add("myloader");
+
 
     $.ajax({
         type: "GET",
@@ -116,6 +116,7 @@ function getCommunePOBM3(id) {
     // Add the class to show the loader
     loader.classList.add("myloader");
 
+
     $.ajax({
         type: "GET",
         url: "api/v1/masterData/getCom/" + id,
@@ -155,7 +156,6 @@ function getVillagePOBM3(id) {
 
     // Add the class to show the loader
     loader.classList.add("myloader");
-
 
     $.ajax({
         type: "GET",

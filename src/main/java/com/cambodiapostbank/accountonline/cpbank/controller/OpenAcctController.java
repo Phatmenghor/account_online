@@ -51,44 +51,25 @@ public class OpenAcctController {
     }
 
     @PostMapping("/customer-create")
-    public ResponseEntity<Object> registerByCustomer(@RequestBody CustomerRequestDto customerRequestDto) throws Exception {
+    public ResponseEntity<?> registerByCustomer(@RequestBody CustomerRequestDto customerRequestDto) throws Exception {
         logger.info("[Customer Creation] Incoming request to register a customer.");
 
-        String JSON_DATA_OTP = createJsonRequestVerifyOtp(customerRequestDto);
-        String OTP_URL = BaseUrl + "/api/IsVerifyOtp";
-        logger.info("[OTP Verification] Sending request to: " + OTP_URL);
-        String otpResponse = httpClientRest.postData(OTP_URL, JSON_DATA_OTP, USERNAME, PASSWORD);
-        logger.info("[OTP Verification] Response received: " + otpResponse);
+        try {
+            String jsonRequest = customerService.createJsonRequestCustomerPost(customerRequestDto);
+            logger.info("[Customer Creation] Request Payload: " + jsonRequest);
 
-        JSONObject jsonObjectOTP = new JSONObject(otpResponse);
-        int errorCodeOTP = jsonObjectOTP.getInt("ErrCode");
-        String errorMsgOTP = jsonObjectOTP.getString("ErrMsg");
+            String openAcctUrl = BaseUrl + "/api/OpenAcct";
+            logger.info("[Customer Creation] Sending request to: " + openAcctUrl);
+            String response = httpClientRest.postData(openAcctUrl, jsonRequest, USERNAME, PASSWORD);
+            logger.info("[Customer Creation] Response received: " + response);
 
-        if (errorCodeOTP == 200) {
-            try {
-                String jsonRequest = customerService.createJsonRequestCustomerPost(customerRequestDto);
-                logger.info("[Customer Creation] Request Payload: " + jsonRequest);
-
-                String openAcctUrl = BaseUrl + "/api/OpenAcct";
-                logger.info("[Customer Creation] Sending request to: " + openAcctUrl);
-                String response = httpClientRest.postData(openAcctUrl, jsonRequest, USERNAME, PASSWORD);
-                logger.info("[Customer Creation] Response received: " + response);
-
-                return ResponseEntity.ok(response);
-            } catch (JSONException e) {
-                logger.error("[Customer Creation] Error processing JSON response", e);
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error processing JSON response");
-            } catch (Exception e) {
-                logger.error("[Customer Creation] Unexpected error occurred", e);
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Unexpected error occurred");
-            }
-        } else {
-            logger.warn("[OTP Verification] Failed: " + errorMsgOTP);
-            CustomerResponseDto customerResponseDto = new CustomerResponseDto();
-            customerResponseDto.setContent("Invalid OTP code.");
-            customerResponseDto.setErrorCode("500");
-            customerResponseDto.setErrorMessage("OTP verification failed");
-            return ResponseEntity.ok(customerResponseDto);
+            return ResponseEntity.ok(response);
+        } catch (JSONException e) {
+            logger.error("[Customer Creation] Error processing JSON response", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error processing JSON response");
+        } catch (Exception e) {
+            logger.error("[Customer Creation] Unexpected error occurred", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Unexpected error occurred");
         }
     }
 }

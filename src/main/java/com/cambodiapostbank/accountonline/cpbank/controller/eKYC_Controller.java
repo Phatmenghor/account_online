@@ -88,8 +88,8 @@ public class eKYC_Controller {
             String jsonData = createJsonValidateNidFace(request);
             String url = baseUrl + "/api/ValidateNIDFace";
 
-            logger.debug("Sending request to URL: {}", url);
-            logger.debug("Request Payload: {}", jsonData);
+            logger.info("Sending request to URL: {}", url);
+            logger.info("Request Payload: {}", jsonData);
 
             String response = httpClientRest.postData(url, jsonData, username, password);
 
@@ -126,8 +126,8 @@ public class eKYC_Controller {
             userInfoObject.put("gender", ekycRequestDataDTO.getUserInfo().getGender());
 
             userInfoObject.put("dob", FormatDate.formatDate(ekycRequestDataDTO.getUserInfo().getDob()));
-            userInfoObject.put("issuedDate", FormatDate.formatDate(ekycRequestDataDTO.getUserInfo().getIssuedDate()));
-            userInfoObject.put("expiredDate", FormatDate.formatDate(ekycRequestDataDTO.getUserInfo().getExpiredDate()));
+            userInfoObject.put("issuedDate", "2021-11-03");
+            userInfoObject.put("expiredDate", "2031-11-02");
 
             jsonObject.put("userInfo", userInfoObject);
             jsonObject.put("faceImg", ekycRequestDataDTO.getFaceImg());

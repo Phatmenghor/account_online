@@ -39,6 +39,7 @@ function getProM2() {
     loader.classList.add("myloader");
 
 
+
     $.ajax({
         type: "GET",
         url: "api/v1/masterData/getPro",
@@ -75,6 +76,7 @@ function getDistrictM2(id) {
     var loader = document.getElementById("loadingDistrict2");
     // Add the class to show the loader
     loader.classList.add("myloader");
+
 
     $.ajax({
         type: "GET",
@@ -115,6 +117,7 @@ function getCommuneM2(id) {
     // Add the class to show the loader
     loader.classList.add("myloader");
 
+
     $.ajax({
         type: "GET",
         url: "api/v1/masterData/getCom/" + id,
@@ -154,6 +157,7 @@ function getVillageM2(id) {
 
     // Add the class to show the loader
     loader.classList.add("myloader");
+
 
     $.ajax({
         type: "GET",
