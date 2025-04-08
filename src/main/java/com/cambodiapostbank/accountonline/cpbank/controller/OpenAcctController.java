@@ -19,11 +19,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.servlet.http.HttpSession;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/openAcct")
+@RequestMapping("/api/v1/")
 public class OpenAcctController {
     private final Log logger = LogFactory.getLog(OpenAcctController.class);
     private final CustomerService customerService;
@@ -50,7 +49,7 @@ public class OpenAcctController {
         return jsonObject.toString();
     }
 
-    @PostMapping("/customer-create")
+    @PostMapping("/customer-register")
     public ResponseEntity<?> registerByCustomer(@RequestBody CustomerRequestDto customerRequestDto) throws Exception {
         logger.info("[Customer Creation] Incoming request to register a customer.");
 

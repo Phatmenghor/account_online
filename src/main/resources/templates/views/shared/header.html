@@ -4,10 +4,10 @@
         <div class="navbar-brand-box">
             <a href="index.html" class="logo logo-dark">
                 <span class="logo-sm">
-                    <img th:src="@{assets/cpbank/images/cp_logo.png}" alt="" height="30">
+                    <img th:src="@{/assets/cpbank/images/cp_logo.png}" alt="" height="30">
                 </span>
                 <span class="logo-lg">
-                    <img th:src="@{assets/cpbank/images/cp_logo.png}" alt="" height="30">
+                    <img th:src="@{/assets/cpbank/images/cp_logo.png}" alt="" height="30">
                 </span>
             </a>
         </div>
@@ -18,20 +18,20 @@
             <button type="button" class="btn header-item" data-bs-toggle="dropdown" aria-haspopup="true"
                     aria-expanded="false" id="language-btn">
                 <!-- Initially set to Khmer flag -->
-                <img id="current-lang-flag" class="header-lang-img" th:src="@{assets/cpbank/icon/cambodia-flag.png}"
+                <img id="current-lang-flag" class="header-lang-img" th:src="@{/assets/cpbank/icon/cambodia-flag.png}"
                      alt="Header Language"
                      height="35">
             </button>
             <div class="dropdown-menu dropdown-menu-end">
                 <a href="javascript:void(0);" class="dropdown-item notify-item language" data-lang="en"
                    onclick="changeLanguage('en')">
-                    <img th:src="@{assets/cpbank/icon/us-flag.png}" alt="English" class="me-1" height="35">
+                    <img th:src="@{/assets/cpbank/icon/us-flag.png}" alt="English" class="me-1" height="35">
                     <span class="align-middle">English</span>
                 </a>
 
                 <a href="javascript:void(0);" class="dropdown-item notify-item language" data-lang="kh"
                    onclick="changeLanguage('kh')">
-                    <img th:src="@{assets/cpbank/icon/cambodia-flag.png}" alt="Khmer" class="me-1" height="35">
+                    <img th:src="@{/assets/cpbank/icon/cambodia-flag.png}" alt="Khmer" class="me-1" height="35">
                     <span class="align-middle">Khmer</span>
                 </a>
             </div>

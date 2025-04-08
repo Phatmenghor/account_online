@@ -1,5 +1,0 @@
-2025-03-31 11:45:42,761 INFO com.cambodiapostbank.accountonline.AccountOnlineApplication [restartedMain] Started AccountOnlineApplication in 4.402 seconds (JVM running for 6.745)
-2025-03-31 11:45:55,324 INFO com.cambodiapostbank.accountonline.cpbank.controller.AuthController [http-nio-8095-exec-6] {"ErrCode":0,"ErrMsg":"Login successfully."}
-2025-03-31 11:46:14,447 INFO com.cambodiapostbank.accountonline.cpbank.controller.HomeController [http-nio-8095-exec-6] errorCode: 1
-2025-03-31 11:46:14,448 INFO com.cambodiapostbank.accountonline.cpbank.controller.HomeController [http-nio-8095-exec-6] errorMsg: System Is Ok.
-2025-03-31 11:46:21,226 INFO com.cambodiapostbank.accountonline.cpbank.controller.eKYC_Controller [http-nio-8095-exec-5] ========> ExtractNID

@@ -1,5 +1,3 @@
-
-
 // Translation translations with more comprehensive content
 const translations = {
     en: {
@@ -44,30 +42,28 @@ const translations = {
     }
 };
 
-
+// Call this on page load to sync the flag with the current language
+function initializeLanguage() {
+    const storedLang = localStorage.getItem('selectedLang') || 'en';
+    updateLanguageDisplay(storedLang);
+}
 
 // Function to change language
 function changeLanguage(lang) {
-    // Check if the selected language is different from the current language
-    if (lang === localStorage.getItem('selectedLang')) {
-        return;  // Exit if the selected language is the same as the current one
-    }
+    const currentLang = localStorage.getItem('selectedLang');
 
-    // Store the selected language in localStorage
+    if (lang === currentLang) return;
+
     localStorage.setItem('selectedLang', lang);
-
-    // Update the display immediately
     updateLanguageDisplay(lang);
 
-    // Make an AJAX request to change the language on the server side
     $.ajax({
-        url: '/change-language',  // Your backend endpoint for changing language
+        url: 'api/change-language',
         type: 'POST',
         contentType: 'application/json',
-        data: JSON.stringify({lang: lang}),  // Send selected language
+        data: JSON.stringify({ lang: lang }),
         success: function (response) {
             console.log('Language changed to: ', response.lang);
-            // Optionally, reload or refresh the page to apply the language change
             location.reload();
         },
         error: function (xhr, status, error) {
@@ -76,14 +72,26 @@ function changeLanguage(lang) {
     });
 }
 
-// Helper function to update language display elements
+// Update flag display based on selected language
 function updateLanguageDisplay(lang) {
-    var flagImage = document.getElementById('current-lang-flag');
+    const flagImage = document.getElementById('current-lang-flag');
 
-    // Update the flag image based on the selected language
-    if (lang === 'en') {
-        flagImage.src = '/assets/cpbank/icon/us-flag.png';  // English flag
-    } else if (lang === 'kh') {
-        flagImage.src = '/assets/cpbank/icon/cambodia-flag.png';  // Khmer flag
+    if (!flagImage) return;
+
+    switch (lang) {
+        case 'en':
+            flagImage.src = '/assets/cpbank/icon/us-flag.png';
+            flagImage.alt = 'English';
+            break;
+        case 'kh':
+            flagImage.src = '/assets/cpbank/icon/cambodia-flag.png';
+            flagImage.alt = 'Khmer';
+            break;
+        default:
+            flagImage.src = '/assets/cpbank/icon/cambodia-flag.png';
+            flagImage.alt = 'Khmer';
     }
 }
+
+// Initialize on document ready
+document.addEventListener('DOMContentLoaded', initializeLanguage);
