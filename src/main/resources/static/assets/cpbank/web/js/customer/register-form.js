@@ -196,7 +196,7 @@ var validation = Array.prototype.filter.call(form, function (forms) {
             var submitButtonId = event.submitter.id;
             if (submitButtonId === 'btnSubmit') {
                 // alert('you click submit');
-                ValidateNidFace();
+                checkAddressCustomer();
             }
         }
         forms.classList.add('was-validated');
@@ -303,7 +303,6 @@ function resetForm() {
 
 function ValidateNidFace() {
     showLoading();
-
     const json = {
         userInfo: {
             idNumber: $('#legalId').val(),
@@ -336,6 +335,7 @@ function ValidateNidFace() {
 }
 
 function handleAjaxNidValidateSuccess(response) {
+    console.log("NID Validate Face Response ==========> ", response);
     var score = 0;
     if (response.error === 0) {
         var faceDocumentScore = response.data.faceDocumentScore;
@@ -374,11 +374,9 @@ function handleAjaxNidValidateSuccess(response) {
                         <div style="margin-left: 20px; margin-top: 5px;">${incorrectFieldsText}</div>
                     </div>
                 `;
-
                 showSweetAlert('warning', lang === 'kh' ? 'បរាជ័យ' : 'Failed..!', htmlContent);
             } else {
-                hideLoading();
-                checkAddressCustomer();
+                submitData();
             }
         } else {
             hideLoading();
@@ -496,7 +494,7 @@ function determineModalToShow() {
         $('#idFormUser3').modal('show');
         getProPOBM3();
     } else {
-        submitData();
+        ValidateNidFace();
     }
 }
 
