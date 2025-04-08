@@ -98,6 +98,7 @@ public class CustomerServiceImpl implements CustomerService {
             jsonObject.put("legal_holder_name", customerRequestDto.getLegalDocName());
             jsonObject.put("legal_doc_name", customerRequestDto.getLegalDocName());
             jsonObject.put("legal_issue_auth", customerRequestDto.getGivenName());
+<<<<<<< HEAD
 
             // Issue Date
             String inputIssDate = customerRequestDto.getLegalIssueDate();
@@ -125,6 +126,10 @@ public class CustomerServiceImpl implements CustomerService {
                 e.printStackTrace();
             }
 
+=======
+            jsonObject.put("legal_iss_date", "20211103");
+            jsonObject.put("legal_exp_date", "20311102");
+>>>>>>> customer_register_v1
             jsonObject.put("customer_type", "ACTIVE");
             jsonObject.put("ownership", "304");
             jsonObject.put("sector", "4501");

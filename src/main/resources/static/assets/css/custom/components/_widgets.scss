@@ -1,0 +1,48 @@
+// 
+// _widgets.scss
+// 
+
+// popular product
+
+.popular-product-box{
+    padding: 12px 15px;
+    background-color: $gray-200;
+}
+
+.sales-weidget{
+ padding: 12px 0px
+}
+  
+.widget-box-1-icon{
+    position: absolute;
+    right: -20px;
+    top: 15px;
+    opacity: .1;
+    width: 80px;
+    height: 80px;
+}
+  
+
+// Transactions
+
+.transactions-contain{
+    padding: 14px 16px;
+}
+
+.swiper-location-widget{
+    height: 276px;
+    .swiper-slide{
+        .card{
+            margin: 0;
+            box-shadow: none;
+            height: 100%;
+            
+            .card-body{
+                padding: 0.5rem 1rem;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+            }
+        }
+    }
+}

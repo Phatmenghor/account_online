@@ -12,6 +12,10 @@ public class SecurityConfig {
 
     private static final String[] PERMIT_ALL_URLS = {
             "/",
+<<<<<<< HEAD
+=======
+            "/change-language/**",
+>>>>>>> customer_register_v1
             "/assets/**",
             "/register/**",
             "/api/**",

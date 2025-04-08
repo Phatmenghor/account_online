@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="en"
+      layout:decorate="~{layouts/_default}"
+      xmlns="http://www.w3.org/1999/html" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Registration Form</title>
+    <meta charset="UTF-8">
+    <th:block layout:fragment="styles">
+
+        <link rel="stylesheet" th:href="@{/assets/cpbank/web/css/register-form.css}">
+    </th:block>
+</head>
+
+
+<body>
+<th:block layout:fragment="content">
+    <div class="container" style="background-color: white; padding: 20px;">
+        <div class="row justify-content-center">
+            <div class="col-sm">
+                <h3 class="text-dark pt-4 pb-2" th:text="#{register.title}">Account Online Register</h3>
+                <div class="py-3">
+
+                    <!-- Reusable Alert -->
+                    <div id="customAlert" class="alert alert-dismissible fade show d-none" role="alert">
+                        <h5 class="alert-heading"></h5>
+                        <span class="message"></span>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+
+
+                    <!-- START FORM -->
+                    <form class="need-novalidate-new" id="idFormRegister" novalidate>
+                        <div class="row gap-3 mb-3">
+                            <div class="col-sm text-center">
+                                <div class="form-group">
+                                    <label for="legalIdImage" th:text="#{register.identityImage}"></label>
+                                    <label class="mt-2" for="legalIdImage">
+                                        <img class="img-fluid w-100"
+                                             id="legalIdImageDisplay"
+                                             style="height: 17rem; width: 27rem !important; cursor: pointer"
+                                             th:src="@{/assets/cpbank/images/National_ID_selfie.png}"/>
+                                    </label>
+                                    <input accept="image/png, image/gif, image/jpeg" id="legalIdImage"
+                                           name="legalIdImage"
+                                           required style="visibility: hidden"
+                                           type="file">
+                                    <div class="invalid-feedback" th:text="#{validation.identityImage.required}"></div>
+                                </div>
+                            </div>
+                            <div class="col-sm text-center">
+                                <div class="form-group">
+                                    <label for="frontImage" th:text="#{register.selfieImage}"></label>
+                                    <label class="mt-2" for="frontImage">
+                                        <img class="img-fluid w-100" id="imgFrontImageDisplay"
+                                             style="height: 17rem; width: 27rem !important; cursor: pointer"
+                                             th:src="@{/assets/cpbank/images/image_selfie.jpg}"/>
+                                    </label>
+                                    <input accept="image/png, image/gif, image/jpeg" id="frontImage" name="frontImage"
+                                           required
+                                           style="visibility: hidden" type="file">
+                                    <div class="invalid-feedback" th:text="#{validation.selfieImage.required}">Please
+                                        upload your selfie image.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm">
+                                <div class="mb-3">
+                                    <div class="form-group">
+                                        <label class="form-label" for="lastNameKh" th:text="#{register.lastNameKh}">Given
+                                            Name</label>
+                                        <input class="form-control" id="lastNameKh" name="lastNameKh"
+                                               required
+                                               th:attr="placeholder=#{register.lastNameKh}"
+                                               type="text"/>
+                                        <div class="invalid-feedback" th:text="#{validation.lastNameKh.required}">Please
+                                            enter your last name (Khmer).
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm">
+                                <div class="mb-3">
+                                    <div class="form-group">
+                                        <label class="form-label" for="firstNameKh"
+                                               th:text="#{register.firstNameKh}"></label>
+                                        <input class="form-control" id="firstNameKh" name="familyNameKhmer"
+                                               required
+                                               th:attr="placeholder=#{register.firstNameKh}"
+                                               type="text"/>
+                                        <div class="invalid-feedback" th:text="#{validation.firstNameKh.required}">
+                                            Please enter your first name (Khmer).
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm">
+                                <div class="mb-3">
+                                    <div class="form-group">
+                                        <label class="form-label" for="familyName"
+                                               th:text="#{register.familyName}"></label>
+                                        <input class="form-control" id="familyName" name="familyName"
+                                               required
+                                               th:attr="placeholder=#{register.familyName}"
+                                               type="text"/>
+                                        <div class="invalid-feedback" th:text="#{validation.familyName.required}">Please
+                                            enter your family name.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm">
+                                <div class="mb-3">
+                                    <div class="form-group">
+                                        <label class="form-label" for="givenName" th:text="#{register.givenName}">Given
+                                            Name</label>
+                                        <input class="form-control" id="givenName" name="givenName"
+                                               required
+                                               th:attr="placeholder=#{register.givenName}"
+                                               type="text"/>
+                                        <div class="invalid-feedback" th:text="#{validation.givenName.required}">Please
+                                            enter your given name.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm">
+                                <div class="mb-3">
+                                    <div class="form-group">
+                                        <label class="form-label" th:text="#{register.dateOfBirth}">Date Of
+                                            Birth</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i
+                                                    class="fa-solid fa-calendar-days"></i></span>
+                                            <input type="text" id="dateOfBirth" name="dateOfBirth" class="form-control"
+                                                   required th:attr="placeholder=#{register.dateOfBirth}">
+                                            <div class="invalid-feedback" th:text="#{validation.dateOfBirth.required}">
+                                                Please select your date of birth.
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-sm">
+                                <div class="mb-3">
+                                    <div class="form-group">
+                                        <label class="form-label" for="gender"
+                                               th:text="#{register.gender}">Gender</label>
+                                        <select class="form-select" id="gender" required>
+                                            <option disabled selected th:text="#{register.option}" value=""></option>
+                                            <option th:text="#{register.gender.male}" th:value="'MALE'"></option>
+                                            <option th:text="#{register.gender.female}" th:value="'FEMALE'"></option>
+                                        </select>
+                                        <div class="invalid-feedback" th:text="#{validation.gender.required}">Please
+                                            select your gender.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm">
+                                <div class="mb-3">
+                                    <div class="form-group">
+                                        <label class="form-label" for="legalDocName" th:text="#{register.legalType}">Legal
+                                            Type</label>
+                                        <select class="form-select" id="legalDocName" required>
+                                            <option disabled selected th:text="#{register.option}" value=""></option>
+                                            <option th:text="#{register.legalDocName.nationalId}"
+                                                    th:value="'NATIONAL.ID'"></option>
+                                        </select>
+                                        <div class="invalid-feedback" th:text="#{validation.legalDocName.required}">
+                                            Please select the legal document type.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm">
+                                <div class="mb-3">
+                                    <div class="form-group">
+                                        <label class="form-label" for="legalId" th:text="#{register.legalId}">Legal
+                                            ID </label>
+                                        <input class="form-control" id="legalId" maxlength="9" minlength="9"
+                                               required
+                                               th:attr="placeholder=#{register.legalId}"
+                                               type="number">
+                                        <div class="invalid-feedback" th:text="#{validation.legalId.required}">Please
+                                            enter a valid 9-digit legal ID number.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-sm">
+                                <div class="mb-3">
+                                    <div class="form-group">
+                                        <label class="form-label" for="customerAddress"
+                                               th:text="#{register.customerAddress}"></label>
+                                        <input class="form-control" id="customerAddress" name="customerAddress"
+                                               required
+                                               th:attr="placeholder=#{register.customerAddress}"
+                                               type="text">
+                                        <div class="invalid-feedback" th:text="#{validation.customerAddress.required}">
+                                            Please enter your address.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm">
+                                <div class="mb-3">
+                                    <div class="form-group">
+                                        <label class="form-label" for="customerPlaceOfBirth"
+                                               th:text="#{register.customerPlaceOfBirth}">
+                                            Place of Birth</label>
+                                        <input class="form-control" id="customerPlaceOfBirth"
+                                               name="customerPlaceOfBirth"
+                                               required
+                                               th:attr="placeholder=#{register.customerPlaceOfBirth}"
+                                               type="text">
+                                        <div class="invalid-feedback"
+                                             th:text="#{validation.customerPlaceOfBirth.required}">Please enter your
+                                            place of birth.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-ms">
+                                <div class="mb-3">
+                                    <div class="form-group">
+                                        <label class="form-label" for="maritalStatus"
+                                               th:text="#{register.maritalStatus}">Marital Status </label>
+                                        <select class="form-select" id="maritalStatus" required>
+                                            <option disabled selected th:text="#{register.option}" value=""></option>
+                                            <option th:text="#{register.maritalStatus.single}"
+                                                    th:value="'SINGLE'"></option>
+                                            <option th:text="#{register.maritalStatus.married}"
+                                                    th:value="'MARRIED'"></option>
+                                            <option th:text="#{register.maritalStatus.widower}"
+                                                    th:value="'WIDOWER'"></option>
+                                            <option th:text="#{register.maritalStatus.widow}"
+                                                    th:value="'WIDOW'"></option>
+                                        </select>
+                                        <div class="invalid-feedback" th:text="#{validation.maritalStatus.required}">
+                                            Please select your marital status.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm">
+                                <div class="mb-3">
+                                    <div class="form-group">
+                                        <label class="form-label" for="occupation" th:text="#{register.occupation}">Occupation:</label>
+                                        <select class="form-select" id="occupation" required>
+                                            <option disabled selected th:text="#{register.option}" value=""></option>
+                                            <option th:text="#{register.occupation.selfEmployed}"
+                                                    th:value="'Self-Employed'"></option>
+                                            <option th:text="#{register.occupation.employee}"
+                                                    th:value="'Employee'"></option>
+                                            <option th:text="#{register.occupation.farmer}"
+                                                    th:value="'Farmer'"></option>
+                                            <option th:text="#{register.occupation.student}"
+                                                    th:value="'Student'"></option>
+                                            <option th:text="#{register.occupation.housewife}"
+                                                    th:value="'Housewife'"></option>
+                                            <option th:text="#{register.occupation.retired}"
+                                                    th:value="'Retired'"></option>
+                                        </select>
+                                        <div class="invalid-feedback" th:text="#{validation.occupation.required}">Please
+                                            select your occupation.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm">
+                                <div class="mb-3">
+                                    <div class="form-group">
+                                        <label class="form-label" for="ddlBranch"
+                                               th:text="#{register.branch}">Branch</label>
+                                        <select class="form-select" id="ddlBranch" required>
+                                            <option disabled selected th:text="#{register.option}" value=""></option>
+                                        </select>
+                                        <div class="invalid-feedback" th:text="#{validation.branch.required}">Please
+                                            select your branch.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm">
+                                <label class="form-label align-self-center" for="company" id="lbl-company"
+                                       th:text="#{register.referal}"> </label>
+                                <input id="company" name="company" th:value="*{company}" type="hidden">
+                                <div class="input-group mb-3 form-group">
+                                    <div class="input-group">
+                                        <button aria-expanded="false" class="btn btn-outline-secondary dropdown-toggle"
+                                                data-bs-toggle="dropdown" id="btn-dropdown"
+                                                th:text="#{register.referal.cpb}"
+                                                type="button">Choose Enterprise
+                                        </button>
+                                        <ul class="dropdown-menu" id="dropdown-menu">
+                                            <li class="dropdown-item mouse-pointer" data-text="CPBANK" id="CPBANK"
+                                                th:text="#{register.referal.cpb}"></li>
+                                            <li class="dropdown-item mouse-pointer" data-text="FUNAN" id="FUNAN"
+                                                th:text="#{register.referal.funan}"></li>
+                                            <li class="dropdown-item mouse-pointer" data-text="OTHERS" id="OTHERS"
+                                                th:text="#{register.referal.others}"></li>
+                                        </ul>
+                                        <input aria-label="Text input with dropdown button" class="form-control"
+                                               id="staffCode"
+                                               th:attr="placeholder=#{register.staffCode}"
+                                               type="text">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm">
+                                <div class="mb-3">
+                                    <div class="form-group">
+                                        <label class="form-label" for="contactNumber"
+                                               th:text="#{register.contactNumber}">Contact Number</label>
+                                        <input class="form-control" id="contactNumber" maxlength="10"
+                                               required th:attr="placeholder=#{register.contactNumber}"
+                                               type="text">
+                                        <div class="invalid-feedback" th:text="#{validation.contactNumber.required}">
+                                            Please enter a valid contact number.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm">
+                                <div class="mb-3">
+                                    <div class="form-group">
+                                        <div class="d-flex flex-row justify-content-between">
+                                            <label class="form-label align-self-center" for="otpCode"
+                                                   th:text="#{register.otpCode}">OTP Code</label>
+                                            <button class="btn btn-link btn-sm" onclick="sendOtp()" type="button">
+                                                Resend OTP
+                                            </button>
+                                        </div>
+                                        <input class="form-control" id="otpCode" maxlength="6" name="otpCode"
+                                               required th:attr="placeholder=#{register.otpCode}" type="text">
+                                        <div class="invalid-feedback" th:text="#{validation.otpCode.required}">Please
+                                            enter the OTP code sent to your contact
+                                            number.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row text-end mt-4 mb-5">
+                            <div class="col-sm">
+                                <button style="background-color: #fc7d2a; color: white"
+                                        class="btn ms-auto px-5 rounded-2" id="btnSubmit"
+                                        th:text="#{register.submit}" type="submit">Submit
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                    <!-- END FORM -->
+
+
+                    <!-- START MODAL 1 -->
+                    <div aria-hidden="true" aria-labelledby="staticBackdropLabel" class="modal fade"
+                         data-bs-backdrop="static" data-bs-keyboard="false"
+                         id="idFormUser1" role="dialog" tabindex="-1">
+                        <div class="modal-dialog modal-lg" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <div class="modal-title">
+                                        <img th:src="@{/assets/cpbank/icon/address.png}"/>
+                                        <span class="txtTitle" style="margin-top:10px;" th:text="#{form.address}">អាស័យដ្ឋានមិនអាចរកឃើញក្នុងប្រព័ន្ធទេ</span>
+                                    </div>
+                                    <button aria-label="Close" class="btn-close" data-bs-dismiss="modal"
+                                            type="button"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <form class="need-novalidate-address" id="form1" novalidate>
+                                        <div class="basic-login-inner">
+                                            <div class="form-group-inner">
+                                                <div class="row">
+                                                    <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4 col-xl-4">
+                                                        <b style="width:100%;">
+                                                            <span class="sky" style="color: red">*</span>
+                                                            <span th:text="#{form.select_address}">សូមជ្រើសរើសអាស័យដ្ឋាន:</span>
+                                                        </b>
+                                                    </div>
+                                                    <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4 col-xl-4">
+                                                        <div class="d-flex">
+                                        <span><span class="sky" style="color: red">*</span>
+                                            <span th:text="#{form.province}">ខេត្ត/ក្រុង</span>
+                                        </span>
+                                                            <div class="myloader" id="loadingProvince1"></div>
+                                                        </div>
+                                                        <select class="form-select" id="province1" required>
+                                                        </select>
+                                                        <div class="invalid-feedback"
+                                                             th:text="#{validation.modal.province.required}">
+                                                            Please select your province.
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4 col-xl-4">
+                                                        <div class="d-flex">
+                                        <span><span class="sky" style="color: red">*</span>
+                                            <span th:text="#{form.district}">ស្រុក/ខណ្ឌ</span>
+                                        </span>
+                                                            <div class="myloader" id="loadingDistrict1"></div>
+                                                        </div>
+                                                        <select class="form-select" id="district1" required>
+                                                        </select>
+                                                        <div class="invalid-feedback"
+                                                             th:text="#{validation.modal.district.required}">
+                                                            Please select your district.
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4 col-xl-4"></div>
+                                                    <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4 col-xl-4">
+                                                        <div class="d-flex">
+                                        <span><span class="sky" style="color: red">*</span>
+                                            <span th:text="#{form.commune}">ឃុំ/សង្កាត់</span>
+                                        </span>
+                                                            <div class="myloader" id="loadingCommune1"></div>
+                                                        </div>
+                                                        <select class="form-select" id="commune1" required>
+                                                        </select>
+                                                        <div class="invalid-feedback"
+                                                             th:text="#{validation.modal.commune.required}">
+                                                            Please select your commune.
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4 col-xl-4">
+                                                        <div class="d-flex">
+                                        <span><span class="sky" style="color: red">*</span>
+                                            <span th:text="#{form.village}">ភូមិ</span>
+                                        </span>
+                                                            <div class="myloader" id="loadingVillage1"></div>
+                                                        </div>
+                                                        <select class="form-select" id="village1" required>
+                                                        </select>
+                                                        <div class="invalid-feedback"
+                                                             th:text="#{validation.modal.village.required}">
+                                                            Please select your village.
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr/>
+                                                <div class="row">
+                                                    <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4 col-xl-4">
+                                                        <b style="width:100%;">
+                                                            <span class="sky" style="color: red">*</span>
+                                                            <span th:text="#{form.select_pob}">សូមជ្រើសរើសទីកន្លែងកំណើត:</span>
+                                                        </b>
+                                                    </div>
+                                                    <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4 col-xl-4">
+                                                        <div class="d-flex">
+                                        <span><span class="sky" style="color: red">*</span>
+                                            <span th:text="#{form.province}">ខេត្ត/ក្រុង</span>
+                                        </span>
+                                                            <div class="myloader" id="loadingProvincePOB1"></div>
+                                                        </div>
+                                                        <select class="form-select" id="provincePOB1" required>
+                                                        </select>
+                                                        <div class="invalid-feedback"
+                                                             th:text="#{validation.modal.pob_province.required}">
+                                                            Please select your place of birth province.
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4 col-xl-4">
+                                                        <div class="d-flex">
+                                        <span><span class="sky" style="color: red">*</span>
+                                            <span th:text="#{form.district}">ស្រុក/ខណ្ឌ</span>
+                                        </span>
+                                                            <div class="myloader" id="loadingDistrictPOB1"></div>
+                                                        </div>
+                                                        <select class="form-select" id="districtPOB1" required>
+                                                        </select>
+                                                        <div class="invalid-feedback"
+                                                             th:text="#{validation.modal.pob_district.required}">
+                                                            Please select your place of birth district.
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4 col-xl-4"></div>
+                                                    <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4 col-xl-4">
+                                                        <div class="d-flex">
+                                        <span><span class="sky" style="color: red">*</span>
+                                            <span th:text="#{form.commune}">ឃុំ/សង្កាត់</span>
+                                        </span>
+                                                            <div class="myloader" id="loadingCommunePOB1"></div>
+                                                        </div>
+                                                        <select class="form-select" id="communePOB1" required>
+                                                        </select>
+                                                        <div class="invalid-feedback"
+                                                             th:text="#{validation.modal.pob_commune.required}">
+                                                            Please select your place of birth commune.
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4 col-xl-4">
+                                                        <div class="d-flex">
+                                        <span><span class="sky" style="color: red">*</span>
+                                            <span th:text="#{form.village}">ភូមិ</span>
+                                        </span>
+                                                            <div class="myloader" id="loadingVillagePOB1"></div>
+                                                        </div>
+                                                        <select class="form-select" id="villagePOB1" required>
+                                                        </select>
+                                                        <div class="invalid-feedback"
+                                                             th:text="#{validation.modal.pob_village.required}">
+                                                            Please select your place of birth village.
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button class="btn btn-primary px-2 py-2" style="width: 80px"
+                                                    id="btnSaveAddressFormAll" type="submit" th:text="#{form.save_all}">
+                                                Save All
+                                            </button>
+                                            <button class="btn btn-secondary px-2 py-2" style="width: 80px"
+                                                    data-bs-dismiss="modal" type="button" th:text="#{form.close}">Close
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- END MODAL 1 -->
+
+
+                    <!-- START MODAL 2 -->
+                    <div aria-hidden="true" aria-labelledby="staticBackdropLabel" class="modal fade"
+                         data-bs-backdrop="static" data-bs-keyboard="false"
+                         id="idFormUser2" role="dialog" tabindex="-1">
+                        <div class="modal-dialog modal-lg" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <div class="modal-title">
+                                        <img th:src="@{/assets/cpbank/icon/address.png}"/>
+                                        <span class="txtTitle" style="margin-top:10px;"
+                                              th:text="#{form.address_not_found}">អាស័យដ្ធានមិនអាចរកឃើញក្នុងប្រព័ន្ធទេ</span>
+                                    </div>
+                                    <button aria-label="Close" class="btn-close" data-bs-dismiss="modal"
+                                            type="button"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <form class="need-novalidate-address" id="form2" novalidate>
+                                        <div class="basic-login-inner">
+                                            <div class="form-group-inner">
+                                                <div class="row">
+                                                    <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4 col-xl-4">
+                                                        <b style="width:100%;">
+                                                            <span class="sky" style="color: red">*</span>
+                                                            <span th:text="#{form.select_address}">សូមជ្រើសរើសអាស័យដ្ធាន:</span>
+                                                        </b>
+                                                    </div>
+                                                    <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4 col-xl-4">
+                                                        <div class="d-flex">
+                                        <span><span class="sky" style="color: red">*</span>
+                                            <span th:text="#{form.province}">ខេត្ត/ក្រុង</span>
+                                        </span>
+                                                            <div class="myloader" id="loadingProvince2"></div>
+                                                        </div>
+                                                        <select class="form-select" id="province2" required>
+                                                        </select>
+                                                        <div class="invalid-feedback"
+                                                             th:text="#{validation.modal.province.required}">Please
+                                                            select your province.
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4 col-xl-4">
+                                                        <div class="d-flex">
+                                        <span><span class="sky" style="color: red">*</span>
+                                            <span th:text="#{form.district}">ស្រុក/ខណ្ឌ</span>
+                                        </span>
+                                                            <div class="myloader" id="loadingDistrict2"></div>
+                                                        </div>
+                                                        <select class="form-select" id="district2" required>
+                                                        </select>
+                                                        <div class="invalid-feedback"
+                                                             th:text="#{validation.modal.district.required}">Please
+                                                            select your district.
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4 col-xl-4"></div>
+                                                    <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4 col-xl-4">
+                                                        <div class="d-flex">
+                                        <span><span class="sky" style="color: red">*</span>
+                                            <span th:text="#{form.commune}">ឃុំ/សង្កាត់</span>
+                                        </span>
+                                                            <div class="myloader" id="loadingCommune2"></div>
+                                                        </div>
+                                                        <select class="form-select" id="commune2" required>
+                                                        </select>
+                                                        <div class="invalid-feedback"
+                                                             th:text="#{validation.modal.commune.required}">Please
+                                                            select your commune.
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4 col-xl-4">
+                                                        <div class="d-flex">
+                                        <span><span class="sky" style="color: red">*</span>
+                                            <span th:text="#{form.village}">ភូមិ</span>
+                                        </span>
+                                                            <div class="myloader" id="loadingVillage2"></div>
+                                                        </div>
+                                                        <select class="form-select" id="village2" required>
+                                                        </select>
+                                                        <div class="invalid-feedback"
+                                                             th:text="#{validation.modal.village.required}">Please
+                                                            select your village.
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button class="btn btn-primary px-2 py-2" style="width: 80px" id="btnSaveAddress" type="submit"
+                                                    th:text="#{form.save}">Save
+                                            </button>
+                                            <button class="btn btn-secondary px-2 py-2" style="width: 80px" data-bs-dismiss="modal"
+                                                    type="button" th:text="#{form.close}">Close
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- END MODAL 2 -->
+
+
+                    <!-- START MODAL 3 -->
+                    <div aria-hidden="true" aria-labelledby="staticBackdropLabel" class="modal fade"
+                         data-bs-backdrop="static" data-bs-keyboard="false"
+                         id="idFormUser3" role="dialog" tabindex="-1">
+                        <div class="modal-dialog modal-lg" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <div class="modal-title">
+                                        <img th:src="@{/assets/cpbank/icon/address.png}"/>
+                                        <span class="txtTitle" style="margin-top:10px;"
+                                              th:text="#{form.place_of_birth_not_found}">ទីកន្លែងកំណើតមិនអាចរកឃើញក្នុងប្រព័ន្ធទេ</span>
+                                    </div>
+                                    <button aria-label="Close" class="btn-close" data-bs-dismiss="modal"
+                                            type="button"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <form class="need-novalidate-address" id="form3" novalidate>
+                                        <div class="basic-login-inner">
+                                            <div class="form-group-inner">
+                                                <div class="row">
+                                                    <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4 col-xl-4">
+                                                        <b style="width:100%;">
+                                                            <span class="sky" style="color: red">*</span>
+                                                            <span th:text="#{form.select_pob}">សូមជ្រើសរើសទីកន្លែងកំណើត:</span>
+                                                        </b>
+                                                    </div>
+                                                    <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4 col-xl-4">
+                                                        <div class="d-flex">
+                                        <span><span class="sky" style="color: red">*</span>
+                                            <span th:text="#{form.province}">ខេត្ត/ក្រុង</span>
+                                        </span>
+                                                            <div class="myloader" id="loadingProvincePOB3"></div>
+                                                        </div>
+                                                        <select class="form-select" id="provincePOB3" required>
+                                                        </select>
+                                                        <div class="invalid-feedback"
+                                                             th:text="#{validation.modal.pob_province.required}">
+                                                            Please select your place of birth province.
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4 col-xl-4">
+                                                        <div class="d-flex">
+                                        <span><span class="sky" style="color: red">*</span>
+                                            <span th:text="#{form.district}">ស្រុក/ខណ្ឌ</span>
+                                        </span>
+                                                            <div class="myloader" id="loadingDistrictPOB3"></div>
+                                                        </div>
+                                                        <select class="form-select" id="districtPOB3" required>
+                                                        </select>
+                                                        <div class="invalid-feedback"
+                                                             th:text="#{validation.modal.pob_district.required}">
+                                                            Please select your place of birth district.
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4 col-xl-4"></div>
+                                                    <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4 col-xl-4">
+                                                        <div class="d-flex">
+                                        <span><span class="sky" style="color: red">*</span>
+                                            <span th:text="#{form.commune}">ឃុំ/សង្កាត់</span>
+                                        </span>
+                                                            <div class="myloader" id="loadingCommunePOB3"></div>
+                                                        </div>
+                                                        <select class="form-select" id="communePOB3" required>
+                                                        </select>
+                                                        <div class="invalid-feedback"
+                                                             th:text="#{validation.modal.pob_commune.required}">
+                                                            Please select your place of birth commune.
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4 col-xl-4">
+                                                        <div class="d-flex">
+                                        <span><span class="sky" style="color: red">*</span>
+                                            <span th:text="#{form.village}">ភូមិ</span>
+                                        </span>
+                                                            <div class="myloader" id="loadingVillagePOB3"></div>
+                                                        </div>
+                                                        <select class="form-select" id="villagePOB3" required>
+                                                        </select>
+                                                        <div class="invalid-feedback"
+                                                             th:text="#{validation.modal.pob_village.required}">
+                                                            Please select your place of birth village.
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button class="btn btn-primary px-2 py-2" style="width: 80px" id="btnSaveAddressPOB"
+                                                    type="submit" th:text="#{form.save}">
+                                                Save
+                                            </button>
+                                            <button class="btn btn-secondary px-2 py-2" style="width: 80px"
+                                                    data-bs-dismiss="modal"
+                                                    type="button" th:text="#{form.close}">
+                                                Close
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- END MODAL 3 -->
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+</th:block>
+
+<th:block layout:fragment="scripts">
+    <script th:src="@{/assets/cpbank/web/js/customer/register-form.js}"></script>
+    <script th:src="@{/assets/cpbank/web/js/loading-sweetalert.js}"></script>
+    <script th:src="@{/assets/cpbank/web/js/translations.js}"></script>
+    <script th:src="@{/assets/cpbank/web/js/customer/modal1.js}"></script>
+    <script th:src="@{/assets/cpbank/web/js/customer/modal2.js}"></script>
+    <script th:src="@{/assets/cpbank/web/js/customer/modal3.js}"></script>
+    <script th:inline="javascript">
+        $('#legalId').prop('readonly', true);
+        $(function () {
+            const companyHiddenFieldId = $('#company').val() || 'CPBANK';
+            $('#btn-dropdown').text($('#' + companyHiddenFieldId).text());
+            $('#company').val(companyHiddenFieldId);
+            $('#dropdown-menu').on('click', 'li', function (evt) {
+                $('#btn-dropdown').text($(this).text());
+                $('#company').val($(this).data('text'));
+            })
+        })
+    </script>
+</th:block>
+</body>
+</html>
