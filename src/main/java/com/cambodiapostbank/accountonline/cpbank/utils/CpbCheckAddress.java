@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-//package com.cambodiapostbank.accountonline.cpbank.utils;
-=======
 package com.cambodiapostbank.accountonline.cpbank.utils;//package com.cambodiapostbank.accountonline.cpbank.utils;
->>>>>>> customer_register_v1
 //
 //import com.cambodiapostbank.accountonline.cpbank.domain.customer.dto.CustomerRequestDto;
 //import org.json.JSONArray;

@@ -4,14 +4,78 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title layout:title-pattern="$LAYOUT_TITLE - $CONTENT_TITLE">Account Online</title>
+
     <style th:replace="/shared/style"></style>
-            }
+
+    <style>
+        /* Ensure full height layout */
+        html, body {
+            height: 100%;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Push content to take available space */
+        .main-content {
+            flex: 1;
+        }
+
+        body[data-layout=horizontal] .page-content {
+            margin-top: 20px !important;
+        }
+    </style>
     <th:block layout:fragment="styles"></th:block>
+
 </head>
-    <div th:replace="/shared/header"></div>
-    <div layout:fragment="content"> </div>
+
+<body data-layout="horizontal" data-topbar="light">
+
+<!-- Begin page -->
+<div id="layout-wrapper">
+
+    <header id="page-topbar" class="isvertical-topbar">
+
+    </header>
+    <!-- ========== Left Sidebar Start ========== -->
+    <div class="vertical-menu">
+
+    </div>
+
+    <!-- Left Sidebar End -->
+    <header class="ishorizontal-topbar">
+        <div th:replace="/shared/header"></div>
+        <div class="topnav"></div>
+    </header>
+
+    <!-- ============================================================== -->
+    <!-- Start right Content here -->
+    <!-- ============================================================== -->
+    <div class="main-content">
+        <div class="page-content">
+            <div layout:fragment="content"></div>
+        </div>
+        <!-- End Page-content -->
+
+
+        <div th:replace="/shared/footer"></div>
+
+    </div>
+    <!-- end main content-->
+
+</div>
+<!-- END layout-wrapper -->
+
+
+<!-- Right Sidebar -->
+<div class="right-bar"></div>
+
+
 <!-- Call script -->
 <div th:replace="/shared/script"></div>
-<th:block layout:fragment="scripts"> </th:block>
+
+<th:block layout:fragment="scripts"></th:block>
+
+
 </body>
 </html>

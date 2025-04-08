@@ -12,7 +12,6 @@
     </th:block>
 </head>
 
-
 <body>
 <th:block layout:fragment="content">
     <div class="container" style="background-color: white; padding: 20px;">
@@ -31,6 +30,7 @@
 
                     <!-- START FORM -->
                     <form class="need-novalidate-new" id="idFormRegister" novalidate>
+                        <input id="submitLabel" th:value="#{register.submitting}" type="hidden">
                         <div class="row gap-3 mb-3">
                             <div class="col-sm text-center">
                                 <div class="form-group">
@@ -45,7 +45,7 @@
                                            name="legalIdImage"
                                            required style="visibility: hidden"
                                            type="file">
-                                    <div class="invalid-feedback" th:text="#{validation.identityImage.required}"></div>
+                                    <div class="invalid-feedback">Please upload your identity image.</div>
                                 </div>
                             </div>
                             <div class="col-sm text-center">
@@ -59,9 +59,7 @@
                                     <input accept="image/png, image/gif, image/jpeg" id="frontImage" name="frontImage"
                                            required
                                            style="visibility: hidden" type="file">
-                                    <div class="invalid-feedback" th:text="#{validation.selfieImage.required}">Please
-                                        upload your selfie image.
-                                    </div>
+                                    <div class="invalid-feedback">Please upload your selfie image.</div>
                                 </div>
                             </div>
                         </div>
@@ -75,9 +73,7 @@
                                                required
                                                th:attr="placeholder=#{register.lastNameKh}"
                                                type="text"/>
-                                        <div class="invalid-feedback" th:text="#{validation.lastNameKh.required}">Please
-                                            enter your last name (Khmer).
-                                        </div>
+                                        <div class="invalid-feedback">Please enter your last name (Khmer).</div>
                                     </div>
                                 </div>
                             </div>
@@ -90,9 +86,7 @@
                                                required
                                                th:attr="placeholder=#{register.firstNameKh}"
                                                type="text"/>
-                                        <div class="invalid-feedback" th:text="#{validation.firstNameKh.required}">
-                                            Please enter your first name (Khmer).
-                                        </div>
+                                        <div class="invalid-feedback">Please enter your first name (Khmer).</div>
                                     </div>
                                 </div>
                             </div>
@@ -107,9 +101,7 @@
                                                required
                                                th:attr="placeholder=#{register.familyName}"
                                                type="text"/>
-                                        <div class="invalid-feedback" th:text="#{validation.familyName.required}">Please
-                                            enter your family name.
-                                        </div>
+                                        <div class="invalid-feedback">Please enter your family name.</div>
                                     </div>
                                 </div>
                             </div>
@@ -122,9 +114,7 @@
                                                required
                                                th:attr="placeholder=#{register.givenName}"
                                                type="text"/>
-                                        <div class="invalid-feedback" th:text="#{validation.givenName.required}">Please
-                                            enter your given name.
-                                        </div>
+                                        <div class="invalid-feedback">Please enter your given name.</div>
                                     </div>
                                 </div>
                             </div>
@@ -140,9 +130,7 @@
                                                     class="fa-solid fa-calendar-days"></i></span>
                                             <input type="text" id="dateOfBirth" name="dateOfBirth" class="form-control"
                                                    required th:attr="placeholder=#{register.dateOfBirth}">
-                                            <div class="invalid-feedback" th:text="#{validation.dateOfBirth.required}">
-                                                Please select your date of birth.
-                                            </div>
+                                            <div class="invalid-feedback">Please select your date of birth.</div>
                                         </div>
                                     </div>
                                 </div>
@@ -158,9 +146,7 @@
                                             <option th:text="#{register.gender.male}" th:value="'MALE'"></option>
                                             <option th:text="#{register.gender.female}" th:value="'FEMALE'"></option>
                                         </select>
-                                        <div class="invalid-feedback" th:text="#{validation.gender.required}">Please
-                                            select your gender.
-                                        </div>
+                                        <div class="invalid-feedback">Please select your gender.</div>
                                     </div>
                                 </div>
                             </div>
@@ -176,9 +162,7 @@
                                             <option th:text="#{register.legalDocName.nationalId}"
                                                     th:value="'NATIONAL.ID'"></option>
                                         </select>
-                                        <div class="invalid-feedback" th:text="#{validation.legalDocName.required}">
-                                            Please select the legal document type.
-                                        </div>
+                                        <div class="invalid-feedback">Please select the legal document type.</div>
                                     </div>
                                 </div>
                             </div>
@@ -191,8 +175,7 @@
                                                required
                                                th:attr="placeholder=#{register.legalId}"
                                                type="number">
-                                        <div class="invalid-feedback" th:text="#{validation.legalId.required}">Please
-                                            enter a valid 9-digit legal ID number.
+                                        <div class="invalid-feedback">Please enter a valid 9-digit legal ID number.
                                         </div>
                                     </div>
                                 </div>
@@ -209,9 +192,7 @@
                                                required
                                                th:attr="placeholder=#{register.customerAddress}"
                                                type="text">
-                                        <div class="invalid-feedback" th:text="#{validation.customerAddress.required}">
-                                            Please enter your address.
-                                        </div>
+                                        <div class="invalid-feedback">Please enter your address.</div>
                                     </div>
                                 </div>
                             </div>
@@ -226,10 +207,7 @@
                                                required
                                                th:attr="placeholder=#{register.customerPlaceOfBirth}"
                                                type="text">
-                                        <div class="invalid-feedback"
-                                             th:text="#{validation.customerPlaceOfBirth.required}">Please enter your
-                                            place of birth.
-                                        </div>
+                                        <div class="invalid-feedback">Please enter your place of birth.</div>
                                     </div>
                                 </div>
                             </div>
@@ -251,9 +229,7 @@
                                             <option th:text="#{register.maritalStatus.widow}"
                                                     th:value="'WIDOW'"></option>
                                         </select>
-                                        <div class="invalid-feedback" th:text="#{validation.maritalStatus.required}">
-                                            Please select your marital status.
-                                        </div>
+                                        <div class="invalid-feedback">Please select your marital status.</div>
                                     </div>
                                 </div>
                             </div>
@@ -278,9 +254,7 @@
                                             <option th:text="#{register.occupation.retired}"
                                                     th:value="'Retired'"></option>
                                         </select>
-                                        <div class="invalid-feedback" th:text="#{validation.occupation.required}">Please
-                                            select your occupation.
-                                        </div>
+                                        <div class="invalid-feedback">Please select your occupation.</div>
                                     </div>
                                 </div>
                             </div>
@@ -292,9 +266,7 @@
                                         <select class="form-select" id="ddlBranch" required>
                                             <option disabled selected th:text="#{register.option}" value=""></option>
                                         </select>
-                                        <div class="invalid-feedback" th:text="#{validation.branch.required}">Please
-                                            select your branch.
-                                        </div>
+                                        <div class="invalid-feedback">Please select your branch.</div>
                                     </div>
                                 </div>
                             </div>
@@ -336,9 +308,7 @@
                                         <input class="form-control" id="contactNumber" maxlength="10"
                                                required th:attr="placeholder=#{register.contactNumber}"
                                                type="text">
-                                        <div class="invalid-feedback" th:text="#{validation.contactNumber.required}">
-                                            Please enter a valid contact number.
-                                        </div>
+                                        <div class="invalid-feedback">Please enter a valid contact number.</div>
                                     </div>
                                 </div>
                             </div>
@@ -354,8 +324,7 @@
                                         </div>
                                         <input class="form-control" id="otpCode" maxlength="6" name="otpCode"
                                                required th:attr="placeholder=#{register.otpCode}" type="text">
-                                        <div class="invalid-feedback" th:text="#{validation.otpCode.required}">Please
-                                            enter the OTP code sent to your contact
+                                        <div class="invalid-feedback">Please enter the OTP code sent to your contact
                                             number.
                                         </div>
                                     </div>
@@ -408,10 +377,7 @@
                                                         </div>
                                                         <select class="form-select" id="province1" required>
                                                         </select>
-                                                        <div class="invalid-feedback"
-                                                             th:text="#{validation.modal.province.required}">
-                                                            Please select your province.
-                                                        </div>
+                                                        <div class="invalid-feedback">The field is required.</div>
                                                     </div>
                                                     <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4 col-xl-4">
                                                         <div class="d-flex">
@@ -422,10 +388,7 @@
                                                         </div>
                                                         <select class="form-select" id="district1" required>
                                                         </select>
-                                                        <div class="invalid-feedback"
-                                                             th:text="#{validation.modal.district.required}">
-                                                            Please select your district.
-                                                        </div>
+                                                        <div class="invalid-feedback">The field is required.</div>
                                                     </div>
                                                     <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4 col-xl-4"></div>
                                                     <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4 col-xl-4">
@@ -437,10 +400,7 @@
                                                         </div>
                                                         <select class="form-select" id="commune1" required>
                                                         </select>
-                                                        <div class="invalid-feedback"
-                                                             th:text="#{validation.modal.commune.required}">
-                                                            Please select your commune.
-                                                        </div>
+                                                        <div class="invalid-feedback">The field is required.</div>
                                                     </div>
                                                     <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4 col-xl-4">
                                                         <div class="d-flex">
@@ -451,10 +411,7 @@
                                                         </div>
                                                         <select class="form-select" id="village1" required>
                                                         </select>
-                                                        <div class="invalid-feedback"
-                                                             th:text="#{validation.modal.village.required}">
-                                                            Please select your village.
-                                                        </div>
+                                                        <div class="invalid-feedback">The field is required.</div>
                                                     </div>
                                                 </div>
                                                 <hr/>
@@ -474,10 +431,7 @@
                                                         </div>
                                                         <select class="form-select" id="provincePOB1" required>
                                                         </select>
-                                                        <div class="invalid-feedback"
-                                                             th:text="#{validation.modal.pob_province.required}">
-                                                            Please select your place of birth province.
-                                                        </div>
+                                                        <div class="invalid-feedback">The field is required.</div>
                                                     </div>
                                                     <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4 col-xl-4">
                                                         <div class="d-flex">
@@ -488,10 +442,7 @@
                                                         </div>
                                                         <select class="form-select" id="districtPOB1" required>
                                                         </select>
-                                                        <div class="invalid-feedback"
-                                                             th:text="#{validation.modal.pob_district.required}">
-                                                            Please select your place of birth district.
-                                                        </div>
+                                                        <div class="invalid-feedback">The field is required.</div>
                                                     </div>
                                                     <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4 col-xl-4"></div>
                                                     <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4 col-xl-4">
@@ -503,10 +454,7 @@
                                                         </div>
                                                         <select class="form-select" id="communePOB1" required>
                                                         </select>
-                                                        <div class="invalid-feedback"
-                                                             th:text="#{validation.modal.pob_commune.required}">
-                                                            Please select your place of birth commune.
-                                                        </div>
+                                                        <div class="invalid-feedback">The field is required.</div>
                                                     </div>
                                                     <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4 col-xl-4">
                                                         <div class="d-flex">
@@ -517,21 +465,19 @@
                                                         </div>
                                                         <select class="form-select" id="villagePOB1" required>
                                                         </select>
-                                                        <div class="invalid-feedback"
-                                                             th:text="#{validation.modal.pob_village.required}">
-                                                            Please select your place of birth village.
-                                                        </div>
+                                                        <div class="invalid-feedback">The field is required.</div>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
                                         <div class="modal-footer">
-                                            <button class="btn btn-primary px-2 py-2" style="width: 80px"
-                                                    id="btnSaveAddressFormAll" type="submit" th:text="#{form.save_all}">
-                                                Save All
+                                            <button class="btn btn-primary" style="width: 250px;" id="btnSaveAddressFormAll"
+                                                    type="submit"
+                                                    th:text="#{form.save_all}">Save All
                                             </button>
-                                            <button class="btn btn-secondary px-2 py-2" style="width: 80px"
-                                                    data-bs-dismiss="modal" type="button" th:text="#{form.close}">Close
+                                            <button class="btn btn-secondary px-6 py-2" style="width: 250px;" data-bs-dismiss="modal"
+                                                    type="button"
+                                                    th:text="#{form.close}">Close
                                             </button>
                                         </div>
                                     </form>
@@ -539,6 +485,7 @@
                             </div>
                         </div>
                     </div>
+
                     <!-- END MODAL 1 -->
 
 
@@ -577,10 +524,7 @@
                                                         </div>
                                                         <select class="form-select" id="province2" required>
                                                         </select>
-                                                        <div class="invalid-feedback"
-                                                             th:text="#{validation.modal.province.required}">Please
-                                                            select your province.
-                                                        </div>
+                                                        <div class="invalid-feedback">The field is required.</div>
                                                     </div>
                                                     <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4 col-xl-4">
                                                         <div class="d-flex">
@@ -591,10 +535,7 @@
                                                         </div>
                                                         <select class="form-select" id="district2" required>
                                                         </select>
-                                                        <div class="invalid-feedback"
-                                                             th:text="#{validation.modal.district.required}">Please
-                                                            select your district.
-                                                        </div>
+                                                        <div class="invalid-feedback">The field is required.</div>
                                                     </div>
                                                     <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4 col-xl-4"></div>
                                                     <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4 col-xl-4">
@@ -606,10 +547,7 @@
                                                         </div>
                                                         <select class="form-select" id="commune2" required>
                                                         </select>
-                                                        <div class="invalid-feedback"
-                                                             th:text="#{validation.modal.commune.required}">Please
-                                                            select your commune.
-                                                        </div>
+                                                        <div class="invalid-feedback">The field is required.</div>
                                                     </div>
                                                     <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4 col-xl-4">
                                                         <div class="d-flex">
@@ -620,20 +558,18 @@
                                                         </div>
                                                         <select class="form-select" id="village2" required>
                                                         </select>
-                                                        <div class="invalid-feedback"
-                                                             th:text="#{validation.modal.village.required}">Please
-                                                            select your village.
-                                                        </div>
+                                                        <div class="invalid-feedback">The field is required.</div>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
                                         <div class="modal-footer">
-                                            <button class="btn btn-primary px-2 py-2" style="width: 80px" id="btnSaveAddress" type="submit"
+                                            <button class="btn btn-primary px-6 py-2" id="btnSaveAddress" type="submit"
                                                     th:text="#{form.save}">Save
                                             </button>
-                                            <button class="btn btn-secondary px-2 py-2" style="width: 80px" data-bs-dismiss="modal"
-                                                    type="button" th:text="#{form.close}">Close
+                                            <button class="btn btn-secondary px-6 py-2" data-bs-dismiss="modal"
+                                                    type="button"
+                                                    th:text="#{form.close}">Close
                                             </button>
                                         </div>
                                     </form>
@@ -642,7 +578,6 @@
                         </div>
                     </div>
                     <!-- END MODAL 2 -->
-
 
                     <!-- START MODAL 3 -->
                     <div aria-hidden="true" aria-labelledby="staticBackdropLabel" class="modal fade"
@@ -654,7 +589,9 @@
                                     <div class="modal-title">
                                         <img th:src="@{/assets/cpbank/icon/address.png}"/>
                                         <span class="txtTitle" style="margin-top:10px;"
-                                              th:text="#{form.place_of_birth_not_found}">ទីកន្លែងកំណើតមិនអាចរកឃើញក្នុងប្រព័ន្ធទេ</span>
+                                              th:text="#{form.place_of_birth_not_found}">
+                        ទីកន្លែងកំណើតមិនអាចរកឃើញក្នុងប្រព័ន្ធទេ
+                    </span>
                                     </div>
                                     <button aria-label="Close" class="btn-close" data-bs-dismiss="modal"
                                             type="button"></button>
@@ -679,9 +616,8 @@
                                                         </div>
                                                         <select class="form-select" id="provincePOB3" required>
                                                         </select>
-                                                        <div class="invalid-feedback"
-                                                             th:text="#{validation.modal.pob_province.required}">
-                                                            Please select your place of birth province.
+                                                        <div class="invalid-feedback" th:text="#{form.field_required}">
+                                                            The field is required.
                                                         </div>
                                                     </div>
                                                     <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4 col-xl-4">
@@ -693,9 +629,8 @@
                                                         </div>
                                                         <select class="form-select" id="districtPOB3" required>
                                                         </select>
-                                                        <div class="invalid-feedback"
-                                                             th:text="#{validation.modal.pob_district.required}">
-                                                            Please select your place of birth district.
+                                                        <div class="invalid-feedback" th:text="#{form.field_required}">
+                                                            The field is required.
                                                         </div>
                                                     </div>
                                                     <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4 col-xl-4"></div>
@@ -708,9 +643,8 @@
                                                         </div>
                                                         <select class="form-select" id="communePOB3" required>
                                                         </select>
-                                                        <div class="invalid-feedback"
-                                                             th:text="#{validation.modal.pob_commune.required}">
-                                                            Please select your place of birth commune.
+                                                        <div class="invalid-feedback" th:text="#{form.field_required}">
+                                                            The field is required.
                                                         </div>
                                                     </div>
                                                     <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4 col-xl-4">
@@ -722,22 +656,22 @@
                                                         </div>
                                                         <select class="form-select" id="villagePOB3" required>
                                                         </select>
-                                                        <div class="invalid-feedback"
-                                                             th:text="#{validation.modal.pob_village.required}">
-                                                            Please select your place of birth village.
+                                                        <div class="invalid-feedback" th:text="#{form.field_required}">
+                                                            The field is required.
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
                                         <div class="modal-footer">
-                                            <button class="btn btn-primary px-2 py-2" style="width: 80px" id="btnSaveAddressPOB"
-                                                    type="submit" th:text="#{form.save}">
+                                            <button class="btn btn-primary" style="width: 100px;" id="btnSaveAddressPOB"
+                                                    type="submit"
+                                                    th:text="#{form.save}">
                                                 Save
                                             </button>
-                                            <button class="btn btn-secondary px-2 py-2" style="width: 80px"
-                                                    data-bs-dismiss="modal"
-                                                    type="button" th:text="#{form.close}">
+                                            <button class="btn btn-secondary" style="width: 100px;" data-bs-dismiss="modal"
+                                                    type="button"
+                                                    th:text="#{form.close}">
                                                 Close
                                             </button>
                                         </div>
@@ -747,7 +681,6 @@
                         </div>
                     </div>
                     <!-- END MODAL 3 -->
-
 
                 </div>
             </div>
