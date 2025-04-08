@@ -500,7 +500,7 @@ var validation = Array.prototype.filter.call(form, function(forms) {
                 // $('#btnSubmit').removeClass('disabled');
                 // $('#btnValidate').addClass('disabled');
                 // disableFormFields();
-                submitData();
+                ValidateNidFace();
 
             }
             else if (submitButtonId === 'btnSaveAddress'){
@@ -531,7 +531,7 @@ var validation = Array.prototype.filter.call(form, function(forms) {
                 // $('#btnSubmit').removeClass('disabled');
                 // $('#btnValidate').addClass('disabled');
                 // disableFormFields();
-                submitData();
+                ValidateNidFace();
             }
             else if (submitButtonId === 'btnSaveAddressPOB'){
                 var pobProvinceCodeTmp1 = $('#provincePOB3').val();
@@ -563,13 +563,11 @@ var validation = Array.prototype.filter.call(form, function(forms) {
                 // $('#btnSubmit').removeClass('disabled');
                 // $('#btnValidate').addClass('disabled');
                 // disableFormFields();
-                submitData();
+                ValidateNidFace();
             }
         }
         forms.classList.add('was-validated');
     }, false);
 });
-
-
 
 

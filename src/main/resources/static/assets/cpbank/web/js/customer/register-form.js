@@ -16,26 +16,11 @@ let isCheckPOBAddressCustomerFound = 0;
 let lang = localStorage.getItem('selectedLang') || 'kh';
 
 $(document).ready(function () {
-
     // Apply the initial language
     updateLanguageDisplay(lang);
 
-    // Initialize flatpickr for dateOfBirth
-    dateOfBirthPicker = $("#dateOfBirth").flatpickr({
-        enableTime: false,
-        dateFormat: "d/m/Y", // Format: DD/MM/YYYY
-        altFormat: "d/m/Y",
-        allowInput: true, // Allows users to type manually
-        onClose: function (selectedDates, dateStr, instance) {
-            let input = instance.input;
-            if (!dateStr) {
-                input.setCustomValidity("Please select a date."); // Set validation error
-            } else {
-                input.setCustomValidity(""); // Clear validation error
-            }
-            input.reportValidity(); // Force validation message display
-        }
-    });
+    // Initialize flatpickr
+    initializeFlatpickr();
 
     // Initialize SweetAlert Toast
     window.Toast = Swal.mixin({
@@ -52,9 +37,27 @@ $(document).ready(function () {
 
     // Call the function to populate other fields
     getBranch();
-
 });
 
+// Function to safely initialize flatpickr
+function initializeFlatpickr() {
+    dateOfBirthPicker = $("#dateOfBirth").flatpickr({
+        enableTime: false,
+        dateFormat: "d/m/Y", // Format: DD/MM/YYYY
+        altFormat: "d/m/Y",
+        allowInput: true, // Allows users to type manually
+        disableMobile: true, //This line ensures Flatpickr works the same on all devices
+        onClose: function (selectedDates, dateStr, instance) {
+            let input = instance.input;
+            if (!dateStr) {
+                input.setCustomValidity("Please select a date."); // Set validation error
+            } else {
+                input.setCustomValidity(""); // Clear validation error
+            }
+            input.reportValidity(); // Force validation message display
+        }
+    });
+}
 
 $('#legalIdImage').on('change', function (evt) {
 
@@ -112,16 +115,15 @@ $('#legalIdImage').on('change', function (evt) {
 });
 
 
-
 function populateFormFields(data) {
     $('#firstNameKh').val(data.firstNameKh);
     $('#lastNameKh').val(data.lastNameKh);
     $('#familyName').val(data.lastNameEn);
     $('#givenName').val(data.firstNameEn);
 
-    // Use Flatpickr's setDate method for dateOfBirth
-    if (dateOfBirthPicker && data.dob) {
-        dateOfBirthPicker.setDate(data.dob, true);
+    // Handle date of birth safely
+    if (data.dob) {
+        $('#dateOfBirth').val(data.dob);
     }
 
     $('#gender').val(data.gender === "M" ? "MALE" : "FEMALE");
@@ -183,7 +185,6 @@ $('#frontImage').on('change', function (evt) {
 });
 
 
-
 // SUBMIT DATA
 var form = document.getElementsByClassName('need-novalidate-new');
 var validation = Array.prototype.filter.call(form, function (forms) {
@@ -195,7 +196,7 @@ var validation = Array.prototype.filter.call(form, function (forms) {
             var submitButtonId = event.submitter.id;
             if (submitButtonId === 'btnSubmit') {
                 // alert('you click submit');
-                ValidateNidFace();
+                checkAddressCustomer();
             }
         }
         forms.classList.add('was-validated');
@@ -239,10 +240,11 @@ function submitData() {
         "lastNameKh": $("#lastNameKh").val(),
     };
 
-    console.log("json===========> "+json)
+    console.log("json===========> " + json);
+
     $.ajax({
         type: "POST",
-        url: "api/v1/openAcct/customer-create",
+        url: "api/v1/customer-register",
         contentType: "application/json",
         dataType: "json",
         data: JSON.stringify(json),
@@ -251,9 +253,7 @@ function submitData() {
             handleSubmitResponseSuccess(response);
         },
         error: function (xhr) {
-            hideLoading();
-            console.error("Error:", xhr.responseText);
-            showSweetAlert('error', 'Error!', 'Something went wrong. Please try again.');
+            handleAjaxError(xhr, status, error);
         }
     });
 }
@@ -292,7 +292,6 @@ function handleSubmitResponseSuccess(response) {
 }
 
 
-
 // RESET FORM FUNCTION
 function resetForm() {
     $(".need-novalidate-new").removeClass("was-validated").trigger("reset");
@@ -304,7 +303,6 @@ function resetForm() {
 
 function ValidateNidFace() {
     showLoading();
-
     const json = {
         userInfo: {
             idNumber: $('#legalId').val(),
@@ -337,6 +335,7 @@ function ValidateNidFace() {
 }
 
 function handleAjaxNidValidateSuccess(response) {
+    console.log("NID Validate Face Response ==========> ", response);
     var score = 0;
     if (response.error === 0) {
         var faceDocumentScore = response.data.faceDocumentScore;
@@ -375,11 +374,9 @@ function handleAjaxNidValidateSuccess(response) {
                         <div style="margin-left: 20px; margin-top: 5px;">${incorrectFieldsText}</div>
                     </div>
                 `;
-
                 showSweetAlert('warning', lang === 'kh' ? 'បរាជ័យ' : 'Failed..!', htmlContent);
             } else {
-                hideLoading();
-                checkAddressCustomer();
+                submitData();
             }
         } else {
             hideLoading();
@@ -407,7 +404,6 @@ function handleAjaxError(xhr, status, error) {
 
     showSweetAlert('error', errorTitle, errorMessage);
 }
-
 
 
 function checkAddressCustomer() {
@@ -498,7 +494,7 @@ function determineModalToShow() {
         $('#idFormUser3').modal('show');
         getProPOBM3();
     } else {
-        submitData();
+        ValidateNidFace();
     }
 }
 
@@ -532,7 +528,7 @@ $('#otpCode').on('change', function () {
                 }
             },
             statusCode: {
-                400: function ({ responseJSON }) {
+                400: function ({responseJSON}) {
                     const message = translations[lang]?.otpFailed || responseJSON?.message || "Verification failed.";
                     showSweetAlert("error", translations[lang]?.fail || "Failed", message);
                     $('#otpCode').val('');
@@ -568,7 +564,7 @@ function sendOtp() {
                 });
             },
             statusCode: {
-                400: function ({ responseJSON }) {
+                400: function ({responseJSON}) {
                     const message = translations[lang]?.otpFailed || responseJSON?.message || "Failed to send OTP.";
                     showSweetAlert("error", translations[lang]?.fail || "Failed", message);
                     $('#otpCode').val('');
@@ -584,7 +580,6 @@ function sendOtp() {
 
 $("#ddlBranch").change(function () {
     var selectOptionValue = $(this).val();
-    alert(selectOptionValue);
     branchCodeValue = selectOptionValue;
 });
 
