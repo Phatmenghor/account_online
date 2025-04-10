@@ -369,7 +369,6 @@ function getCommunePOB(id) {
 }
 
 
-
 //get village
 var VILLAGE_TEXT_POB = null;
 function getVillagePOB(id) {
@@ -378,7 +377,6 @@ function getVillagePOB(id) {
 
     // Add the class to show the loader
     loader.classList.add("myloader");
-
 
     $.ajax({
         type: "GET",
@@ -408,7 +406,6 @@ function getVillagePOB(id) {
         }
     });
 }
-
 
 
 var ddlProvincePOB1 = $('#provincePOB1');

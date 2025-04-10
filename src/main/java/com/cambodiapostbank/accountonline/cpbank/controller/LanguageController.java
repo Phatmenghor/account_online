@@ -24,7 +24,7 @@ public class LanguageController {
         this.localeResolver = localeResolver;
     }
 
-    @PostMapping("/change-language")
+    @PostMapping("/api/change-language")
     @ResponseBody
     public ResponseEntity<?> changeLanguage(@RequestBody Map<String, String> request, HttpServletRequest httpServletRequest) {
         String lang = request.get("lang");
