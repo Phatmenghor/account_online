@@ -1,7 +1,7 @@
 package com.cambodiapostbank.accountonline.cpbank.controller;
 
 import com.cambodiapostbank.accountonline.cpbank.domain.eKYC.dto.*;
-import com.cambodiapostbank.accountonline.cpbank.utils.FormatDate;
+import com.cambodiapostbank.accountonline.cpbank.utils.DateFormatter;
 import com.cambodiapostbank.accountonline.cpbank.utils.http.HttpClientRest;
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;
@@ -72,6 +72,7 @@ public class eKYC_Controller {
         String url = baseUrl + "/api/CheckPOB";
 
         logger.debug("Sending request to URL: {}", url);
+
         logger.debug("Request Payload: {}", jsonData);
 
         String response = httpClientRest.postData(url, jsonData, username, password);
@@ -80,13 +81,13 @@ public class eKYC_Controller {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/validate-nid-face")
-    public ResponseEntity<String> verifyNidFaceImage(@RequestBody EkycRequestDataDTO request) {
+    @PostMapping("/validate-nid")
+    public ResponseEntity<String> verifyNidFaceImage(@RequestBody ValidateNidRequest request) {
         logger.info("Start: Validate NID Face Image processing.");
 
         try {
-            String jsonData = createJsonValidateNidFace(request);
-            String url = baseUrl + "/api/ValidateNIDFace";
+            String jsonData = validateNid(request);
+            String url = baseUrl + "/api/ValidateNid";
 
             logger.info("Sending request to URL: {}", url);
             logger.info("Request Payload: {}", jsonData);
@@ -95,6 +96,7 @@ public class eKYC_Controller {
 
             logger.info("Validate NID Face response received.");
             return ResponseEntity.ok(response);
+
         } catch (Exception e) {
             logger.error("Error occurred while verifying NID face image: ", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -113,31 +115,25 @@ public class eKYC_Controller {
         }
     }
 
-    private String createJsonValidateNidFace(EkycRequestDataDTO ekycRequestDataDTO) {
+    public String validateNid(ValidateNidRequest req) {
+        JSONObject jsonObject = new JSONObject();
         try {
-            JSONObject jsonObject = new JSONObject();
-            JSONObject userInfoObject = new JSONObject();
-
-            userInfoObject.put("idNumber", ekycRequestDataDTO.getUserInfo().getIdNumber());
-            userInfoObject.put("firstNameKh", ekycRequestDataDTO.getUserInfo().getFirstNameKh());
-            userInfoObject.put("lastNameKh", ekycRequestDataDTO.getUserInfo().getLastNameKh());
-            userInfoObject.put("firstNameEn", ekycRequestDataDTO.getUserInfo().getFirstNameEn());
-            userInfoObject.put("lastNameEn", ekycRequestDataDTO.getUserInfo().getLastNameEn());
-            userInfoObject.put("gender", ekycRequestDataDTO.getUserInfo().getGender());
-
-            userInfoObject.put("dob", FormatDate.formatDate(ekycRequestDataDTO.getUserInfo().getDob()));
-            userInfoObject.put("issuedDate", "2021-11-03");
-            userInfoObject.put("expiredDate", "2031-11-02");
-
-            jsonObject.put("userInfo", userInfoObject);
-            jsonObject.put("faceImg", ekycRequestDataDTO.getFaceImg());
-            jsonObject.put("idImage", ekycRequestDataDTO.getIdImage());
-
-            return jsonObject.toString();
+            jsonObject.put("applicationName", "ACCOUNT_ONLINE");
+            jsonObject.put("idNumber", req.getIdNumber());
+            jsonObject.put("firstNameKh", req.getFirstNameKh());
+            jsonObject.put("lastNameKh", req.getLastNameKh());
+            jsonObject.put("firstNameEn", req.getFirstNameEn());
+            jsonObject.put("lastNameEn", req.getLastNameEn());
+            jsonObject.put("gender", req.getGender());
+            jsonObject.put("dob", DateFormatter.formatDate(req.getDob()));
+            jsonObject.put("issuedDate", "2021-11-03");
+            jsonObject.put("expiredDate", "2031-11-02");
         } catch (JSONException e) {
-            logger.error("Error constructing JSON payload for Validate NID Face: ", e);
-            return "{}";
+            // Handle the exception appropriately
+            logger.error("Error creating JSON payload", e);
+            e.printStackTrace();
         }
+        return jsonObject.toString();
     }
 
     private String createJsonCheckAddress(AddressRequestDTO addressRequestDTO) {

@@ -60,59 +60,77 @@ function initializeFlatpickr() {
 }
 
 $('#legalIdImage').on('change', function (evt) {
+    const file = evt.target.files[0];
+
+    if (!file) return;
 
     const reader = new FileReader();
 
     reader.onload = function (event) {
-        $('#legalIdImageDisplay').attr('src', event.target.result);
+        const img = new Image();
+        img.onload = function () {
+            // Create canvas and set dimensions
+            const canvas = document.createElement('canvas');
+            canvas.width = img.width;
+            canvas.height = img.height;
 
-        // Directly convert the image to base64 without using canvas
-        legalImageValue = event.target.result.split(',')[1];
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0);
 
-        var json = {idImage: legalImageValue};
+            // Compress to 0.5 quality as JPEG
+            const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.5);
+            $('#legalIdImageDisplay').attr('src', compressedDataUrl);
 
-        showLoading();
+            legalImageValue = compressedDataUrl.split(',')[1];
+            const json = { idImage: legalImageValue };
 
-        $.ajax({
-            type: "POST",
-            url: "api/v1/eKYC/extract-nid",
-            contentType: 'application/json',
-            dataType: 'json',
-            data: JSON.stringify(json),
-            success: function (response) {
-                console.log(response);
-                hideLoading();
-                const lang = localStorage.getItem('selectedLang') || 'kh';
+            showLoading();
 
-                if (response.error === 0) {
-                    if (response.data !== null) {
-                        populateFormFields(response.data);
+            $.ajax({
+                type: "POST",
+                url: "api/v1/eKYC/extract-nid",
+                contentType: 'application/json',
+                dataType: 'json',
+                data: JSON.stringify(json),
+                success: function (response) {
+                    console.log(response);
+                    hideLoading();
+                    const lang = localStorage.getItem('selectedLang') || 'kh';
+
+                    if (response.error === 0) {
+                        if (response.data !== null) {
+                            populateFormFields(response.data);
+                        } else {
+                            resetNidImageInput();
+                            showSweetAlert("error", translations[lang].fail, response.message);
+                        }
                     } else {
-                        clearFormFields();
-                        $('#legalIdImage').val(null);
-                        $('#legalIdImageDisplay').attr('src', '/assets/cpbank/images/National_ID_selfie.png');
+                        hideLoading();
+                        resetNidImageInput();
                         showSweetAlert("error", translations[lang].fail, response.message);
                     }
-                } else {
+                },
+                error: function (xhr, status, error) {
                     hideLoading();
-                    $('#legalIdImage').val(null);
-                    $('#legalIdImageDisplay').attr('src', '/assets/cpbank/images/National_ID_selfie.png');
-                    showSweetAlert("error", translations[lang].fail, response.message);
-                }
-            },
-            error: function (xhr, status, error) {
-                hideLoading();
-                $('#legalIdImage').val(null);
-                $('#legalIdImageDisplay').attr('src', '/assets/cpbank/images/National_ID_selfie.png');
+                    resetNidImageInput();
 
-                const lang = localStorage.getItem('selectedLang') || 'kh';
-                showSweetAlert("error", translations[lang].fail, translations[lang].tryAgain);
-            },
-        });
+                    const lang = localStorage.getItem('selectedLang') || 'kh';
+                    showSweetAlert("error", translations[lang].fail, translations[lang].tryAgain);
+                },
+            });
+        };
+
+        img.src = event.target.result;
     };
 
-    reader.readAsDataURL(evt.target.files[0]);
+    reader.readAsDataURL(file);
 });
+
+function resetNidImageInput() {
+    $('#legalIdImage').val(null);
+    $('#legalIdImageDisplay').attr('src', '/assets/cpbank/images/National_ID_selfie.png');
+}
+
 
 
 function populateFormFields(data) {
@@ -171,17 +189,37 @@ function populateFormFields(data) {
 }
 
 $('#frontImage').on('change', function (evt) {
+    const file = evt.target.files[0];
+
+    if (!file) return;
+
     const reader = new FileReader();
 
     reader.onload = function (event) {
-        // Directly set the base64 string without using canvas
-        selfieImageValue = event.target.result.split(',')[1];
+        const img = new Image();
+        img.onload = function () {
+            // Create a canvas to draw and compress the image
+            const canvas = document.createElement('canvas');
+            canvas.width = img.width;
+            canvas.height = img.height;
 
-        // Display the image
-        $('#imgFrontImageDisplay').attr('src', event.target.result);
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0);
+
+            // Compress image to JPEG with 0.5 quality
+            const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.5);
+
+            // Set the base64 image string (without the "data:image/jpeg;base64," part)
+            selfieImageValue = compressedDataUrl.split(',')[1];
+
+            // Display the compressed image
+            $('#imgFrontImageDisplay').attr('src', compressedDataUrl);
+        };
+
+        img.src = event.target.result;
     };
 
-    reader.readAsDataURL(evt.target.files[0]);
+    reader.readAsDataURL(file);
 });
 
 
@@ -301,27 +339,23 @@ function resetForm() {
     $("#imgFrontImageDisplay").attr("src", "/assets/cpbank/images/image_selfie.jpg");
 }
 
-function ValidateNidFace() {
+function ValidateNid() {
     showLoading();
     const json = {
-        userInfo: {
-            idNumber: $('#legalId').val(),
-            firstNameKh: $('#firstNameKh').val(),
-            lastNameKh: $('#lastNameKh').val(),
-            firstNameEn: $('#givenName').val(),
-            lastNameEn: $('#familyName').val(),
-            gender: $('#gender').val() === "MALE" ? "M" : "F",
-            dob: $('#dateOfBirth').val(),
-            issuedDate: $('#issuedDate').val(),
-            expiredDate: $('#expiredDate').val()
-        },
-        faceImg: selfieImageValue,
-        idImage: legalImageValue
+        idNumber: $('#legalId').val(),
+        firstNameKh: $('#firstNameKh').val(),
+        lastNameKh: $('#lastNameKh').val(),
+        firstNameEn: $('#givenName').val(),
+        lastNameEn: $('#familyName').val(),
+        gender: $('#gender').val() === "MALE" ? "M" : "F",
+        dob: $('#dateOfBirth').val(),
+        issuedDate: $('#issuedDate').val(),
+        expiredDate: $('#expiredDate').val()
     };
 
     $.ajax({
         type: "POST",
-        url: "api/v1/eKYC/validate-nid-face",
+        url: "api/v1/eKYC/validate-nid",
         contentType: 'application/json',
         dataType: 'json',
         data: JSON.stringify(json),
@@ -335,21 +369,16 @@ function ValidateNidFace() {
 }
 
 function handleAjaxNidValidateSuccess(response) {
-    console.log("NID Validate Face Response ==========> ", response);
-    var score = 0;
+    console.log("NID Validate Response ==========> ", response);
+
+    hideLoading(); // Always hide loader first
+
     if (response.error === 0) {
-        var faceDocumentScore = response.data.faceDocumentScore;
-        var faceMoiScore = response.data.faceMoiScore;
-        var NidScore = response.data.userInfo.score;
-        var parsedScore = parseFloat(faceMoiScore).toFixed(2);
-        score = parsedScore * 100;
+        const { score, incorrectFields } = response.data;
 
-        if (faceDocumentScore >= 0.50 && faceMoiScore >= 0.50 && NidScore >= 0) {
-            hideLoading();
-            var incorrectFields = response.data.userInfo.incorrectFields;
-
-            if (incorrectFields.includes("lastNameKh") || incorrectFields.includes("firstNameKh") || incorrectFields.includes("dob") || incorrectFields.includes("gender") || incorrectFields.includes("lastNameEn") || incorrectFields.includes("firstNameEn")) {
-                var fieldMappings = {
+        if (score >= 0) {
+            if (incorrectFields && incorrectFields.length > 0) {
+                const fieldMappings = {
                     lastNameKh: lang === 'kh' ? "នាមត្រកូល" : "Last Name (KH)",
                     firstNameKh: lang === 'kh' ? "នាមខ្លួន" : "First Name (KH)",
                     dob: lang === 'kh' ? "ថ្ងៃខែឆ្នាំកំណើត (ថ្ងៃ ខែ ឆ្នាំ)" : "Date of Birth",
@@ -358,16 +387,12 @@ function handleAjaxNidValidateSuccess(response) {
                     firstNameEn: lang === 'kh' ? "នាមខ្លួន (អក្សរឡាតាំង)" : "Given Name"
                 };
 
-                let incorrectFieldsText = incorrectFields
-                    .filter(field => fieldMappings[field]) // Filter out undefined fields
+                const incorrectFieldsText = incorrectFields
+                    .filter(field => fieldMappings[field]) // Ensure valid fields
                     .map(field => `- ${fieldMappings[field]}`)
                     .join('<br />');
 
-                let htmlContent = `
-                    <div style="text-align: start;">
-                        <img src="/assets/cpbank/icon/success.png" alt="success" style="width: 20px; height: 20px;" />
-                        ${lang === 'kh' ? 'រូបថត selfie របស់អ្នកត្រឹមត្រូវជាមួយអត្តសញ្ញាណប័ណ្ណ' : 'Your selfie image is valid with ID card'} (${score}%)
-                    </div>
+                const htmlContent = `
                     <div style="text-align: start; margin-top: 10px;">
                         <img src="/assets/cpbank/icon/fail1.png" alt="fail" style="width: 16px; height: 16px;" />
                         ${lang === 'kh' ? 'ព័ត៌មានមិនត្រឹមត្រូវ:' : 'Incorrect information:'}
@@ -376,24 +401,15 @@ function handleAjaxNidValidateSuccess(response) {
                 `;
                 showSweetAlert('warning', lang === 'kh' ? 'បរាជ័យ' : 'Failed..!', htmlContent);
             } else {
+                // No incorrect fields — proceed
                 submitData();
             }
-        } else {
-            hideLoading();
-            const lang = localStorage.getItem('selectedLang') || 'kh';
-            showSweetAlert(
-                'error',
-                lang === 'kh' ? "បរាជ័យ" : "Failed..!",
-                lang === 'kh'
-                    ? `រូបភាព Selfie របស់អ្នកមិនត្រឹមត្រូវជាមួយអត្តសញ្ញាណប័ណ្ណទេ (${score}%)`
-                    : `Your selfie image is not valid with ID (${score}%)`
-            );
         }
     } else {
-        hideLoading();
         showSweetAlert('error', translations[lang].fail, response.message);
     }
 }
+
 
 function handleAjaxError(xhr, status, error) {
     hideLoading();
@@ -494,7 +510,7 @@ function determineModalToShow() {
         $('#idFormUser3').modal('show');
         getProPOBM3();
     } else {
-        ValidateNidFace();
+        ValidateNid();
     }
 }
 

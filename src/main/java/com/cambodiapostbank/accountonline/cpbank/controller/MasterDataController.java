@@ -62,6 +62,7 @@ public class MasterDataController {
             logger.warn("Invalid request: reqNo parameter is missing or empty.");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error: reqNo parameter is missing or empty.");
         }
+
         String URL = BaseUrl + "/api/District/" + reqNo;
         logger.info("Fetching district data for: " + reqNo);
         String response = httpClientRest.getData(URL, USERNAME, PASSWORD);
