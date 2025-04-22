@@ -59,7 +59,75 @@ function initializeFlatpickr() {
     });
 }
 
+
+// SUBMIT DATA
+var form = document.getElementsByClassName('need-novalidate-new');
+var validation = Array.prototype.filter.call(form, function (forms) {
+    forms.addEventListener('submit', function (event) {
+        if (forms.checkValidity() === false) {
+            event.preventDefault();
+        } else {
+            event.preventDefault();
+            var submitButtonId = event.submitter.id;
+            if (submitButtonId === 'btnSubmit') {
+                // alert('you click submit');
+                submitData();
+            }
+        }
+        forms.classList.add('was-validated');
+    }, false);
+});
+
+
+//VALIDATION DATA
+var form = document.getElementsByClassName('need-novalidate-new');
+var validation = Array.prototype.filter.call(form, function(forms) {
+    forms.addEventListener('submit', function(event) {
+        if (forms.checkValidity() === false) {
+            event.preventDefault();
+        } else {
+            event.preventDefault();
+            var submitButtonId = event.submitter.id;
+            if (submitButtonId === 'btnValidate') {
+                // alert('you are click validate');
+                verifyCustomerInfo();
+            }
+        }
+        forms.classList.add('was-validated');
+    }, false);
+});
+
+function verifyCustomerInfo() {
+    const lang = localStorage.getItem('selectedLang') || 'kh';
+
+    const confirmationText = lang === 'kh'
+        ? "សូមបញ្ជាក់ថា លោកអ្នកបានពិនិត្យព័ត៌មានផ្ទាល់ខ្លួនរបស់អ្នករួចរាល់ហើយមែនទេ?"
+        : "Please confirm that you have reviewed your personal information.";
+
+    Swal.fire({
+        title: lang === 'kh' ? "បញ្ជាក់ព័ត៌មាន" : "Confirm Information",
+        text: confirmationText,
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: lang === 'kh' ? "បាទ/ចាស ខ្ញុំបានពិនិត្យរួច" : "Yes, I have reviewed",
+        cancelButtonText: lang === 'kh' ? "ទេ ខ្ញុំត្រូវពិនិត្យម្តងទៀត" : "No, I need to review",
+        customClass: {
+            confirmButton: 'swal2-button-custom',
+            cancelButton: 'swal2-button-custom'
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            ValidateNid();
+        }
+    });
+}
+
+
+
 $('#legalIdImage').on('change', function (evt) {
+
     const file = evt.target.files[0];
 
     if (!file) return;
@@ -128,7 +196,7 @@ $('#legalIdImage').on('change', function (evt) {
 
 function resetNidImageInput() {
     $('#legalIdImage').val(null);
-    $('#legalIdImageDisplay').attr('src', '/assets/cpbank/images/National_ID_selfie.png');
+    $('#legalIdImageDisplay').attr('src', '/OpenAcct/assets/cpbank/images/National_ID_selfie.png');
 }
 
 
@@ -223,23 +291,6 @@ $('#frontImage').on('change', function (evt) {
 });
 
 
-// SUBMIT DATA
-var form = document.getElementsByClassName('need-novalidate-new');
-var validation = Array.prototype.filter.call(form, function (forms) {
-    forms.addEventListener('submit', function (event) {
-        if (forms.checkValidity() === false) {
-            event.preventDefault();
-        } else {
-            event.preventDefault();
-            var submitButtonId = event.submitter.id;
-            if (submitButtonId === 'btnSubmit') {
-                // alert('you click submit');
-                checkAddressCustomer();
-            }
-        }
-        forms.classList.add('was-validated');
-    }, false);
-});
 
 
 // Submit Data Function
@@ -326,17 +377,20 @@ function handleSubmitResponseSuccess(response) {
 
     // Optionally reset the form if needed
     resetForm();
-
+    undisableFormFields();
 }
 
 
 // RESET FORM FUNCTION
 function resetForm() {
+    $('#btnValidate').removeClass('disabled');
+    $('#btnSubmit').addClass('disabled');
+
     $(".need-novalidate-new").removeClass("was-validated").trigger("reset");
     $("#legalIdImage").val(null);
-    $("#legalIdImageDisplay").attr("src", "/assets/cpbank/images/National_ID_selfie.png");
+    $("#legalIdImageDisplay").attr("src", "/OpenAcct/assets/cpbank/images/National_ID_selfie.png");
     $("#frontImage").val(null);
-    $("#imgFrontImageDisplay").attr("src", "/assets/cpbank/images/image_selfie.jpg");
+    $("#imgFrontImageDisplay").attr("src", "/OpenAcct/assets/cpbank/images/image_selfie.jpg");
 }
 
 function ValidateNid() {
@@ -379,36 +433,38 @@ function handleAjaxNidValidateSuccess(response) {
         if (score >= 0) {
             if (incorrectFields && incorrectFields.length > 0) {
                 const fieldMappings = {
-                    lastNameKh: lang === 'kh' ? "នាមត្រកូល" : "Last Name (KH)",
-                    firstNameKh: lang === 'kh' ? "នាមខ្លួន" : "First Name (KH)",
-                    dob: lang === 'kh' ? "ថ្ងៃខែឆ្នាំកំណើត (ថ្ងៃ ខែ ឆ្នាំ)" : "Date of Birth",
+                    lastNameKh: lang === 'kh' ? "នាមត្រកូល" : "Last Name (Khmer)",
+                    firstNameKh: lang === 'kh' ? "នាមខ្លួន" : "First Name (Khmer)",
+                    dob: lang === 'kh' ? "ថ្ងៃខែឆ្នាំកំណើត" : "Date of Birth",
                     gender: lang === 'kh' ? "ភេទ" : "Gender",
                     lastNameEn: lang === 'kh' ? "នាមត្រកូល (អក្សរឡាតាំង)" : "Family Name",
                     firstNameEn: lang === 'kh' ? "នាមខ្លួន (អក្សរឡាតាំង)" : "Given Name"
                 };
 
                 const incorrectFieldsText = incorrectFields
-                    .filter(field => fieldMappings[field]) // Ensure valid fields
+                    .filter(field => fieldMappings[field])
                     .map(field => `- ${fieldMappings[field]}`)
                     .join('<br />');
 
                 const htmlContent = `
                     <div style="text-align: start; margin-top: 10px;">
-                        <img src="/assets/cpbank/icon/fail1.png" alt="fail" style="width: 16px; height: 16px;" />
-                        ${lang === 'kh' ? 'ព័ត៌មានមិនត្រឹមត្រូវ:' : 'Incorrect information:'}
+                        <img src="/OpenAcct/assets/cpbank/icon/fail1.png" alt="fail" style="width: 16px; height: 16px;" />
+                        ${lang === 'kh' ? 'ព័ត៌មានមិនត្រូវ។ សូមពិនិត្យ៖' : 'Some info is incorrect. Please check:'}
                         <div style="margin-left: 20px; margin-top: 5px;">${incorrectFieldsText}</div>
                     </div>
                 `;
-                showSweetAlert('warning', lang === 'kh' ? 'បរាជ័យ' : 'Failed..!', htmlContent);
+                showSweetAlert('warning', lang === 'kh' ? 'បរាជ័យ' : 'Validation Failed', htmlContent);
             } else {
                 // No incorrect fields — proceed
-                submitData();
+                // showSweetAlert('success', lang === 'kh' ? 'ជោគជ័យ' : 'Success', lang === 'kh' ? 'ព័ត៌មានត្រឹមត្រូវទាំងអស់។' : 'All information is correct.');
+                checkAddressCustomer();
             }
         }
     } else {
-        showSweetAlert('error', translations[lang].fail, response.message);
+        showSweetAlert('error', lang === 'kh' ? 'បរាជ័យ' : 'Failed', response.message || (lang === 'kh' ? 'មានបញ្ហា។ សូមសាកល្បងម្ដងទៀត។' : 'Something went wrong. Please try again.'));
     }
 }
+
 
 
 function handleAjaxError(xhr, status, error) {
@@ -420,7 +476,6 @@ function handleAjaxError(xhr, status, error) {
 
     showSweetAlert('error', errorTitle, errorMessage);
 }
-
 
 function checkAddressCustomer() {
     // alert(customerAddress);
@@ -496,6 +551,31 @@ function checkPOBAddressCustomer() {
     }
 }
 
+function undisableFormFields() {
+    $('#firstNameKh').prop('readonly', false);
+    $('#lastNameKh').prop('readonly', false);
+    $('#familyName').prop('readonly', false);
+    $('#givenName').prop('readonly', false);
+    document.getElementById("legalDocName").disabled = false;
+    document.getElementById("gender").disabled = false;
+    document.getElementById("dateOfBirth").disabled = false;
+    $("#customerPlaceOfBirth").prop('readonly', false);
+    $('#customerAddress').prop('readonly', false);
+}
+
+function disableFormFields() {
+    $('#firstNameKh').prop('readonly', true);
+    $('#lastNameKh').prop('readonly', true);
+    $('#familyName').prop('readonly', true);
+    $('#givenName').prop('readonly', true);
+    document.getElementById("legalDocName").disabled = true;
+    document.getElementById("gender").disabled = true;
+    document.getElementById("dateOfBirth").disabled = true;
+    $("#customerPlaceOfBirth").prop('readonly', true);
+    $('#customerAddress').prop('readonly', true);
+
+}
+
 // Function to determine which modal to show
 function determineModalToShow() {
     // console.log('isCheckPobFound: ' + isCheckPOBAddressCustomerFound + ' - ' + 'isCheckAddressFound: ' + isCheckAddressCustomerFound);
@@ -510,7 +590,22 @@ function determineModalToShow() {
         $('#idFormUser3').modal('show');
         getProPOBM3();
     } else {
-        ValidateNid();
+        const lang = localStorage.getItem('selectedLang') || 'kh';
+        if (lang === 'kh') {
+            Toast.fire({
+                icon: 'success',
+                title: "ព័ត៌មានរបស់លោកអ្នកត្រឹមត្រូវ"
+            });
+        } else {
+            Toast.fire({
+                icon: 'success',
+                title: "Your information is correct"
+            });
+        }
+
+        $('#btnSubmit').removeClass('disabled');
+        $('#btnValidate').addClass('disabled');
+        disableFormFields();
     }
 }
 

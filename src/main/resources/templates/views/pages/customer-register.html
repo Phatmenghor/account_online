@@ -364,10 +364,15 @@
                         </div>
                         <div class="row text-end mt-4 mb-5">
                             <div class="col-sm">
-                                <button style="background-color: #fc7d2a; color: white"
-                                        class="btn ms-auto px-5 rounded-2" id="btnSubmit"
+
+                                <button class="btn btn-primary ms-auto px-5 rounded-2" id="btnValidate" th:text="#{register.validate}"
+                                        type="submit">Validate
+                                </button>
+
+                                <button class="btn btn-primary ms-auto px-5 rounded-2 disabled" id="btnSubmit"
                                         th:text="#{register.submit}" type="submit">Submit
                                 </button>
+
                             </div>
                         </div>
                     </form>

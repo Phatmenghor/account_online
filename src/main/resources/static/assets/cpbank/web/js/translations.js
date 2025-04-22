@@ -80,15 +80,15 @@ function updateLanguageDisplay(lang) {
 
     switch (lang) {
         case 'en':
-            flagImage.src = '/assets/cpbank/icon/us-flag.png';
+            flagImage.src = '/OpenAcct/assets/cpbank/icon/us-flag.png';
             flagImage.alt = 'English';
             break;
         case 'kh':
-            flagImage.src = '/assets/cpbank/icon/cambodia-flag.png';
+            flagImage.src = '/OpenAcct/assets/cpbank/icon/cambodia-flag.png';
             flagImage.alt = 'Khmer';
             break;
         default:
-            flagImage.src = '/assets/cpbank/icon/cambodia-flag.png';
+            flagImage.src = '/OpenAcct/assets/cpbank/icon/cambodia-flag.png';
             flagImage.alt = 'Khmer';
     }
 }

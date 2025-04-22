@@ -557,10 +557,9 @@ var validation = Array.prototype.filter.call(form, function(forms) {
 
                 // alert('p: '+pobProvinceCode+' d: '+pobDistrictCode+' c: '+pobCommuneCode+' v: '+pobVillageCode);
                 $('#idFormUser3').modal('hide');
-                // $('#btnSubmit').removeClass('disabled');
-                // $('#btnValidate').addClass('disabled');
-                // disableFormFields();
-                ValidateNid();
+                $('#btnSubmit').removeClass('disabled');
+                $('#btnValidate').addClass('disabled');
+                disableFormFields();
             }
         }
         forms.classList.add('was-validated');
