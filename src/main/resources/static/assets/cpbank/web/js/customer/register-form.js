@@ -113,10 +113,6 @@ function verifyCustomerInfo() {
         cancelButtonColor: "#d33",
         confirmButtonText: lang === 'kh' ? "បាទ/ចាស ខ្ញុំបានពិនិត្យរួច" : "Yes, I have reviewed",
         cancelButtonText: lang === 'kh' ? "ទេ ខ្ញុំត្រូវពិនិត្យម្តងទៀត" : "No, I need to review",
-        customClass: {
-            confirmButton: 'swal2-button-custom',
-            cancelButton: 'swal2-button-custom'
-        }
     }).then((result) => {
         if (result.isConfirmed) {
             ValidateNid();
