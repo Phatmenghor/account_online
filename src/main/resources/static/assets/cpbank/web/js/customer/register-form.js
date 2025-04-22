@@ -424,42 +424,57 @@ function handleAjaxNidValidateSuccess(response) {
     hideLoading(); // Always hide loader first
 
     if (response.error === 0) {
-        const { score, incorrectFields } = response.data;
-
-        if (score >= 0) {
-            if (incorrectFields && incorrectFields.length > 0) {
-                const fieldMappings = {
-                    lastNameKh: lang === 'kh' ? "នាមត្រកូល" : "Last Name (Khmer)",
-                    firstNameKh: lang === 'kh' ? "នាមខ្លួន" : "First Name (Khmer)",
-                    dob: lang === 'kh' ? "ថ្ងៃខែឆ្នាំកំណើត" : "Date of Birth",
-                    gender: lang === 'kh' ? "ភេទ" : "Gender",
-                    lastNameEn: lang === 'kh' ? "នាមត្រកូល (អក្សរឡាតាំង)" : "Family Name",
-                    firstNameEn: lang === 'kh' ? "នាមខ្លួន (អក្សរឡាតាំង)" : "Given Name"
+        const {incorrectFields } = response.data;
+        if (incorrectFields.includes("lastNameKh") || incorrectFields.includes("firstNameKh") || incorrectFields.includes("dob") || incorrectFields.includes("gender") || incorrectFields.includes("lastNameEn") || incorrectFields.includes("firstNameEn")) {
+            var incorrectFieldsText = '';
+            var fieldMappings;
+            if (lang == 'kh') {
+                fieldMappings = {
+                    lastNameKh: "នាមត្រកូល",
+                    firstNameKh: "នាមខ្លួន",
+                    dob: "ថ្ងៃខែឆ្នាំកំណើត (ថ្ងៃ ខែ ឆ្នាំ)",
+                    gender: "ភេទ",
+                    lastNameEn: "នាមត្រកូល (អក្សរឡាតាំង)",
+                    firstNameEn: "នាមខ្លួន (អក្សរឡាតាំង)",
+                    issuedDate: "កាលបរិច្ឆេទចេញប័ណ្ណ",
+                    expiredDate: "កាលបរិច្ឆេទផុតកំណត់"
                 };
-
-                const incorrectFieldsText = incorrectFields
-                    .filter(field => fieldMappings[field])
-                    .map(field => `- ${fieldMappings[field]}`)
-                    .join('<br />');
-
-                const htmlContent = `
-                    <div style="text-align: start; margin-top: 10px;">
-                        <img src="/OpenAcct/assets/cpbank/icon/fail1.png" alt="fail" style="width: 16px; height: 16px;" />
-                        ${lang === 'kh' ? 'ព័ត៌មានមិនត្រូវ។ សូមពិនិត្យ៖' : 'Some info is incorrect. Please check:'}
-                        <div style="margin-left: 20px; margin-top: 5px;">${incorrectFieldsText}</div>
-                    </div>
-                `;
-                showSweetAlert('warning', lang === 'kh' ? 'បរាជ័យ' : 'Validation Failed', htmlContent);
             } else {
-                // No incorrect fields — proceed
-                // showSweetAlert('success', lang === 'kh' ? 'ជោគជ័យ' : 'Success', lang === 'kh' ? 'ព័ត៌មានត្រឹមត្រូវទាំងអស់។' : 'All information is correct.');
-                checkAddressCustomer();
+                fieldMappings = {
+                    lastNameKh: "Family Name (KH)",
+                    firstNameKh: "Given Name (KH)",
+                    dob: "Date of Birth",
+                    gender: "Gender",
+                    lastNameEn: "Family Name",
+                    firstNameEn: "Given Name",
+                    issuedDate: "Issued Date",
+                    expiredDate: "Expired Date"
+                };
             }
+
+            if (Array.isArray(incorrectFields) && incorrectFields.length > 0) {
+                incorrectFieldsText = incorrectFields
+                    .filter(field => field !== "issuedDate" && field !== "expiredDate")
+                    .map(function(field) {
+                        return fieldMappings[field] ? '- ' + fieldMappings[field] : '- ' + field;
+                    }).join('<br />');
+            }
+
+            const htmlContent = `
+                <div style="text-align: start; margin-top: 10px;">
+                    <img src="/OpenAcct/assets/cpbank/icon/fail1.png" alt="fail" style="width: 16px; height: 16px;" />
+                    ${lang === 'kh' ? 'ព័ត៌មានមិនត្រូវ។ សូមពិនិត្យ៖' : 'Some info is incorrect. Please check:'}
+                    <div style="margin-left: 20px; margin-top: 5px;">${incorrectFieldsText}</div>
+                </div>
+            `;
+            showSweetAlert('warning', lang === 'kh' ? 'បរាជ័យ' : 'Validation Failed', htmlContent);
+        } else {
+            // Proceed even if issuedDate or expiredDate is incorrect
+            checkAddressCustomer();
         }
-    } else {
-        showSweetAlert('error', lang === 'kh' ? 'បរាជ័យ' : 'Failed', response.message || (lang === 'kh' ? 'មានបញ្ហា។ សូមសាកល្បងម្ដងទៀត។' : 'Something went wrong. Please try again.'));
     }
 }
+
 
 
 
