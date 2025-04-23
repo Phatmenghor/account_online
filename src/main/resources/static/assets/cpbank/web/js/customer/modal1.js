@@ -494,10 +494,10 @@ var validation = Array.prototype.filter.call(form, function(forms) {
                 }
 
                 $('#idFormUser1').modal('hide');
-                // $('#btnSubmit').removeClass('disabled');
-                // $('#btnValidate').addClass('disabled');
-                // disableFormFields();
-                ValidateNid();
+                $('#btnSubmit').removeClass('disabled');
+                $('#btnValidate').addClass('disabled');
+                disableFormFields();
+                // ValidateNid();
 
             }
             else if (submitButtonId === 'btnSaveAddress'){
@@ -525,10 +525,10 @@ var validation = Array.prototype.filter.call(form, function(forms) {
                 }
 
                 $('#idFormUser2').modal('hide');
-                // $('#btnSubmit').removeClass('disabled');
-                // $('#btnValidate').addClass('disabled');
-                // disableFormFields();
-                ValidateNid();
+                $('#btnSubmit').removeClass('disabled');
+                $('#btnValidate').addClass('disabled');
+                disableFormFields();
+                // ValidateNid();
             }
             else if (submitButtonId === 'btnSaveAddressPOB'){
                 var pobProvinceCodeTmp1 = $('#provincePOB3').val();

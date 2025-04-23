@@ -11,8 +11,6 @@ let pobVillageCode = null;
 let legalImageValue = null;
 let selfieImageValue = null;
 let branchCodeValue = null;
-let isCheckAddressCustomerFound = 0;
-let isCheckPOBAddressCustomerFound = 0;
 let lang = localStorage.getItem('selectedLang') || 'kh';
 
 $(document).ready(function () {
@@ -160,6 +158,7 @@ $('#legalIdImage').on('change', function (evt) {
                     console.log(response);
                     hideLoading();
                     const lang = localStorage.getItem('selectedLang') || 'kh';
+
 
                     if (response.error === 0) {
                         if (response.data !== null) {
@@ -488,7 +487,15 @@ function handleAjaxError(xhr, status, error) {
     showSweetAlert('error', errorTitle, errorMessage);
 }
 
+var isCheckAddressCustomerFound = 0;
+var isCheckPOBAddressCustomerFound = 0;
 function checkAddressCustomer() {
+
+    // Reset values before starting a new check
+    isCheckAddressCustomerFound = 0;
+    isCheckPOBAddressCustomerFound = 0;
+
+
     // alert(customerAddress);
     if ($("#customerAddress").val() != null) {
         showLoading();
@@ -601,6 +608,7 @@ function determineModalToShow() {
         $('#idFormUser3').modal('show');
         getProPOBM3();
     } else {
+
         const lang = localStorage.getItem('selectedLang') || 'kh';
         if (lang === 'kh') {
             Toast.fire({
