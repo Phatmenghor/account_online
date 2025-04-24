@@ -409,6 +409,7 @@ function ValidateNid() {
         dataType: 'json',
         data: JSON.stringify(json),
         success: function (response) {
+            console.log("=======response: ",response);
             handleAjaxNidValidateSuccess(response);
         },
         error: function (xhr, status, error) {
@@ -471,6 +472,8 @@ function handleAjaxNidValidateSuccess(response) {
             // Proceed even if issuedDate or expiredDate is incorrect
             checkAddressCustomer();
         }
+    }else{
+        showSweetAlert('error', lang === 'kh' ? 'បរាជ័យ' : 'Validation Failed', response.message);
     }
 }
 
