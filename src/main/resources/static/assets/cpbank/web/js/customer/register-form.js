@@ -155,7 +155,6 @@ $('#legalIdImage').on('change', function (evt) {
                 dataType: 'json',
                 data: JSON.stringify(json),
                 success: function (response) {
-                    console.log(response);
                     hideLoading();
                     const lang = localStorage.getItem('selectedLang') || 'kh';
 
@@ -324,8 +323,6 @@ function submitData() {
         "lastNameKh": $("#lastNameKh").val(),
     };
 
-    console.log("json===========> " + json);
-
     $.ajax({
         type: "POST",
         url: "api/v1/customer-register",
@@ -345,7 +342,7 @@ function submitData() {
 // Handle API Response Function
 function handleSubmitResponseSuccess(response) {
     // Log the response for better inspection
-    console.log("submit response=========> ", response);
+//    console.log("submit response=========> ", response);
 
     // Extract status code and message from the response
     const statusCode = response.ErrCode;
@@ -409,7 +406,7 @@ function ValidateNid() {
         dataType: 'json',
         data: JSON.stringify(json),
         success: function (response) {
-            console.log("=======response: ",response);
+//            console.log("=======response: ",response);
             handleAjaxNidValidateSuccess(response);
         },
         error: function (xhr, status, error) {
@@ -419,42 +416,51 @@ function ValidateNid() {
 }
 
 function handleAjaxNidValidateSuccess(response) {
-    console.log("NID Validate Response ==========> ", response);
+//    console.log("NID Validate Response ==========> ", response);
 
     hideLoading(); // Always hide loader first
 
     if (response.error === 0) {
-        const {incorrectFields } = response.data;
-        if (incorrectFields.includes("lastNameKh") || incorrectFields.includes("firstNameKh") || incorrectFields.includes("dob") || incorrectFields.includes("gender") || incorrectFields.includes("lastNameEn") || incorrectFields.includes("firstNameEn")) {
+        const { incorrectFields } = response.data;
+
+        // Define fields to SKIP (non-blocking) - these will NOT cause validation to fail
+        const skipFields = ["firstNameKh", "lastNameKh", "issuedDate", "expiredDate"];
+
+        // Filter out skipped fields - only keep critical fields that are wrong
+        const criticalIncorrectFields = incorrectFields.filter(field =>
+            !skipFields.includes(field)
+        );
+
+//        console.log("All incorrect fields:", incorrectFields);
+//        console.log("Skipped fields (ignored):", incorrectFields.filter(field => skipFields.includes(field)));
+//        console.log("Critical incorrect fields (will block):", criticalIncorrectFields);
+
+        // Only show error if there are critical fields that are incorrect
+        if (criticalIncorrectFields.length > 0) {
             var incorrectFieldsText = '';
             var fieldMappings;
+
             if (lang == 'kh') {
                 fieldMappings = {
-                    lastNameKh: "នាមត្រកូល",
-                    firstNameKh: "នាមខ្លួន",
                     dob: "ថ្ងៃខែឆ្នាំកំណើត (ថ្ងៃ ខែ ឆ្នាំ)",
                     gender: "ភេទ",
                     lastNameEn: "នាមត្រកូល (អក្សរឡាតាំង)",
                     firstNameEn: "នាមខ្លួន (អក្សរឡាតាំង)",
-                    issuedDate: "កាលបរិច្ឆេទចេញប័ណ្ណ",
-                    expiredDate: "កាលបរិច្ឆេទផុតកំណត់"
+                    idNumber: "លេខអត្តសញ្ញាណប័ណ្ណ"
                 };
             } else {
                 fieldMappings = {
-                    lastNameKh: "Family Name (KH)",
-                    firstNameKh: "Given Name (KH)",
                     dob: "Date of Birth",
                     gender: "Gender",
                     lastNameEn: "Family Name",
                     firstNameEn: "Given Name",
-                    issuedDate: "Issued Date",
-                    expiredDate: "Expired Date"
+                    idNumber: "ID Number"
                 };
             }
 
-            if (Array.isArray(incorrectFields) && incorrectFields.length > 0) {
-                incorrectFieldsText = incorrectFields
-                    .filter(field => field !== "issuedDate" && field !== "expiredDate")
+            // Only show critical incorrect fields in the error message
+            if (Array.isArray(criticalIncorrectFields) && criticalIncorrectFields.length > 0) {
+                incorrectFieldsText = criticalIncorrectFields
                     .map(function(field) {
                         return fieldMappings[field] ? '- ' + fieldMappings[field] : '- ' + field;
                     }).join('<br />');
@@ -467,18 +473,38 @@ function handleAjaxNidValidateSuccess(response) {
                     <div style="margin-left: 20px; margin-top: 5px;">${incorrectFieldsText}</div>
                 </div>
             `;
+
+//            console.log("BLOCKING - Showing error for critical fields:", criticalIncorrectFields);
             showSweetAlert('warning', lang === 'kh' ? 'បរាជ័យ' : 'Validation Failed', htmlContent);
+
         } else {
-            // Proceed even if issuedDate or expiredDate is incorrect
+            // NO CRITICAL ERRORS - Continue with validation process
+//            console.log("No critical field errors found, continuing...");
+
+            // Log skipped fields for information (optional)
+            const skippedIncorrectFields = incorrectFields.filter(field => skipFields.includes(field));
+            if (skippedIncorrectFields.length > 0) {
+//                console.log("Skipped incorrect fields (continuing anyway):", skippedIncorrectFields);
+
+                // Optional: Show brief info toast about skipped fields
+                Toast.fire({
+                    icon: 'info',
+                    title: lang === 'kh'
+                        ? 'ព័ត៌មានខ្លះមិនត្រឹមត្រូវ ប៉ុន្តែបន្តបាន'
+                        : 'Some information is incorrect but continuing',
+                    timer: 2000
+                });
+            }
+
+            // Continue with address checking process
             checkAddressCustomer();
         }
-    }else{
+
+    } else {
+        // API returned error
         showSweetAlert('error', lang === 'kh' ? 'បរាជ័យ' : 'Validation Failed', response.message);
     }
 }
-
-
-
 
 function handleAjaxError(xhr, status, error) {
     hideLoading();
