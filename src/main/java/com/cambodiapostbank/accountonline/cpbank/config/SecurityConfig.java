@@ -1,3 +1,5 @@
+// SOLUTION 1: Update SecurityConfig.java to add secure cookie configuration
+
 package com.cambodiapostbank.accountonline.cpbank.config;
 
 import org.springframework.context.annotation.Bean;
@@ -33,7 +35,18 @@ public class SecurityConfig {
                 .authorizeRequests()
                 .antMatchers(PERMIT_ALL_URLS).permitAll()
                 .anyRequest().authenticated()
-                .and().formLogin();
+                .and()
+                .formLogin()
+                .and()
+                // ADD SECURE HEADERS (compatible with Spring Boot 2.7.x)
+                .headers(headers -> headers
+                        .frameOptions().deny()
+                        .contentTypeOptions()
+                        .and()
+                        .httpStrictTransportSecurity(hstsConfig -> hstsConfig
+                                .maxAgeInSeconds(31536000)
+                        )
+                );
         return http.build();
     }
 }
