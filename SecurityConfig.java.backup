@@ -1,0 +1,34 @@
+package com.cambodiapostbank.accountonline.cpbank.config;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
+
+@Configuration
+@EnableWebSecurity
+public class SecurityConfig implements WebMvcConfigurer {
+    private static final String[] PERMIT_ALL_URLS = {"/", "/change-language/**", "/assets/**", "/register/**", "/api/**", "/home/**", "/register-by-customer/**", "/register-by-staff/**", "/sign-out/**", "/login-page/**", "/change-password/**", "/expired-password/**", "/maintenanceOpenByCustomer/**", "/maintenanceOpenByStaff/**"};
+
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        return http.csrf().disable().authorizeRequests().antMatchers(PERMIT_ALL_URLS).permitAll().antMatchers("/fonts/", "/images/", "/css/", "/js/", "/assets/").denyAll().antMatchers("/assets/**").permitAll().anyRequest().authenticated().and().formLogin().and().headers().frameOptions().deny().contentTypeOptions().and().sessionManagement().sessionFixation().migrateSession().maximumSessions(1).maxSessionsPreventsLogin(false).and().build();
+    }
+
+    @Override
+    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        registry.addResourceHandler("/assets/**").addResourceLocations("classpath:/static/assets/").setCachePeriod(31536000).resourceChain(true);
+    }
+
+    @Override
+    public void addViewControllers(ViewControllerRegistry registry) {
+        registry.addViewController("/fonts/").setViewName("error/404");
+        registry.addViewController("/images/").setViewName("error/404");
+        registry.addViewController("/css/").setViewName("error/404");
+        registry.addViewController("/js/").setViewName("error/404");
+        registry.addViewController("/assets/").setViewName("error/404");
+    }
+}

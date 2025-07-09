@@ -1,5 +1,3 @@
-// SOLUTION 1: Add Security Configuration to prevent directory listing
-
 package com.cambodiapostbank.accountonline.cpbank.config;
 
 import org.springframework.context.annotation.Bean;
@@ -9,58 +7,59 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig implements WebMvcConfigurer {
 
     private static final String[] PERMIT_ALL_URLS = {
-            "/",
-            "/change-language/**",
-            "/assets/**",
-            "/register/**",
-            "/api/**",
-            "/home/**",
-            "/register-by-customer/**",
-            "/register-by-staff/**",
-            "/sign-out/**",
-            "/login-page/**",
-            "/change-password/**",
-            "/expired-password/**",
-            "/maintenanceOpenByCustomer/**",
-            "/maintenanceOpenByStaff/**",
+            "/", "/change-language/**", "/assets/**", "/register/**", "/api/**", "/home/**",
+            "/register-by-customer/**", "/register-by-staff/**", "/sign-out/**", "/login-page/**",
+            "/change-password/**", "/expired-password/**", "/maintenanceOpenByCustomer/**", "/maintenanceOpenByStaff/**"
     };
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        // Authorization configuration
         http.csrf().disable()
                 .authorizeRequests()
                 .antMatchers(PERMIT_ALL_URLS).permitAll()
-                // BLOCK DIRECTORY ACCESS
-                .antMatchers("/fonts/", "/images/", "/css/", "/js/").denyAll()
-                .antMatchers("/fonts/**", "/images/**", "/css/**", "/js/**").permitAll()
-                .anyRequest().authenticated()
-                .and()
-                .formLogin()
-                .and()
-                // ADD SECURE HEADERS
-                .headers(headers -> headers
-                        .frameOptions().deny()
-                        .contentTypeOptions()
-                        .and()
-                        .httpStrictTransportSecurity(hstsConfig -> hstsConfig
-                                .maxAgeInSeconds(31536000)
-                        )
-                );
+                .antMatchers("/fonts/", "/images/", "/css/", "/js/", "/assets/").denyAll()
+                .antMatchers("/assets/**").permitAll()
+                .anyRequest().authenticated();
+        
+        // Form login configuration
+        http.formLogin();
+        
+        // Security headers configuration
+        http.headers()
+                .frameOptions().deny()
+                .contentTypeOptions();
+        
+        // Session management configuration
+        http.sessionManagement()
+                .sessionFixation().migrateSession()
+                .maximumSessions(1)
+                .maxSessionsPreventsLogin(false);
+
         return http.build();
     }
 
-    // CONFIGURE RESOURCE HANDLING TO PREVENT DIRECTORY LISTING
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry.addResourceHandler("/assets/**")
                 .addResourceLocations("classpath:/static/assets/")
-                .setCachePeriod(3600)
+                .setCachePeriod(31536000)
                 .resourceChain(true);
+    }
+
+    @Override
+    public void addViewControllers(ViewControllerRegistry registry) {
+        registry.addViewController("/fonts/").setViewName("error/404");
+        registry.addViewController("/images/").setViewName("error/404");
+        registry.addViewController("/css/").setViewName("error/404");
+        registry.addViewController("/js/").setViewName("error/404");
+        registry.addViewController("/assets/").setViewName("error/404");
     }
 }
