@@ -348,15 +348,14 @@
                                         <div class="d-flex flex-row justify-content-between">
                                             <label class="form-label align-self-center" for="otpCode"
                                                    th:text="#{register.otpCode}">OTP Code</label>
-                                            <button class="btn btn-link btn-sm" onclick="sendOtp()" type="button">
-                                                Resend OTP
+                                            <button class="btn btn-link btn-sm" id="resendOTPBtn" type="button">
+                                                <span th:text="#{register.resendOTP}">Resend OTP</span>
                                             </button>
                                         </div>
                                         <input class="form-control" id="otpCode" maxlength="6" name="otpCode"
                                                required th:attr="placeholder=#{register.otpCode}" type="text">
                                         <div class="invalid-feedback" th:text="#{validation.otpCode.required}">Please
-                                            enter the OTP code sent to your contact
-                                            number.
+                                            enter the OTP code sent to your contact number.
                                         </div>
                                     </div>
                                 </div>

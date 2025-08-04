@@ -13,6 +13,12 @@ let selfieImageValue = null;
 let branchCodeValue = null;
 let lang = localStorage.getItem('selectedLang') || 'kh';
 
+// OTP Global Variables
+let resendCountdown = 0;
+let resendInterval = null;
+let otpAttempts = 0;
+let isOtpLocked = false;
+
 $(document).ready(function () {
     // Apply the initial language
     updateLanguageDisplay(lang);
@@ -35,6 +41,17 @@ $(document).ready(function () {
 
     // Call the function to populate other fields
     getBranch();
+
+    // Initialize resend button
+    updateResendButton();
+
+    // Handle resend button click
+    $('#resendOTPBtn').on('click', function(e) {
+        e.preventDefault();
+        if (resendCountdown === 0) {
+            sendOtp();
+        }
+    });
 });
 
 // Function to safely initialize flatpickr
@@ -57,7 +74,6 @@ function initializeFlatpickr() {
     });
 }
 
-
 // SUBMIT DATA
 var form = document.getElementsByClassName('need-novalidate-new');
 var validation = Array.prototype.filter.call(form, function (forms) {
@@ -68,14 +84,12 @@ var validation = Array.prototype.filter.call(form, function (forms) {
             event.preventDefault();
             var submitButtonId = event.submitter.id;
             if (submitButtonId === 'btnSubmit') {
-                // alert('you click submit');
                 submitData();
             }
         }
         forms.classList.add('was-validated');
     }, false);
 });
-
 
 //VALIDATION DATA
 var form = document.getElementsByClassName('need-novalidate-new');
@@ -87,7 +101,6 @@ var validation = Array.prototype.filter.call(form, function(forms) {
             event.preventDefault();
             var submitButtonId = event.submitter.id;
             if (submitButtonId === 'btnValidate') {
-                // alert('you are click validate');
                 verifyCustomerInfo();
             }
         }
@@ -118,10 +131,7 @@ function verifyCustomerInfo() {
     });
 }
 
-
-
 $('#legalIdImage').on('change', function (evt) {
-
     const file = evt.target.files[0];
 
     if (!file) return;
@@ -158,7 +168,6 @@ $('#legalIdImage').on('change', function (evt) {
                     hideLoading();
                     const lang = localStorage.getItem('selectedLang') || 'kh';
 
-
                     if (response.error === 0) {
                         if (response.data !== null) {
                             populateFormFields(response.data);
@@ -193,8 +202,6 @@ function resetNidImageInput() {
     $('#legalIdImageDisplay').attr('src', '/OpenAcct/assets/cpbank/images/National_ID_selfie.png');
 }
 
-
-
 function populateFormFields(data) {
     $('#firstNameKh').val(data.firstNameKh);
     $('#lastNameKh').val(data.lastNameKh);
@@ -212,7 +219,7 @@ function populateFormFields(data) {
     $("#customerPlaceOfBirth").val(data.pob);
     $('#customerAddress').val(data.address);
 
-    // Event listeners for user input (Optional, avoid overwriting existing data unnecessarily)
+    // Event listeners for user input
     $('#firstNameKh').on('input', function () {
         data.firstNameKh = $(this).val();
     });
@@ -284,9 +291,6 @@ $('#frontImage').on('change', function (evt) {
     reader.readAsDataURL(file);
 });
 
-
-
-
 // Submit Data Function
 function submitData() {
     showLoading();
@@ -341,17 +345,9 @@ function submitData() {
 
 // Handle API Response Function
 function handleSubmitResponseSuccess(response) {
-    // Log the response for better inspection
-//    console.log("submit response=========> ", response);
-
-    // Extract status code and message from the response
     const statusCode = response.ErrCode;
-    // alert(statusCode);
-
-    // Extract content or error message based on the language (Khmer or English)
     let content = lang === "kh" ? response.Content : response.ErrMsg;
 
-    // Determine the alert type based on the status code
     let alertType;
     let header;
     if (statusCode === "200") {
@@ -361,17 +357,14 @@ function handleSubmitResponseSuccess(response) {
         alertType = "info";
         header = translations[lang].alreadyExists;
     } else {
-        alertType = "danger"; // Change this to 'danger' for errors
+        alertType = "danger";
         header = translations[lang].fail;
     }
-    // Show the alert
-    showAlert(alertType, header, content);
 
-    // Optionally reset the form if needed
+    showAlert(alertType, header, content);
     resetForm();
     undisableFormFields();
 }
-
 
 // RESET FORM FUNCTION
 function resetForm() {
@@ -383,6 +376,9 @@ function resetForm() {
     $("#legalIdImageDisplay").attr("src", "/OpenAcct/assets/cpbank/images/National_ID_selfie.png");
     $("#frontImage").val(null);
     $("#imgFrontImageDisplay").attr("src", "/OpenAcct/assets/cpbank/images/image_selfie.jpg");
+
+    // Reset OTP state when form is reset
+    resetOtpState();
 }
 
 function ValidateNid() {
@@ -406,7 +402,6 @@ function ValidateNid() {
         dataType: 'json',
         data: JSON.stringify(json),
         success: function (response) {
-//            console.log("=======response: ",response);
             handleAjaxNidValidateSuccess(response);
         },
         error: function (xhr, status, error) {
@@ -416,26 +411,15 @@ function ValidateNid() {
 }
 
 function handleAjaxNidValidateSuccess(response) {
-//    console.log("NID Validate Response ==========> ", response);
-
-    hideLoading(); // Always hide loader first
+    hideLoading();
 
     if (response.error === 0) {
         const { incorrectFields } = response.data;
-
-        // Define fields to SKIP (non-blocking) - these will NOT cause validation to fail
         const skipFields = ["firstNameKh", "lastNameKh", "issuedDate", "expiredDate"];
-
-        // Filter out skipped fields - only keep critical fields that are wrong
         const criticalIncorrectFields = incorrectFields.filter(field =>
             !skipFields.includes(field)
         );
 
-//        console.log("All incorrect fields:", incorrectFields);
-//        console.log("Skipped fields (ignored):", incorrectFields.filter(field => skipFields.includes(field)));
-//        console.log("Critical incorrect fields (will block):", criticalIncorrectFields);
-
-        // Only show error if there are critical fields that are incorrect
         if (criticalIncorrectFields.length > 0) {
             var incorrectFieldsText = '';
             var fieldMappings;
@@ -458,7 +442,6 @@ function handleAjaxNidValidateSuccess(response) {
                 };
             }
 
-            // Only show critical incorrect fields in the error message
             if (Array.isArray(criticalIncorrectFields) && criticalIncorrectFields.length > 0) {
                 incorrectFieldsText = criticalIncorrectFields
                     .map(function(field) {
@@ -474,19 +457,11 @@ function handleAjaxNidValidateSuccess(response) {
                 </div>
             `;
 
-//            console.log("BLOCKING - Showing error for critical fields:", criticalIncorrectFields);
             showSweetAlert('warning', lang === 'kh' ? 'បរាជ័យ' : 'Validation Failed', htmlContent);
 
         } else {
-            // NO CRITICAL ERRORS - Continue with validation process
-//            console.log("No critical field errors found, continuing...");
-
-            // Log skipped fields for information (optional)
             const skippedIncorrectFields = incorrectFields.filter(field => skipFields.includes(field));
             if (skippedIncorrectFields.length > 0) {
-//                console.log("Skipped incorrect fields (continuing anyway):", skippedIncorrectFields);
-
-                // Optional: Show brief info toast about skipped fields
                 Toast.fire({
                     icon: 'info',
                     title: lang === 'kh'
@@ -496,12 +471,10 @@ function handleAjaxNidValidateSuccess(response) {
                 });
             }
 
-            // Continue with address checking process
             checkAddressCustomer();
         }
 
     } else {
-        // API returned error
         showSweetAlert('error', lang === 'kh' ? 'បរាជ័យ' : 'Validation Failed', response.message);
     }
 }
@@ -518,21 +491,17 @@ function handleAjaxError(xhr, status, error) {
 
 var isCheckAddressCustomerFound = 0;
 var isCheckPOBAddressCustomerFound = 0;
-function checkAddressCustomer() {
 
-    // Reset values before starting a new check
+function checkAddressCustomer() {
     isCheckAddressCustomerFound = 0;
     isCheckPOBAddressCustomerFound = 0;
 
-
-    // alert(customerAddress);
     if ($("#customerAddress").val() != null) {
         showLoading();
         var json = {
             customer_address: $("#customerAddress").val()
         };
 
-        // console.log(JSON.stringify(json));
         $.ajax({
             type: "POST",
             url: "api/v1/eKYC/verify-address",
@@ -540,7 +509,6 @@ function checkAddressCustomer() {
             dataType: 'json',
             data: JSON.stringify(json),
             success: function (response) {
-                // console.log(response);
                 if (response.IsFindAddress == 1) {
                     hideLoading();
                     isCheckAddressCustomerFound = 1;
@@ -576,7 +544,6 @@ function checkPOBAddressCustomer() {
             dataType: 'json',
             data: JSON.stringify(json),
             success: function (response) {
-                // console.log(response);
                 if (response.IsFindAddress == 1) {
                     hideLoading();
                     isCheckPOBAddressCustomerFound = 1;
@@ -620,12 +587,9 @@ function disableFormFields() {
     document.getElementById("dateOfBirth").disabled = true;
     $("#customerPlaceOfBirth").prop('readonly', true);
     $('#customerAddress').prop('readonly', true);
-
 }
 
-// Function to determine which modal to show
 function determineModalToShow() {
-    // console.log('isCheckPobFound: ' + isCheckPOBAddressCustomerFound + ' - ' + 'isCheckAddressFound: ' + isCheckAddressCustomerFound);
     if (isCheckAddressCustomerFound === 0 && isCheckPOBAddressCustomerFound === 0) {
         $('#idFormUser1').modal('show');
         getPro();
@@ -637,7 +601,6 @@ function determineModalToShow() {
         $('#idFormUser3').modal('show');
         getProPOBM3();
     } else {
-
         const lang = localStorage.getItem('selectedLang') || 'kh';
         if (lang === 'kh') {
             Toast.fire({
@@ -657,85 +620,288 @@ function determineModalToShow() {
     }
 }
 
+// ============================
+// OTP FUNCTIONALITY
+// ============================
+
 // Detect change in contact number and send OTP
-$('#contactNumber').on('change', function () {
-    sendOtp();
+$('#contactNumber').on('change blur', function () {
+    const phoneNumber = $(this).val().trim();
+    if (phoneNumber && phoneNumber.length >= 9) {
+        resetOtpState();
+        sendOtp();
+    }
 });
 
 // Detect change in OTP code field and verify the OTP
-$('#otpCode').on('change', function () {
+$('#otpCode').on('input', function () {
     const contactNumberVal = $('#contactNumber').val();
-    const otpCodeVal = $(this).val();
+    const otpCodeVal = $(this).val().trim();
 
-    if (contactNumberVal) {
-        $.ajax({
-            type: "POST",
-            url: "api/v1/otp/verify",
-            contentType: 'application/json',
-            dataType: 'json',
-            data: JSON.stringify({
-                phone_number: contactNumberVal,
-                otp_code: otpCodeVal
-            }),
-            success: function (response) {
-                if (response.status === 'OK') {
-                    const message = translations[lang]?.otpVerified || response.message;
-                    Toast.fire({
-                        icon: 'success',
-                        title: message
-                    });
-                }
-            },
-            statusCode: {
-                400: function ({responseJSON}) {
-                    const message = translations[lang]?.otpFailed || responseJSON?.message || "Verification failed.";
-                    showSweetAlert("error", translations[lang]?.fail || "Failed", message);
-                    $('#otpCode').val('');
-                }
-            }
-        }).fail(function () {
-            $('#otpCode').val('');
-            showSweetAlert("error", translations[lang]?.error || "Error", translations[lang]?.tryAgain || "Please try again.");
-        });
+    if (contactNumberVal && otpCodeVal && otpCodeVal.length === 6) {
+        verifyOtp(contactNumberVal, otpCodeVal);
     }
 });
 
-// Send OTP function
+// Send OTP function - Handles C# API responses
 function sendOtp() {
     const contactNumberVal = $('#contactNumber').val();
 
-    if (contactNumberVal) {
-        $.ajax({
-            type: "POST",
-            url: "api/v1/otp/send",
-            contentType: 'application/json',
-            dataType: 'json',
-            data: JSON.stringify({
-                phone: contactNumberVal,
-                App: '0',
-                Text: ""
-            }),
-            success: function (response) {
-                const message = translations[lang]?.otpSent || response.message;
+    if (!contactNumberVal || resendCountdown > 0) {
+        return;
+    }
+
+    showLoading(translations[lang].sending || "កំពុងផ្ញើលេខ PIN សម្ងាត់...");
+
+    $.ajax({
+        type: "POST",
+        url: "api/v1/otp/send",
+        contentType: 'application/json',
+        dataType: 'json',
+        data: JSON.stringify({
+            phone: contactNumberVal,
+            App: '0',
+            Text: ""
+        }),
+        success: function (response) {
+            hideLoading();
+
+            if (response.status === 'OK') {
+                startResendCountdown(60);
+
                 Toast.fire({
                     icon: 'success',
-                    title: message
+                    title: translations[lang].otpSent || "បានផ្ញើលេខ PIN សម្ងាត់ដោយជោគជ័យ"
                 });
-            },
-            statusCode: {
-                400: function ({responseJSON}) {
-                    const message = translations[lang]?.otpFailed || responseJSON?.message || "Failed to send OTP.";
-                    showSweetAlert("error", translations[lang]?.fail || "Failed", message);
-                    $('#otpCode').val('');
+            }
+        },
+        statusCode: {
+            400: function(xhr) {
+                hideLoading();
+                const response = xhr.responseJSON;
+
+                if (response && response.message) {
+                    if (response.message.startsWith('-')) {
+                        const remainingSeconds = Math.abs(parseInt(response.message));
+
+                        if (parseInt(response.message) === -500) {
+                            showOtpModal('error',
+                                translations[lang].otpLocked || 'ការព្យាយាមច្រើនពេក',
+                                translations[lang].otpLockedMessage || 'អ្នកបានលើសចំនួនការព្យាយាមអតិបរមាហើយ។ សូមរង់ចាំ ៥ នាទីមុនពេលព្យាយាមម្តងទៀត។'
+                            );
+                        } else {
+                            startResendCountdown(remainingSeconds);
+
+                            showOtpModal('warning',
+                                translations[lang].otpWait || 'សូមរង់ចាំ',
+                                (translations[lang].otpWaitMessage || 'សូមរង់ចាំ {seconds} វិនាទីមុនពេលស្នើលេខ PIN សម្ងាត់ថ្មី។')
+                                    .replace('{seconds}', remainingSeconds)
+                            );
+                        }
+                    } else {
+                        showOtpModal('error',
+                            translations[lang].fail || 'បរាជ័យ',
+                            response.message || translations[lang].otpSendFailed || "បរាជ័យក្នុងការផ្ញើលេខ PIN សម្ងាត់"
+                        );
+                    }
                 }
             }
-        }).fail(function () {
-            $('#otpCode').val('');
-            showSweetAlert("error", translations[lang]?.error || "Error", translations[lang]?.tryAgain || "Please try again.");
-        });
+        },
+        error: function (xhr) {
+            hideLoading();
+            showOtpModal('error',
+                translations[lang].error || 'កំហុស',
+                translations[lang].tryAgain || 'សូមព្យាយាមម្តងទៀត'
+            );
+        }
+    });
+}
+
+// Verify OTP function - Handles all C# API responses
+function verifyOtp(phoneNumber, otpCode) {
+    $.ajax({
+        type: "POST",
+        url: "api/v1/otp/verify",
+        contentType: 'application/json',
+        dataType: 'json',
+        data: JSON.stringify({
+            phone_number: phoneNumber,
+            otp_code: otpCode
+        }),
+        success: function (response) {
+            if (response.status === 'OK' && response.message === 'OTP_VERIFIED') {
+                $('#otpCode').removeClass('is-invalid').addClass('is-valid');
+
+                Toast.fire({
+                    icon: 'success',
+                    title: translations[lang].otpVerified || "លេខ PIN សម្ងាត់ត្រឹមត្រូវ"
+                });
+
+                resetOtpState();
+            }
+        },
+        statusCode: {
+            400: function(xhr) {
+                const response = xhr.responseJSON;
+                $('#otpCode').removeClass('is-valid').addClass('is-invalid').val('');
+
+                if (response && response.message) {
+
+                    if (response.message === 'TOO_MANY_ATTEMPTS') {
+                        showOtpModal('error',
+                            translations[lang].otpLocked || 'ការព្យាយាមច្រើនពេក',
+                            translations[lang].otpLockedMessage || 'អ្នកបានលើសចំនួនការព្យាយាមអតិបរមាហើយ។ សូមរង់ចាំ ៥ នាទីមុនពេលព្យាយាមម្តងទៀត។'
+                        );
+
+                    } else if (response.message === 'OTP_EXPIRED') {
+                        showOtpModal('error',
+                            translations[lang].otpExpired || 'លេខ PIN សម្ងាត់ផុតកំណត់',
+                            translations[lang].otpExpiredMessage || 'លេខ PIN សម្ងាត់របស់អ្នកផុតកំណត់ហើយ។ សូមស្នើលេខថ្មី។'
+                        );
+                        resetOtpState();
+
+                    } else if (response.message.includes('OTP_ATTEMPT_REMANING_')) {
+                        const remaining = response.message.split('_').pop();
+                        showOtpModal('warning',
+                            translations[lang].otpInvalid || 'លេខ PIN សម្ងាត់មិនត្រឹមត្រូវ',
+                            (translations[lang].otpAttemptsRemaining || 'លេខ PIN សម្ងាត់មិនត្រឹមត្រូវ។ នៅសល់ {attempts} ដង។')
+                                .replace('{attempts}', remaining)
+                        );
+
+                    } else if (response.message === 'OTP_INVALID') {
+                        showOtpModal('error',
+                            translations[lang].otpInvalid || 'លេខ PIN សម្ងាត់មិនត្រឹមត្រូវ',
+                            translations[lang].otpInvalidMessage || 'លេខ PIN សម្ងាត់ដែលអ្នកបានបញ្ចូលមិនត្រឹមត្រូវទេ។'
+                        );
+
+                    } else {
+                        showOtpModal('error',
+                            translations[lang].otpInvalid || 'លេខ PIN សម្ងាត់មិនត្រឹមត្រូវ',
+                            response.message || translations[lang].otpInvalidMessage || 'លេខ PIN សម្ងាត់ដែលអ្នកបានបញ្ចូលមិនត្រឹមត្រូវទេ។'
+                        );
+                    }
+                }
+            }
+        },
+        error: function (xhr) {
+            $('#otpCode').removeClass('is-valid').addClass('is-invalid').val('');
+            showOtpModal('error',
+                translations[lang].error || 'កំហុស',
+                translations[lang].tryAgain || 'សូមព្យាយាមម្តងទៀត'
+            );
+        }
+    });
+}
+
+// Start resend countdown
+function startResendCountdown(seconds) {
+    resendCountdown = seconds;
+    updateResendButton();
+
+    if (resendInterval) {
+        clearInterval(resendInterval);
+    }
+
+    resendInterval = setInterval(() => {
+        resendCountdown--;
+        updateResendButton();
+
+        if (resendCountdown <= 0) {
+            clearInterval(resendInterval);
+            resendInterval = null;
+            updateResendButton();
+        }
+    }, 1000);
+}
+
+// Update resend button text and state
+function updateResendButton() {
+    const resendBtn = document.querySelector('#resendOTPBtn');
+
+    if (!resendBtn) return;
+
+    if (resendCountdown > 0) {
+        const minutes = Math.floor(resendCountdown / 60);
+        const seconds = resendCountdown % 60;
+        const timeStr = minutes > 0 ?
+            `${minutes}:${seconds.toString().padStart(2, '0')}` :
+            `${seconds}s`;
+
+        resendBtn.textContent = (translations[lang].resendWait || 'ផ្ញើលេខ PIN សម្ងាត់ម្តងទៀត ({time})')
+            .replace('{time}', timeStr);
+        resendBtn.disabled = true;
+        resendBtn.classList.remove('btn-link');
+        resendBtn.classList.add('btn-secondary');
+        resendBtn.style.opacity = '0.6';
+        resendBtn.onclick = null;
+    } else {
+        resendBtn.textContent = translations[lang].resendOTP || 'ផ្ញើលេខ PIN សម្ងាត់ម្តងទៀត';
+        resendBtn.disabled = false;
+        resendBtn.classList.remove('btn-secondary');
+        resendBtn.classList.add('btn-link');
+        resendBtn.style.opacity = '1';
+        resendBtn.onclick = function(e) {
+            e.preventDefault();
+            if (resendCountdown === 0) {
+                sendOtp();
+            }
+        };
     }
 }
 
+// Reset OTP state
+function resetOtpState() {
+    resendCountdown = 0;
+
+    if (resendInterval) {
+        clearInterval(resendInterval);
+        resendInterval = null;
+    }
+
+    $('#otpCode').removeClass('is-invalid is-valid').val('');
+    updateResendButton();
+}
+
+// Show OTP modal alerts
+function showOtpModal(type, title, message) {
+    let icon = type;
+    let buttonClass = 'btn-primary';
+
+    switch(type) {
+        case 'error':
+            icon = 'error';
+            buttonClass = 'btn-danger';
+            break;
+        case 'warning':
+            icon = 'warning';
+            buttonClass = 'btn-warning';
+            break;
+        case 'success':
+            icon = 'success';
+            buttonClass = 'btn-success';
+            break;
+        default:
+            icon = 'info';
+    }
+
+    Swal.fire({
+        icon: icon,
+        title: title,
+        text: message,
+        confirmButtonText: translations[lang].confirm || 'យល់ព្រម',
+        customClass: {
+            confirmButton: `btn ${buttonClass}`,
+            popup: 'swal-custom-popup'
+        },
+        buttonsStyling: false,
+        allowOutsideClick: false,
+        allowEscapeKey: false
+    });
+}
+
+// ============================
+// BRANCH FUNCTIONALITY
+// ============================
 
 $("#ddlBranch").change(function () {
     var selectOptionValue = $(this).val();
@@ -749,7 +915,6 @@ function getBranch() {
         contentType: 'application/json',
         dataType: 'json',
         success: function (response) {
-            // console.log(response);
             if (response.length > 0) {
                 var ddlBranch = $('#ddlBranch');
                 for (var i = 0; i < response.length; i++) {
@@ -757,9 +922,55 @@ function getBranch() {
                     var branchValue = Branch.BranchID;
                     var branchText = Branch.Branchkh;
                     var option = new Option(branchText, branchValue);
-                    ddlBranch.append(option); // Append the option to the select element
+                    ddlBranch.append(option);
                 }
             }
         }
     });
 }
+
+// ============================
+// TRANSLATIONS
+// ============================
+
+// OTP Translations
+const otpTranslations = {
+    en: {
+        otpSent: "OTP Sent Successfully",
+        otpVerified: "OTP Verified Successfully",
+        otpInvalid: "Invalid OTP",
+        otpInvalidMessage: "The OTP code you entered is incorrect.",
+        otpExpired: "OTP Expired",
+        otpExpiredMessage: "Your OTP has expired. Please request a new one.",
+        otpLocked: "Too Many Attempts",
+        otpLockedMessage: "You have exceeded the maximum number of attempts. Please wait 5 minutes before trying again.",
+        otpWait: "Please Wait",
+        otpWaitMessage: "Please wait {seconds} seconds before requesting another OTP.",
+        otpAttemptsRemaining: "Invalid OTP. {attempts} attempts remaining.",
+        otpSendFailed: "Failed to send OTP. Please try again.",
+        resendOTP: "Resend OTP",
+        resendWait: "Resend OTP ({time})",
+        sending: "Sending OTP, please wait..."
+    },
+    kh: {
+        otpSent: "បានផ្ញើលេខ PIN សម្ងាត់ដោយជោគជ័យ",
+        otpVerified: "លេខ PIN សម្ងាត់ត្រឹមត្រូវ",
+        otpInvalid: "លេខ PIN សម្ងាត់មិនត្រឹមត្រូវ",
+        otpInvalidMessage: "លេខ PIN សម្ងាត់ដែលអ្នកបានបញ្ចូលមិនត្រឹមត្រូវទេ។",
+        otpExpired: "លេខ PIN សម្ងាត់ផុតកំណត់",
+        otpExpiredMessage: "លេខ PIN សម្ងាត់របស់អ្នកផុតកំណត់ហើយ។ សូមស្នើលេខថ្មី។",
+        otpLocked: "ការព្យាយាមច្រើនពេក",
+        otpLockedMessage: "អ្នកបានលើសចំនួនការព្យាយាមអតិបរមាហើយ។ សូមរង់ចាំ ៥ នាទីមុនពេលព្យាយាមម្តងទៀត។",
+        otpWait: "សូមរង់ចាំ",
+        otpWaitMessage: "សូមរង់ចាំ {seconds} វិនាទីមុនពេលស្នើលេខ PIN សម្ងាត់ថ្មី។",
+        otpAttemptsRemaining: "លេខ PIN សម្ងាត់មិនត្រឹមត្រូវ។ នៅសល់ {attempts} ដង។",
+        otpSendFailed: "បរាជ័យក្នុងការផ្ញើលេខ PIN សម្ងាត់។ សូមព្យាយាមម្តងទៀត។",
+        resendOTP: "ផ្ញើលេខ PIN សម្ងាត់ម្តងទៀត",
+        resendWait: "ផ្ញើលេខ PIN សម្ងាត់ម្តងទៀត ({time})",
+        sending: "កំពុងផ្ញើលេខ PIN សម្ងាត់..."
+    }
+};
+
+// Merge translations with existing ones
+Object.assign(translations.en, otpTranslations.en);
+Object.assign(translations.kh, otpTranslations.kh);
