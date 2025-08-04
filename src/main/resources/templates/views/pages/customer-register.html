@@ -7,11 +7,9 @@
     <title>Registration Form</title>
     <meta charset="UTF-8">
     <th:block layout:fragment="styles">
-
         <link rel="stylesheet" th:href="@{/assets/cpbank/web/css/register-form.css}">
     </th:block>
 </head>
-
 
 <body>
 <th:block layout:fragment="content">
@@ -27,7 +25,6 @@
                         <span class="message"></span>
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
-
 
                     <!-- START FORM -->
                     <form class="need-novalidate-new" id="idFormRegister" novalidate>
@@ -327,6 +324,8 @@
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Updated OTP Section -->
                         <div class="row">
                             <div class="col-sm">
                                 <div class="mb-3">
@@ -349,7 +348,8 @@
                                             <label class="form-label align-self-center" for="otpCode"
                                                    th:text="#{register.otpCode}">OTP Code</label>
                                             <button class="btn btn-link btn-sm" id="resendOTPBtn" type="button">
-                                                <span th:text="#{register.resendOTP}">Resend OTP</span>
+                                                <span id="resendOTPText" th:text="#{register.resendOTP}">Resend OTP</span>
+                                                <span id="resendCountdown" class="d-none text-primary fw-bold"></span>
                                             </button>
                                         </div>
                                         <input class="form-control" id="otpCode" maxlength="6" name="otpCode"
@@ -357,13 +357,15 @@
                                         <div class="invalid-feedback" th:text="#{validation.otpCode.required}">Please
                                             enter the OTP code sent to your contact number.
                                         </div>
+                                        <!-- OTP Status Indicator -->
+                                        <div id="otpStatus" class="mt-2"></div>
                                     </div>
                                 </div>
                             </div>
                         </div>
+
                         <div class="row text-end mt-4 mb-5">
                             <div class="col-sm">
-
                                 <button class="btn btn-primary ms-auto px-5 rounded-2" id="btnValidate" th:text="#{register.validate}"
                                         type="submit">Validate
                                 </button>
@@ -371,12 +373,38 @@
                                 <button class="btn btn-primary ms-auto px-5 rounded-2 disabled" id="btnSubmit"
                                         th:text="#{register.submit}" type="submit">Submit
                                 </button>
-
                             </div>
                         </div>
                     </form>
                     <!-- END FORM -->
 
+                    <!-- Ban Modal -->
+                    <div class="modal fade" id="otpBanModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="otpBanModalLabel" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="otpBanModalLabel">
+                                        <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                                        <span id="banModalTitle" th:text="#{otp.ban.title}">Account Temporarily Restricted</span>
+                                    </h5>
+                                </div>
+                                <div class="modal-body text-center">
+                                    <div class="mb-3">
+                                        <i class="fas fa-clock text-danger" style="font-size: 48px;"></i>
+                                    </div>
+                                    <p id="banModalMessage" class="mb-3" th:text="#{otp.ban.message}">
+                                        Too many failed OTP attempts. Please wait before trying again.
+                                    </p>
+                                    <div id="banCountdown" class="fs-4 text-danger fw-bold"></div>
+                                </div>
+                                <div class="modal-footer justify-content-center">
+                                    <button type="button" class="btn btn-primary" id="banModalOkBtn">
+                                        <span id="banModalOkText" th:text="#{otp.ban.ok}">OK</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
                     <!-- START MODAL 1 -->
                     <div aria-hidden="true" aria-labelledby="staticBackdropLabel" class="modal fade"
@@ -545,7 +573,6 @@
                     </div>
                     <!-- END MODAL 1 -->
 
-
                     <!-- START MODAL 2 -->
                     <div aria-hidden="true" aria-labelledby="staticBackdropLabel" class="modal fade"
                          data-bs-backdrop="static" data-bs-keyboard="false"
@@ -646,7 +673,6 @@
                         </div>
                     </div>
                     <!-- END MODAL 2 -->
-
 
                     <!-- START MODAL 3 -->
                     <div aria-hidden="true" aria-labelledby="staticBackdropLabel" class="modal fade"
@@ -751,7 +777,6 @@
                         </div>
                     </div>
                     <!-- END MODAL 3 -->
-
 
                 </div>
             </div>

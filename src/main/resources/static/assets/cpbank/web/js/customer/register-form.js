@@ -13,11 +13,8 @@ let selfieImageValue = null;
 let branchCodeValue = null;
 let lang = localStorage.getItem('selectedLang') || 'kh';
 
-// OTP Global Variables
-let resendCountdown = 0;
-let resendInterval = null;
-let otpAttempts = 0;
-let isOtpLocked = false;
+// Global OTP Manager instance
+let otpManager = null;
 
 $(document).ready(function () {
     // Apply the initial language
@@ -39,19 +36,11 @@ $(document).ready(function () {
         }
     });
 
+    // Initialize OTP Manager
+    otpManager = new OTPManager();
+
     // Call the function to populate other fields
     getBranch();
-
-    // Initialize resend button
-    updateResendButton();
-
-    // Handle resend button click
-    $('#resendOTPBtn').on('click', function(e) {
-        e.preventDefault();
-        if (resendCountdown === 0) {
-            sendOtp();
-        }
-    });
 });
 
 // Function to safely initialize flatpickr
@@ -74,6 +63,629 @@ function initializeFlatpickr() {
     });
 }
 
+// OTP Management System
+class OTPManager {
+    constructor() {
+        this.countdownInterval = null;
+        this.banCountdownInterval = null;
+        this.resendCountdownSeconds = 60;
+        this.failedAttempts = 0;
+        this.maxFailedAttempts = 3;
+        this.currentPhoneNumber = null;
+        this.isOTPVerified = false;
+        this.isBanned = false;
+        this.banEndTime = null;
+        this.lang = localStorage.getItem('selectedLang') || 'kh';
+
+        this.init();
+    }
+
+    init() {
+        this.bindEvents();
+        this.loadState();
+        this.updateUILanguage();
+    }
+
+    bindEvents() {
+        // Phone number change event
+        $('#contactNumber').on('change blur', (e) => {
+            const newPhoneNumber = $(e.target).val().trim();
+            if (newPhoneNumber && newPhoneNumber !== this.currentPhoneNumber && newPhoneNumber.length >= 9) {
+                this.currentPhoneNumber = newPhoneNumber;
+                this.resetOTPState();
+                this.sendOTP();
+            }
+        });
+
+        // OTP code input event
+        $('#otpCode').on('input', (e) => {
+            const otpCode = $(e.target).val().trim();
+            if (otpCode && otpCode.length === 6) {
+                this.verifyOTP(otpCode);
+            }
+        });
+
+        // Resend button click
+        $('#resendOTPBtn').on('click', (e) => {
+            e.preventDefault();
+            if (!this.isResendDisabled()) {
+                this.sendOTP();
+            }
+        });
+
+        // Ban modal OK button
+        $('#banModalOkBtn').on('click', () => {
+            $('#otpBanModal').modal('hide');
+        });
+    }
+
+    loadState() {
+        try {
+            const savedState = sessionStorage.getItem('otpState');
+            if (savedState) {
+                const state = JSON.parse(savedState);
+                this.failedAttempts = state.failedAttempts || 0;
+                this.currentPhoneNumber = state.currentPhoneNumber || null;
+                this.isOTPVerified = state.isOTPVerified || false;
+                this.isBanned = state.isBanned || false;
+                this.banEndTime = state.banEndTime ? new Date(state.banEndTime) : null;
+
+                // Check if ban is still active
+                if (this.isBanned && this.banEndTime && new Date() < this.banEndTime) {
+                    this.showBanStatus();
+                } else if (this.isBanned) {
+                    this.resetBanState();
+                }
+
+                // Update UI based on loaded state
+                if (this.currentPhoneNumber) {
+                    $('#contactNumber').val(this.currentPhoneNumber);
+                }
+
+                if (this.isOTPVerified) {
+                    this.updateOTPStatus(this.getTranslation('otpVerified'), 'success');
+                }
+            }
+        } catch (e) {
+            console.warn('Failed to load OTP state:', e);
+        }
+    }
+
+    saveState() {
+        try {
+            const state = {
+                failedAttempts: this.failedAttempts,
+                currentPhoneNumber: this.currentPhoneNumber,
+                isOTPVerified: this.isOTPVerified,
+                isBanned: this.isBanned,
+                banEndTime: this.banEndTime ? this.banEndTime.toISOString() : null
+            };
+            sessionStorage.setItem('otpState', JSON.stringify(state));
+        } catch (e) {
+            console.warn('Failed to save OTP state:', e);
+        }
+    }
+
+    resetOTPState() {
+        this.isOTPVerified = false;
+        $('#otpCode').val('');
+        this.updateOTPStatus('');
+        this.saveState();
+    }
+
+    resetBanState() {
+        this.isBanned = false;
+        this.banEndTime = null;
+        this.failedAttempts = 0;
+        this.clearBanCountdown();
+        this.enableResendButton();
+        this.saveState();
+    }
+
+    sendOTP() {
+        if (this.isBanned && this.banEndTime && new Date() < this.banEndTime) {
+            this.showBanModal();
+            return;
+        }
+
+        const phoneNumber = $('#contactNumber').val().trim();
+        if (!phoneNumber || phoneNumber.length < 9) {
+            this.showError(this.getTranslation('invalidPhoneNumber'));
+            return;
+        }
+
+        this.updateOTPStatus(this.getTranslation('sendingOTP'), 'info');
+        this.disableResendButton();
+
+        const requestData = {
+            phone: phoneNumber,
+            App: '0',
+            Text: ""
+        };
+
+        $.ajax({
+            type: "POST",
+            url: "api/v1/otp/send",
+            contentType: 'application/json',
+            data: JSON.stringify(requestData),
+            success: (response) => {
+                this.handleSendOTPSuccess(response);
+            },
+            error: (xhr, status, error) => {
+                this.handleSendOTPError(xhr, status, error);
+            }
+        });
+    }
+
+    handleSendOTPSuccess(response) {
+        // Handle direct number response (your API returns 200 with just a number)
+        if (typeof response === 'number') {
+            if (response > 0) {
+                // Positive number means OTP sent successfully (like 529636)
+                const message = this.getTranslation('otpSent');
+                this.updateOTPStatus(message, 'success');
+                this.startResendCountdown();
+
+                Toast.fire({
+                    icon: 'success',
+                    title: message
+                });
+            } else if (response === -500) {
+                // User is banned, need to check actual ban time
+                this.checkBanStatus();
+            } else if (response < 0) {
+                // Negative number means wait time in seconds (like -10 = 10 seconds)
+                const waitSeconds = Math.abs(response);
+                this.startResendCountdown(waitSeconds);
+                const message = this.getTranslation('waitBeforeResend').replace('{time}', this.formatTime(waitSeconds));
+                this.updateOTPStatus(message, 'warning');
+
+                Toast.fire({
+                    icon: 'info',
+                    title: message
+                });
+            }
+        } else if (response && typeof response === 'object' && response.status === 'OK') {
+            // Handle object response with status
+            const message = response.message || this.getTranslation('otpSent');
+            this.updateOTPStatus(message, 'success');
+            this.startResendCountdown();
+
+            Toast.fire({
+                icon: 'success',
+                title: message
+            });
+        } else {
+            // Handle unexpected response format - treat as success
+            this.updateOTPStatus(this.getTranslation('otpSent'), 'success');
+            this.startResendCountdown();
+
+            Toast.fire({
+                icon: 'success',
+                title: this.getTranslation('otpSent')
+            });
+        }
+    }
+
+    handleSendOTPError(xhr, status, error) {
+        let errorMessage = this.getTranslation('otpSendFailed');
+
+        try {
+            const response = JSON.parse(xhr.responseText);
+
+            // Check for specific error messages from API
+            if (response.message) {
+                if (response.message.includes('TOO_MANY_ATTEMPTS')) {
+                    const parts = response.message.split('-');
+                    if (parts.length > 1) {
+                        const banTime = parseFloat(parts[1]);
+                        this.handleBanResponse(banTime, this.getTranslation('tooManyAttempts'));
+                        return;
+                    }
+                }
+                errorMessage = this.translateAPIMessage(response.message);
+            }
+        } catch (e) {
+            console.warn('Failed to parse error response:', e);
+        }
+
+        this.updateOTPStatus(errorMessage, 'error');
+        this.showError(errorMessage);
+        this.enableResendButton();
+    }
+
+    verifyOTP(otpCode) {
+        if (this.isBanned && this.banEndTime && new Date() < this.banEndTime) {
+            this.showBanModal();
+            return;
+        }
+
+        const phoneNumber = $('#contactNumber').val().trim();
+        if (!phoneNumber) {
+            this.showError(this.getTranslation('enterPhoneFirst'));
+            return;
+        }
+
+        this.updateOTPStatus(this.getTranslation('verifyingOTP'), 'info');
+
+        const requestData = {
+            phone_number: phoneNumber,
+            otp_code: parseInt(otpCode)
+        };
+
+        $.ajax({
+            type: "POST",
+            url: "api/v1/otp/verify",
+            contentType: 'application/json',
+            data: JSON.stringify(requestData),
+            success: (response) => {
+                this.handleVerifyOTPSuccess(response);
+            },
+            error: (xhr, status, error) => {
+                this.handleVerifyOTPError(xhr, status, error);
+            }
+        });
+    }
+
+    handleVerifyOTPSuccess(response) {
+        let message = this.getTranslation('otpVerified');
+
+        // Handle different response formats
+        if (response && typeof response === 'object' && response.status === 'OK') {
+            message = this.translateAPIMessage(response.message) || message;
+        } else if (typeof response === 'string') {
+            try {
+                const parsedResponse = JSON.parse(response);
+                if (parsedResponse.status === 'OK') {
+                    message = this.translateAPIMessage(parsedResponse.message) || message;
+                }
+            } catch (e) {
+                // If parsing fails, use default message
+                message = this.getTranslation('otpVerified');
+            }
+        }
+
+        this.isOTPVerified = true;
+        this.failedAttempts = 0;
+        this.updateOTPStatus(message, 'success');
+        this.saveState();
+
+        Toast.fire({
+            icon: 'success',
+            title: message
+        });
+
+        // Enable form validation or next steps
+        this.onOTPVerified();
+    }
+
+    handleVerifyOTPError(xhr, status, error) {
+        let errorMessage = this.getTranslation('otpVerifyFailed');
+
+        try {
+            const response = JSON.parse(xhr.responseText);
+
+            if (response.message) {
+                if (response.message.includes('TOO_MANY_ATTEMPTS')) {
+                    // Handle TOO_MANY_ATTEMPTS-269.0311575 format
+                    const parts = response.message.split('-');
+                    if (parts.length > 1) {
+                        const banTime = parseFloat(parts[1]);
+                        this.handleBanResponse(banTime, this.getTranslation('tooManyAttempts'));
+                        return;
+                    } else {
+                        // Just TOO_MANY_ATTEMPTS without time - use default 5 min
+                        this.handleBanResponse(300, this.getTranslation('tooManyAttempts'));
+                        return;
+                    }
+                }
+
+                errorMessage = this.translateAPIMessage(response.message);
+
+                // Increment failed attempts for invalid OTP (but not for expired or banned)
+                if (response.message === 'OTP_INVALID') {
+                    this.failedAttempts++;
+                    this.saveState();
+                }
+            }
+        } catch (e) {
+            console.warn('Failed to parse error response:', e);
+            this.failedAttempts++;
+            this.saveState();
+        }
+
+        // Clear OTP field and show error
+        $('#otpCode').val('');
+        this.updateOTPStatus(errorMessage, 'error');
+        this.showError(errorMessage);
+    }
+
+    checkBanStatus() {
+        // When -500 is returned from send OTP, call verify API to get actual ban time
+        const phoneNumber = $('#contactNumber').val().trim();
+        if (!phoneNumber) {
+            // Fallback to 5 minutes if no phone number
+            this.handleBanResponse(300, this.getTranslation('tooManyAttempts'));
+            return;
+        }
+
+        const requestData = {
+            phone_number: phoneNumber,
+            otp_code: 000000 // Use number instead of string to trigger ban check
+        };
+
+        $.ajax({
+            type: "POST",
+            url: "api/v1/otp/verify",
+            contentType: 'application/json',
+            data: JSON.stringify(requestData),
+            success: (response) => {
+                // This shouldn't happen when checking ban status
+                console.log('Unexpected success from ban check');
+                // Fallback to 5 minutes
+                this.handleBanResponse(300, this.getTranslation('tooManyAttempts'));
+            },
+            error: (xhr, status, error) => {
+                try {
+                    const response = JSON.parse(xhr.responseText);
+                    if (response.message && response.message.includes('TOO_MANY_ATTEMPTS')) {
+                        const parts = response.message.split('-');
+                        if (parts.length > 1) {
+                            const banTime = parseFloat(parts[1]);
+                            this.handleBanResponse(banTime, this.getTranslation('tooManyAttempts'));
+                        } else {
+                            // Default to 5 minutes if no time specified
+                            this.handleBanResponse(300, this.getTranslation('tooManyAttempts'));
+                        }
+                    } else {
+                        // Fallback to 5 minutes for any other error
+                        this.handleBanResponse(300, this.getTranslation('tooManyAttempts'));
+                    }
+                } catch (e) {
+                    // Fallback to 5 minutes ban if parsing fails
+                    this.handleBanResponse(300, this.getTranslation('tooManyAttempts'));
+                }
+            }
+        });
+    }
+
+    translateAPIMessage(message) {
+        const translations = {
+            'OTP_VERIFIED': this.getTranslation('otpVerified'),
+            'OTP_INVALID': this.getTranslation('otpInvalid'),
+            'OTP_EXPIRED': this.getTranslation('otpExpired'),
+            'TOO_MANY_ATTEMPTS': this.getTranslation('tooManyAttempts')
+        };
+
+        return translations[message] || message;
+    }
+
+    handleBanResponse(banTimeSeconds, message) {
+        this.banEndTime = new Date(Date.now() + (banTimeSeconds * 1000));
+        this.isBanned = true;
+        this.saveState();
+
+        this.showBanModal(banTimeSeconds, message);
+        this.disableResendButton();
+    }
+
+    showBanModal(banTimeSeconds = null, message = null) {
+        // Calculate remaining ban time
+        let remainingSeconds = banTimeSeconds;
+        if (!remainingSeconds && this.banEndTime) {
+            remainingSeconds = Math.max(0, Math.ceil((this.banEndTime - new Date()) / 1000));
+        }
+
+        if (remainingSeconds <= 0) {
+            this.resetBanState();
+            return;
+        }
+
+        // Update modal content
+        const banTimeFormatted = this.formatTime(remainingSeconds);
+        $('#banModalTitle').text(this.getTranslation('banTitle'));
+        $('#banModalMessage').text(this.getTranslation('banMessage').replace('{time}', banTimeFormatted));
+        $('#banModalOkText').text(this.getTranslation('ok'));
+
+        // Show modal
+        $('#otpBanModal').modal('show');
+
+        // Start countdown
+        this.startBanCountdown(remainingSeconds);
+    }
+
+    showBanStatus() {
+        if (!this.banEndTime) return;
+
+        const remainingSeconds = Math.max(0, Math.ceil((this.banEndTime - new Date()) / 1000));
+        if (remainingSeconds > 0) {
+            this.disableResendButton();
+            const banTimeFormatted = this.formatTime(remainingSeconds);
+            this.updateOTPStatus(this.getTranslation('accountBanned').replace('{time}', banTimeFormatted), 'error');
+        } else {
+            this.resetBanState();
+        }
+    }
+
+    startResendCountdown(customSeconds = null) {
+        const totalSeconds = customSeconds || this.resendCountdownSeconds;
+        let remainingSeconds = totalSeconds;
+
+        this.disableResendButton();
+
+        this.countdownInterval = setInterval(() => {
+            if (remainingSeconds <= 0) {
+                this.clearResendCountdown();
+                this.enableResendButton();
+                return;
+            }
+
+            this.updateResendCountdown(remainingSeconds);
+            remainingSeconds--;
+        }, 1000);
+
+        // Initial update
+        this.updateResendCountdown(remainingSeconds);
+    }
+
+    startBanCountdown(totalSeconds) {
+        let remainingSeconds = totalSeconds;
+
+        this.banCountdownInterval = setInterval(() => {
+            if (remainingSeconds <= 0) {
+                this.clearBanCountdown();
+                this.resetBanState();
+                $('#otpBanModal').modal('hide');
+                return;
+            }
+
+            this.updateBanCountdown(remainingSeconds);
+            remainingSeconds--;
+        }, 1000);
+
+        // Initial update
+        this.updateBanCountdown(remainingSeconds);
+    }
+
+    updateResendCountdown(seconds) {
+        const formatted = this.formatTime(seconds);
+        $('#resendCountdown').text(`(${formatted})`).removeClass('d-none');
+        $('#resendOTPText').addClass('d-none');
+    }
+
+    updateBanCountdown(seconds) {
+        const formatted = this.formatTime(seconds);
+        $('#banCountdown').text(formatted);
+    }
+
+    clearResendCountdown() {
+        if (this.countdownInterval) {
+            clearInterval(this.countdownInterval);
+            this.countdownInterval = null;
+        }
+    }
+
+    clearBanCountdown() {
+        if (this.banCountdownInterval) {
+            clearInterval(this.banCountdownInterval);
+            this.banCountdownInterval = null;
+        }
+    }
+
+    formatTime(seconds) {
+        const minutes = Math.floor(seconds / 60);
+        const remainingSeconds = seconds % 60;
+
+        if (minutes > 0) {
+            return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+        }
+        return `${remainingSeconds}s`;
+    }
+
+    disableResendButton() {
+        $('#resendOTPBtn').prop('disabled', true).addClass('disabled');
+    }
+
+    enableResendButton() {
+        $('#resendOTPBtn').prop('disabled', false).removeClass('disabled');
+        $('#resendCountdown').addClass('d-none');
+        $('#resendOTPText').removeClass('d-none');
+    }
+
+    isResendDisabled() {
+        return $('#resendOTPBtn').prop('disabled');
+    }
+
+    updateOTPStatus(message, type = '') {
+        const statusElement = $('#otpStatus');
+
+        if (!message) {
+            statusElement.html('').removeClass();
+            return;
+        }
+
+        let className = 'text-info';
+        let icon = 'fas fa-info-circle';
+
+        switch (type) {
+            case 'success':
+                className = 'text-success';
+                icon = 'fas fa-check-circle';
+                break;
+            case 'error':
+                className = 'text-danger';
+                icon = 'fas fa-exclamation-circle';
+                break;
+            case 'warning':
+                className = 'text-warning';
+                icon = 'fas fa-exclamation-triangle';
+                break;
+        }
+
+        statusElement.html(`<small class="${className}"><i class="${icon} me-1"></i>${message}</small>`);
+    }
+
+    showError(message) {
+        showSweetAlert('error', this.getTranslation('error'), message);
+    }
+
+    onOTPVerified() {
+        // This method can be overridden or extended
+        // Enable form validation or next steps
+        console.log('OTP verified successfully');
+    }
+
+    updateUILanguage() {
+        this.lang = localStorage.getItem('selectedLang') || 'kh';
+        // Update any UI elements that need language updates
+    }
+
+    getTranslation(key) {
+        const translations = {
+            kh: {
+                otpSent: 'បានផ្ញើលេខកូដ OTP ដោយជោគជ័យ',
+                otpVerified: 'កូដ OTP ត្រឹមត្រូវ',
+                otpInvalid: 'កូដ OTP មិនត្រឹមត្រូវ',
+                otpExpired: 'កូដ OTP ផុតកំណត់',
+                otpSendFailed: 'ការផ្ញើកូដ OTP បានបរាជ័យ',
+                otpVerifyFailed: 'ការផ្ទៀងផ្ទាត់កូដ OTP បានបរាជ័យ',
+                sendingOTP: 'កំពុងផ្ញើកូដ OTP...',
+                verifyingOTP: 'កំពុងផ្ទៀងផ្ទាត់កូដ OTP...',
+                tooManyAttempts: 'ការព្យាយាមច្រើនពេក។ សូមរង់ចាំ {time}',
+                banTitle: 'គណនីត្រូវបានរឹតបន្តឹងជាបណ្តាះអាសន្ន',
+                banMessage: 'ការព្យាយាមផ្ទៀងផ្ទាត់កូដ OTP មិនត្រឹមត្រូវច្រើនពេក។ សូមរង់ចាំ {time} មុនពេលព្យាយាមម្តងទៀត។',
+                accountBanned: 'គណនីត្រូវបានរឹតបន្តឹង សូមរង់ចាំ {time}',
+                invalidPhoneNumber: 'សូមបញ្ចូលលេខទូរស័ព្ទត្រឹមត្រូវ',
+                enterPhoneFirst: 'សូមបញ្ចូលលេខទូរស័ព្ទជាមុនសិន',
+                waitBeforeResend: 'សូមរង់ចាំ {time} មុនពេលផ្ញើម្តងទៀត',
+                error: 'កំហុស',
+                ok: 'យល់ព្រម'
+            },
+            en: {
+                otpSent: 'OTP sent successfully',
+                otpVerified: 'OTP verified successfully',
+                otpInvalid: 'Invalid OTP code',
+                otpExpired: 'OTP code has expired',
+                otpSendFailed: 'Failed to send OTP',
+                otpVerifyFailed: 'OTP verification failed',
+                sendingOTP: 'Sending OTP...',
+                verifyingOTP: 'Verifying OTP...',
+                tooManyAttempts: 'Too many attempts. Please wait {time}',
+                banTitle: 'Account Temporarily Restricted',
+                banMessage: 'Too many failed OTP attempts. Please wait {time} before trying again.',
+                accountBanned: 'Account is restricted. Please wait {time}',
+                invalidPhoneNumber: 'Please enter a valid phone number',
+                enterPhoneFirst: 'Please enter phone number first',
+                waitBeforeResend: 'Please wait {time} before resending',
+                error: 'Error',
+                ok: 'OK'
+            }
+        };
+
+        return translations[this.lang]?.[key] || translations['en'][key] || key;
+    }
+}
+
 // SUBMIT DATA
 var form = document.getElementsByClassName('need-novalidate-new');
 var validation = Array.prototype.filter.call(form, function (forms) {
@@ -84,6 +696,11 @@ var validation = Array.prototype.filter.call(form, function (forms) {
             event.preventDefault();
             var submitButtonId = event.submitter.id;
             if (submitButtonId === 'btnSubmit') {
+                // Check if OTP is verified before submitting
+                if (!otpManager.isOTPVerified) {
+                    showSweetAlert('warning', otpManager.getTranslation('error'), 'Please verify OTP first');
+                    return;
+                }
                 submitData();
             }
         }
@@ -219,7 +836,7 @@ function populateFormFields(data) {
     $("#customerPlaceOfBirth").val(data.pob);
     $('#customerAddress').val(data.address);
 
-    // Event listeners for user input
+    // Event listeners for user input (Optional, avoid overwriting existing data unnecessarily)
     $('#firstNameKh').on('input', function () {
         data.firstNameKh = $(this).val();
     });
@@ -377,8 +994,11 @@ function resetForm() {
     $("#frontImage").val(null);
     $("#imgFrontImageDisplay").attr("src", "/OpenAcct/assets/cpbank/images/image_selfie.jpg");
 
-    // Reset OTP state when form is reset
-    resetOtpState();
+    // Reset OTP state
+    if (otpManager) {
+        otpManager.resetOTPState();
+        otpManager.resetBanState();
+    }
 }
 
 function ValidateNid() {
@@ -491,7 +1111,6 @@ function handleAjaxError(xhr, status, error) {
 
 var isCheckAddressCustomerFound = 0;
 var isCheckPOBAddressCustomerFound = 0;
-
 function checkAddressCustomer() {
     isCheckAddressCustomerFound = 0;
     isCheckPOBAddressCustomerFound = 0;
@@ -620,289 +1239,6 @@ function determineModalToShow() {
     }
 }
 
-// ============================
-// OTP FUNCTIONALITY
-// ============================
-
-// Detect change in contact number and send OTP
-$('#contactNumber').on('change blur', function () {
-    const phoneNumber = $(this).val().trim();
-    if (phoneNumber && phoneNumber.length >= 9) {
-        resetOtpState();
-        sendOtp();
-    }
-});
-
-// Detect change in OTP code field and verify the OTP
-$('#otpCode').on('input', function () {
-    const contactNumberVal = $('#contactNumber').val();
-    const otpCodeVal = $(this).val().trim();
-
-    if (contactNumberVal && otpCodeVal && otpCodeVal.length === 6) {
-        verifyOtp(contactNumberVal, otpCodeVal);
-    }
-});
-
-// Send OTP function - Handles C# API responses
-function sendOtp() {
-    const contactNumberVal = $('#contactNumber').val();
-
-    if (!contactNumberVal || resendCountdown > 0) {
-        return;
-    }
-
-    showLoading(translations[lang].sending || "កំពុងផ្ញើលេខ PIN សម្ងាត់...");
-
-    $.ajax({
-        type: "POST",
-        url: "api/v1/otp/send",
-        contentType: 'application/json',
-        dataType: 'json',
-        data: JSON.stringify({
-            phone: contactNumberVal,
-            App: '0',
-            Text: ""
-        }),
-        success: function (response) {
-            hideLoading();
-
-            if (response.status === 'OK') {
-                startResendCountdown(60);
-
-                Toast.fire({
-                    icon: 'success',
-                    title: translations[lang].otpSent || "បានផ្ញើលេខ PIN សម្ងាត់ដោយជោគជ័យ"
-                });
-            }
-        },
-        statusCode: {
-            400: function(xhr) {
-                hideLoading();
-                const response = xhr.responseJSON;
-
-                if (response && response.message) {
-                    if (response.message.startsWith('-')) {
-                        const remainingSeconds = Math.abs(parseInt(response.message));
-
-                        if (parseInt(response.message) === -500) {
-                            showOtpModal('error',
-                                translations[lang].otpLocked || 'ការព្យាយាមច្រើនពេក',
-                                translations[lang].otpLockedMessage || 'អ្នកបានលើសចំនួនការព្យាយាមអតិបរមាហើយ។ សូមរង់ចាំ ៥ នាទីមុនពេលព្យាយាមម្តងទៀត។'
-                            );
-                        } else {
-                            startResendCountdown(remainingSeconds);
-
-                            showOtpModal('warning',
-                                translations[lang].otpWait || 'សូមរង់ចាំ',
-                                (translations[lang].otpWaitMessage || 'សូមរង់ចាំ {seconds} វិនាទីមុនពេលស្នើលេខ PIN សម្ងាត់ថ្មី។')
-                                    .replace('{seconds}', remainingSeconds)
-                            );
-                        }
-                    } else {
-                        showOtpModal('error',
-                            translations[lang].fail || 'បរាជ័យ',
-                            response.message || translations[lang].otpSendFailed || "បរាជ័យក្នុងការផ្ញើលេខ PIN សម្ងាត់"
-                        );
-                    }
-                }
-            }
-        },
-        error: function (xhr) {
-            hideLoading();
-            showOtpModal('error',
-                translations[lang].error || 'កំហុស',
-                translations[lang].tryAgain || 'សូមព្យាយាមម្តងទៀត'
-            );
-        }
-    });
-}
-
-// Verify OTP function - Handles all C# API responses
-function verifyOtp(phoneNumber, otpCode) {
-    $.ajax({
-        type: "POST",
-        url: "api/v1/otp/verify",
-        contentType: 'application/json',
-        dataType: 'json',
-        data: JSON.stringify({
-            phone_number: phoneNumber,
-            otp_code: otpCode
-        }),
-        success: function (response) {
-            if (response.status === 'OK' && response.message === 'OTP_VERIFIED') {
-                $('#otpCode').removeClass('is-invalid').addClass('is-valid');
-
-                Toast.fire({
-                    icon: 'success',
-                    title: translations[lang].otpVerified || "លេខ PIN សម្ងាត់ត្រឹមត្រូវ"
-                });
-
-                resetOtpState();
-            }
-        },
-        statusCode: {
-            400: function(xhr) {
-                const response = xhr.responseJSON;
-                $('#otpCode').removeClass('is-valid').addClass('is-invalid').val('');
-
-                if (response && response.message) {
-
-                    if (response.message === 'TOO_MANY_ATTEMPTS') {
-                        showOtpModal('error',
-                            translations[lang].otpLocked || 'ការព្យាយាមច្រើនពេក',
-                            translations[lang].otpLockedMessage || 'អ្នកបានលើសចំនួនការព្យាយាមអតិបរមាហើយ។ សូមរង់ចាំ ៥ នាទីមុនពេលព្យាយាមម្តងទៀត។'
-                        );
-
-                    } else if (response.message === 'OTP_EXPIRED') {
-                        showOtpModal('error',
-                            translations[lang].otpExpired || 'លេខ PIN សម្ងាត់ផុតកំណត់',
-                            translations[lang].otpExpiredMessage || 'លេខ PIN សម្ងាត់របស់អ្នកផុតកំណត់ហើយ។ សូមស្នើលេខថ្មី។'
-                        );
-                        resetOtpState();
-
-                    } else if (response.message.includes('OTP_ATTEMPT_REMANING_')) {
-                        const remaining = response.message.split('_').pop();
-                        showOtpModal('warning',
-                            translations[lang].otpInvalid || 'លេខ PIN សម្ងាត់មិនត្រឹមត្រូវ',
-                            (translations[lang].otpAttemptsRemaining || 'លេខ PIN សម្ងាត់មិនត្រឹមត្រូវ។ នៅសល់ {attempts} ដង។')
-                                .replace('{attempts}', remaining)
-                        );
-
-                    } else if (response.message === 'OTP_INVALID') {
-                        showOtpModal('error',
-                            translations[lang].otpInvalid || 'លេខ PIN សម្ងាត់មិនត្រឹមត្រូវ',
-                            translations[lang].otpInvalidMessage || 'លេខ PIN សម្ងាត់ដែលអ្នកបានបញ្ចូលមិនត្រឹមត្រូវទេ។'
-                        );
-
-                    } else {
-                        showOtpModal('error',
-                            translations[lang].otpInvalid || 'លេខ PIN សម្ងាត់មិនត្រឹមត្រូវ',
-                            response.message || translations[lang].otpInvalidMessage || 'លេខ PIN សម្ងាត់ដែលអ្នកបានបញ្ចូលមិនត្រឹមត្រូវទេ។'
-                        );
-                    }
-                }
-            }
-        },
-        error: function (xhr) {
-            $('#otpCode').removeClass('is-valid').addClass('is-invalid').val('');
-            showOtpModal('error',
-                translations[lang].error || 'កំហុស',
-                translations[lang].tryAgain || 'សូមព្យាយាមម្តងទៀត'
-            );
-        }
-    });
-}
-
-// Start resend countdown
-function startResendCountdown(seconds) {
-    resendCountdown = seconds;
-    updateResendButton();
-
-    if (resendInterval) {
-        clearInterval(resendInterval);
-    }
-
-    resendInterval = setInterval(() => {
-        resendCountdown--;
-        updateResendButton();
-
-        if (resendCountdown <= 0) {
-            clearInterval(resendInterval);
-            resendInterval = null;
-            updateResendButton();
-        }
-    }, 1000);
-}
-
-// Update resend button text and state
-function updateResendButton() {
-    const resendBtn = document.querySelector('#resendOTPBtn');
-
-    if (!resendBtn) return;
-
-    if (resendCountdown > 0) {
-        const minutes = Math.floor(resendCountdown / 60);
-        const seconds = resendCountdown % 60;
-        const timeStr = minutes > 0 ?
-            `${minutes}:${seconds.toString().padStart(2, '0')}` :
-            `${seconds}s`;
-
-        resendBtn.textContent = (translations[lang].resendWait || 'ផ្ញើលេខ PIN សម្ងាត់ម្តងទៀត ({time})')
-            .replace('{time}', timeStr);
-        resendBtn.disabled = true;
-        resendBtn.classList.remove('btn-link');
-        resendBtn.classList.add('btn-secondary');
-        resendBtn.style.opacity = '0.6';
-        resendBtn.onclick = null;
-    } else {
-        resendBtn.textContent = translations[lang].resendOTP || 'ផ្ញើលេខ PIN សម្ងាត់ម្តងទៀត';
-        resendBtn.disabled = false;
-        resendBtn.classList.remove('btn-secondary');
-        resendBtn.classList.add('btn-link');
-        resendBtn.style.opacity = '1';
-        resendBtn.onclick = function(e) {
-            e.preventDefault();
-            if (resendCountdown === 0) {
-                sendOtp();
-            }
-        };
-    }
-}
-
-// Reset OTP state
-function resetOtpState() {
-    resendCountdown = 0;
-
-    if (resendInterval) {
-        clearInterval(resendInterval);
-        resendInterval = null;
-    }
-
-    $('#otpCode').removeClass('is-invalid is-valid').val('');
-    updateResendButton();
-}
-
-// Show OTP modal alerts
-function showOtpModal(type, title, message) {
-    let icon = type;
-    let buttonClass = 'btn-primary';
-
-    switch(type) {
-        case 'error':
-            icon = 'error';
-            buttonClass = 'btn-danger';
-            break;
-        case 'warning':
-            icon = 'warning';
-            buttonClass = 'btn-warning';
-            break;
-        case 'success':
-            icon = 'success';
-            buttonClass = 'btn-success';
-            break;
-        default:
-            icon = 'info';
-    }
-
-    Swal.fire({
-        icon: icon,
-        title: title,
-        text: message,
-        confirmButtonText: translations[lang].confirm || 'យល់ព្រម',
-        customClass: {
-            confirmButton: `btn ${buttonClass}`,
-            popup: 'swal-custom-popup'
-        },
-        buttonsStyling: false,
-        allowOutsideClick: false,
-        allowEscapeKey: false
-    });
-}
-
-// ============================
-// BRANCH FUNCTIONALITY
-// ============================
-
 $("#ddlBranch").change(function () {
     var selectOptionValue = $(this).val();
     branchCodeValue = selectOptionValue;
@@ -928,49 +1264,3 @@ function getBranch() {
         }
     });
 }
-
-// ============================
-// TRANSLATIONS
-// ============================
-
-// OTP Translations
-const otpTranslations = {
-    en: {
-        otpSent: "OTP Sent Successfully",
-        otpVerified: "OTP Verified Successfully",
-        otpInvalid: "Invalid OTP",
-        otpInvalidMessage: "The OTP code you entered is incorrect.",
-        otpExpired: "OTP Expired",
-        otpExpiredMessage: "Your OTP has expired. Please request a new one.",
-        otpLocked: "Too Many Attempts",
-        otpLockedMessage: "You have exceeded the maximum number of attempts. Please wait 5 minutes before trying again.",
-        otpWait: "Please Wait",
-        otpWaitMessage: "Please wait {seconds} seconds before requesting another OTP.",
-        otpAttemptsRemaining: "Invalid OTP. {attempts} attempts remaining.",
-        otpSendFailed: "Failed to send OTP. Please try again.",
-        resendOTP: "Resend OTP",
-        resendWait: "Resend OTP ({time})",
-        sending: "Sending OTP, please wait..."
-    },
-    kh: {
-        otpSent: "បានផ្ញើលេខ PIN សម្ងាត់ដោយជោគជ័យ",
-        otpVerified: "លេខ PIN សម្ងាត់ត្រឹមត្រូវ",
-        otpInvalid: "លេខ PIN សម្ងាត់មិនត្រឹមត្រូវ",
-        otpInvalidMessage: "លេខ PIN សម្ងាត់ដែលអ្នកបានបញ្ចូលមិនត្រឹមត្រូវទេ។",
-        otpExpired: "លេខ PIN សម្ងាត់ផុតកំណត់",
-        otpExpiredMessage: "លេខ PIN សម្ងាត់របស់អ្នកផុតកំណត់ហើយ។ សូមស្នើលេខថ្មី។",
-        otpLocked: "ការព្យាយាមច្រើនពេក",
-        otpLockedMessage: "អ្នកបានលើសចំនួនការព្យាយាមអតិបរមាហើយ។ សូមរង់ចាំ ៥ នាទីមុនពេលព្យាយាមម្តងទៀត។",
-        otpWait: "សូមរង់ចាំ",
-        otpWaitMessage: "សូមរង់ចាំ {seconds} វិនាទីមុនពេលស្នើលេខ PIN សម្ងាត់ថ្មី។",
-        otpAttemptsRemaining: "លេខ PIN សម្ងាត់មិនត្រឹមត្រូវ។ នៅសល់ {attempts} ដង។",
-        otpSendFailed: "បរាជ័យក្នុងការផ្ញើលេខ PIN សម្ងាត់។ សូមព្យាយាមម្តងទៀត។",
-        resendOTP: "ផ្ញើលេខ PIN សម្ងាត់ម្តងទៀត",
-        resendWait: "ផ្ញើលេខ PIN សម្ងាត់ម្តងទៀត ({time})",
-        sending: "កំពុងផ្ញើលេខ PIN សម្ងាត់..."
-    }
-};
-
-// Merge translations with existing ones
-Object.assign(translations.en, otpTranslations.en);
-Object.assign(translations.kh, otpTranslations.kh);
