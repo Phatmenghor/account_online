@@ -281,7 +281,7 @@ class OTPManager {
 
             if (response.message) {
                 if (response.message.includes('TOO_MANY_ATTEMPTS')) {
-                    // Handle TOO_MANY_ATTEMPTS-299.2573603 format
+                    // Handle TOO_MANY_ATTEMPTS-298.4533587 format
                     const parts = response.message.split('-');
                     if (parts.length > 1) {
                         const banTime = parseFloat(parts[1]);
@@ -374,7 +374,7 @@ class OTPManager {
 
             if (response.message) {
                 if (response.message.includes('TOO_MANY_ATTEMPTS')) {
-                    // Handle TOO_MANY_ATTEMPTS-299.2573603 format
+                    // Handle TOO_MANY_ATTEMPTS-298.4533587 format
                     const parts = response.message.split('-');
                     if (parts.length > 1) {
                         const banTime = parseFloat(parts[1]);
@@ -474,12 +474,17 @@ class OTPManager {
     }
 
     handleBanResponse(banTimeSeconds, message) {
-        console.log(`Handling ban: ${banTimeSeconds} seconds`);
-        this.banEndTime = new Date(Date.now() + (banTimeSeconds * 1000));
+        // Parse the decimal seconds properly
+        const exactSeconds = parseFloat(banTimeSeconds);
+        const roundedSeconds = Math.floor(exactSeconds);
+
+        console.log(`Handling ban: ${exactSeconds} seconds (rounded to ${roundedSeconds})`);
+
+        this.banEndTime = new Date(Date.now() + (exactSeconds * 1000));
         this.isBanned = true;
         this.saveState();
 
-        this.showBanModal(banTimeSeconds, message);
+        this.showBanModal(roundedSeconds, message);
         this.disableResendButton();
     }
 
@@ -593,10 +598,9 @@ class OTPManager {
         }
     }
 
-    // Improved formatTime function - add this to your OTPManager class
-
+    // Enhanced formatTime function for proper ban time display
     formatTime(seconds) {
-        // Round to remove decimals like .441638599999976
+        // Round to remove decimals like .4533587
         const totalSeconds = Math.floor(seconds);
         const minutes = Math.floor(totalSeconds / 60);
         const remainingSeconds = totalSeconds % 60;
@@ -606,39 +610,30 @@ class OTPManager {
 
         if (minutes > 0) {
             if (lang === 'kh') {
-                // Khmer format: "4 នាទី 37 វិនាទី"
+                // Khmer format: "4 នាទី 58 វិនាទី" or "4 នាទី" if no seconds
                 if (remainingSeconds > 0) {
                     return `${minutes} នាទី ${remainingSeconds} វិនាទី`;
                 } else {
                     return `${minutes} នាទី`;
                 }
             } else {
-                // English format: "4 min 37 sec"
+                // English format: "4 minutes and 58 seconds" or "4 minutes" if no seconds
+                const minuteText = minutes === 1 ? 'minute' : 'minutes';
                 if (remainingSeconds > 0) {
-                    return `${minutes} min ${remainingSeconds} sec`;
+                    const secondText = remainingSeconds === 1 ? 'second' : 'seconds';
+                    return `${minutes} ${minuteText} and ${remainingSeconds} ${secondText}`;
                 } else {
-                    return `${minutes} min`;
+                    return `${minutes} ${minuteText}`;
                 }
             }
         } else {
             if (lang === 'kh') {
                 return `${remainingSeconds} វិនាទី`;
             } else {
-                return `${remainingSeconds} sec`;
+                const secondText = remainingSeconds === 1 ? 'second' : 'seconds';
+                return `${remainingSeconds} ${secondText}`;
             }
         }
-    }
-
-    formatTimeShort(seconds) {
-        // Round to remove decimals
-        const totalSeconds = Math.floor(seconds);
-        const minutes = Math.floor(totalSeconds / 60);
-        const remainingSeconds = totalSeconds % 60;
-
-        if (minutes > 0) {
-            return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
-        }
-        return `${remainingSeconds}s`;
     }
 
     disableResendButton() {
@@ -715,10 +710,7 @@ class OTPManager {
                 enterPhoneFirst: 'សូមបញ្ចូលលេខទូរស័ព្ទជាមុនសិន',
                 waitBeforeResend: 'សូមរង់ចាំ {time} មុនពេលផ្ញើម្តងទៀត',
                 error: 'កំហុស',
-                ok: 'យល់ព្រម',
-                // Time units
-                minutes: 'នាទី',
-                seconds: 'វិនាទី'
+                ok: 'យល់ព្រម'
             },
             en: {
                 otpSent: 'OTP sent successfully',
@@ -737,10 +729,7 @@ class OTPManager {
                 enterPhoneFirst: 'Please enter phone number first',
                 waitBeforeResend: 'Please wait {time} before resending',
                 error: 'Error',
-                ok: 'OK',
-                // Time units
-                minutes: 'min',
-                seconds: 'sec'
+                ok: 'OK'
             }
         };
 
