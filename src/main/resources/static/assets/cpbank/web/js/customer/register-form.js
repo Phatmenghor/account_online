@@ -63,7 +63,7 @@ function initializeFlatpickr() {
     });
 }
 
-// OTP Management System
+// Complete OTP Management System
 class OTPManager {
     constructor() {
         this.countdownInterval = null;
@@ -180,6 +180,7 @@ class OTPManager {
         this.clearBanCountdown();
         this.enableResendButton();
         this.saveState();
+        console.log('Ban state reset');
     }
 
     sendOTP() {
@@ -218,10 +219,12 @@ class OTPManager {
     }
 
     handleSendOTPSuccess(response) {
-        // Handle direct number response (your API returns 200 with just a number)
+        console.log('Send OTP Response:', response);
+
+        // Handle direct number response (status 200 with number)
         if (typeof response === 'number') {
             if (response > 0) {
-                // Positive number means OTP sent successfully (like 529636)
+                // Positive number = OTP sent successfully
                 const message = this.getTranslation('otpSent');
                 this.updateOTPStatus(message, 'success');
                 this.startResendCountdown();
@@ -231,11 +234,13 @@ class OTPManager {
                     title: message
                 });
             } else if (response === -500) {
-                // User is banned, need to check actual ban time
+                // -500 = Phone banned, need to get actual ban time via verify API
+                console.log('Phone number banned (-500), checking ban status...');
                 this.checkBanStatus();
-            } else if (response < 0) {
-                // Negative number means wait time in seconds (like -10 = 10 seconds)
+            } else if (response < 0 && response >= -60) {
+                // Negative numbers from -60 to -1 = wait time in seconds
                 const waitSeconds = Math.abs(response);
+                console.log(`Wait time: ${waitSeconds} seconds`);
                 this.startResendCountdown(waitSeconds);
                 const message = this.getTranslation('waitBeforeResend').replace('{time}', this.formatTime(waitSeconds));
                 this.updateOTPStatus(message, 'warning');
@@ -246,7 +251,7 @@ class OTPManager {
                 });
             }
         } else if (response && typeof response === 'object' && response.status === 'OK') {
-            // Handle object response with status
+            // Handle object response with status OK
             const message = response.message || this.getTranslation('otpSent');
             this.updateOTPStatus(message, 'success');
             this.startResendCountdown();
@@ -256,7 +261,7 @@ class OTPManager {
                 title: message
             });
         } else {
-            // Handle unexpected response format - treat as success
+            // Fallback - treat as success
             this.updateOTPStatus(this.getTranslation('otpSent'), 'success');
             this.startResendCountdown();
 
@@ -268,17 +273,19 @@ class OTPManager {
     }
 
     handleSendOTPError(xhr, status, error) {
+        console.log('Send OTP Error:', xhr.status, xhr.responseText);
         let errorMessage = this.getTranslation('otpSendFailed');
 
         try {
             const response = JSON.parse(xhr.responseText);
 
-            // Check for specific error messages from API
             if (response.message) {
                 if (response.message.includes('TOO_MANY_ATTEMPTS')) {
+                    // Handle TOO_MANY_ATTEMPTS-299.2573603 format
                     const parts = response.message.split('-');
                     if (parts.length > 1) {
                         const banTime = parseFloat(parts[1]);
+                        console.log(`Ban time from send error: ${banTime} seconds`);
                         this.handleBanResponse(banTime, this.getTranslation('tooManyAttempts'));
                         return;
                     }
@@ -328,6 +335,7 @@ class OTPManager {
     }
 
     handleVerifyOTPSuccess(response) {
+        console.log('Verify OTP Success:', response);
         let message = this.getTranslation('otpVerified');
 
         // Handle different response formats
@@ -340,7 +348,6 @@ class OTPManager {
                     message = this.translateAPIMessage(parsedResponse.message) || message;
                 }
             } catch (e) {
-                // If parsing fails, use default message
                 message = this.getTranslation('otpVerified');
             }
         }
@@ -355,11 +362,11 @@ class OTPManager {
             title: message
         });
 
-        // Enable form validation or next steps
         this.onOTPVerified();
     }
 
     handleVerifyOTPError(xhr, status, error) {
+        console.log('Verify OTP Error:', xhr.status, xhr.responseText);
         let errorMessage = this.getTranslation('otpVerifyFailed');
 
         try {
@@ -367,10 +374,11 @@ class OTPManager {
 
             if (response.message) {
                 if (response.message.includes('TOO_MANY_ATTEMPTS')) {
-                    // Handle TOO_MANY_ATTEMPTS-269.0311575 format
+                    // Handle TOO_MANY_ATTEMPTS-299.2573603 format
                     const parts = response.message.split('-');
                     if (parts.length > 1) {
                         const banTime = parseFloat(parts[1]);
+                        console.log(`Ban time from verify error: ${banTime} seconds`);
                         this.handleBanResponse(banTime, this.getTranslation('tooManyAttempts'));
                         return;
                     } else {
@@ -409,9 +417,11 @@ class OTPManager {
             return;
         }
 
+        console.log('Checking ban status by calling verify API...');
+
         const requestData = {
             phone_number: phoneNumber,
-            otp_code: 000000 // Use number instead of string to trigger ban check
+            otp_code: 000000 // Dummy OTP to trigger ban response
         };
 
         $.ajax({
@@ -421,17 +431,19 @@ class OTPManager {
             data: JSON.stringify(requestData),
             success: (response) => {
                 // This shouldn't happen when checking ban status
-                console.log('Unexpected success from ban check');
+                console.log('Unexpected success from ban check:', response);
                 // Fallback to 5 minutes
                 this.handleBanResponse(300, this.getTranslation('tooManyAttempts'));
             },
             error: (xhr, status, error) => {
+                console.log('Ban check error response:', xhr.responseText);
                 try {
                     const response = JSON.parse(xhr.responseText);
                     if (response.message && response.message.includes('TOO_MANY_ATTEMPTS')) {
                         const parts = response.message.split('-');
                         if (parts.length > 1) {
                             const banTime = parseFloat(parts[1]);
+                            console.log(`Actual ban time: ${banTime} seconds`);
                             this.handleBanResponse(banTime, this.getTranslation('tooManyAttempts'));
                         } else {
                             // Default to 5 minutes if no time specified
@@ -443,6 +455,7 @@ class OTPManager {
                     }
                 } catch (e) {
                     // Fallback to 5 minutes ban if parsing fails
+                    console.warn('Failed to parse ban check response:', e);
                     this.handleBanResponse(300, this.getTranslation('tooManyAttempts'));
                 }
             }
@@ -461,6 +474,7 @@ class OTPManager {
     }
 
     handleBanResponse(banTimeSeconds, message) {
+        console.log(`Handling ban: ${banTimeSeconds} seconds`);
         this.banEndTime = new Date(Date.now() + (banTimeSeconds * 1000));
         this.isBanned = true;
         this.saveState();
@@ -480,6 +494,8 @@ class OTPManager {
             this.resetBanState();
             return;
         }
+
+        console.log(`Showing ban modal: ${remainingSeconds} seconds remaining`);
 
         // Update modal content
         const banTimeFormatted = this.formatTime(remainingSeconds);
@@ -540,6 +556,11 @@ class OTPManager {
             }
 
             this.updateBanCountdown(remainingSeconds);
+
+            // Also update the modal message with current time
+            const banTimeFormatted = this.formatTime(remainingSeconds);
+            $('#banModalMessage').text(this.getTranslation('banMessage').replace('{time}', banTimeFormatted));
+
             remainingSeconds--;
         }, 1000);
 
@@ -572,9 +593,47 @@ class OTPManager {
         }
     }
 
+    // Improved formatTime function - add this to your OTPManager class
+
     formatTime(seconds) {
-        const minutes = Math.floor(seconds / 60);
-        const remainingSeconds = seconds % 60;
+        // Round to remove decimals like .441638599999976
+        const totalSeconds = Math.floor(seconds);
+        const minutes = Math.floor(totalSeconds / 60);
+        const remainingSeconds = totalSeconds % 60;
+
+        // Get language for proper formatting
+        const lang = this.lang || localStorage.getItem('selectedLang') || 'kh';
+
+        if (minutes > 0) {
+            if (lang === 'kh') {
+                // Khmer format: "4 នាទី 37 វិនាទី"
+                if (remainingSeconds > 0) {
+                    return `${minutes} នាទី ${remainingSeconds} វិនាទី`;
+                } else {
+                    return `${minutes} នាទី`;
+                }
+            } else {
+                // English format: "4 min 37 sec"
+                if (remainingSeconds > 0) {
+                    return `${minutes} min ${remainingSeconds} sec`;
+                } else {
+                    return `${minutes} min`;
+                }
+            }
+        } else {
+            if (lang === 'kh') {
+                return `${remainingSeconds} វិនាទី`;
+            } else {
+                return `${remainingSeconds} sec`;
+            }
+        }
+    }
+
+    formatTimeShort(seconds) {
+        // Round to remove decimals
+        const totalSeconds = Math.floor(seconds);
+        const minutes = Math.floor(totalSeconds / 60);
+        const remainingSeconds = totalSeconds % 60;
 
         if (minutes > 0) {
             return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
@@ -630,14 +689,11 @@ class OTPManager {
     }
 
     onOTPVerified() {
-        // This method can be overridden or extended
-        // Enable form validation or next steps
         console.log('OTP verified successfully');
     }
 
     updateUILanguage() {
         this.lang = localStorage.getItem('selectedLang') || 'kh';
-        // Update any UI elements that need language updates
     }
 
     getTranslation(key) {
@@ -659,7 +715,10 @@ class OTPManager {
                 enterPhoneFirst: 'សូមបញ្ចូលលេខទូរស័ព្ទជាមុនសិន',
                 waitBeforeResend: 'សូមរង់ចាំ {time} មុនពេលផ្ញើម្តងទៀត',
                 error: 'កំហុស',
-                ok: 'យល់ព្រម'
+                ok: 'យល់ព្រម',
+                // Time units
+                minutes: 'នាទី',
+                seconds: 'វិនាទី'
             },
             en: {
                 otpSent: 'OTP sent successfully',
@@ -678,7 +737,10 @@ class OTPManager {
                 enterPhoneFirst: 'Please enter phone number first',
                 waitBeforeResend: 'Please wait {time} before resending',
                 error: 'Error',
-                ok: 'OK'
+                ok: 'OK',
+                // Time units
+                minutes: 'min',
+                seconds: 'sec'
             }
         };
 
