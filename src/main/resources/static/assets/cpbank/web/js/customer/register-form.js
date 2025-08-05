@@ -281,14 +281,22 @@ class OTPManager {
 
             if (response.message) {
                 if (response.message.includes('TOO_MANY_ATTEMPTS')) {
-                    // Handle TOO_MANY_ATTEMPTS-298.4533587 format
+                    // Backend now sends clean format: "TOO_MANY_ATTEMPTS-298"
                     const parts = response.message.split('-');
                     if (parts.length > 1) {
-                        const banTime = parseFloat(parts[1]);
-                        console.log(`Ban time from send error: ${banTime} seconds`);
-                        this.handleBanResponse(banTime, this.getTranslation('tooManyAttempts'));
-                        return;
+                        const banTime = parseInt(parts[1]); // Now it's a clean integer
+
+                        if (!isNaN(banTime) && banTime > 0) {
+                            console.log(`Ban time from send error: ${banTime} seconds`);
+                            this.handleBanResponse(banTime, this.getTranslation('tooManyAttempts'));
+                            return;
+                        }
                     }
+
+                    // Fallback to default ban time if parsing fails
+                    console.log('Failed to parse ban time, using default 5 minutes');
+                    this.handleBanResponse(300, this.getTranslation('tooManyAttempts'));
+                    return;
                 }
                 errorMessage = this.translateAPIMessage(response.message);
             }
@@ -374,18 +382,22 @@ class OTPManager {
 
             if (response.message) {
                 if (response.message.includes('TOO_MANY_ATTEMPTS')) {
-                    // Handle TOO_MANY_ATTEMPTS-298.4533587 format
+                    // Backend now sends clean format: "TOO_MANY_ATTEMPTS-298"
                     const parts = response.message.split('-');
                     if (parts.length > 1) {
-                        const banTime = parseFloat(parts[1]);
-                        console.log(`Ban time from verify error: ${banTime} seconds`);
-                        this.handleBanResponse(banTime, this.getTranslation('tooManyAttempts'));
-                        return;
-                    } else {
-                        // Just TOO_MANY_ATTEMPTS without time - use default 5 min
-                        this.handleBanResponse(300, this.getTranslation('tooManyAttempts'));
-                        return;
+                        const banTime = parseInt(parts[1]); // Now it's a clean integer
+
+                        if (!isNaN(banTime) && banTime > 0) {
+                            console.log(`Ban time from verify error: ${banTime} seconds`);
+                            this.handleBanResponse(banTime, this.getTranslation('tooManyAttempts'));
+                            return;
+                        }
                     }
+
+                    // Fallback to default ban time if parsing fails
+                    console.log('Failed to parse ban time, using default 5 minutes');
+                    this.handleBanResponse(300, this.getTranslation('tooManyAttempts'));
+                    return;
                 }
 
                 errorMessage = this.translateAPIMessage(response.message);
@@ -408,6 +420,7 @@ class OTPManager {
         this.showError(errorMessage);
     }
 
+    // Complete fix for checkBanStatus method - replace this method in your OTPManager class
     checkBanStatus() {
         // When -500 is returned from send OTP, call verify API to get actual ban time
         const phoneNumber = $('#contactNumber').val().trim();
@@ -442,9 +455,16 @@ class OTPManager {
                     if (response.message && response.message.includes('TOO_MANY_ATTEMPTS')) {
                         const parts = response.message.split('-');
                         if (parts.length > 1) {
-                            const banTime = parseFloat(parts[1]);
-                            console.log(`Actual ban time: ${banTime} seconds`);
-                            this.handleBanResponse(banTime, this.getTranslation('tooManyAttempts'));
+                            // FIXED: Use parseInt instead of parseFloat since backend now sends clean integers
+                            const banTime = parseInt(parts[1]);
+
+                            if (!isNaN(banTime) && banTime > 0) {
+                                console.log(`Actual ban time: ${banTime} seconds`);
+                                this.handleBanResponse(banTime, this.getTranslation('tooManyAttempts'));
+                            } else {
+                                // Default to 5 minutes if parsing fails
+                                this.handleBanResponse(300, this.getTranslation('tooManyAttempts'));
+                            }
                         } else {
                             // Default to 5 minutes if no time specified
                             this.handleBanResponse(300, this.getTranslation('tooManyAttempts'));
@@ -473,26 +493,33 @@ class OTPManager {
         return translations[message] || message;
     }
 
-    handleBanResponse(banTimeSeconds, message) {
-        // Parse the decimal seconds properly
-        const exactSeconds = parseFloat(banTimeSeconds);
-        const roundedSeconds = Math.floor(exactSeconds);
+handleBanResponse(banTimeSeconds, message) {
+    // Since backend now sends clean integers, this is much simpler
+    const cleanSeconds = Math.floor(Math.abs(parseInt(banTimeSeconds) || 0));
 
-        console.log(`Handling ban: ${exactSeconds} seconds (rounded to ${roundedSeconds})`);
+    console.log(`Handling ban: ${cleanSeconds} seconds`);
 
-        this.banEndTime = new Date(Date.now() + (exactSeconds * 1000));
-        this.isBanned = true;
-        this.saveState();
+    // Use clean seconds for ban end time calculation
+    this.banEndTime = new Date(Date.now() + (cleanSeconds * 1000));
+    this.isBanned = true;
+    this.saveState();
 
-        this.showBanModal(roundedSeconds, message);
-        this.disableResendButton();
-    }
+    // Show ban modal with clean time
+    this.showBanModal(cleanSeconds, message);
+    this.disableResendButton();
+}
+
 
     showBanModal(banTimeSeconds = null, message = null) {
         // Calculate remaining ban time
-        let remainingSeconds = banTimeSeconds;
-        if (!remainingSeconds && this.banEndTime) {
-            remainingSeconds = Math.max(0, Math.ceil((this.banEndTime - new Date()) / 1000));
+        let remainingSeconds = 0;
+
+        if (banTimeSeconds !== null) {
+            // Ensure we use integer parsing for clean time
+            remainingSeconds = Math.floor(Math.abs(parseInt(banTimeSeconds) || 0));
+        } else if (this.banEndTime) {
+            const rawSeconds = Math.max(0, (this.banEndTime - new Date()) / 1000);
+            remainingSeconds = Math.floor(rawSeconds);
         }
 
         if (remainingSeconds <= 0) {
@@ -502,8 +529,10 @@ class OTPManager {
 
         console.log(`Showing ban modal: ${remainingSeconds} seconds remaining`);
 
-        // Update modal content
+        // Format time properly using our formatTime function
         const banTimeFormatted = this.formatTime(remainingSeconds);
+
+        // Update modal content
         $('#banModalTitle').text(this.getTranslation('banTitle'));
         $('#banModalMessage').text(this.getTranslation('banMessage').replace('{time}', banTimeFormatted));
         $('#banModalOkText').text(this.getTranslation('ok'));
@@ -511,18 +540,22 @@ class OTPManager {
         // Show modal
         $('#otpBanModal').modal('show');
 
-        // Start countdown
+        // Start countdown with clean integer
         this.startBanCountdown(remainingSeconds);
     }
 
     showBanStatus() {
         if (!this.banEndTime) return;
 
-        const remainingSeconds = Math.max(0, Math.ceil((this.banEndTime - new Date()) / 1000));
+        const rawSeconds = Math.max(0, (this.banEndTime - new Date()) / 1000);
+        const remainingSeconds = Math.floor(rawSeconds);
+
         if (remainingSeconds > 0) {
             this.disableResendButton();
             const banTimeFormatted = this.formatTime(remainingSeconds);
             this.updateOTPStatus(this.getTranslation('accountBanned').replace('{time}', banTimeFormatted), 'error');
+
+            console.log(`Ban status: ${remainingSeconds} seconds -> ${banTimeFormatted}`);
         } else {
             this.resetBanState();
         }
@@ -530,9 +563,12 @@ class OTPManager {
 
     startResendCountdown(customSeconds = null) {
         const totalSeconds = customSeconds || this.resendCountdownSeconds;
-        let remainingSeconds = totalSeconds;
+        let remainingSeconds = Math.floor(Math.abs(parseFloat(totalSeconds) || 0));
 
         this.disableResendButton();
+
+        // Clear any existing countdown
+        this.clearResendCountdown();
 
         this.countdownInterval = setInterval(() => {
             if (remainingSeconds <= 0) {
@@ -549,40 +585,57 @@ class OTPManager {
         this.updateResendCountdown(remainingSeconds);
     }
 
-    startBanCountdown(totalSeconds) {
-        let remainingSeconds = totalSeconds;
+   startBanCountdown(totalSeconds) {
+       // Ensure we start with a clean integer
+       let remainingSeconds = Math.floor(Math.abs(parseInt(totalSeconds) || 0));
 
-        this.banCountdownInterval = setInterval(() => {
-            if (remainingSeconds <= 0) {
-                this.clearBanCountdown();
-                this.resetBanState();
-                $('#otpBanModal').modal('hide');
-                return;
-            }
+       // Clear any existing countdown
+       this.clearBanCountdown();
 
-            this.updateBanCountdown(remainingSeconds);
+       console.log(`Starting ban countdown with ${remainingSeconds} seconds`);
 
-            // Also update the modal message with current time
-            const banTimeFormatted = this.formatTime(remainingSeconds);
-            $('#banModalMessage').text(this.getTranslation('banMessage').replace('{time}', banTimeFormatted));
+       this.banCountdownInterval = setInterval(() => {
+           if (remainingSeconds <= 0) {
+               this.clearBanCountdown();
+               this.resetBanState();
+               $('#otpBanModal').modal('hide');
+               return;
+           }
 
-            remainingSeconds--;
-        }, 1000);
+           // Update the countdown display
+           this.updateBanCountdown(remainingSeconds);
 
-        // Initial update
-        this.updateBanCountdown(remainingSeconds);
-    }
+           // Update the modal message with current time
+           const banTimeFormatted = this.formatTime(remainingSeconds);
+           $('#banModalMessage').text(this.getTranslation('banMessage').replace('{time}', banTimeFormatted));
+
+           remainingSeconds--;
+       }, 1000);
+
+       // Initial update
+       this.updateBanCountdown(remainingSeconds);
+   }
 
     updateResendCountdown(seconds) {
-        const formatted = this.formatTime(seconds);
+        const cleanSeconds = Math.floor(Math.abs(parseFloat(seconds) || 0));
+        const formatted = this.formatTime(cleanSeconds);
         $('#resendCountdown').text(`(${formatted})`).removeClass('d-none');
         $('#resendOTPText').addClass('d-none');
     }
 
-    updateBanCountdown(seconds) {
-        const formatted = this.formatTime(seconds);
-        $('#banCountdown').text(formatted);
-    }
+  updateBanCountdown(seconds) {
+      // Ensure we're working with a clean integer
+      const cleanSeconds = Math.floor(Math.abs(parseInt(seconds) || 0));
+
+      // Use our formatTime function for consistent formatting
+      const formatted = this.formatTime(cleanSeconds);
+
+      // Update the countdown display
+      $('#banCountdown').text(formatted);
+
+      console.log(`Ban countdown update: ${cleanSeconds} seconds -> "${formatted}"`);
+  }
+
 
     clearResendCountdown() {
         if (this.countdownInterval) {
@@ -600,13 +653,24 @@ class OTPManager {
 
     // Enhanced formatTime function for proper ban time display
     formatTime(seconds) {
-        // Round to remove decimals like .4533587
-        const totalSeconds = Math.floor(seconds);
+        // Convert to clean integer - handle any input type
+        let totalSeconds = 0;
+
+        if (typeof seconds === 'string') {
+            // Remove any non-numeric characters except decimal point, then convert to integer
+            const cleaned = seconds.replace(/[^0-9.]/g, '');
+            totalSeconds = Math.floor(Math.abs(parseFloat(cleaned) || 0));
+        } else {
+            totalSeconds = Math.floor(Math.abs(parseInt(seconds) || 0));
+        }
+
         const minutes = Math.floor(totalSeconds / 60);
         const remainingSeconds = totalSeconds % 60;
 
         // Get language for proper formatting
         const lang = this.lang || localStorage.getItem('selectedLang') || 'kh';
+
+        console.log(`formatTime: input="${seconds}" -> totalSeconds=${totalSeconds} -> ${minutes}m ${remainingSeconds}s -> lang=${lang}`);
 
         if (minutes > 0) {
             if (lang === 'kh') {

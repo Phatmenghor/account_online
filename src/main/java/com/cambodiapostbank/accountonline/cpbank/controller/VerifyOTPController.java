@@ -64,11 +64,11 @@ public class VerifyOTPController {
         } catch (Exception e) {
             log.error("[OTP Send] Error sending OTP to phone number: " + sendOtpRequestDto.getPhoneNumber(), e);
 
-            // Check if it's a ban-related error
+            // Check if it's a ban-related error and clean the time format
             if (e.getMessage() != null && e.getMessage().contains("TOO_MANY_ATTEMPTS")) {
                 Map<String, String> response = new LinkedHashMap<>();
                 response.put("status", "Failed");
-                response.put("message", e.getMessage()); // This should contain "TOO_MANY_ATTEMPTS-299.2573603"
+                response.put("message", cleanBanMessage(e.getMessage()));
                 return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
             }
 
@@ -106,7 +106,7 @@ public class VerifyOTPController {
 
             response.put("status", "Failed");
 
-            // Handle specific C# API error messages
+            // Handle specific C# API error messages and clean ban messages
             String errorMessage = e.getMessage();
             if (errorMessage != null) {
                 if (errorMessage.contains("OTP_EXPIRED")) {
@@ -114,7 +114,7 @@ public class VerifyOTPController {
                 } else if (errorMessage.contains("OTP_INVALID")) {
                     response.put("message", "OTP_INVALID");
                 } else if (errorMessage.contains("TOO_MANY_ATTEMPTS")) {
-                    response.put("message", errorMessage); // This should contain "TOO_MANY_ATTEMPTS-299.2573603"
+                    response.put("message", cleanBanMessage(errorMessage));
                 } else {
                     response.put("message", "OTP_INVALID"); // Default fallback
                 }
@@ -123,6 +123,45 @@ public class VerifyOTPController {
             }
 
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    /**
+     * Clean the ban message to convert decimal seconds to integer
+     * Input: "TOO_MANY_ATTEMPTS-298.4533587"
+     * Output: "TOO_MANY_ATTEMPTS-298"
+     */
+    private String cleanBanMessage(String originalMessage) {
+        log.info("[OTP Controller] cleanBanMessage called with: " + originalMessage);
+
+        try {
+            if (originalMessage == null || !originalMessage.contains("TOO_MANY_ATTEMPTS-")) {
+                log.info("[OTP Controller] Message doesn't contain TOO_MANY_ATTEMPTS-, returning original");
+                return originalMessage;
+            }
+
+            String[] parts = originalMessage.split("-");
+            if (parts.length != 2) {
+                log.warn("[OTP Controller] Message doesn't split into 2 parts, returning original");
+                return originalMessage;
+            }
+
+            String banTimeStr = parts[1].trim();
+            log.info("[OTP Controller] Extracted ban time string: '" + banTimeStr + "'");
+
+            double banTimeDecimal = Double.parseDouble(banTimeStr);
+            int banTimeInteger = (int) Math.floor(Math.abs(banTimeDecimal));
+
+            String cleanedMessage = "TOO_MANY_ATTEMPTS-" + banTimeInteger;
+
+            log.info("[OTP Controller] Cleaned ban message: '" + originalMessage + "' -> '" + cleanedMessage + "'");
+
+            return cleanedMessage;
+
+        } catch (Exception e) {
+            log.error("[OTP Controller] Failed to clean ban message: " + originalMessage, e);
+            // Return original message if cleaning fails
+            return originalMessage;
         }
     }
 }
