@@ -14,22 +14,23 @@ import java.io.IOException;
 public class SecurityHeadersFilter extends OncePerRequestFilter {
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, 
-                                  FilterChain filterChain) throws ServletException, IOException {
-        
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
+                                    FilterChain filterChain) throws ServletException, IOException {
+
         // Add all missing security headers
         response.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
-        response.setHeader("Content-Security-Policy", 
-            "default-src 'self'; " +
-            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com https://code.jquery.com https://cdn.jsdelivr.net; " +
-            "style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; " +
-            "img-src 'self' data: https:; " +
-            "font-src 'self' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net;"
+        response.setHeader("Content-Security-Policy",
+                "default-src 'self'; " +
+                        "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com https://code.jquery.com https://cdn.jsdelivr.net; " +
+                        "style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://fonts.googleapis.com; " +
+                        "font-src 'self' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://fonts.gstatic.com; " +
+                        "img-src 'self' data: https:; " +
+                        "connect-src 'self';"
         );
         response.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
         response.setHeader("Permissions-Policy", "camera=(), microphone=(), geolocation=(), payment=(), usb=()");
         response.setHeader("X-XSS-Protection", "1; mode=block");
-        
+
         filterChain.doFilter(request, response);
     }
 }
