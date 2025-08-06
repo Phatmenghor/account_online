@@ -40,7 +40,7 @@ $(document).ready(function () {
 
     // Initialize OTP Manager
     otpManager = new OTPManager();
-    console.log('OTP Manager initialized:', otpManager);
+//    console.log('OTP Manager initialized:', otpManager);
 
     // Call the function to populate other fields
     getBranch();
@@ -66,7 +66,7 @@ function initializeFlatpickr() {
     });
 }
 
-// Complete OTP Management System - WORKING VERSION
+// Enhanced OTP Management System with Per-Phone Ban and Debouncing
 class OTPManager {
     constructor() {
         this.countdownInterval = null;
@@ -76,9 +76,12 @@ class OTPManager {
         this.maxFailedAttempts = 3;
         this.currentPhoneNumber = null;
         this.isOTPVerified = false;
-        this.isBanned = false;
-        this.banEndTime = null;
+        this.bannedPhones = new Map(); // Store ban info per phone number
         this.lang = localStorage.getItem('selectedLang') || 'kh';
+
+        // Prevent multiple simultaneous API calls
+        this.isVerifyingOTP = false;
+        this.isSendingOTP = false;
 
         this.init();
     }
@@ -89,59 +92,83 @@ class OTPManager {
             this.bindEvents();
             this.loadState();
             this.updateUILanguage();
-            console.log('OTP Manager fully initialized');
+//            console.log('OTP Manager fully initialized');
         }, 100);
     }
 
     bindEvents() {
-        console.log('Binding OTP events...');
+//        console.log('Binding OTP events...');
 
-        // Phone number change event - FIXED
-        $('#contactNumber').off('change blur input keyup').on('change blur input keyup', (e) => {
+        // Check if required elements exist before binding
+        if (!$('#contactNumber').length || !$('#otpCode').length || !$('#resendOTPBtn').length) {
+//            console.warn('OTP elements not found, skipping event binding');
+            return;
+        }
+
+        // Phone number change event - ONLY on blur (leaving field)
+        $('#contactNumber').off('blur').on('blur', (e) => {
             const newPhoneNumber = $(e.target).val().trim();
-            console.log('Phone number event triggered:', newPhoneNumber);
+//            console.log('Phone number blur event triggered:', newPhoneNumber);
 
             if (newPhoneNumber && newPhoneNumber !== this.currentPhoneNumber && newPhoneNumber.length >= 9) {
-                console.log('Phone number meets criteria, sending OTP');
+//                console.log('Phone number meets criteria, sending OTP');
+
+                // Clear any previous ban countdown when switching phone numbers
+                this.clearBanCountdown();
+
+                // Update current phone number
                 this.currentPhoneNumber = newPhoneNumber;
                 this.resetOTPState();
-                // Add slight delay to ensure UI updates
+
+                // Check if this phone number is banned
+                if (this.isPhoneBanned(newPhoneNumber)) {
+                    this.showPhoneBanStatus(newPhoneNumber);
+                    return;
+                }
+
+                // Phone is not banned, clear any previous ban status and send OTP
+                this.updateOTPStatus('', ''); // Clear any previous ban messages
+                this.enableResendButton(); // Make sure resend button is enabled
+
                 setTimeout(() => {
                     this.sendOTP();
                 }, 200);
             }
         });
 
-        // OTP code input event - FIXED
+        // OTP code input event with debouncing to prevent multiple calls
+        let otpTimeout = null;
         $('#otpCode').off('input keyup').on('input keyup', (e) => {
             const otpCode = $(e.target).val().trim();
-            console.log('OTP code input:', otpCode, 'Length:', otpCode.length);
+//            console.log('OTP code input:', otpCode, 'Length:', otpCode.length);
+
+            // Clear previous timeout
+            if (otpTimeout) {
+                clearTimeout(otpTimeout);
+            }
 
             if (otpCode && otpCode.length === 6) {
-                console.log('OTP code complete, verifying...');
-                // Add slight delay to ensure user finished typing
-                setTimeout(() => {
-                    this.verifyOTP(otpCode);
-                }, 300);
+//                console.log('OTP code complete, will verify after delay...');
+                // Debounce - wait 500ms before verifying to prevent multiple calls
+                otpTimeout = setTimeout(() => {
+                    if (!this.isVerifyingOTP) { // Prevent multiple simultaneous calls
+                        this.verifyOTP(otpCode);
+                    }
+                }, 500);
             }
         });
 
-        // Resend button click - FIXED
+        // Resend button click
         $('#resendOTPBtn').off('click').on('click', (e) => {
             e.preventDefault();
-            console.log('Resend button clicked, disabled:', this.isResendDisabled());
+//            console.log('Resend button clicked, disabled:', this.isResendDisabled());
 
-            if (!this.isResendDisabled()) {
+            if (!this.isResendDisabled() && !this.isSendingOTP) {
                 this.sendOTP();
             }
         });
 
-        // Ban modal OK button
-        $('#banModalOkBtn').off('click').on('click', () => {
-            $('#otpBanModal').modal('hide');
-        });
-
-        console.log('OTP Manager events bound successfully');
+//        console.log('OTP Manager events bound successfully');
     }
 
     loadState() {
@@ -152,19 +179,25 @@ class OTPManager {
                 this.failedAttempts = state.failedAttempts || 0;
                 this.currentPhoneNumber = state.currentPhoneNumber || null;
                 this.isOTPVerified = state.isOTPVerified || false;
-                this.isBanned = state.isBanned || false;
-                this.banEndTime = state.banEndTime ? new Date(state.banEndTime) : null;
 
-                // Check if ban is still active
-                if (this.isBanned && this.banEndTime && new Date() < this.banEndTime) {
-                    this.showBanStatus();
-                } else if (this.isBanned) {
-                    this.resetBanState();
+                // Load banned phones map
+                if (state.bannedPhones) {
+                    this.bannedPhones = new Map(state.bannedPhones);
+                    // Clean up expired bans
+                    this.cleanExpiredBans();
                 }
 
                 // Update UI based on loaded state
                 if (this.currentPhoneNumber) {
-                    $('#contactNumber').val(this.currentPhoneNumber);
+                    const phoneField = $('#contactNumber');
+                    if (phoneField.length) {
+                        phoneField.val(this.currentPhoneNumber);
+                    }
+
+                    // Check if current phone is banned
+                    if (this.isPhoneBanned(this.currentPhoneNumber)) {
+                        this.showPhoneBanStatus(this.currentPhoneNumber);
+                    }
                 }
 
                 if (this.isOTPVerified) {
@@ -182,8 +215,7 @@ class OTPManager {
                 failedAttempts: this.failedAttempts,
                 currentPhoneNumber: this.currentPhoneNumber,
                 isOTPVerified: this.isOTPVerified,
-                isBanned: this.isBanned,
-                banEndTime: this.banEndTime ? this.banEndTime.toISOString() : null
+                bannedPhones: Array.from(this.bannedPhones.entries()) // Convert Map to Array for storage
             };
             sessionStorage.setItem('otpState', JSON.stringify(state));
         } catch (e) {
@@ -193,39 +225,121 @@ class OTPManager {
 
     resetOTPState() {
         this.isOTPVerified = false;
-        $('#otpCode').val('');
+        const otpCodeField = $('#otpCode');
+        if (otpCodeField.length) {
+            otpCodeField.val('');
+        }
+        // Clear any ban countdown when resetting OTP state
+        this.clearBanCountdown();
         this.updateOTPStatus('');
         this.saveState();
     }
 
-    resetBanState() {
-        this.isBanned = false;
-        this.banEndTime = null;
-        this.failedAttempts = 0;
-        this.clearBanCountdown();
-        this.enableResendButton();
+    // Phone-specific ban methods
+    isPhoneBanned(phoneNumber) {
+        if (!phoneNumber || !this.bannedPhones.has(phoneNumber)) {
+            return false;
+        }
+
+        const banInfo = this.bannedPhones.get(phoneNumber);
+        const now = new Date();
+
+        if (banInfo.banEndTime && now < new Date(banInfo.banEndTime)) {
+            return true;
+        } else {
+            // Ban expired, remove it
+            this.bannedPhones.delete(phoneNumber);
+            this.saveState();
+            return false;
+        }
+    }
+
+    banPhone(phoneNumber, banTimeSeconds) {
+        const cleanSeconds = Math.floor(Math.abs(parseInt(banTimeSeconds) || 0));
+        const banEndTime = new Date(Date.now() + (cleanSeconds * 1000));
+
+        this.bannedPhones.set(phoneNumber, {
+            banEndTime: banEndTime.toISOString(),
+            banTimeSeconds: cleanSeconds
+        });
+
         this.saveState();
-        console.log('Ban state reset');
+//        console.log(`Phone ${phoneNumber} banned for ${cleanSeconds} seconds`);
+    }
+
+    showPhoneBanStatus(phoneNumber) {
+        if (!this.isPhoneBanned(phoneNumber)) return;
+
+        const banInfo = this.bannedPhones.get(phoneNumber);
+        const rawSeconds = Math.max(0, (new Date(banInfo.banEndTime) - new Date()) / 1000);
+        const remainingSeconds = Math.floor(rawSeconds);
+
+        if (remainingSeconds > 0) {
+            this.disableResendButton();
+            const banTimeFormatted = this.formatTime(remainingSeconds);
+            this.updateOTPStatus(this.getTranslation('accountBanned').replace('{time}', banTimeFormatted), 'error');
+            this.startPhoneBanCountdown(phoneNumber, remainingSeconds);
+//            console.log(`Phone ban status: ${remainingSeconds} seconds -> ${banTimeFormatted}`);
+        } else {
+            this.bannedPhones.delete(phoneNumber);
+            this.saveState();
+        }
+    }
+
+    cleanExpiredBans() {
+        const now = new Date();
+        for (const [phoneNumber, banInfo] of this.bannedPhones.entries()) {
+            if (now >= new Date(banInfo.banEndTime)) {
+                this.bannedPhones.delete(phoneNumber);
+            }
+        }
+        this.saveState();
+    }
+
+    resetBanState() {
+        // This method is kept for backward compatibility but now works with current phone
+        if (this.currentPhoneNumber && this.bannedPhones.has(this.currentPhoneNumber)) {
+            this.bannedPhones.delete(this.currentPhoneNumber);
+            this.saveState();
+            this.clearBanCountdown();
+            this.enableResendButton();
+//            console.log(`Ban state reset for phone: ${this.currentPhoneNumber}`);
+        }
     }
 
     sendOTP() {
-        console.log('sendOTP called');
+//        console.log('sendOTP called');
 
-        if (this.isBanned && this.banEndTime && new Date() < this.banEndTime) {
-            this.showBanModal();
+        // Prevent multiple simultaneous calls
+        if (this.isSendingOTP) {
+//            console.log('Already sending OTP, skipping...');
             return;
         }
 
-        const phoneNumber = $('#contactNumber').val().trim();
-        console.log('Sending OTP to:', phoneNumber);
+        const phoneField = $('#contactNumber');
+        if (!phoneField.length) {
+            console.error('Phone number field not found');
+            return;
+        }
+
+        const phoneNumber = phoneField.val().trim();
+//        console.log('Sending OTP to:', phoneNumber);
 
         if (!phoneNumber || phoneNumber.length < 9) {
-            this.showError(this.getTranslation('invalidPhoneNumber'));
+            showSweetAlert('error', this.getTranslation('error'), this.getTranslation('invalidPhoneNumber'));
             return;
         }
 
+        // Check if this specific phone number is banned
+        if (this.isPhoneBanned(phoneNumber)) {
+            this.showPhoneBanStatus(phoneNumber);
+            return;
+        }
+
+        this.isSendingOTP = true; // Set flag to prevent multiple calls
         this.updateOTPStatus(this.getTranslation('sendingOTP'), 'info');
         this.disableResendButton();
+        // Removed showLoading() - only show status message under input
 
         const requestData = {
             phone: phoneNumber,
@@ -233,7 +347,7 @@ class OTPManager {
             Text: ""
         };
 
-        console.log('Sending AJAX request to:', "api/v1/otp/send", requestData);
+//        console.log('Sending AJAX request to:', "api/v1/otp/send", requestData);
 
         $.ajax({
             type: "POST",
@@ -241,26 +355,33 @@ class OTPManager {
             contentType: 'application/json',
             data: JSON.stringify(requestData),
             beforeSend: function() {
-                console.log('AJAX request started for OTP send');
+//                console.log('AJAX request started for OTP send');
             },
             success: (response) => {
-                console.log('Send OTP AJAX success:', response);
+                this.isSendingOTP = false; // Reset flag
+                // Removed hideLoading() - no modal to hide
+                console.log('Hi', response);
                 this.handleSendOTPSuccess(response);
             },
             error: (xhr, status, error) => {
-                console.log('Send OTP AJAX error:', xhr.status, xhr.responseText, status, error);
+                this.isSendingOTP = false; // Reset flag
+                // Removed hideLoading() - no modal to hide
+                console.log('Hi', xhr.status, xhr.responseText, status, error);
                 this.handleSendOTPError(xhr, status, error);
             }
         });
     }
 
     handleSendOTPSuccess(response) {
-        console.log('Send OTP Response:', response);
+//        console.log('Send OTP Response:', response);
+
+        // Clear any previous ban countdown when OTP is successfully processed
+        this.clearBanCountdown();
 
         // Handle direct number response (status 200 with number)
         if (typeof response === 'number') {
             if (response > 0) {
-                // Positive number = OTP sent successfully
+                // Positive number = OTP sent successfully (6 digits = OTP code)
                 const message = this.getTranslation('otpSent');
                 this.updateOTPStatus(message, 'success');
                 this.startResendCountdown();
@@ -270,13 +391,13 @@ class OTPManager {
                     title: message
                 });
             } else if (response === -500) {
-                // -500 = Phone banned, need to get actual ban time via verify API
-                console.log('Phone number banned (-500), checking ban status...');
+                // -500 = Phone banned for verification, need to get actual ban time
+//                console.log('Phone number banned (-500), checking ban status...');
                 this.checkBanStatus();
             } else if (response < 0 && response >= -60) {
-                // Negative numbers from -60 to -1 = wait time in seconds
+                // Negative numbers from -60 to -1 = wait time in seconds before next send
                 const waitSeconds = Math.abs(response);
-                console.log(`Wait time: ${waitSeconds} seconds`);
+//                console.log(`Wait time: ${waitSeconds} seconds`);
                 this.startResendCountdown(waitSeconds);
                 const message = this.getTranslation('waitBeforeResend').replace('{time}', this.formatTime(waitSeconds));
                 this.updateOTPStatus(message, 'warning');
@@ -309,7 +430,7 @@ class OTPManager {
     }
 
     handleSendOTPError(xhr, status, error) {
-        console.log('Send OTP Error:', xhr.status, xhr.responseText);
+//        console.log('Send OTP Error:', xhr.status, xhr.responseText);
         let errorMessage = this.getTranslation('otpSendFailed');
 
         try {
@@ -317,21 +438,21 @@ class OTPManager {
 
             if (response.message) {
                 if (response.message.includes('TOO_MANY_ATTEMPTS')) {
-                    // Backend now sends clean format: "TOO_MANY_ATTEMPTS-298"
+                    // Backend sends format: "TOO_MANY_ATTEMPTS-298"
                     const parts = response.message.split('-');
                     if (parts.length > 1) {
-                        const banTime = parseInt(parts[1]); // Now it's a clean integer
+                        const banTime = parseInt(parts[1]);
 
                         if (!isNaN(banTime) && banTime > 0) {
-                            console.log(`Ban time from send error: ${banTime} seconds`);
-                            this.handleBanResponse(banTime, this.getTranslation('tooManyAttempts'));
+//                            console.log(`Ban time from send error: ${banTime} seconds`);
+                            this.handleBanResponse(banTime);
                             return;
                         }
                     }
 
                     // Fallback to default ban time if parsing fails
-                    console.log('Failed to parse ban time, using default 5 minutes');
-                    this.handleBanResponse(300, this.getTranslation('tooManyAttempts'));
+//                    console.log('Failed to parse ban time, using default 5 minutes');
+                    this.handleBanResponse(300);
                     return;
                 }
                 errorMessage = this.translateAPIMessage(response.message);
@@ -341,32 +462,47 @@ class OTPManager {
         }
 
         this.updateOTPStatus(errorMessage, 'error');
-        this.showError(errorMessage);
+        showSweetAlert('error', this.getTranslation('error'), errorMessage);
         this.enableResendButton();
     }
 
     verifyOTP(otpCode) {
-        console.log('verifyOTP called with code:', otpCode);
+//        console.log('verifyOTP called with code:', otpCode);
 
-        if (this.isBanned && this.banEndTime && new Date() < this.banEndTime) {
-            this.showBanModal();
+        // Prevent multiple simultaneous calls
+        if (this.isVerifyingOTP) {
+//            console.log('Already verifying OTP, skipping...');
             return;
         }
 
-        const phoneNumber = $('#contactNumber').val().trim();
+        const phoneField = $('#contactNumber');
+        if (!phoneField.length) {
+            console.error('Phone number field not found');
+            return;
+        }
+
+        const phoneNumber = phoneField.val().trim();
         if (!phoneNumber) {
-            this.showError(this.getTranslation('enterPhoneFirst'));
+            showSweetAlert('error', this.getTranslation('error'), this.getTranslation('enterPhoneFirst'));
             return;
         }
 
+        // Check if this specific phone number is banned
+        if (this.isPhoneBanned(phoneNumber)) {
+            this.showPhoneBanStatus(phoneNumber);
+            return;
+        }
+
+        this.isVerifyingOTP = true; // Set flag to prevent multiple calls
         this.updateOTPStatus(this.getTranslation('verifyingOTP'), 'info');
+        showLoading(this.getTranslation('verifyingOTP'));
 
         const requestData = {
             phone_number: phoneNumber,
             otp_code: parseInt(otpCode)
         };
 
-        console.log('Sending verify OTP request:', requestData);
+//        console.log('Sending verify OTP request:', requestData);
 
         $.ajax({
             type: "POST",
@@ -374,18 +510,22 @@ class OTPManager {
             contentType: 'application/json',
             data: JSON.stringify(requestData),
             success: (response) => {
-                console.log('Verify OTP success:', response);
+                this.isVerifyingOTP = false; // Reset flag
+                hideLoading();
+//                console.log('Verify OTP success:', response);
                 this.handleVerifyOTPSuccess(response);
             },
             error: (xhr, status, error) => {
-                console.log('Verify OTP error:', xhr.status, xhr.responseText);
+                this.isVerifyingOTP = false; // Reset flag
+                hideLoading();
+//                console.log('Verify OTP error:', xhr.status, xhr.responseText);
                 this.handleVerifyOTPError(xhr, status, error);
             }
         });
     }
 
     handleVerifyOTPSuccess(response) {
-        console.log('Verify OTP Success:', response);
+//        console.log('Verify OTP Success:', response);
         let message = this.getTranslation('otpVerified');
 
         // Handle different response formats
@@ -416,7 +556,7 @@ class OTPManager {
     }
 
     handleVerifyOTPError(xhr, status, error) {
-        console.log('Verify OTP Error:', xhr.status, xhr.responseText);
+//        console.log('Verify OTP Error:', xhr.status, xhr.responseText);
         let errorMessage = this.getTranslation('otpVerifyFailed');
 
         try {
@@ -424,21 +564,21 @@ class OTPManager {
 
             if (response.message) {
                 if (response.message.includes('TOO_MANY_ATTEMPTS')) {
-                    // Backend now sends clean format: "TOO_MANY_ATTEMPTS-298"
+                    // Backend sends format: "TOO_MANY_ATTEMPTS-298"
                     const parts = response.message.split('-');
                     if (parts.length > 1) {
-                        const banTime = parseInt(parts[1]); // Now it's a clean integer
+                        const banTime = parseInt(parts[1]);
 
                         if (!isNaN(banTime) && banTime > 0) {
-                            console.log(`Ban time from verify error: ${banTime} seconds`);
-                            this.handleBanResponse(banTime, this.getTranslation('tooManyAttempts'));
+//                            console.log(`Ban time from verify error: ${banTime} seconds`);
+                            this.handleBanResponse(banTime);
                             return;
                         }
                     }
 
                     // Fallback to default ban time if parsing fails
-                    console.log('Failed to parse ban time, using default 5 minutes');
-                    this.handleBanResponse(300, this.getTranslation('tooManyAttempts'));
+//                    console.log('Failed to parse ban time, using default 5 minutes');
+                    this.handleBanResponse(300);
                     return;
                 }
 
@@ -456,26 +596,36 @@ class OTPManager {
             this.saveState();
         }
 
-        // Clear OTP field and show error
-        $('#otpCode').val('');
+        // Clear OTP field and show error using consistent pattern
+        const otpCodeField = $('#otpCode');
+        if (otpCodeField.length) {
+            otpCodeField.val('');
+        }
         this.updateOTPStatus(errorMessage, 'error');
-        this.showError(errorMessage);
+        showSweetAlert('error', this.getTranslation('error'), errorMessage);
     }
 
     checkBanStatus() {
         // When -500 is returned from send OTP, call verify API to get actual ban time
-        const phoneNumber = $('#contactNumber').val().trim();
-        if (!phoneNumber) {
-            // Fallback to 5 minutes if no phone number
-            this.handleBanResponse(300, this.getTranslation('tooManyAttempts'));
+        const phoneField = $('#contactNumber');
+        if (!phoneField.length) {
+            console.error('Phone number field not found');
+            this.handleBanResponse(300);
             return;
         }
 
-        console.log('Checking ban status by calling verify API...');
+        const phoneNumber = phoneField.val().trim();
+        if (!phoneNumber) {
+            // Fallback to 5 minutes if no phone number
+            this.handleBanResponse(300);
+            return;
+        }
+
+//        console.log('Checking ban status by calling verify API...');
 
         const requestData = {
             phone_number: phoneNumber,
-            otp_code: 000000 // Dummy OTP to trigger ban response
+            otp_code: 123456 // Dummy OTP to trigger ban response
         };
 
         $.ajax({
@@ -485,12 +635,12 @@ class OTPManager {
             data: JSON.stringify(requestData),
             success: (response) => {
                 // This shouldn't happen when checking ban status
-                console.log('Unexpected success from ban check:', response);
+//                console.log('Unexpected success from ban check:', response);
                 // Fallback to 5 minutes
-                this.handleBanResponse(300, this.getTranslation('tooManyAttempts'));
+                this.handleBanResponse(300);
             },
             error: (xhr, status, error) => {
-                console.log('Ban check error response:', xhr.responseText);
+//                console.log('Ban check error response:', xhr.responseText);
                 try {
                     const response = JSON.parse(xhr.responseText);
                     if (response.message && response.message.includes('TOO_MANY_ATTEMPTS')) {
@@ -499,24 +649,24 @@ class OTPManager {
                             const banTime = parseInt(parts[1]);
 
                             if (!isNaN(banTime) && banTime > 0) {
-                                console.log(`Actual ban time: ${banTime} seconds`);
-                                this.handleBanResponse(banTime, this.getTranslation('tooManyAttempts'));
+//                                console.log(`Actual ban time: ${banTime} seconds`);
+                                this.handleBanResponse(banTime);
                             } else {
                                 // Default to 5 minutes if parsing fails
-                                this.handleBanResponse(300, this.getTranslation('tooManyAttempts'));
+                                this.handleBanResponse(300);
                             }
                         } else {
                             // Default to 5 minutes if no time specified
-                            this.handleBanResponse(300, this.getTranslation('tooManyAttempts'));
+                            this.handleBanResponse(300);
                         }
                     } else {
                         // Fallback to 5 minutes for any other error
-                        this.handleBanResponse(300, this.getTranslation('tooManyAttempts'));
+                        this.handleBanResponse(300);
                     }
                 } catch (e) {
                     // Fallback to 5 minutes ban if parsing fails
                     console.warn('Failed to parse ban check response:', e);
-                    this.handleBanResponse(300, this.getTranslation('tooManyAttempts'));
+                    this.handleBanResponse(300);
                 }
             }
         });
@@ -533,28 +683,26 @@ class OTPManager {
         return translations[message] || message;
     }
 
-    handleBanResponse(banTimeSeconds, message) {
-        // Since backend now sends clean integers, this is much simpler
+    handleBanResponse(banTimeSeconds) {
         const cleanSeconds = Math.floor(Math.abs(parseInt(banTimeSeconds) || 0));
 
-        console.log(`Handling ban: ${cleanSeconds} seconds`);
+//        console.log(`Handling ban: ${cleanSeconds} seconds`);
 
         // Use clean seconds for ban end time calculation
         this.banEndTime = new Date(Date.now() + (cleanSeconds * 1000));
         this.isBanned = true;
         this.saveState();
 
-        // Show ban modal with clean time
-        this.showBanModal(cleanSeconds, message);
+        // Show ban alert using consistent pattern
+        this.showBanAlert(cleanSeconds);
         this.disableResendButton();
     }
 
-    showBanModal(banTimeSeconds = null, message = null) {
+    showBanAlert(banTimeSeconds = null) {
         // Calculate remaining ban time
         let remainingSeconds = 0;
 
         if (banTimeSeconds !== null) {
-            // Ensure we use integer parsing for clean time
             remainingSeconds = Math.floor(Math.abs(parseInt(banTimeSeconds) || 0));
         } else if (this.banEndTime) {
             const rawSeconds = Math.max(0, (this.banEndTime - new Date()) / 1000);
@@ -566,20 +714,19 @@ class OTPManager {
             return;
         }
 
-        console.log(`Showing ban modal: ${remainingSeconds} seconds remaining`);
+//        console.log(`Showing ban alert: ${remainingSeconds} seconds remaining`);
 
         // Format time properly using our formatTime function
         const banTimeFormatted = this.formatTime(remainingSeconds);
 
-        // Update modal content
-        $('#banModalTitle').text(this.getTranslation('banTitle'));
-        $('#banModalMessage').text(this.getTranslation('banMessage').replace('{time}', banTimeFormatted));
-        $('#banModalOkText').text(this.getTranslation('ok'));
+        // Create ban message content following register form pattern
+        const banMessage = this.getTranslation('banMessage').replace('{time}', banTimeFormatted);
 
-        // Show modal
-        $('#otpBanModal').modal('show');
+        // Show alert using consistent SweetAlert pattern
+        showSweetAlert('warning', this.getTranslation('banTitle'), banMessage);
 
-        // Start countdown with clean integer
+        // Update status and start countdown
+        this.updateOTPStatus(this.getTranslation('accountBanned').replace('{time}', banTimeFormatted), 'error');
         this.startBanCountdown(remainingSeconds);
     }
 
@@ -594,7 +741,7 @@ class OTPManager {
             const banTimeFormatted = this.formatTime(remainingSeconds);
             this.updateOTPStatus(this.getTranslation('accountBanned').replace('{time}', banTimeFormatted), 'error');
 
-            console.log(`Ban status: ${remainingSeconds} seconds -> ${banTimeFormatted}`);
+//            console.log(`Ban status: ${remainingSeconds} seconds -> ${banTimeFormatted}`);
         } else {
             this.resetBanState();
         }
@@ -603,6 +750,9 @@ class OTPManager {
     startResendCountdown(customSeconds = null) {
         const totalSeconds = customSeconds || this.resendCountdownSeconds;
         let remainingSeconds = Math.floor(Math.abs(parseFloat(totalSeconds) || 0));
+
+        // Clear any ban countdown when starting resend countdown
+        this.clearBanCountdown();
 
         this.disableResendButton();
 
@@ -631,48 +781,36 @@ class OTPManager {
         // Clear any existing countdown
         this.clearBanCountdown();
 
-        console.log(`Starting ban countdown with ${remainingSeconds} seconds`);
+//        console.log(`Starting ban countdown with ${remainingSeconds} seconds`);
 
         this.banCountdownInterval = setInterval(() => {
             if (remainingSeconds <= 0) {
                 this.clearBanCountdown();
                 this.resetBanState();
-                $('#otpBanModal').modal('hide');
                 return;
             }
 
-            // Update the countdown display
-            this.updateBanCountdown(remainingSeconds);
-
-            // Update the modal message with current time
+            // Update the status display with current time
             const banTimeFormatted = this.formatTime(remainingSeconds);
-            $('#banModalMessage').text(this.getTranslation('banMessage').replace('{time}', banTimeFormatted));
+            this.updateOTPStatus(this.getTranslation('accountBanned').replace('{time}', banTimeFormatted), 'error');
 
             remainingSeconds--;
         }, 1000);
-
-        // Initial update
-        this.updateBanCountdown(remainingSeconds);
     }
 
     updateResendCountdown(seconds) {
         const cleanSeconds = Math.floor(Math.abs(parseFloat(seconds) || 0));
         const formatted = this.formatTime(cleanSeconds);
-        $('#resendCountdown').text(`(${formatted})`).removeClass('d-none');
-        $('#resendOTPText').addClass('d-none');
-    }
 
-    updateBanCountdown(seconds) {
-        // Ensure we're working with a clean integer
-        const cleanSeconds = Math.floor(Math.abs(parseInt(seconds) || 0));
+        const resendCountdown = $('#resendCountdown');
+        const resendText = $('#resendOTPText');
 
-        // Use our formatTime function for consistent formatting
-        const formatted = this.formatTime(cleanSeconds);
-
-        // Update the countdown display
-        $('#banCountdown').text(formatted);
-
-        console.log(`Ban countdown update: ${cleanSeconds} seconds -> "${formatted}"`);
+        if (resendCountdown.length) {
+            resendCountdown.text(`(${formatted})`).removeClass('d-none');
+        }
+        if (resendText.length) {
+            resendText.addClass('d-none');
+        }
     }
 
     clearResendCountdown() {
@@ -707,7 +845,7 @@ class OTPManager {
         // Get language for proper formatting
         const lang = this.lang || localStorage.getItem('selectedLang') || 'kh';
 
-        console.log(`formatTime: input="${seconds}" -> totalSeconds=${totalSeconds} -> ${minutes}m ${remainingSeconds}s -> lang=${lang}`);
+//        console.log(`formatTime: input="${seconds}" -> totalSeconds=${totalSeconds} -> ${minutes}m ${remainingSeconds}s -> lang=${lang}`);
 
         if (minutes > 0) {
             if (lang === 'kh') {
@@ -738,21 +876,46 @@ class OTPManager {
     }
 
     disableResendButton() {
-        $('#resendOTPBtn').prop('disabled', true).addClass('disabled');
+        const resendBtn = $('#resendOTPBtn');
+        if (resendBtn.length) {
+            resendBtn.prop('disabled', true).addClass('disabled');
+        }
     }
 
     enableResendButton() {
-        $('#resendOTPBtn').prop('disabled', false).removeClass('disabled');
-        $('#resendCountdown').addClass('d-none');
-        $('#resendOTPText').removeClass('d-none');
+        const resendBtn = $('#resendOTPBtn');
+        const resendCountdown = $('#resendCountdown');
+        const resendText = $('#resendOTPText');
+
+        if (resendBtn.length) {
+            resendBtn.prop('disabled', false).removeClass('disabled');
+        }
+        if (resendCountdown.length) {
+            resendCountdown.addClass('d-none');
+        }
+        if (resendText.length) {
+            resendText.removeClass('d-none');
+        }
+
+        // Clear any ban status messages when enabling resend button
+        // (unless current phone is actually banned)
+        if (this.currentPhoneNumber && !this.isPhoneBanned(this.currentPhoneNumber)) {
+            this.updateOTPStatus('', '');
+        }
     }
 
     isResendDisabled() {
-        return $('#resendOTPBtn').prop('disabled');
+        const resendBtn = $('#resendOTPBtn');
+        return resendBtn.length ? resendBtn.prop('disabled') : false;
     }
 
     updateOTPStatus(message, type = '') {
         const statusElement = $('#otpStatus');
+
+        if (!statusElement.length) {
+            console.warn('OTP status element not found');
+            return;
+        }
 
         if (!message) {
             statusElement.html('').removeClass();
@@ -775,22 +938,22 @@ class OTPManager {
                 className = 'text-warning';
                 icon = 'fas fa-exclamation-triangle';
                 break;
+            case 'info':
+                // Add spinning animation for loading states
+                if (message.includes('កំពុងផ្ញើ') || message.includes('Sending') ||
+                    message.includes('កំពុងផ្ទៀងផ្ទាត់') || message.includes('Verifying')) {
+                    icon = 'fas fa-spinner fa-spin';
+                } else {
+                    icon = 'fas fa-info-circle';
+                }
+                break;
         }
 
         statusElement.html(`<small class="${className}"><i class="${icon} me-1"></i>${message}</small>`);
     }
 
-    showError(message) {
-        if (typeof showSweetAlert === 'function') {
-            showSweetAlert('error', this.getTranslation('error'), message);
-        } else {
-            console.error('showSweetAlert not available, showing alert:', message);
-            alert(message);
-        }
-    }
-
     onOTPVerified() {
-        console.log('OTP verified successfully');
+//        console.log('OTP verified successfully');
     }
 
     updateUILanguage() {
@@ -1151,10 +1314,16 @@ function resetForm() {
     $("#frontImage").val(null);
     $("#imgFrontImageDisplay").attr("src", "/assets/cpbank/images/image_selfie.jpg");
 
-    // Reset OTP state
+    // Reset OTP state and clear all countdowns
     if (otpManager) {
         otpManager.resetOTPState();
         otpManager.resetBanState();
+        otpManager.clearBanCountdown();
+        otpManager.clearResendCountdown();
+        // Clear the current phone number to avoid conflicts
+        otpManager.currentPhoneNumber = null;
+        otpManager.updateOTPStatus('', '');
+        otpManager.enableResendButton();
     }
 }
 

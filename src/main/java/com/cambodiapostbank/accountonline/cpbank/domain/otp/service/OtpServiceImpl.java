@@ -3,6 +3,7 @@ package com.cambodiapostbank.accountonline.cpbank.domain.otp.service;
 import com.cambodiapostbank.accountonline.cpbank.domain.otp.dto.SendOtpRequestDto;
 import com.cambodiapostbank.accountonline.cpbank.domain.otp.dto.VerifyOTPRequestDto;
 import com.cambodiapostbank.accountonline.cpbank.utils.http.CpbHttpClient;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -11,6 +12,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 
+@Slf4j
 @Service
 public class OtpServiceImpl implements OtpService {
 
@@ -37,6 +39,10 @@ public class OtpServiceImpl implements OtpService {
     public Object sendOtpRaw(SendOtpRequestDto sendOtpRequestDto) throws IOException {
         HttpURLConnection response = httpClient.post("api/sms", sendOtpRequestDto.toJSON());
 
+        // Log the response details including headers
+        log.info("SMS API Response - Status Code: {}, URL: {}, Headers: {}",
+                response.getResponseCode(), response.getURL(), response.getHeaderFields());
+
         if (response.getResponseCode() == HttpURLConnection.HTTP_OK) {
             // Read the response body
             BufferedReader reader = new BufferedReader(new InputStreamReader(response.getInputStream()));
@@ -49,11 +55,19 @@ public class OtpServiceImpl implements OtpService {
 
             String responseText = responseBody.toString().trim();
 
+            // Console-style logging of response data
+            log.info("SMS API Response Body: {}", responseText);
+            log.info("Response details - Length: {} chars, Raw: [{}]",
+                    responseText.length(), responseText);
+
             try {
                 // Try to parse as integer (the C# API returns integers for OTP codes and error codes)
-                return Integer.parseInt(responseText);
+                Integer result = Integer.parseInt(responseText);
+                log.info("Parsed response as integer: {}", result);
+                return result;
             } catch (NumberFormatException e) {
                 // If not an integer, return as string
+                log.info("Response is not an integer, returning as string: {}", responseText);
                 return responseText;
             }
         } else {
@@ -68,8 +82,14 @@ public class OtpServiceImpl implements OtpService {
 
             String errorText = errorBody.toString();
 
+            // Console-style logging of error data
+            log.info("SMS API Error Body: {}", errorText);
+            log.info("Error details - Status: {}, Length: {} chars",
+                    response.getResponseCode(), errorText.length());
+
             // Check for ban-related errors
             if (errorText.contains("TOO_MANY_ATTEMPTS")) {
+                log.info("Too many attempts detected, throwing RuntimeException");
                 throw new RuntimeException(errorText);
             }
 

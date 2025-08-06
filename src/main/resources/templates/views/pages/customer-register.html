@@ -28,14 +28,14 @@
 
                     <!-- START FORM -->
                     <form class="need-novalidate-new" id="idFormRegister" novalidate>
-                        <div class="row gap-3 mb-3">
-                            <div class="col-sm text-center">
+                        <div class="row mb-3">
+                            <div class="col-12 col-md-6 mb-3 mb-md-0 text-center">
                                 <div class="form-group">
                                     <label for="legalIdImage" th:text="#{register.identityImage}"></label>
-                                    <label class="mt-2" for="legalIdImage">
-                                        <img class="img-fluid w-100"
+                                    <label class="mt-2 d-block" for="legalIdImage">
+                                        <img class="img-fluid"
                                              id="legalIdImageDisplay"
-                                             style="height: 17rem; width: 27rem !important; cursor: pointer"
+                                             style="height: 17rem; width: 27rem !important; cursor: pointer; max-width: 100%;"
                                              th:src="@{/assets/cpbank/images/National_ID_selfie.png}"/>
                                     </label>
                                     <input accept="image/png, image/gif, image/jpeg" id="legalIdImage"
@@ -45,12 +45,12 @@
                                     <div class="invalid-feedback" th:text="#{validation.identityImage.required}"></div>
                                 </div>
                             </div>
-                            <div class="col-sm text-center">
+                            <div class="col-12 col-md-6 text-center">
                                 <div class="form-group">
                                     <label for="frontImage" th:text="#{register.selfieImage}"></label>
-                                    <label class="mt-2" for="frontImage">
-                                        <img class="img-fluid w-100" id="imgFrontImageDisplay"
-                                             style="height: 17rem; width: 27rem !important; cursor: pointer"
+                                    <label class="mt-2 d-block" for="frontImage">
+                                        <img class="img-fluid" id="imgFrontImageDisplay"
+                                             style="height: 17rem; width: 27rem !important; cursor: pointer; max-width: 100%;"
                                              th:src="@{/assets/cpbank/images/image_selfie.jpg}"/>
                                     </label>
                                     <input accept="image/png, image/gif, image/jpeg" id="frontImage" name="frontImage"

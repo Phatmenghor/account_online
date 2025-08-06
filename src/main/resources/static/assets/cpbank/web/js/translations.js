@@ -44,7 +44,7 @@ const translations = {
 
 // Call this on page load to sync the flag with the current language
 function initializeLanguage() {
-    const storedLang = localStorage.getItem('selectedLang') || 'en';
+    const storedLang = localStorage.getItem('selectedLang') || 'kh';
     updateLanguageDisplay(storedLang);
 }
 
@@ -63,7 +63,7 @@ function changeLanguage(lang) {
         contentType: 'application/json',
         data: JSON.stringify({ lang: lang }),
         success: function (response) {
-            console.log('Language changed to: ', response.lang);
+            console.log('Language changed to: ', lang);
             location.reload();
         },
         error: function (xhr, status, error) {
@@ -72,25 +72,30 @@ function changeLanguage(lang) {
     });
 }
 
-// Update flag display based on selected language
+// Update flag display based on selected language - FIXED PATHS
 function updateLanguageDisplay(lang) {
     const flagImage = document.getElementById('current-lang-flag');
 
-    if (!flagImage) return;
+    if (!flagImage) {
+        console.warn('Flag image element not found');
+        return;
+    }
 
     switch (lang) {
         case 'en':
-            flagImage.src = '/OpenAcct/assets/cpbank/icon/us-flag.png';
+            flagImage.src = 'assets/cpbank/icon/us-flag.png';
             flagImage.alt = 'English';
             break;
         case 'kh':
-            flagImage.src = '/OpenAcct/assets/cpbank/icon/cambodia-flag.png';
+            flagImage.src = 'assets/cpbank/icon/cambodia-flag.png';
             flagImage.alt = 'Khmer';
             break;
         default:
-            flagImage.src = '/OpenAcct/assets/cpbank/icon/cambodia-flag.png';
+            flagImage.src = 'assets/cpbank/icon/cambodia-flag.png';
             flagImage.alt = 'Khmer';
     }
+
+    console.log(`Updated flag image to: ${flagImage.src} for language: ${lang}`);
 }
 
 // Initialize on document ready
