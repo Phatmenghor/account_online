@@ -117,6 +117,25 @@ public final class AppConstants {
 
         public static final String REJECT_SUCCESS_MESSAGE = "ស្នើសុំបង្កើតគណនីត្រូវបានពិចារណាហើយ។\n\n❌ ស្នើសុំរបស់លោកអ្នកមិនត្រូវបានផ្ល័ងផ្សាយក្នុងលើកនេះ\n• សូមក្រឡេកមើលលម្អិតលម្អិតនៃលក្ខខណ្ឌ\n• លោកអ្នកអាចដាក់ស្នើសុំម្តងទៀត\n• ប្រសិនបើលោកអ្នកមានសំណួរ សូមទំនាក់ទំនង " + SUPPORT_PHONE_PRIMARY + " ឬ " + SUPPORT_PHONE_SECONDARY + " ដើម្បីទទួលបានជំនួយ។";
 
+        // ── English Versions ──
+        public static final String PENDING_REQUEST_ALREADY_EXISTS_EN = "You have already submitted an account opening request. Please wait for the review department's response. If you have any questions, please contact " + SUPPORT_PHONE_PRIMARY + " or " + SUPPORT_PHONE_SECONDARY + " for further assistance.";
+
+        public static final String ACCOUNT_ALREADY_EXISTS_FOR_LEGAL_ID_EN = "You already have an account with CPB Bank. Please use your current account or contact customer service at " + SUPPORT_PHONE_PRIMARY + " or " + SUPPORT_PHONE_SECONDARY + " for assistance.";
+
+        public static final String INVALID_STATUS_ONLY_PENDING_CAN_APPROVE_EN = "There was a problem processing your request. Please contact the technical team or call " + SUPPORT_PHONE_PRIMARY + " or " + SUPPORT_PHONE_SECONDARY + ".";
+
+        public static final String INVALID_STATUS_ONLY_PENDING_CAN_REJECT_EN = "There was a problem processing your request. Please contact the technical team or call " + SUPPORT_PHONE_PRIMARY + " or " + SUPPORT_PHONE_SECONDARY + ".";
+
+        public static final String FAILED_PARSE_CUSTOMER_DATA_EN = "There was a problem processing your details. Please try again or contact customer service at " + SUPPORT_PHONE_PRIMARY + " or " + SUPPORT_PHONE_SECONDARY + " for assistance.";
+
+        public static final String FAILED_CREATE_ACCOUNT_EN = "There was a problem creating your account. Please try again or contact customer service at " + SUPPORT_PHONE_PRIMARY + " or " + SUPPORT_PHONE_SECONDARY + " for assistance.";
+
+        public static final String SUBMIT_SUCCESS_MESSAGE_EN = "Welcome! Your account opening request has been received successfully.\n\n📋 Details:\n• Your new account number will be sent to you via SMS\n• The bank is currently reviewing your information (approximately 3-5 business days)\n• You will receive your account number within the timeframe\n\n💬 If you have any questions, please contact:\n📞 " + SUPPORT_PHONE_PRIMARY + " or " + SUPPORT_PHONE_SECONDARY + "\n📧 Hours: 9:00 - 17:00 (Monday - Friday)";
+
+        public static final String APPROVE_SUCCESS_MESSAGE_EN = "Welcome! Your account opening request has been approved successfully.\n\n✅ Your account is being created\n• Your new account number will be sent to you within 1-3 business days\n• Please ensure your phone number is reachable\n• After that, you can use our mobile banking services\n\n💬 If you have any questions, please contact " + SUPPORT_PHONE_PRIMARY + " or " + SUPPORT_PHONE_SECONDARY + ".";
+
+        public static final String REJECT_SUCCESS_MESSAGE_EN = "Your account opening request has been reviewed.\n\n❌ Your request was not approved this time\n• Please review the detailed conditions\n• You can submit a new request\n• If you have any questions, please contact " + SUPPORT_PHONE_PRIMARY + " or " + SUPPORT_PHONE_SECONDARY + " for assistance.";
+
         // ==================================================================================
         // 9. FIELD NAME TRANSLATIONS
         // Used in: CamdxErrorCheckServiceImpl
