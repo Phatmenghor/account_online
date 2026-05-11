@@ -346,12 +346,12 @@ export default function PendingAccountDetailModal({
         </ScrollArea>
 
         {/* Footer */}
-        <DialogFooter className="px-6 py-4 border-t bg-muted/30 flex-shrink-0">
+        <DialogFooter className="px-6 py-4 border-t bg-muted/30 flex-shrink-0 justify-between">
           <Button variant="outline" onClick={handleClose}>
             Close
           </Button>
           {!isReadOnly && account && (
-            <>
+            <div className="flex gap-3">
               <Button
                 variant="destructive"
                 onClick={() => onReject?.(account)}
@@ -364,7 +364,7 @@ export default function PendingAccountDetailModal({
               >
                 Approve
               </Button>
-            </>
+            </div>
           )}
         </DialogFooter>
       </DialogContent>
