@@ -2,6 +2,7 @@ package com.internal.feature.open_account.controller;
 
 import com.internal.exceptions.response.ApiResponse;
 import com.internal.feature.open_account.dto.response.PendingAccountOpeningRequestDto;
+import com.internal.feature.open_account.dto.response.PendingAccountOpeningRequestHistoryDto;
 import com.internal.feature.open_account.service.OpenAccountService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -9,6 +10,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/admin/open-account")
@@ -37,5 +40,17 @@ public class AdminOpenAccountController {
         log.info("✓ Request retrieved | Request ID: {}", requestId);
 
         return ResponseEntity.ok(ApiResponse.success("Request retrieved successfully", response));
+    }
+
+    @GetMapping("/{requestId}/history")
+    public ResponseEntity<ApiResponse<Page<PendingAccountOpeningRequestHistoryDto>>> getRequestHistory(
+            @PathVariable Long requestId, Pageable pageable) throws Exception {
+        log.info("Fetching history for request ID: {}", requestId);
+
+        Page<PendingAccountOpeningRequestHistoryDto> response = openAccountService.getRequestHistory(requestId, pageable);
+
+        log.info("✓ Found {} history records | Total: {}", response.getNumberOfElements(), response.getTotalElements());
+
+        return ResponseEntity.ok(ApiResponse.success("Request history retrieved successfully", response));
     }
 }

@@ -12,6 +12,7 @@ import com.internal.feature.open_account.dto.request.CustomerRequest;
 import com.internal.feature.open_account.dto.request.RejectAccountOpeningRequestDto;
 import com.internal.feature.open_account.dto.response.CustomerResponse;
 import com.internal.feature.open_account.dto.response.PendingAccountOpeningRequestDto;
+import com.internal.feature.open_account.dto.response.PendingAccountOpeningRequestHistoryDto;
 import com.internal.feature.open_account.event.AccountOpenedEvent;
 import com.internal.feature.open_account.facade.BankingService;
 import com.internal.feature.open_account.facade.ComplianceService;
@@ -430,6 +431,42 @@ public class OpenAccountServiceImpl implements OpenAccountService {
                 .legalId(entity.getLegalId())
                 .status(entity.getStatus())
                 .amlStatus(entity.getAmlStatus())
+                .remark(entity.getRemark())
+                .createdAt(createdAtMillis)
+                .build();
+    }
+
+    @Override
+    public List<PendingAccountOpeningRequestHistoryDto> getRequestHistory(Long requestId) throws Exception {
+        log.debug("Fetching history for request ID: {}", requestId);
+        return historyRepository.findByRequestIdOrderByCreatedAtDesc(requestId)
+                .stream()
+                .map(this::mapHistoryToDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public Page<PendingAccountOpeningRequestHistoryDto> getRequestHistory(Long requestId, Pageable pageable) throws Exception {
+        log.debug("Fetching history for request ID: {} with pagination", requestId);
+        return historyRepository.findByRequestIdOrderByCreatedAtDesc(requestId, pageable)
+                .map(this::mapHistoryToDto);
+    }
+
+    private PendingAccountOpeningRequestHistoryDto mapHistoryToDto(PendingAccountOpeningRequestHistory entity) {
+        Long createdAtMillis = null;
+        if (entity.getCreatedAt() != null) {
+            createdAtMillis = entity.getCreatedAt()
+                    .atZone(ZoneId.systemDefault())
+                    .toInstant()
+                    .toEpochMilli();
+        }
+
+        return PendingAccountOpeningRequestHistoryDto.builder()
+                .id(entity.getId())
+                .requestId(entity.getRequestId())
+                .legalId(entity.getLegalId())
+                .status(entity.getStatus())
+                .actionUsername(entity.getActionUsername())
                 .remark(entity.getRemark())
                 .createdAt(createdAtMillis)
                 .build();

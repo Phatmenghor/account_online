@@ -5,6 +5,7 @@ import com.internal.feature.open_account.dto.request.CustomerRequest;
 import com.internal.feature.open_account.dto.request.RejectAccountOpeningRequestDto;
 import com.internal.feature.open_account.dto.response.CustomerResponse;
 import com.internal.feature.open_account.dto.response.PendingAccountOpeningRequestDto;
+import com.internal.feature.open_account.dto.response.PendingAccountOpeningRequestHistoryDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -26,4 +27,8 @@ public interface OpenAccountService {
     Page<PendingAccountOpeningRequestDto> getPendingRequests(Pageable pageable);
 
     PendingAccountOpeningRequestDto getPendingRequest(Long requestId) throws Exception;
+
+    List<PendingAccountOpeningRequestHistoryDto> getRequestHistory(Long requestId) throws Exception;
+
+    Page<PendingAccountOpeningRequestHistoryDto> getRequestHistory(Long requestId, Pageable pageable) throws Exception;
 }
