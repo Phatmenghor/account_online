@@ -6,6 +6,7 @@ import com.internal.feature.open_account.dto.request.CustomerRequest;
 import com.internal.feature.open_account.dto.request.RejectAccountOpeningRequestDto;
 import com.internal.feature.open_account.dto.response.PendingAccountOpeningRequestDto;
 import com.internal.feature.open_account.service.OpenAccountService;
+import com.internal.utils.constants.ResponseMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -29,7 +30,7 @@ public class OpenAccountController {
         log.info("✓ Account opening request submitted for admin review | Request ID: {}", response.getId());
         log.info("  Legal ID: {} | AML Status: {}", response.getLegalId(), response.getAmlStatus());
 
-        return ResponseEntity.ok(ApiResponse.success("Account opening request submitted for admin review", response));
+        return ResponseEntity.ok(ApiResponse.success(ResponseMessage.PENDING_ACCOUNTS_RETRIEVED, response));
     }
 
     @PostMapping("/approve")
@@ -41,7 +42,7 @@ public class OpenAccountController {
 
         log.info("✓ Request approved | Legal ID: {}", response.getLegalId());
 
-        return ResponseEntity.ok(ApiResponse.success("Request approved successfully", response));
+        return ResponseEntity.ok(ApiResponse.success(ResponseMessage.ACCOUNT_APPROVED, response));
     }
 
     @PostMapping("/reject")
@@ -53,6 +54,6 @@ public class OpenAccountController {
 
         log.info("✓ Request rejected | Legal ID: {}", response.getLegalId());
 
-        return ResponseEntity.ok(ApiResponse.success("Request rejected successfully", response));
+        return ResponseEntity.ok(ApiResponse.success(ResponseMessage.ACCOUNT_REJECTED, response));
     }
 }

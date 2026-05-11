@@ -69,6 +69,11 @@ public final class ResponseMessage {
     // ===== Open Account =====
     public static final String ACCOUNT_RETRIEVED = "Account retrieved successfully";
     public static final String SUCCESS_ACCOUNTS_RETRIEVED = "Success accounts retrieved successfully";
+    public static final String PENDING_ACCOUNTS_RETRIEVED = "Pending accounts retrieved successfully";
+    public static final String PENDING_ACCOUNT_RETRIEVED = "Pending account retrieved successfully";
+    public static final String PENDING_ACCOUNT_HISTORY_RETRIEVED = "Pending account history retrieved successfully";
+    public static final String ACCOUNT_APPROVED = "Account opening request approved successfully";
+    public static final String ACCOUNT_REJECTED = "Account opening request rejected successfully";
 
     // ===== Report =====
     public static final String REPORT_LOGS_RETRIEVED = "Account online report logs retrieved successfully";

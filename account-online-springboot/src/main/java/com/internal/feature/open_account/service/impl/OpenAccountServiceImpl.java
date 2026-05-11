@@ -31,8 +31,10 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.internal.utils.pagination.PaginationResponse;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import java.time.ZoneId;
 import java.util.List;
 import java.util.Map;
@@ -404,10 +406,19 @@ public class OpenAccountServiceImpl implements OpenAccountService {
     }
 
     @Override
-    public Page<PendingAccountOpeningRequestDto> getPendingRequests(Pageable pageable) {
-        log.debug("Fetching pending requests with pagination - Page: {}, Size: {}", pageable.getPageNumber(), pageable.getPageSize());
-        return pendingRequestRepository.findByStatus(AccountOpeningRequestStatusEnum.PENDING, pageable)
-                .map(this::mapToDto);
+    public PaginationResponse<PendingAccountOpeningRequestDto> getPendingRequests(int pageNo, int pageSize, String sortBy, String sortDirection) throws Exception {
+        log.debug("Fetching pending requests with pagination - Page: {}, Size: {}, Sort: {}", pageNo, pageSize, sortBy);
+
+        Sort.Direction direction = "DESC".equalsIgnoreCase(sortDirection) ? Sort.Direction.DESC : Sort.Direction.ASC;
+        PageRequest pageable = PageRequest.of(pageNo - 1, pageSize, Sort.by(direction, sortBy));
+
+        Page<PendingAccountOpeningRequest> page = pendingRequestRepository.findByStatus(AccountOpeningRequestStatusEnum.PENDING, pageable);
+        List<PendingAccountOpeningRequestDto> content = page.getContent().stream()
+                .map(this::mapToDto)
+                .collect(Collectors.toList());
+
+        log.info("Found {} pending requests", page.getTotalElements());
+        return new PaginationResponse<>(content, page.getNumber() + 1, page.getSize(), page.getTotalElements());
     }
 
     @Override
@@ -446,10 +457,19 @@ public class OpenAccountServiceImpl implements OpenAccountService {
     }
 
     @Override
-    public Page<PendingAccountOpeningRequestHistoryDto> getRequestHistory(Long requestId, Pageable pageable) throws Exception {
+    public PaginationResponse<PendingAccountOpeningRequestHistoryDto> getRequestHistory(Long requestId, int pageNo, int pageSize, String sortBy, String sortDirection) throws Exception {
         log.debug("Fetching history for request ID: {} with pagination", requestId);
-        return historyRepository.findByRequestIdOrderByCreatedAtDesc(requestId, pageable)
-                .map(this::mapHistoryToDto);
+
+        Sort.Direction direction = "DESC".equalsIgnoreCase(sortDirection) ? Sort.Direction.DESC : Sort.Direction.ASC;
+        PageRequest pageable = PageRequest.of(pageNo - 1, pageSize, Sort.by(direction, sortBy));
+
+        Page<PendingAccountOpeningRequestHistory> page = historyRepository.findByRequestIdOrderByCreatedAtDesc(requestId, pageable);
+        List<PendingAccountOpeningRequestHistoryDto> content = page.getContent().stream()
+                .map(this::mapHistoryToDto)
+                .collect(Collectors.toList());
+
+        log.info("Found {} history records for request ID: {}", page.getTotalElements(), requestId);
+        return new PaginationResponse<>(content, page.getNumber() + 1, page.getSize(), page.getTotalElements());
     }
 
     private PendingAccountOpeningRequestHistoryDto mapHistoryToDto(PendingAccountOpeningRequestHistory entity) {
