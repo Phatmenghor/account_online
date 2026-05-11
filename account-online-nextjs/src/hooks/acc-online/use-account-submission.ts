@@ -170,80 +170,95 @@ export const useAccountSubmission = ({
       }));
 
       // ── 4. Submit account ──
-      const accountData = {
-        // Personal Information
-        title: formData.title || "",
-        familyName: formData.lastNameEn,
-        givenName: formData.firstNameEn,
-        firstNameKh: formData.firstNameKh,
-        lastNameKh: formData.lastNameKh,
-        gender: convertGenderToAPI(formData.gender),
-        dateOfBirth: formatDate(formData.dob),
-        nationality: "KH", // Default to Cambodia
-        email: "", // Optional, can be added to form
-        phoneNumber: phoneNumber,
+      // Helper to only include fields with actual values
+      const buildAccountData = () => {
+        const data: Record<string, any> = {
+          // Personal Information - always required
+          familyName: formData.lastNameEn,
+          givenName: formData.firstNameEn,
+          firstNameKh: formData.firstNameKh,
+          lastNameKh: formData.lastNameKh,
+          gender: convertGenderToAPI(formData.gender),
+          dateOfBirth: formatDate(formData.dob),
+          phoneNumber: phoneNumber,
 
-        // Marital & Occupation
-        maritalStatus: selectedMaritalStatus
-          ? getMaritalStatusString(selectedMaritalStatus.id.toString())
-          : "SINGLE",
-        occupation: selectedOccupation?.occupationCode || "",
+          // Legal Information - always required
+          legalId: formData.idNumber,
+          legalAddress: formData.address,
+          legalIssueDate: formatDate(formData.issuedDate),
+          legalExpireDate: formatDate(formData.expiredDate),
+          legalMrz1: formData.MRZ1,
+          legalMrz2: formData.MRZ2,
+          legalMrz3: formData.MRZ3,
 
-        // Place of Birth
-        placeOfBirth: formData.pob,
-        customerPobProvince:
-          locationData.placeOfBirth.province?.provinceCode || "",
-        customerPobDistrict:
-          locationData.placeOfBirth.district?.districtCode || "",
-        customerPobCommune:
-          locationData.placeOfBirth.commune?.communeCode || "",
-        customerPobVillage:
-          locationData.placeOfBirth.village?.villageCode || "",
+          // Place of Birth - always include
+          placeOfBirth: formData.pob,
 
-        // Current Address
-        customerCurrentProvince:
-          locationData.currentAddress.province?.provinceCode || "",
-        customerCurrentDistrict:
-          locationData.currentAddress.district?.districtCode || "",
-        customerCurrentCommune:
-          locationData.currentAddress.commune?.communeCode || "",
-        customerCurrentVillage:
-          locationData.currentAddress.village?.villageCode || "",
+          // Branch and Images - always required
+          branchCode: selectedBranch!.branchID,
+          nidImageName: nidFileName!,
+          selfieImageName: selfieFileName!,
+          customerRole: "OWNER",
+        };
 
-        // Legal Information
-        legalId: formData.idNumber,
-        legalDocType: selectedLegalType?.legalTypeValue || "",
-        legalAddress: formData.address,
-        legalIssueDate: formatDate(formData.issuedDate),
-        legalExpireDate: formatDate(formData.expiredDate),
-        legalIssAuth: "", // Can be added to form
-        legalHolderName: "", // Can be added to form
-        legalMrz1: formData.MRZ1,
-        legalMrz2: formData.MRZ2,
-        legalMrz3: formData.MRZ3,
+        // Conditionally add fields if they have values
+        if (selectedLegalType?.legalTypeValue) {
+          data.legalDocType = selectedLegalType.legalTypeValue;
+        }
 
-        // Bank & Reference
-        companyName: selectedReferenceBank?.nameEn || "",
-        referralId: staffCode || "",
-        releasedBy: staffCode || "", // Staff code as released by
-        branchCode: selectedBranch!.branchID,
+        if (phoneNumber) {
+          data.phoneNumber = phoneNumber;
+        }
 
-        // Customer Type & Business
-        customerType: "", // Can be "INDIVIDUAL" or "BUSINESS"
-        industry: "", // Can be added to form
-        sector: "", // Can be added to form
-        averageIncome: "", // Can be added to form
+        if (selectedMaritalStatus) {
+          data.maritalStatus = getMaritalStatusString(selectedMaritalStatus.id.toString());
+        }
 
-        // Product & Account
-        productAccount: "", // Default product code
-        categoryAccount: "", // Can be added to form
-        customerRole: "OWNER", // Default role
+        if (selectedOccupation?.occupationCode) {
+          data.occupation = selectedOccupation.occupationCode;
+        }
 
-        // Images
-        nidImageName: nidFileName!,
-        selfieImageName: selfieFileName!,
+        if (selectedReferenceBank?.nameEn) {
+          data.companyName = selectedReferenceBank.nameEn;
+        }
+
+        if (staffCode) {
+          data.referralId = staffCode;
+          data.releasedBy = staffCode;
+        }
+
+        // Add address fields only if they have values
+        if (locationData.currentAddress.province?.provinceCode) {
+          data.customerCurrentProvince = locationData.currentAddress.province.provinceCode;
+        }
+        if (locationData.currentAddress.district?.districtCode) {
+          data.customerCurrentDistrict = locationData.currentAddress.district.districtCode;
+        }
+        if (locationData.currentAddress.commune?.communeCode) {
+          data.customerCurrentCommune = locationData.currentAddress.commune.communeCode;
+        }
+        if (locationData.currentAddress.village?.villageCode) {
+          data.customerCurrentVillage = locationData.currentAddress.village.villageCode;
+        }
+
+        // Place of birth address - only if provided
+        if (locationData.placeOfBirth.province?.provinceCode) {
+          data.customerPobProvince = locationData.placeOfBirth.province.provinceCode;
+        }
+        if (locationData.placeOfBirth.district?.districtCode) {
+          data.customerPobDistrict = locationData.placeOfBirth.district.districtCode;
+        }
+        if (locationData.placeOfBirth.commune?.communeCode) {
+          data.customerPobCommune = locationData.placeOfBirth.commune.communeCode;
+        }
+        if (locationData.placeOfBirth.village?.villageCode) {
+          data.customerPobVillage = locationData.placeOfBirth.village.villageCode;
+        }
+
+        return data;
       };
 
+      const accountData = buildAccountData();
       const response = await createOpenAccountService(accountData);
 
       // ── 5. Clear cache on success ──
