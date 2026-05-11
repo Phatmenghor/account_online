@@ -12,6 +12,9 @@ import com.internal.feature.open_account.dto.request.CustomerRequest;
 import com.internal.feature.open_account.dto.request.RejectAccountOpeningRequestDto;
 import com.internal.feature.open_account.dto.response.CustomerResponse;
 import com.internal.feature.open_account.dto.response.PendingAccountOpeningRequestDto;
+import com.internal.feature.open_account.dto.request.AllPendingAccountHistoryRequestDto;
+import com.internal.feature.open_account.dto.response.AllPendingAccountOpeningHistoryResponseDto;
+import com.internal.feature.open_account.dto.response.PendingAccountOpeningHistoryDto;
 import com.internal.feature.open_account.dto.response.PendingAccountOpeningRequestHistoryDto;
 import com.internal.feature.open_account.event.AccountOpenedEvent;
 import com.internal.feature.open_account.facade.BankingService;
@@ -489,6 +492,59 @@ public class OpenAccountServiceImpl implements OpenAccountService {
                 .actionUsername(entity.getActionUsername())
                 .remark(entity.getRemark())
                 .createdAt(createdAtMillis)
+                .build();
+    }
+
+    @Override
+    public AllPendingAccountOpeningHistoryResponseDto getAllPendingAccountsHistory(AllPendingAccountHistoryRequestDto request) throws Exception {
+        log.info("Fetching all pending accounts history with search: {}", request.getSearch());
+
+        Sort.Direction direction = "DESC".equalsIgnoreCase(request.getSortDirection()) ? Sort.Direction.DESC : Sort.Direction.ASC;
+        PageRequest pageable = PageRequest.of(request.getPageNo() - 1, request.getPageSize(), Sort.by(direction, request.getSortBy()));
+
+        Page<PendingAccountOpeningRequest> page = pendingRequestRepository.findByStatus(AccountOpeningRequestStatusEnum.PENDING, pageable);
+
+        List<PendingAccountOpeningHistoryDto> content = page.getContent().stream()
+                .map(this::mapToDetailedHistoryDto)
+                .collect(Collectors.toList());
+
+        log.info("Found {} pending accounts", page.getTotalElements());
+
+        return AllPendingAccountOpeningHistoryResponseDto.builder()
+                .content(content)
+                .pageNo(page.getNumber() + 1)
+                .pageSize(page.getSize())
+                .totalElements(page.getTotalElements())
+                .totalPages(page.getTotalPages())
+                .last(page.isLast())
+                .build();
+    }
+
+    @Override
+    public PendingAccountOpeningHistoryDto getPendingAccountHistoryById(Long requestId) throws Exception {
+        log.info("Fetching history for request ID: {}", requestId);
+
+        PendingAccountOpeningRequest request = pendingRequestRepository.findById(requestId)
+                .orElseThrow(() -> new NotFoundException("Request not found: " + requestId));
+
+        List<PendingAccountOpeningRequestHistoryDto> history = historyRepository.findByRequestIdOrderByCreatedAtDesc(requestId)
+                .stream()
+                .map(this::mapHistoryToDto)
+                .collect(Collectors.toList());
+
+        return PendingAccountOpeningHistoryDto.builder()
+                .requestId(request.getId())
+                .legalId(request.getLegalId())
+                .request(mapToDto(request))
+                .history(history)
+                .build();
+    }
+
+    private PendingAccountOpeningHistoryDto mapToDetailedHistoryDto(PendingAccountOpeningRequest entity) {
+        return PendingAccountOpeningHistoryDto.builder()
+                .requestId(entity.getId())
+                .legalId(entity.getLegalId())
+                .request(mapToDto(entity))
                 .build();
     }
 
