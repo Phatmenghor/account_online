@@ -16,4 +16,5 @@ public class AllPendingAccountHistoryRequestDto {
     private int pageSize = 20;
     private String sortBy = "createdAt";
     private String sortDirection = "DESC";
+    private String status;
 }

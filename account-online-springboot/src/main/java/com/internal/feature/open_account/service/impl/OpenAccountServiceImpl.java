@@ -331,18 +331,24 @@ public class OpenAccountServiceImpl implements OpenAccountService {
 
     @Override
     public AllPendingAccountOpeningHistoryResponseDto getAllPendingAccountsHistory(AllPendingAccountHistoryRequestDto request) throws Exception {
-        log.info("Fetching all pending accounts history with search: {}", request.getSearch());
+        log.info("Fetching accounts history with search: {} | Status filter: {}", request.getSearch(), request.getStatus());
 
         Sort.Direction direction = "DESC".equalsIgnoreCase(request.getSortDirection()) ? Sort.Direction.DESC : Sort.Direction.ASC;
         PageRequest pageable = PageRequest.of(request.getPageNo() - 1, request.getPageSize(), Sort.by(direction, request.getSortBy()));
 
-        Page<PendingAccountOpeningRequest> page = pendingRequestRepository.findByStatus(AccountOpeningRequestStatusEnum.PENDING, pageable);
+        Page<PendingAccountOpeningRequest> page;
+        if (request.getStatus() != null && !request.getStatus().isEmpty() && !"ALL".equalsIgnoreCase(request.getStatus())) {
+            AccountOpeningRequestStatusEnum status = AccountOpeningRequestStatusEnum.valueOf(request.getStatus().toUpperCase());
+            page = pendingRequestRepository.findByStatus(status, pageable);
+        } else {
+            page = pendingRequestRepository.findAll(pageable);
+        }
 
         List<PendingAccountOpeningHistoryDto> content = page.getContent().stream()
                 .map(this::mapToDetailedHistoryDto)
                 .collect(Collectors.toList());
 
-        log.info("Found {} pending accounts", page.getTotalElements());
+        log.info("Found {} account records", page.getTotalElements());
 
         return AllPendingAccountOpeningHistoryResponseDto.builder()
                 .content(content)
