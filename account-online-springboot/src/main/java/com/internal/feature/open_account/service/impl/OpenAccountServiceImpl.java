@@ -332,6 +332,8 @@ public class OpenAccountServiceImpl implements OpenAccountService {
                     .toEpochMilli();
         }
 
+        String message = getStatusMessage(entity.getStatus());
+
         return PendingAccountOpeningRequestDto.builder()
                 .id(entity.getId())
                 .legalId(entity.getLegalId())
@@ -339,7 +341,20 @@ public class OpenAccountServiceImpl implements OpenAccountService {
                 .amlStatus(entity.getAmlStatus())
                 .remark(entity.getRemark())
                 .createdAt(createdAtMillis)
+                .message(message)
                 .build();
+    }
+
+    private String getStatusMessage(AccountOpeningRequestStatusEnum status) {
+        if (status == null) {
+            return "មានបញ្ហាក្នុងការដំណើរការ";
+        }
+        return switch (status) {
+            case PENDING -> "ស្នើសុំបង្កើតគណនីរបស់អ្នកត្រូវបានបញ្ជូនដោយជោគជ័យ។ សូមរងចាំការឆ្លើយប្រតិកម្មពីផ្នែកលទ្ធផលគ្រប់គ្រង។";
+            case APPROVED -> "ស្នើសុំបង្កើតគណនីត្រូវបានផ្ល័ងផ្សាយដោយជោគជ័យ។ គណនីនឹងត្រូវបានបង្កើតក្នុងរយៈពេលដែលមាន។";
+            case REJECTED -> "ស្នើសុំបង្កើតគណនីត្រូវបានច្រានចោលដោយជោគជ័យ។";
+            default -> "មានបញ្ហាក្នុងការដំណើរការ";
+        };
     }
 
     private PendingAccountOpeningRequestHistoryDto mapHistoryToDto(PendingAccountOpeningRequestHistory entity) {

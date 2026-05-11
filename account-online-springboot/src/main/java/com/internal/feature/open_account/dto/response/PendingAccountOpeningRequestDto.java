@@ -19,4 +19,4 @@ public class PendingAccountOpeningRequestDto {
     private AmlStatusEnum amlStatus;
     private String remark;
     private Long createdAt;
-}
+    private String message;

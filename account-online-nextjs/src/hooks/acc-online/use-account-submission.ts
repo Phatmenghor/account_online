@@ -221,7 +221,7 @@ export const useAccountSubmission = ({
 
       setSuccessData({
         title: "សូមស្វាគមន៍",
-        message: "ស្នើសុំបង្កើតគណនីរបស់អ្នកត្រូវបានបញ្ជូនដោយជោគជ័យ។ សូមរងចាំការឆ្ លើយប្រតិកម្មពីផ្នែកលទ្ធផលគ្រប់គ្រងរបស់យើងខ្ញុំក្នុងរយៈពេលដែលមាន។",
+        message: response?.message || "ស្នើសុំបង្កើតគណនីរបស់អ្នកត្រូវបានបញ្ជូនដោយជោគជ័យ។",
       });
       setShowSuccessModal(true);
     } catch (error: any) {
