@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PendingAccountAdminReviewDto } from "@/models/open-account-admin/pending-account.response";
 import { useState, useEffect } from "react";
-import { User, FileText, Image as ImageIcon, AlertCircle } from "lucide-react";
+import { User, FileText, Image as ImageIcon, AlertCircle, DollarSign } from "lucide-react";
 import ImageDisplayCard from "@/components/shared/card/image-display-card";
 
 interface PendingAccountDetailModalProps {
@@ -22,345 +22,247 @@ interface PendingAccountDetailModalProps {
   isReadOnly?: boolean;
 }
 
-interface CustomerData {
-  title?: string;
-  givenName?: string;
-  familyName?: string;
-  firstNameKh?: string;
-  lastNameKh?: string;
-  gender?: string;
-  dateOfBirth?: string;
-  nationality?: string;
-  maritalStatus?: string;
-  phoneNumber?: string;
-  email?: string;
-  customerCurrentProvince?: string;
-  customerCurrentDistrict?: string;
-  customerCurrentCommune?: string;
-  customerCurrentVillage?: string;
-  legalAddress?: string;
-  customerPobProvince?: string;
-  customerPobDistrict?: string;
-  customerPobCommune?: string;
-  customerPobVillage?: string;
-  placeOfBirth?: string;
-  legalDocType?: string;
-  legalHolderName?: string;
-  legalIssAuth?: string;
-  legalIssueDate?: string;
-  legalExpireDate?: string;
-  customerType?: string;
-  companyName?: string;
-  occupation?: string;
-  industry?: string;
-  sector?: string;
-  averageIncome?: string;
-  branchCode?: string;
-  productAccount?: string;
-  categoryAccount?: string;
-  nidImageName?: string;
-  selfieImageName?: string;
-}
-
 export default function PendingAccountDetailModal({
   account,
   isOpen,
   onClose,
   isReadOnly = false,
 }: PendingAccountDetailModalProps) {
-  const [customerData, setCustomerData] = useState<CustomerData | null>(null);
+  const [customerData, setCustomerData] = useState<any>(null);
 
   useEffect(() => {
-    if (account?.requestData) {
-      // requestData is already parsed object from backend
-      setCustomerData(account.requestData as CustomerData);
+    if (account?.requestData && typeof account.requestData === "object") {
+      setCustomerData(account.requestData);
     }
   }, [account]);
 
   if (!account) return null;
 
+  const displayField = (label: string, value: any) => {
+    if (!value) return null;
+    return (
+      <div key={label}>
+        <p className="text-xs font-medium text-muted-foreground mb-1">{label}</p>
+        <p className="text-sm text-foreground font-medium">{value}</p>
+      </div>
+    );
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-3">
+          <DialogTitle className="flex items-center gap-3 text-xl">
             <User className="h-5 w-5" />
-            Pending Account Details
+            Account Opening Request - {account.legalId}
           </DialogTitle>
-          <DialogDescription>
-            Legal ID: {account.legalId}
+          <DialogDescription className="flex gap-4">
+            <Badge variant={account.status === "PENDING" ? "secondary" : account.status === "APPROVED" ? "default" : "destructive"}>
+              {account.status}
+            </Badge>
+            <Badge variant="outline">{account.amlStatus}</Badge>
+            <span>Submitted: {account.createdAt}</span>
           </DialogDescription>
         </DialogHeader>
 
-        <Tabs defaultValue="personal" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="personal">
-              <User className="w-4 h-4 mr-2" />
-              Personal
-            </TabsTrigger>
-            <TabsTrigger value="address">
-              <FileText className="w-4 h-4 mr-2" />
-              Address
-            </TabsTrigger>
-            <TabsTrigger value="business">
-              <AlertCircle className="w-4 h-4 mr-2" />
-              Business
-            </TabsTrigger>
-            <TabsTrigger value="images">
-              <ImageIcon className="w-4 h-4 mr-2" />
-              Images
-            </TabsTrigger>
-          </TabsList>
+        {customerData ? (
+          <Tabs defaultValue="personal" className="w-full">
+            <TabsList className="grid w-full grid-cols-5">
+              <TabsTrigger value="personal">
+                <User className="w-4 h-4 mr-2" />
+                Personal
+              </TabsTrigger>
+              <TabsTrigger value="address">
+                <FileText className="w-4 h-4 mr-2" />
+                Address
+              </TabsTrigger>
+              <TabsTrigger value="legal">
+                <AlertCircle className="w-4 h-4 mr-2" />
+                Legal
+              </TabsTrigger>
+              <TabsTrigger value="business">
+                <DollarSign className="w-4 h-4 mr-2" />
+                Business
+              </TabsTrigger>
+              <TabsTrigger value="images">
+                <ImageIcon className="w-4 h-4 mr-2" />
+                Images
+              </TabsTrigger>
+            </TabsList>
 
-          {/* PERSONAL TAB */}
-          <TabsContent value="personal" className="space-y-4">
-            <ScrollArea className="h-[400px] pr-4">
-              <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <DetailField
-                    label="Status"
-                    value={
-                      <Badge variant="default">{account.status}</Badge>
-                    }
-                  />
-                  <DetailField label="AML Status" value={account.amlStatus} />
-                  <DetailField
-                    label="Given Name"
-                    value={customerData?.givenName}
-                  />
-                  <DetailField
-                    label="Family Name"
-                    value={customerData?.familyName}
-                  />
-                  <DetailField
-                    label="First Name (Khmer)"
-                    value={customerData?.firstNameKh}
-                  />
-                  <DetailField
-                    label="Last Name (Khmer)"
-                    value={customerData?.lastNameKh}
-                  />
-                  <DetailField label="Gender" value={customerData?.gender} />
-                  <DetailField
-                    label="Date of Birth"
-                    value={customerData?.dateOfBirth}
-                  />
-                  <DetailField
-                    label="Nationality"
-                    value={customerData?.nationality}
-                  />
-                  <DetailField
-                    label="Marital Status"
-                    value={customerData?.maritalStatus}
-                  />
-                  <DetailField
-                    label="Phone Number"
-                    value={customerData?.phoneNumber}
-                  />
-                  <DetailField label="Email" value={customerData?.email} />
-                </div>
-              </div>
-            </ScrollArea>
-          </TabsContent>
-
-          {/* ADDRESS TAB */}
-          <TabsContent value="address" className="space-y-4">
-            <ScrollArea className="h-[400px] pr-4">
-              <div className="space-y-6">
-                <div>
-                  <h4 className="font-semibold text-sm mb-3">
-                    Current Address
-                  </h4>
+            {/* PERSONAL TAB */}
+            <TabsContent value="personal" className="space-y-4 mt-4">
+              <ScrollArea className="h-[400px] pr-4">
+                <div className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
-                    <DetailField
-                      label="Province"
-                      value={customerData?.customerCurrentProvince}
-                    />
-                    <DetailField
-                      label="District"
-                      value={customerData?.customerCurrentDistrict}
-                    />
-                    <DetailField
-                      label="Commune"
-                      value={customerData?.customerCurrentCommune}
-                    />
-                    <DetailField
-                      label="Village"
-                      value={customerData?.customerCurrentVillage}
-                    />
+                    {displayField("Title", customerData.title)}
+                    {displayField("Given Name", customerData.givenName || customerData.given_name)}
+                    {displayField("Family Name", customerData.familyName || customerData.family_name)}
+                    {displayField("First Name (Khmer)", customerData.firstNameKh)}
+                    {displayField("Last Name (Khmer)", customerData.lastNameKh)}
+                    {displayField("Gender", customerData.gender)}
+                    {displayField("Date of Birth", customerData.dateOfBirth || customerData.date_of_birth)}
+                    {displayField("Nationality", customerData.nationality)}
+                    {displayField("Marital Status", customerData.maritalStatus || customerData.marital_status)}
+                    {displayField("Phone Number", customerData.phoneNumber || customerData.sms)}
+                    {displayField("Email", customerData.email)}
                   </div>
                 </div>
+              </ScrollArea>
+            </TabsContent>
 
-                <div>
-                  <h4 className="font-semibold text-sm mb-3">
-                    Place of Birth
-                  </h4>
-                  <div className="grid grid-cols-2 gap-4">
-                    <DetailField
-                      label="Province"
-                      value={customerData?.customerPobProvince}
-                    />
-                    <DetailField
-                      label="District"
-                      value={customerData?.customerPobDistrict}
-                    />
-                    <DetailField
-                      label="Commune"
-                      value={customerData?.customerPobCommune}
-                    />
-                    <DetailField
-                      label="Village"
-                      value={customerData?.customerPobVillage}
-                    />
-                    <DetailField
-                      label="Place of Birth"
-                      value={customerData?.placeOfBirth}
-                    />
+            {/* ADDRESS TAB */}
+            <TabsContent value="address" className="space-y-4 mt-4">
+              <ScrollArea className="h-[400px] pr-4">
+                <div className="space-y-6">
+                  <div>
+                    <h4 className="font-semibold text-sm mb-3">Current Address</h4>
+                    <div className="grid grid-cols-2 gap-4">
+                      {displayField("Province", customerData.customerCurrentProvince || customerData.cust_province)}
+                      {displayField("District", customerData.customerCurrentDistrict || customerData.cust_district)}
+                      {displayField("Commune", customerData.customerCurrentCommune || customerData.cust_commune)}
+                      {displayField("Village", customerData.customerCurrentVillage || customerData.cust_village)}
+                    </div>
+                  </div>
+
+                  <div>
+                    <h4 className="font-semibold text-sm mb-3">Place of Birth</h4>
+                    <div className="grid grid-cols-2 gap-4">
+                      {displayField("Province", customerData.customerPobProvince || customerData.cust_pob_province)}
+                      {displayField("District", customerData.customerPobDistrict || customerData.cust_pob_district)}
+                      {displayField("Commune", customerData.customerPobCommune || customerData.cust_pob_commune)}
+                      {displayField("Village", customerData.customerPobVillage || customerData.cust_pob_village)}
+                      {displayField("Place of Birth", customerData.placeOfBirth || customerData.place_of_birth)}
+                    </div>
+                  </div>
+
+                  <div>
+                    <h4 className="font-semibold text-sm mb-3">Legal Address</h4>
+                    <p className="text-sm text-foreground">
+                      {customerData.legalAddress || customerData.address || "---"}
+                    </p>
                   </div>
                 </div>
+              </ScrollArea>
+            </TabsContent>
 
-                <div>
-                  <h4 className="font-semibold text-sm mb-3">
-                    Legal Address
-                  </h4>
-                  <p className="text-sm text-foreground">
-                    {customerData?.legalAddress || "---"}
-                  </p>
-                </div>
-              </div>
-            </ScrollArea>
-          </TabsContent>
-
-          {/* BUSINESS TAB */}
-          <TabsContent value="business" className="space-y-4">
-            <ScrollArea className="h-[400px] pr-4">
-              <div className="space-y-6">
-                <div>
-                  <h4 className="font-semibold text-sm mb-3">
-                    Legal Document
-                  </h4>
+            {/* LEGAL TAB */}
+            <TabsContent value="legal" className="space-y-4 mt-4">
+              <ScrollArea className="h-[400px] pr-4">
+                <div className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
-                    <DetailField
-                      label="Document Type"
-                      value={customerData?.legalDocType}
-                    />
-                    <DetailField
-                      label="Holder Name"
-                      value={customerData?.legalHolderName}
-                    />
-                    <DetailField
-                      label="Issuing Authority"
-                      value={customerData?.legalIssAuth}
-                    />
-                    <DetailField
-                      label="Issue Date"
-                      value={customerData?.legalIssueDate}
-                    />
-                    <DetailField
-                      label="Expiration Date"
-                      value={customerData?.legalExpireDate}
-                    />
+                    {displayField("Document Type", customerData.legalDocType || customerData.legal_doc_name)}
+                    {displayField("Holder Name", customerData.legalHolderName || customerData.legal_holder_name)}
+                    {displayField("Issuing Authority", customerData.legalIssAuth || customerData.legal_iss_auth)}
+                    {displayField("Issue Date", customerData.legalIssueDate || customerData.legal_iss_date || customerData.issuedDate)}
+                    {displayField("Expiration Date", customerData.legalExpireDate || customerData.legal_exp_date || customerData.expiredDate)}
+                  </div>
+
+                  {customerData.legalMrz1 && (
+                    <div className="mt-4 p-3 bg-muted rounded-md">
+                      <h4 className="font-semibold text-sm mb-2">Machine Readable Zone (MRZ)</h4>
+                      <div className="font-mono text-xs space-y-1">
+                        <p>{customerData.legalMrz1 || customerData.legalMRZ1}</p>
+                        <p>{customerData.legalMrz2 || customerData.legalMRZ2}</p>
+                        <p>{customerData.legalMrz3 || customerData.legalMRZ3}</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </ScrollArea>
+            </TabsContent>
+
+            {/* BUSINESS TAB */}
+            <TabsContent value="business" className="space-y-4 mt-4">
+              <ScrollArea className="h-[400px] pr-4">
+                <div className="space-y-6">
+                  <div>
+                    <h4 className="font-semibold text-sm mb-3">Employment Information</h4>
+                    <div className="grid grid-cols-2 gap-4">
+                      {displayField("Customer Type", customerData.customerType || customerData.customer_type)}
+                      {displayField("Company Name", customerData.companyName || customerData.company)}
+                      {displayField("Occupation", customerData.occupation)}
+                      {displayField("Industry", customerData.industry)}
+                      {displayField("Sector", customerData.sector)}
+                      {displayField("Average Income", customerData.averageIncome || customerData.average_income)}
+                    </div>
+                  </div>
+
+                  <div>
+                    <h4 className="font-semibold text-sm mb-3">Banking Information</h4>
+                    <div className="grid grid-cols-2 gap-4">
+                      {displayField("Branch Code", customerData.branchCode || customerData.branch_code)}
+                      {displayField("Product Account", customerData.productAccount || customerData.product_account)}
+                      {displayField("Category Account", customerData.categoryAccount || customerData.category_account)}
+                      {displayField("Customer Role", customerData.customerRole || customerData.customer_role)}
+                      {displayField("Loan Officer", customerData.loanOfficer || customerData.loan_officer)}
+                      {displayField("Released By", customerData.releasedBy || customerData.released_by)}
+                    </div>
                   </div>
                 </div>
+              </ScrollArea>
+            </TabsContent>
 
-                <div>
-                  <h4 className="font-semibold text-sm mb-3">
-                    Employment Information
-                  </h4>
-                  <div className="grid grid-cols-2 gap-4">
-                    <DetailField
-                      label="Customer Type"
-                      value={customerData?.customerType}
-                    />
-                    <DetailField
-                      label="Company Name"
-                      value={customerData?.companyName}
-                    />
-                    <DetailField
-                      label="Occupation"
-                      value={customerData?.occupation}
-                    />
-                    <DetailField
-                      label="Industry"
-                      value={customerData?.industry}
-                    />
-                    <DetailField label="Sector" value={customerData?.sector} />
-                    <DetailField
-                      label="Average Income"
-                      value={customerData?.averageIncome}
-                    />
-                  </div>
+            {/* IMAGES TAB */}
+            <TabsContent value="images" className="space-y-4 mt-4">
+              <ScrollArea className="h-[400px] pr-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <ImageDisplayCard
+                    title="National ID Document"
+                    imageName={customerData.nidImageName || customerData.nid_image_name}
+                    imageType="nid"
+                    legalId={account.legalId}
+                  />
+                  <ImageDisplayCard
+                    title="Selfie Photo"
+                    imageName={customerData.selfieImageName || customerData.selfie_image_name}
+                    imageType="selfie"
+                    legalId={account.legalId}
+                  />
                 </div>
-
-                <div>
-                  <h4 className="font-semibold text-sm mb-3">Banking Info</h4>
-                  <div className="grid grid-cols-2 gap-4">
-                    <DetailField
-                      label="Branch Code"
-                      value={customerData?.branchCode}
-                    />
-                    <DetailField
-                      label="Product Account"
-                      value={customerData?.productAccount}
-                    />
-                    <DetailField
-                      label="Category Account"
-                      value={customerData?.categoryAccount}
-                    />
-                  </div>
-                </div>
-              </div>
-            </ScrollArea>
-          </TabsContent>
-
-          {/* IMAGES TAB */}
-          <TabsContent value="images" className="space-y-4">
-            <ScrollArea className="h-[400px] pr-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <ImageDisplayCard
-                  title="National ID"
-                  imageName={customerData?.nidImageName}
-                  imageType="nid"
-                  legalId={account.legalId}
-                />
-                <ImageDisplayCard
-                  title="Selfie"
-                  imageName={customerData?.selfieImageName}
-                  imageType="selfie"
-                  legalId={account.legalId}
-                />
-              </div>
-            </ScrollArea>
-          </TabsContent>
-        </Tabs>
-
-        {/* Remark Section */}
-        {account.remark && (
-          <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-md">
-            <p className="text-sm font-medium text-amber-900">Remarks:</p>
-            <p className="text-sm text-amber-800">{account.remark}</p>
+              </ScrollArea>
+            </TabsContent>
+          </Tabs>
+        ) : (
+          <div className="text-center py-8 text-muted-foreground">
+            No customer data available
           </div>
         )}
+
+        {/* FOOTER SECTION */}
+        <div className="mt-6 pt-4 border-t space-y-3">
+          {/* AML Status */}
+          {account.amlResultData && typeof account.amlResultData === "object" && (
+            <div className="p-3 bg-blue-50 border border-blue-200 rounded-md">
+              <p className="text-sm font-medium text-blue-900 mb-2">AML Status:</p>
+              <div className="text-sm text-blue-800 space-y-1">
+                <p>• Risk Level: <span className="font-semibold">{(account.amlResultData as any).riskLevel || "---"}</span></p>
+                <p>• Service: {(account.amlResultData as any).serviceName || "---"}</p>
+                <p>• Rules Score: {(account.amlResultData as any).totalRulesScore || 0}</p>
+              </div>
+            </div>
+          )}
+
+          {/* Remarks */}
+          {account.remark && (
+            <div className="p-3 bg-amber-50 border border-amber-200 rounded-md">
+              <p className="text-sm font-medium text-amber-900 mb-1">Admin Remarks:</p>
+              <p className="text-sm text-amber-800">{account.remark}</p>
+            </div>
+          )}
+
+          {/* Additional Info */}
+          <div className="p-3 bg-gray-50 border border-gray-200 rounded-md">
+            <p className="text-xs font-medium text-gray-600 mb-2">ADDITIONAL INFORMATION</p>
+            <div className="text-xs text-gray-700 space-y-1">
+              <p>• Legal ID: <span className="font-mono font-semibold">{account.legalId}</span></p>
+              <p>• Request ID: <span className="font-mono font-semibold">{account.requestId}</span></p>
+              <p>• Status: <Badge variant="outline" className="ml-2">{account.status}</Badge></p>
+              <p>• Submitted: {account.createdAt}</p>
+            </div>
+          </div>
+        </div>
       </DialogContent>
     </Dialog>
-  );
-}
-
-function DetailField({
-  label,
-  value,
-}: {
-  label: string;
-  value?: string | React.ReactNode;
-}) {
-  return (
-    <div>
-      <p className="text-xs font-medium text-muted-foreground mb-1">
-        {label}
-      </p>
-      <p className="text-sm text-foreground font-medium">
-        {typeof value === "string" ? value || "---" : value || "---"}
-      </p>
-    </div>
   );
 }
