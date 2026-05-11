@@ -117,6 +117,13 @@ public final class AppConstants {
 
         public static final String REJECT_SUCCESS_MESSAGE = "ស្នើសុំបង្កើតគណនីត្រូវបានពិចារណាហើយ។\n\n❌ ស្នើសុំរបស់លោកអ្នកមិនត្រូវបានផ្ល័ងផ្សាយក្នុងលើកនេះ\n• សូមក្រឡេកមើលលម្អិតលម្អិតនៃលក្ខខណ្ឌ\n• លោកអ្នកអាចដាក់ស្នើសុំម្តងទៀត\n• ប្រសិនបើលោកអ្នកមានសំណួរ សូមទំនាក់ទំនង " + SUPPORT_PHONE_PRIMARY + " ឬ " + SUPPORT_PHONE_SECONDARY + " ដើម្បីទទួលបានជំនួយ។";
 
+        // API Response Messages - Simple & Clear (for ApiResponse.success())
+        public static final String ACCOUNT_OPENING_SUBMITTED = "Account opening request submitted successfully";
+        public static final String ACCOUNT_OPENING_APPROVED = "Account opening request approved successfully";
+        public static final String ACCOUNT_OPENING_REJECTED = "Account opening request rejected successfully";
+        public static final String PENDING_ACCOUNTS_RETRIEVED = "Pending accounts retrieved successfully";
+        public static final String PENDING_ACCOUNT_DETAIL_RETRIEVED = "Pending account details retrieved successfully";
+
         // ── English Versions ──
         public static final String PENDING_REQUEST_ALREADY_EXISTS_EN = "You have already submitted an account opening request. Please wait for the review department's response. If you have any questions, please contact " + SUPPORT_PHONE_PRIMARY + " or " + SUPPORT_PHONE_SECONDARY + " for further assistance.";
 
