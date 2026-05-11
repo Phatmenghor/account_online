@@ -59,13 +59,9 @@ export const createPendingAccountHistoryTableColumns = ({
       minWidth: "180px",
       render: (account) => {
         let name = "---";
-        if (account.requestData) {
-          try {
-            const data = JSON.parse(account.requestData);
-            name = `${data.givenName || ""} ${data.familyName || ""}`.trim() || "---";
-          } catch (e) {
-            name = "---";
-          }
+        if (account.requestData && typeof account.requestData === "object") {
+          const data = account.requestData as any;
+          name = `${data.givenName || data.given_name || ""} ${data.familyName || data.family_name || ""}`.trim() || "---";
         }
         return <span className="font-medium">{name}</span>;
       },

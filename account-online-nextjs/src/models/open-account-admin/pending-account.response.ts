@@ -20,13 +20,13 @@ export interface PendingAccountOpeningRequestDto {
 
   // AML information
   amlStatus: string;
-  amlResultData?: string;
+  amlResultData?: any;
 
-  // Complete customer data (raw JSON)
-  requestData?: string;
+  // Complete customer data (parsed JSON object)
+  requestData?: any;
 
-  // Customer info JSON
-  customerInfo?: string;
+  // Customer info JSON (parsed object)
+  customerInfo?: any;
 }
 
 // Main DTO for Pending Account Review
@@ -39,16 +39,16 @@ export interface PendingAccountAdminReviewDto {
 
   // AML information
   amlStatus: string;
-  amlResultData?: string;
+  amlResultData?: any;
 
   // Review remarks
   remark?: string;
 
-  // Complete customer data (raw JSON)
-  requestData?: string;
+  // Complete customer data (parsed JSON object)
+  requestData?: any;
 
-  // Customer info JSON
-  customerInfo?: string;
+  // Customer info JSON (parsed object)
+  customerInfo?: any;
 }
 
 // Request for approving account

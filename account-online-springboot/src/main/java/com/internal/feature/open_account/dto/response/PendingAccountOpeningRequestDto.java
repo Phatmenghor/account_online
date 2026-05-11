@@ -3,6 +3,8 @@ package com.internal.feature.open_account.dto.response;
 import com.internal.enumation.AccountOpeningRequestStatusEnum;
 import com.internal.enumation.AmlStatusEnum;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonRawValue;
+import com.fasterxml.jackson.databind.JsonNode;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -25,11 +27,13 @@ public class PendingAccountOpeningRequestDto {
 
     // AML information
     private AmlStatusEnum amlStatus;
+
+    @JsonRawValue
     private String amlResultData;
 
-    // Complete customer data (raw JSON from request)
-    private String requestData;
+    // Complete customer data (parsed JSON object)
+    private Object requestData;
 
-    // AML raw data
-    private String customerInfo;
+    // Customer info JSON
+    private Object customerInfo;
 }

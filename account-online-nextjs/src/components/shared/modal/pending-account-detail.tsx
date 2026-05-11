@@ -72,12 +72,8 @@ export default function PendingAccountDetailModal({
 
   useEffect(() => {
     if (account?.requestData) {
-      try {
-        const parsed = JSON.parse(account.requestData);
-        setCustomerData(parsed);
-      } catch (e) {
-        console.error("Failed to parse customer data:", e);
-      }
+      // requestData is already parsed object from backend
+      setCustomerData(account.requestData as CustomerData);
     }
   }, [account]);
 

@@ -286,6 +286,24 @@ public class OpenAccountServiceImpl implements OpenAccountService {
 
         String message = getStatusMessage(entity.getStatus());
 
+        Object requestDataObj = null;
+        try {
+            if (entity.getRequestData() != null) {
+                requestDataObj = objectMapper.readValue(entity.getRequestData(), Object.class);
+            }
+        } catch (Exception e) {
+            log.warn("Failed to parse requestData: {}", e.getMessage());
+        }
+
+        Object customerInfoObj = null;
+        try {
+            if (entity.getCustomerInfo() != null && !entity.getCustomerInfo().isEmpty()) {
+                customerInfoObj = objectMapper.readValue(entity.getCustomerInfo(), Object.class);
+            }
+        } catch (Exception e) {
+            log.warn("Failed to parse customerInfo: {}", e.getMessage());
+        }
+
         return PendingAccountOpeningRequestDto.builder()
                 .id(entity.getId())
                 .legalId(entity.getLegalId())
@@ -295,8 +313,8 @@ public class OpenAccountServiceImpl implements OpenAccountService {
                 .remark(entity.getRemark())
                 .amlStatus(entity.getAmlStatus())
                 .amlResultData(entity.getAmlResultData())
-                .requestData(entity.getRequestData())
-                .customerInfo(entity.getCustomerInfo())
+                .requestData(requestDataObj)
+                .customerInfo(customerInfoObj)
                 .build();
     }
 
@@ -396,6 +414,24 @@ public class OpenAccountServiceImpl implements OpenAccountService {
                     .format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
         }
 
+        Object requestDataObj = null;
+        try {
+            if (request.getRequestData() != null) {
+                requestDataObj = objectMapper.readValue(request.getRequestData(), Object.class);
+            }
+        } catch (Exception e) {
+            log.warn("Failed to parse requestData: {}", e.getMessage());
+        }
+
+        Object customerInfoObj = null;
+        try {
+            if (request.getCustomerInfo() != null && !request.getCustomerInfo().isEmpty()) {
+                customerInfoObj = objectMapper.readValue(request.getCustomerInfo(), Object.class);
+            }
+        } catch (Exception e) {
+            log.warn("Failed to parse customerInfo: {}", e.getMessage());
+        }
+
         return PendingAccountAdminReviewDto.builder()
                 .requestId(request.getId())
                 .legalId(request.getLegalId())
@@ -404,8 +440,8 @@ public class OpenAccountServiceImpl implements OpenAccountService {
                 .amlStatus(request.getAmlStatus())
                 .amlResultData(request.getAmlResultData())
                 .remark(request.getRemark())
-                .requestData(request.getRequestData())
-                .customerInfo(request.getCustomerInfo())
+                .requestData(requestDataObj)
+                .customerInfo(customerInfoObj)
                 .build();
     }
 
