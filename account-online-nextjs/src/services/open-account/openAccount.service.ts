@@ -10,7 +10,7 @@ export async function createOpenAccountService(request: CreateOpenAccountReq) {
     // - Mobile banking activation
     // Timeout is configurable via NEXT_PUBLIC_ACCOUNT_CREATION_TIMEOUT env variable (default: 5 minutes)
     const response = await axiosClientWithAuth.post(
-      "/api/v1/public/open-account",
+      "/api/v1/public/open-account/submit",
       request,
       { timeout: ACCOUNT_CREATION_TIMEOUT }
     );
