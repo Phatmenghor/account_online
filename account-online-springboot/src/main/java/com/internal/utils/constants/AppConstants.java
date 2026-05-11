@@ -98,24 +98,24 @@ public final class AppConstants {
         // ==================================================================================
 
         // Error Messages - Detailed & Professional
-        public static final String PENDING_REQUEST_ALREADY_EXISTS = "លោកអ្នកបានដាក់ស្នើសុំបង្កើតគណនីរួចហើយ។ សូមរងចាំការឆ្លើយប្រតិកម្មពីផ្នែកលទ្ធផលគ្រប់គ្រង។ ប្រសិនបើលោកអ្នកមានសំណួរ សូមទំនាក់ទំនង " + SUPPORT_PHONE_PRIMARY + " ឬ " + SUPPORT_PHONE_SECONDARY;
+        public static final String PENDING_REQUEST_ALREADY_EXISTS = "លោកអ្នកបានដាក់ស្នើសុំបង្កើតគណនីរួចហើយ។ សូមរងចាំការឆ្លើយប្រតិកម្មពីផ្នែកលទ្ធផលគ្រប់គ្រង។ ប្រសិនបើលោកអ្នកមានសំណួរ សូមទំនាក់ទំនង " + SUPPORT_PHONE_PRIMARY + " ឬ " + SUPPORT_PHONE_SECONDARY + " ដើម្បីទទួលបានជំនួយបន្ថែម។";
 
-        public static final String ACCOUNT_ALREADY_EXISTS_FOR_LEGAL_ID = "លោកអ្នកមានគណនីជាមួយធនាគារ CPB រួចហើយ។ សូមប្រើប្រាស់គណនីបច្ចុប្បន្ននៃលោកអ្នក ឬទំនាក់ទំនងសេវាបម្រើអតិថិជនដើម្បីទទួលបានជំនួយ។";
+        public static final String ACCOUNT_ALREADY_EXISTS_FOR_LEGAL_ID = "លោកអ្នកមានគណនីជាមួយធនាគារ CPB រួចហើយ។ សូមប្រើប្រាស់គណនីបច្ចុប្បន្ននៃលោកអ្នក ឬទំនាក់ទំនងសេវាបម្រើអតិថិជនតាមរយៈលេខ " + SUPPORT_PHONE_PRIMARY + " ឬ " + SUPPORT_PHONE_SECONDARY + " ដើម្បីទទួលបានជំនួយ។";
 
-        public static final String INVALID_STATUS_ONLY_PENDING_CAN_APPROVE = "មានបញ្ហាក្នុងការដំណើរការ។ សូមលើកលែងក្រុមផ្នែកបច្ចេកទេស។";
+        public static final String INVALID_STATUS_ONLY_PENDING_CAN_APPROVE = "មានបញ្ហាក្នុងការដំណើរការស្នើសុំរបស់លោកអ្នក។ សូមលើកលែងក្រុមផ្នែកបច្ចេកទេស ឬទំនាក់ទំនង " + SUPPORT_PHONE_PRIMARY + " ឬ " + SUPPORT_PHONE_SECONDARY + "។";
 
-        public static final String INVALID_STATUS_ONLY_PENDING_CAN_REJECT = "មានបញ្ហាក្នុងការដំណើរការ។ សូមលើកលែងក្រុមផ្នែកបច្ចេកទេស។";
+        public static final String INVALID_STATUS_ONLY_PENDING_CAN_REJECT = "មានបញ្ហាក្នុងការដំណើរការស្នើសុំរបស់លោកអ្នក។ សូមលើកលែងក្រុមផ្នែកបច្ចេកទេស ឬទំនាក់ទំនង " + SUPPORT_PHONE_PRIMARY + " ឬ " + SUPPORT_PHONE_SECONDARY + "។";
 
-        public static final String FAILED_PARSE_CUSTOMER_DATA = "មានបញ្ហាក្នុងការដំណើរការលម្អិតលម្អិតលម្អិត។ សូមព្យាយាមម្តងទៀត ឬទំនាក់ទំនង " + SUPPORT_PHONE_PRIMARY;
+        public static final String FAILED_PARSE_CUSTOMER_DATA = "មានបញ្ហាក្នុងការដំណើរការលម្អិតលម្អិតរបស់លោកអ្នក។ សូមព្យាយាមម្តងទៀត ឬទំនាក់ទំនងសេវាបម្រើអតិថិជនតាមរយៈលេខ " + SUPPORT_PHONE_PRIMARY + " ឬ " + SUPPORT_PHONE_SECONDARY + " ដើម្បីទទួលបានជំនួយ។";
 
-        public static final String FAILED_CREATE_ACCOUNT = "មានបញ្ហាក្នុងការបង្កើតគណនី។ សូមព្យាយាមម្តងទៀត ឬទំនាក់ទំនងសេវាបម្រើអតិថិជនលេខ " + SUPPORT_PHONE_PRIMARY + " ឬ " + SUPPORT_PHONE_SECONDARY;
+        public static final String FAILED_CREATE_ACCOUNT = "មានបញ្ហាក្នុងការបង្កើតគណនី។ សូមព្យាយាមម្តងទៀត ឬទំនាក់ទំនងសេវាបម្រើអតិថិជនតាមរយៈលេខ " + SUPPORT_PHONE_PRIMARY + " ឬ " + SUPPORT_PHONE_SECONDARY + " ដើម្បីទទួលបានជំនួយ។";
 
         // Success Messages - Professional & Detailed
         public static final String SUBMIT_SUCCESS_MESSAGE = "សូមស្វាគមន៍! ស្នើសុំបង្កើតគណនីរបស់លោកអ្នកត្រូវបានទទួលដោយជោគជ័យ។\n\n📋 លម្អិត:\n• លេខសម្គាល់សម្ងាត់ថ្មី នឹងទាក់ទងលោកអ្នកតាមរយៈសារទូរស័ព្ទ\n• ធនាគារកំពុងវាយតម្លៃលម្អិតលម្អិតរបស់លោកអ្នក (ឡើង ៣-៥ ថ្ងៃធ្វើការ)\n• លោកអ្នកនឹងទទួលបានលេខគណនីក្នុងពេលដ៏ល្អលម្អិត\n\n💬 ប្រសិនបើលោកអ្នកមានសំណួរ សូមទំនាក់ទំនង:\n📞 " + SUPPORT_PHONE_PRIMARY + " ឬ " + SUPPORT_PHONE_SECONDARY + "\n📧 ពេលម៉ោង៖ ៩:០០ - ១៧:០០ (ច័ន្ទ - ព្រហស្បតិ៍)";
 
-        public static final String APPROVE_SUCCESS_MESSAGE = "សូមស្វាគមន់! ស្នើសុំបង្កើតគណនីត្រូវបានផ្ល័ងផ្សាយដោយជោគជ័យ។\n\n✅ គណនីរបស់លោកអ្នកកំពុងត្រូវបានបង្កើត\n• លេខគណនីថ្មីនឹងបញ្ជូនទៅលោកអ្នកក្នុងរយៈពេល ១-៣ ថ្ងៃធ្វើការ\n• សូមធានាថាលេខទូរស័ព្ទរបស់លោកអ្នកឈានដល់\n• បន្ទាប់មក លោកអ្នកអាចប្រើប្រាស់សេវាធនាគារលើឡាន";
+        public static final String APPROVE_SUCCESS_MESSAGE = "សូមស្វាគមន់! ស្នើសុំបង្កើតគណនីត្រូវបានផ្ល័ងផ្សាយដោយជោគជ័យ។\n\n✅ គណនីរបស់លោកអ្នកកំពុងត្រូវបានបង្កើត\n• លេខគណនីថ្មីនឹងបញ្ជូនទៅលោកអ្នកក្នុងរយៈពេល ១-៣ ថ្ងៃធ្វើការ\n• សូមធានាថាលេខទូរស័ព្ទរបស់លោកអ្នកឈានដល់\n• បន្ទាប់មក លោកអ្នកអាចប្រើប្រាស់សេវាធនាគារលើឡាន\n\n💬 ប្រសិនបើលោកអ្នកមានសំណួរ សូមទំនាក់ទំនង " + SUPPORT_PHONE_PRIMARY + " ឬ " + SUPPORT_PHONE_SECONDARY + "។";
 
-        public static final String REJECT_SUCCESS_MESSAGE = "ស្នើសុំបង្កើតគណនីត្រូវបានពិចារណាហើយ។\n\n❌ ស្នើសុំរបស់លោកអ្នកមិនត្រូវបានផ្ល័ងផ្សាយក្នុងលើកនេះ\n• សូមក្រឡេកមើលលម្អិតលម្អិតនៃប្រើកម្លាំង\n• លោកអ្នកអាចដាក់ស្នើសុំម្តងទៀត\n• ប្រសិនបើលោកអ្នកមានសំណួរ សូមទំនាក់ទំនង " + SUPPORT_PHONE_PRIMARY;
+        public static final String REJECT_SUCCESS_MESSAGE = "ស្នើសុំបង្កើតគណនីត្រូវបានពិចារណាហើយ។\n\n❌ ស្នើសុំរបស់លោកអ្នកមិនត្រូវបានផ្ល័ងផ្សាយក្នុងលើកនេះ\n• សូមក្រឡេកមើលលម្អិតលម្អិតនៃលក្ខខណ្ឌ\n• លោកអ្នកអាចដាក់ស្នើសុំម្តងទៀត\n• ប្រសិនបើលោកអ្នកមានសំណួរ សូមទំនាក់ទំនង " + SUPPORT_PHONE_PRIMARY + " ឬ " + SUPPORT_PHONE_SECONDARY + " ដើម្បីទទួលបានជំនួយ។";
 
         // ==================================================================================
         // 9. FIELD NAME TRANSLATIONS
