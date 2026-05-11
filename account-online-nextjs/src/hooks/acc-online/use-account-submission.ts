@@ -187,41 +187,41 @@ export const useAccountSubmission = ({
         legalMrz2: formData.MRZ2,
         legalMrz3: formData.MRZ3,
 
-        // Legal Type Selection - submit all available data
-        legalDocType: selectedLegalType?.legalTypeValue,
+        // Legal Type Selection - use empty string if not selected
+        legalDocType: selectedLegalType?.legalTypeValue || "",
 
         // Phone and Contact
         phoneNumber: phoneNumber,
 
-        // Marital Status - submit all available data
+        // Marital Status - use empty string if not selected
         maritalStatus: selectedMaritalStatus
           ? getMaritalStatusString(selectedMaritalStatus.id.toString())
-          : undefined,
+          : "",
 
-        // Occupation - submit all available data
-        occupation: selectedOccupation?.occupationCode,
+        // Occupation - use empty string if not selected
+        occupation: selectedOccupation?.occupationCode || "",
 
-        // Reference Bank - submit all available data
-        companyName: selectedReferenceBank?.nameEn,
+        // Reference Bank - use empty string if not selected
+        companyName: selectedReferenceBank?.nameEn || "",
 
-        // Staff/Referral
-        referralId: staffCode,
-        releasedBy: staffCode,
+        // Staff/Referral - use empty string if not provided
+        referralId: staffCode || "",
+        releasedBy: staffCode || "",
 
         // Branch - always required
         branchCode: selectedBranch!.branchID,
 
-        // Current Address - submit all available codes
-        customerCurrentProvince: locationData.currentAddress.province?.provinceCode,
-        customerCurrentDistrict: locationData.currentAddress.district?.districtCode,
-        customerCurrentCommune: locationData.currentAddress.commune?.communeCode,
-        customerCurrentVillage: locationData.currentAddress.village?.villageCode,
+        // Current Address - use empty string if not selected
+        customerCurrentProvince: locationData.currentAddress.province?.provinceCode || "",
+        customerCurrentDistrict: locationData.currentAddress.district?.districtCode || "",
+        customerCurrentCommune: locationData.currentAddress.commune?.communeCode || "",
+        customerCurrentVillage: locationData.currentAddress.village?.villageCode || "",
 
-        // Place of Birth Address - submit all available codes
-        customerPobProvince: locationData.placeOfBirth.province?.provinceCode,
-        customerPobDistrict: locationData.placeOfBirth.district?.districtCode,
-        customerPobCommune: locationData.placeOfBirth.commune?.communeCode,
-        customerPobVillage: locationData.placeOfBirth.village?.villageCode,
+        // Place of Birth Address - use empty string if not selected
+        customerPobProvince: locationData.placeOfBirth.province?.provinceCode || "",
+        customerPobDistrict: locationData.placeOfBirth.district?.districtCode || "",
+        customerPobCommune: locationData.placeOfBirth.commune?.communeCode || "",
+        customerPobVillage: locationData.placeOfBirth.village?.villageCode || "",
 
         // Images
         nidImageName: nidFileName!,
