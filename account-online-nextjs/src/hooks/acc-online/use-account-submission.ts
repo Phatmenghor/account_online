@@ -171,28 +171,26 @@ export const useAccountSubmission = ({
 
       // ── 4. Submit account ──
       const accountData = {
+        // Personal Information
+        title: formData.title || "",
         familyName: formData.lastNameEn,
         givenName: formData.firstNameEn,
         firstNameKh: formData.firstNameKh,
         lastNameKh: formData.lastNameKh,
-        dateOfBirth: formatDate(formData.dob),
         gender: convertGenderToAPI(formData.gender),
-        placeOfBirth: formData.pob,
-        companyName: selectedReferenceBank?.nameEn || "",
-        referralId: staffCode || "",
-        branchCode: selectedBranch!.branchID,
-        occupation: selectedOccupation?.occupationCode || "",
+        dateOfBirth: formatDate(formData.dob),
+        nationality: "KH", // Default to Cambodia
+        email: "", // Optional, can be added to form
+        phoneNumber: phoneNumber,
+
+        // Marital & Occupation
         maritalStatus: selectedMaritalStatus
           ? getMaritalStatusString(selectedMaritalStatus.id.toString())
           : "SINGLE",
-        customerCurrentProvince:
-          locationData.currentAddress.province?.provinceCode || "",
-        customerCurrentDistrict:
-          locationData.currentAddress.district?.districtCode || "",
-        customerCurrentCommune:
-          locationData.currentAddress.commune?.communeCode || "",
-        customerCurrentVillage:
-          locationData.currentAddress.village?.villageCode || "",
+        occupation: selectedOccupation?.occupationCode || "",
+
+        // Place of Birth
+        placeOfBirth: formData.pob,
         customerPobProvince:
           locationData.placeOfBirth.province?.provinceCode || "",
         customerPobDistrict:
@@ -201,15 +199,47 @@ export const useAccountSubmission = ({
           locationData.placeOfBirth.commune?.communeCode || "",
         customerPobVillage:
           locationData.placeOfBirth.village?.villageCode || "",
+
+        // Current Address
+        customerCurrentProvince:
+          locationData.currentAddress.province?.provinceCode || "",
+        customerCurrentDistrict:
+          locationData.currentAddress.district?.districtCode || "",
+        customerCurrentCommune:
+          locationData.currentAddress.commune?.communeCode || "",
+        customerCurrentVillage:
+          locationData.currentAddress.village?.villageCode || "",
+
+        // Legal Information
         legalId: formData.idNumber,
+        legalDocType: selectedLegalType?.legalTypeValue || "",
+        legalAddress: formData.address,
         legalIssueDate: formatDate(formData.issuedDate),
         legalExpireDate: formatDate(formData.expiredDate),
-        legalAddress: formData.address,
-        legalDocType: selectedLegalType?.legalTypeValue || "",
+        legalIssAuth: "", // Can be added to form
+        legalHolderName: "", // Can be added to form
         legalMrz1: formData.MRZ1,
         legalMrz2: formData.MRZ2,
         legalMrz3: formData.MRZ3,
-        phoneNumber: phoneNumber,
+
+        // Bank & Reference
+        companyName: selectedReferenceBank?.nameEn || "",
+        referralId: staffCode || "",
+        releasedBy: staffCode || "", // Staff code as released by
+        branchCode: selectedBranch!.branchID,
+
+        // Customer Type & Business
+        customerType: "", // Can be "INDIVIDUAL" or "BUSINESS"
+        industry: "", // Can be added to form
+        sector: "", // Can be added to form
+        averageIncome: "", // Can be added to form
+
+        // Product & Account
+        productAccount: "", // Default product code
+        categoryAccount: "", // Can be added to form
+        customerRole: "OWNER", // Default role
+
+        // Images
         nidImageName: nidFileName!,
         selfieImageName: selfieFileName!,
       };
