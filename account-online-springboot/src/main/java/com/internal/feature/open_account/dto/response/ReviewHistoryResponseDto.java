@@ -5,13 +5,15 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class PendingAccountOpeningHistoryDto {
+public class ReviewHistoryResponseDto {
 
     private Long requestId;
     private String legalId;
-    private PendingAccountOpeningRequestDto request;
+    private List<PendingAccountOpeningRequestHistoryDto> history;
 }

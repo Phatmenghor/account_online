@@ -18,6 +18,7 @@ import com.internal.feature.open_account.dto.response.AllPendingAccountOpeningHi
 import com.internal.feature.open_account.dto.response.PendingAccountAdminReviewDto;
 import com.internal.feature.open_account.dto.response.PendingAccountOpeningHistoryDto;
 import com.internal.feature.open_account.dto.response.PendingAccountOpeningRequestHistoryDto;
+import com.internal.feature.open_account.dto.response.ReviewHistoryResponseDto;
 import com.internal.feature.open_account.event.AccountOpenedEvent;
 import com.internal.feature.open_account.facade.BankingService;
 import com.internal.feature.open_account.facade.ComplianceService;
@@ -304,124 +305,47 @@ public class OpenAccountServiceImpl implements OpenAccountService {
                 .createdAt(createdAtMillis)
                 .message(message)
                 .amlResultData(entity.getAmlResultData())
-                .customerRole("OWNER"); // Default value
+                .customerRole("OWNER");
 
         if (customerData != null) {
-            // Only add fields that have actual values (not null or empty)
-            if (customerData.getTitle() != null) {
-                builder.title(customerData.getTitle());
-            }
-            if (customerData.getGivenName() != null) {
-                builder.givenName(customerData.getGivenName());
-            }
-            if (customerData.getFamilyName() != null) {
-                builder.familyName(customerData.getFamilyName());
-            }
-            if (customerData.getFirstNameKh() != null) {
-                builder.firstNameKh(customerData.getFirstNameKh());
-            }
-            if (customerData.getLastNameKh() != null) {
-                builder.lastNameKh(customerData.getLastNameKh());
-            }
-            if (customerData.getGender() != null) {
-                builder.gender(customerData.getGender());
-            }
-            if (customerData.getDateOfBirth() != null) {
-                builder.dateOfBirth(customerData.getDateOfBirth());
-            }
-            if (customerData.getNationality() != null) {
-                builder.nationality(customerData.getNationality());
-            }
-            if (customerData.getMaritalStatus() != null) {
-                builder.maritalStatus(customerData.getMaritalStatus());
-            }
-            if (customerData.getPhoneNumber() != null) {
-                builder.phoneNumber(customerData.getPhoneNumber());
-            }
-            if (customerData.getEmail() != null) {
-                builder.email(customerData.getEmail());
-            }
-            if (customerData.getCustomerCurrentProvince() != null) {
-                builder.customerCurrentProvince(customerData.getCustomerCurrentProvince());
-            }
-            if (customerData.getCustomerCurrentDistrict() != null) {
-                builder.customerCurrentDistrict(customerData.getCustomerCurrentDistrict());
-            }
-            if (customerData.getCustomerCurrentCommune() != null) {
-                builder.customerCurrentCommune(customerData.getCustomerCurrentCommune());
-            }
-            if (customerData.getCustomerCurrentVillage() != null) {
-                builder.customerCurrentVillage(customerData.getCustomerCurrentVillage());
-            }
-            if (customerData.getLegalAddress() != null) {
-                builder.legalAddress(customerData.getLegalAddress());
-            }
-            if (customerData.getCustomerPobProvince() != null) {
-                builder.customerPobProvince(customerData.getCustomerPobProvince());
-            }
-            if (customerData.getCustomerPobDistrict() != null) {
-                builder.customerPobDistrict(customerData.getCustomerPobDistrict());
-            }
-            if (customerData.getCustomerPobCommune() != null) {
-                builder.customerPobCommune(customerData.getCustomerPobCommune());
-            }
-            if (customerData.getCustomerPobVillage() != null) {
-                builder.customerPobVillage(customerData.getCustomerPobVillage());
-            }
-            if (customerData.getPlaceOfBirth() != null) {
-                builder.placeOfBirth(customerData.getPlaceOfBirth());
-            }
-            if (customerData.getLegalDocType() != null) {
-                builder.legalDocType(customerData.getLegalDocType());
-            }
-            if (customerData.getLegalHolderName() != null) {
-                builder.legalHolderName(customerData.getLegalHolderName());
-            }
-            if (customerData.getLegalIssAuth() != null) {
-                builder.legalIssAuth(customerData.getLegalIssAuth());
-            }
-            if (customerData.getLegalIssueDate() != null) {
-                builder.legalIssueDate(customerData.getLegalIssueDate());
-            }
-            if (customerData.getLegalExpireDate() != null) {
-                builder.legalExpireDate(customerData.getLegalExpireDate());
-            }
-            if (customerData.getCustomerType() != null) {
-                builder.customerType(customerData.getCustomerType());
-            }
-            if (customerData.getCompanyName() != null && !customerData.getCompanyName().isEmpty()) {
-                builder.companyName(customerData.getCompanyName());
-            }
-            if (customerData.getOccupation() != null) {
-                builder.occupation(customerData.getOccupation());
-            }
-            if (customerData.getIndustry() != null) {
-                builder.industry(customerData.getIndustry());
-            }
-            if (customerData.getSector() != null) {
-                builder.sector(customerData.getSector());
-            }
-            if (customerData.getAverageIncome() != null) {
-                builder.averageIncome(customerData.getAverageIncome());
-            }
-            if (customerData.getBranchCode() != null) {
-                builder.branchCode(customerData.getBranchCode());
-            }
-            if (customerData.getProductAccount() != null) {
-                builder.productAccount(customerData.getProductAccount());
-            }
-            if (customerData.getCategoryAccount() != null) {
-                builder.categoryAccount(customerData.getCategoryAccount());
-            }
-            if (customerData.getCustomerRole() != null) {
-                builder.customerRole(customerData.getCustomerRole());
-            }
-            if (customerData.getNidImageName() != null) {
-                builder.nidImageName(customerData.getNidImageName());
-            }
-            if (customerData.getSelfieImageName() != null) {
-                builder.selfieImageName(customerData.getSelfieImageName());
-            }
+            builder.title(customerData.getTitle())
+                    .givenName(customerData.getGivenName())
+                    .familyName(customerData.getFamilyName())
+                    .firstNameKh(customerData.getFirstNameKh())
+                    .lastNameKh(customerData.getLastNameKh())
+                    .gender(customerData.getGender())
+                    .dateOfBirth(customerData.getDateOfBirth())
+                    .nationality(customerData.getNationality())
+                    .maritalStatus(customerData.getMaritalStatus())
+                    .phoneNumber(customerData.getPhoneNumber())
+                    .email(customerData.getEmail())
+                    .customerCurrentProvince(customerData.getCustomerCurrentProvince())
+                    .customerCurrentDistrict(customerData.getCustomerCurrentDistrict())
+                    .customerCurrentCommune(customerData.getCustomerCurrentCommune())
+                    .customerCurrentVillage(customerData.getCustomerCurrentVillage())
+                    .legalAddress(customerData.getLegalAddress())
+                    .customerPobProvince(customerData.getCustomerPobProvince())
+                    .customerPobDistrict(customerData.getCustomerPobDistrict())
+                    .customerPobCommune(customerData.getCustomerPobCommune())
+                    .customerPobVillage(customerData.getCustomerPobVillage())
+                    .placeOfBirth(customerData.getPlaceOfBirth())
+                    .legalDocType(customerData.getLegalDocType())
+                    .legalHolderName(customerData.getLegalHolderName())
+                    .legalIssAuth(customerData.getLegalIssAuth())
+                    .legalIssueDate(customerData.getLegalIssueDate())
+                    .legalExpireDate(customerData.getLegalExpireDate())
+                    .customerType(customerData.getCustomerType())
+                    .companyName(customerData.getCompanyName())
+                    .occupation(customerData.getOccupation())
+                    .industry(customerData.getIndustry())
+                    .sector(customerData.getSector())
+                    .averageIncome(customerData.getAverageIncome())
+                    .branchCode(customerData.getBranchCode())
+                    .productAccount(customerData.getProductAccount())
+                    .categoryAccount(customerData.getCategoryAccount())
+                    .customerRole(customerData.getCustomerRole())
+                    .nidImageName(customerData.getNidImageName())
+                    .selfieImageName(customerData.getSelfieImageName());
         }
 
         return builder.build();
@@ -578,6 +502,28 @@ public class OpenAccountServiceImpl implements OpenAccountService {
         }
 
         return builder.build();
+    }
+
+    @Override
+    public ReviewHistoryResponseDto getReviewHistory(Long requestId) throws Exception {
+        log.info("Fetching review history for request ID: {}", requestId);
+
+        PendingAccountOpeningRequest request = pendingRequestRepository.findById(requestId)
+                .orElseThrow(() -> new NotFoundException("Request not found: " + requestId));
+
+        List<PendingAccountOpeningRequestHistory> historyRecords = historyRepository.findByRequestIdOrderByCreatedAtDesc(requestId);
+
+        List<PendingAccountOpeningRequestHistoryDto> historyDtos = historyRecords.stream()
+                .map(this::mapHistoryToDto)
+                .collect(Collectors.toList());
+
+        log.info("✓ Found {} history records for request: {}", historyDtos.size(), requestId);
+
+        return ReviewHistoryResponseDto.builder()
+                .requestId(request.getId())
+                .legalId(request.getLegalId())
+                .history(historyDtos)
+                .build();
     }
 
     private void saveHistory(PendingAccountOpeningRequest request, AccountOpeningRequestStatusEnum status, String remark) {
