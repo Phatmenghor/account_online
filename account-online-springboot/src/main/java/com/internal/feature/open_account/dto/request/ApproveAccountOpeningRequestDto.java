@@ -16,5 +16,5 @@ public class ApproveAccountOpeningRequestDto {
     @NotNull(message = "Request ID is required")
     private Long requestId;
 
-    private String approvalRemark;
+    private String remark;
 }

@@ -17,11 +17,6 @@ public class PendingAccountOpeningRequestDto {
     private String legalId;
     private AccountOpeningRequestStatusEnum status;
     private AmlStatusEnum amlStatus;
-    private String rejectionReason;
-    private String rejectedBy;
-    private String approvalRemark;
-    private String approvedBy;
+    private String remark;
     private Long createdAt;
-    private Long approvedAt;
-    private Long rejectedAt;
 }

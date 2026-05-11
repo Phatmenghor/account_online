@@ -17,7 +17,9 @@ import com.internal.feature.open_account.facade.BankingService;
 import com.internal.feature.open_account.facade.ComplianceService;
 import com.internal.feature.open_account.facade.ReportingService;
 import com.internal.feature.open_account.models.PendingAccountOpeningRequest;
+import com.internal.feature.open_account.models.PendingAccountOpeningRequestHistory;
 import com.internal.feature.open_account.repository.PendingAccountOpeningRequestRepository;
+import com.internal.feature.open_account.repository.PendingAccountOpeningRequestHistoryRepository;
 import com.internal.feature.open_account.service.OpenAccountService;
 import com.internal.feature.telegram_alerts.service.MonitoringService;
 import com.internal.utils.SecurityUtils;
@@ -46,6 +48,7 @@ public class OpenAccountServiceImpl implements OpenAccountService {
     private final ApplicationEventPublisher eventPublisher;
     private final MonitoringService monitoringService;
     private final PendingAccountOpeningRequestRepository pendingRequestRepository;
+    private final PendingAccountOpeningRequestHistoryRepository historyRepository;
     private final SecurityUtils securityUtils;
     private final ObjectMapper objectMapper;
 
@@ -351,11 +354,12 @@ public class OpenAccountServiceImpl implements OpenAccountService {
         }
 
         pendingRequest.setStatus(AccountOpeningRequestStatusEnum.APPROVED);
-        pendingRequest.setApprovedBy(securityUtils.getCurrentUser().getUsername());
-        pendingRequest.setApprovedAt(System.currentTimeMillis());
-        pendingRequest.setApprovalRemark(dto.getApprovalRemark());
+        pendingRequest.setRemark(dto.getRemark());
 
         PendingAccountOpeningRequest saved = pendingRequestRepository.save(pendingRequest);
+
+        saveHistory(saved, AccountOpeningRequestStatusEnum.APPROVED, dto.getRemark());
+
         log.info("✓ Request approved | ID: {} | Legal ID: {}", saved.getId(), saved.getLegalId());
 
         return mapToDto(saved);
@@ -377,13 +381,14 @@ public class OpenAccountServiceImpl implements OpenAccountService {
         }
 
         pendingRequest.setStatus(AccountOpeningRequestStatusEnum.REJECTED);
-        pendingRequest.setRejectedBy(securityUtils.getCurrentUser().getUsername());
-        pendingRequest.setRejectedAt(System.currentTimeMillis());
-        pendingRequest.setRejectionReason(dto.getRejectionReason());
+        pendingRequest.setRemark(dto.getRemark());
 
         PendingAccountOpeningRequest saved = pendingRequestRepository.save(pendingRequest);
-        log.info("✓ Request rejected | ID: {} | Legal ID: {} | Reason: {}",
-                saved.getId(), saved.getLegalId(), dto.getRejectionReason());
+
+        saveHistory(saved, AccountOpeningRequestStatusEnum.REJECTED, dto.getRemark());
+
+        log.info("✓ Request rejected | ID: {} | Legal ID: {} | Remark: {}",
+                saved.getId(), saved.getLegalId(), dto.getRemark());
 
         return mapToDto(saved);
     }
@@ -425,13 +430,27 @@ public class OpenAccountServiceImpl implements OpenAccountService {
                 .legalId(entity.getLegalId())
                 .status(entity.getStatus())
                 .amlStatus(entity.getAmlStatus())
-                .rejectionReason(entity.getRejectionReason())
-                .rejectedBy(entity.getRejectedBy())
-                .approvalRemark(entity.getApprovalRemark())
-                .approvedBy(entity.getApprovedBy())
+                .remark(entity.getRemark())
                 .createdAt(createdAtMillis)
-                .approvedAt(entity.getApprovedAt())
-                .rejectedAt(entity.getRejectedAt())
                 .build();
+    }
+
+    private void saveHistory(PendingAccountOpeningRequest request, AccountOpeningRequestStatusEnum status, String remark) {
+        try {
+            PendingAccountOpeningRequestHistory history = PendingAccountOpeningRequestHistory.builder()
+                    .requestId(request.getId())
+                    .legalId(request.getLegalId())
+                    .status(status)
+                    .actionUsername(securityUtils.getCurrentUser().getUsername())
+                    .requestData(request.getRequestData())
+                    .customerInfo(request.getCustomerInfo())
+                    .amlResultData(request.getAmlResultData())
+                    .remark(remark)
+                    .build();
+            historyRepository.save(history);
+            log.debug("✓ History saved | Request ID: {} | Status: {}", request.getId(), status);
+        } catch (Exception e) {
+            log.error("Failed to save history for request: {}", request.getId(), e);
+        }
     }
 }

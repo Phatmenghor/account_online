@@ -16,6 +16,6 @@ public class RejectAccountOpeningRequestDto {
     @NotNull(message = "Request ID is required")
     private Long requestId;
 
-    @NotNull(message = "Rejection reason is required")
-    private String rejectionReason;
+    @NotNull(message = "Remark is required")
+    private String remark;
 }
