@@ -93,7 +93,22 @@ public final class AppConstants {
         public static final String SAVE_CUSTOMER_IMAGES = "SAVE_CUSTOMER_IMAGES";
 
         // ==================================================================================
-        // 8. FIELD NAME TRANSLATIONS
+        // 8. OPEN ACCOUNT PENDING REQUEST MESSAGES
+        // Used in: OpenAccountServiceImpl for admin approval flow
+        // ==================================================================================
+        public static final String PENDING_REQUEST_ALREADY_EXISTS = "ស្នើសុំបង្កើតគណនីបានកកដាច់ស្ថិតក្នុងស្ថានភាពរង់ចាំ";
+        public static final String ACCOUNT_ALREADY_EXISTS_FOR_LEGAL_ID = "គណនីបានបង្កើតរួចរាល់សម្រាប់លេខ ID ច្បាប់ប្រឹក្សា";
+        public static final String INVALID_STATUS_ONLY_PENDING_CAN_APPROVE = "មានតែស្នើសុំដែលរង់ចាំប៉ុណ្ណោះដែលអាចផ្ល័ងផ្សាយបាន";
+        public static final String INVALID_STATUS_ONLY_PENDING_CAN_REJECT = "មានតែស្នើសុំដែលរង់ចាំប៉ុណ្ណោះដែលអាចច្រានចោលបាន";
+        public static final String FAILED_PARSE_CUSTOMER_DATA = "បរាជ័យក្នុងការញែកទិន្នន័យអតិថិជន";
+        public static final String FAILED_CREATE_ACCOUNT = "បរាជ័យក្នុងការបង្កើតគណនី";
+
+        public static final String SUBMIT_SUCCESS_MESSAGE = "ស្នើសុំបង្កើតគណនីរបស់អ្នកត្រូវបានបញ្ជូនដោយជោគជ័យ។ សូមរងចាំការឆ្លើយប្រតិកម្មពីផ្នែកលទ្ធផលគ្រប់គ្រង។";
+        public static final String APPROVE_SUCCESS_MESSAGE = "ស្នើសុំបង្កើតគណនីត្រូវបានផ្ល័ងផ្សាយដោយជោគជ័យ។ គណនីនឹងត្រូវបានបង្កើតក្នុងរយៈពេលដែលមាន។";
+        public static final String REJECT_SUCCESS_MESSAGE = "ស្នើសុំបង្កើតគណនីត្រូវបានច្រានចោលដោយជោគជ័យ។";
+
+        // ==================================================================================
+        // 9. FIELD NAME TRANSLATIONS
         // Used in: CamdxErrorCheckServiceImpl
         // ==================================================================================
         public static final String FIELD_KH_LASTNAME_EN = "នាមត្រកូល (អង់គ្លេស)";

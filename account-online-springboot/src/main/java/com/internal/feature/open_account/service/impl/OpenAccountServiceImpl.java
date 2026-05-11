@@ -27,7 +27,6 @@ import com.internal.feature.open_account.models.PendingAccountOpeningRequestHist
 import com.internal.feature.open_account.repository.PendingAccountOpeningRequestRepository;
 import com.internal.feature.open_account.repository.PendingAccountOpeningRequestHistoryRepository;
 import com.internal.feature.open_account.service.OpenAccountService;
-import com.internal.feature.telegram_alerts.service.MonitoringService;
 import com.internal.utils.SecurityUtils;
 import com.internal.utils.constants.AppConstants;
 import lombok.RequiredArgsConstructor;
@@ -54,7 +53,6 @@ public class OpenAccountServiceImpl implements OpenAccountService {
     private final ComplianceService complianceService;
     private final ReportingService reportingService;
     private final ApplicationEventPublisher eventPublisher;
-    private final MonitoringService monitoringService;
     private final PendingAccountOpeningRequestRepository pendingRequestRepository;
     private final PendingAccountOpeningRequestHistoryRepository historyRepository;
     private final SecurityUtils securityUtils;
@@ -69,14 +67,11 @@ public class OpenAccountServiceImpl implements OpenAccountService {
         String currentStep = "START";
 
         try {
-            // Step 1: Test connection
-            log.debug("Step 1: Testing connection");
+            log.info("Step 1: Testing connection | Legal ID: {}", legalId);
             currentStep = AppConstants.TEST_CONNECTION;
             bankingService.testConnection();
-            monitoringService.logAccountOpeningStepProgress(legalId, "TEST_CONNECTION", true, null);
 
-            // Step 2: Check existing complete account
-            log.debug("Step 2: Checking existing account");
+            log.info("Step 2: Checking existing account | Legal ID: {}", legalId);
             currentStep = "CHECK_EXISTING_COMPLETE_ACCOUNT";
             var recoveryResult = bankingService.checkExistingCompleteAccountAndActivate(request);
             if (recoveryResult.isPresent()) {
@@ -92,63 +87,45 @@ public class OpenAccountServiceImpl implements OpenAccountService {
                 }
             }
 
-            // Step 3: Get customer info
-            log.debug("Step 3: Retrieving customer info");
+            log.info("Step 3: Retrieving customer info | Legal ID: {}", legalId);
             currentStep = AppConstants.GET_CUSTOMER_INFO;
             Map<String, String> customerInfo = bankingService.getCustomerInfo(legalId);
-            String customerCif = customerInfo != null ? customerInfo.get("CIF") : "N/A";
-            monitoringService.logAccountOpeningStepProgress(legalId, "GET_CUSTOMER_INFO", true, customerCif);
 
-            // Step 4: Validate existing accounts
-            log.debug("Step 4: Validating accounts");
+            log.info("Step 4: Validating accounts | Legal ID: {}", legalId);
             currentStep = AppConstants.VALIDATE_EXISTING_ACCOUNT;
             bankingService.validateExistingAccounts(customerInfo);
-            monitoringService.logAccountOpeningStepProgress(legalId, "VALIDATE_EXISTING_ACCOUNT", true, null);
 
-            // Step 5: Process AML
-            log.debug("Step 5: Processing AML");
+            log.info("Step 5: Processing AML | Legal ID: {}", legalId);
             currentStep = AppConstants.PROCESS_AML;
             var amlResult = complianceService.processAml(request);
-            String amlStatus = amlResult != null ? amlResult.getStatus().name() : "UNKNOWN";
-            monitoringService.logAccountOpeningStepProgress(legalId, "PROCESS_AML", true, amlStatus);
             complianceService.sentMessageOnHighRisk(request, amlResult);
 
-            // Step 6: Create customer
-            log.debug("Step 6: Creating customer");
+            log.info("Step 6: Creating customer | Legal ID: {}", legalId);
             currentStep = AppConstants.CREATE_CUSTOMER;
             CustomerCreationResult customerResult = bankingService.createCustomerIfNeeded(request, customerInfo);
             context.setCif(customerResult.getCif());
             context.setMnemonic(customerResult.getMnemonic());
-            monitoringService.logAccountOpeningStepProgress(legalId, "CREATE_CUSTOMER", true, customerResult.getCif());
 
-            // Step 7: Create KHR Account
-            log.debug("Step 7: Creating KHR account");
+            log.info("Step 7: Creating KHR account | CIF: {}", context.getCif());
             currentStep = AppConstants.CREATE_KHR_ACCOUNT;
             context.setKhrAccount(bankingService.createAccountIfNeeded(request, customerInfo,
                     context.getCif(), AppConstants.CURRENCY_KHR));
-            monitoringService.logAccountOpeningStepProgress(legalId, "CREATE_KHR_ACCOUNT", true, context.getKhrAccount());
 
-            // Step 8: Create USD Account
-            log.debug("Step 8: Creating USD account");
+            log.info("Step 8: Creating USD account | CIF: {}", context.getCif());
             currentStep = AppConstants.CREATE_USD_ACCOUNT;
             context.setUsdAccount(bankingService.createAccountIfNeeded(request, customerInfo,
                     context.getCif(), AppConstants.CURRENCY_USD));
-            monitoringService.logAccountOpeningStepProgress(legalId, "CREATE_USD_ACCOUNT", true, context.getUsdAccount());
 
-            // Step 9: Final Validation
-            log.debug("Step 9: Validating accounts");
+            log.info("Step 9: Validating accounts | CIF: {}", context.getCif());
             currentStep = AppConstants.VALIDATE_ACCOUNT_CREATION;
             bankingService.validateAllRequiredAccountsCreated(context.getCif(),
                     context.getKhrAccount(),
                     context.getUsdAccount());
-            monitoringService.logAccountOpeningStepProgress(legalId, "VALIDATE_ACCOUNT_CREATION", true, null);
 
-            // Step 10: Activate mobile banking
-            log.debug("Step 10: Activating mobile banking");
+            log.info("Step 10: Activating mobile banking | CIF: {}", context.getCif());
             currentStep = AppConstants.ACTIVATE_MOBILE_BANKING;
             context.setMbActivationCode(bankingService.activateMobileBanking(request, context.getCif(),
                     context.getKhrAccount(), context.getUsdAccount()));
-            monitoringService.logAccountOpeningStepProgress(legalId, "ACTIVATE_MOBILE_BANKING", true, null);
 
             CustomerResponse accInfo = complianceService.buildCustomerAccInfo(
                     context.getCif(), context.getKhrAccount(), context.getUsdAccount(),
@@ -162,8 +139,7 @@ public class OpenAccountServiceImpl implements OpenAccountService {
             return accInfo;
 
         } catch (Exception e) {
-            log.error("Account opening failed at step: {} | Legal ID: {}", currentStep, legalId, e);
-            monitoringService.logAccountOpeningFailed(legalId, currentStep, e.getMessage(), e);
+            log.error("Account opening failed at step: {} | Legal ID: {} | Error: {}", currentStep, legalId, e.getMessage(), e);
             final String failureRemark = reportingService.buildFailureRemark(
                     currentStep, context.getCif(), context.getKhrAccount(),
                     context.getUsdAccount(), context.getAmlResult());
@@ -181,46 +157,31 @@ public class OpenAccountServiceImpl implements OpenAccountService {
         var existingPending = pendingRequestRepository.findByLegalIdAndStatus(
                 legalId, AccountOpeningRequestStatusEnum.PENDING);
         if (existingPending.isPresent()) {
-            throw new OpenAccountException("PENDING_REQUEST_EXISTS",
-                    "ស្នើសុំបង្កើតគណនីបានកកដាច់ស្ថិតក្នុងស្ថានភាពរង់ចាំសម្រាប់លេខ ID ច្បាប់ប្រឹក្សា: " + legalId);
+            throw new OpenAccountException("PENDING_REQUEST_EXISTS", AppConstants.PENDING_REQUEST_ALREADY_EXISTS);
         }
 
         try {
-            // Step 1: Test connection
-            log.debug("Step 1: Testing connection");
+            log.info("Step 1: Testing connection");
             bankingService.testConnection();
-            monitoringService.logAccountOpeningStepProgress(legalId, "TEST_CONNECTION", true, null);
 
-            // Step 2: Check existing account
-            log.debug("Step 2: Checking existing account");
+            log.info("Step 2: Checking existing account");
             var recoveryResult = bankingService.checkExistingCompleteAccountAndActivate(request);
             if (recoveryResult.isPresent()) {
-                throw new OpenAccountException("ACCOUNT_ALREADY_EXISTS",
-                        "គណនីបានបង្កើតរួចរាល់សម្រាប់លេខ ID ច្បាប់ប្រឹក្សា: " + legalId);
+                throw new OpenAccountException("ACCOUNT_ALREADY_EXISTS", AppConstants.ACCOUNT_ALREADY_EXISTS_FOR_LEGAL_ID);
             }
 
-            // Step 3: Get customer info
-            log.debug("Step 3: Retrieving customer info");
+            log.info("Step 3: Retrieving customer info | Legal ID: {}", legalId);
             Map<String, String> customerInfo = bankingService.getCustomerInfo(legalId);
-            String customerCif = customerInfo != null ? customerInfo.get("CIF") : "N/A";
-            log.debug("Customer CIF: {}", customerCif);
-            monitoringService.logAccountOpeningStepProgress(legalId, "GET_CUSTOMER_INFO", true, customerCif);
 
-            // Step 4: Validate existing accounts
-            log.debug("Step 4: Validating accounts");
+            log.info("Step 4: Validating accounts | Legal ID: {}", legalId);
             bankingService.validateExistingAccounts(customerInfo);
-            monitoringService.logAccountOpeningStepProgress(legalId, "VALIDATE_EXISTING_ACCOUNT", true, null);
 
-            // Step 5: Process AML
-            log.debug("Step 5: Processing AML");
+            log.info("Step 5: Processing AML | Legal ID: {}", legalId);
             var amlResult = complianceService.processAml(request);
             String amlStatus = amlResult != null ? amlResult.getStatus().name() : "UNKNOWN";
-            log.debug("AML status: {}", amlStatus);
-            monitoringService.logAccountOpeningStepProgress(legalId, "PROCESS_AML", true, amlStatus);
             complianceService.sentMessageOnHighRisk(request, amlResult);
 
-            // Store pending request for admin review
-            log.debug("Storing request for admin review");
+            log.info("Step 6: Storing request for admin review | Legal ID: {}", legalId);
             PendingAccountOpeningRequest pendingRequest = PendingAccountOpeningRequest.builder()
                     .legalId(legalId)
                     .status(AccountOpeningRequestStatusEnum.PENDING)
@@ -231,7 +192,7 @@ public class OpenAccountServiceImpl implements OpenAccountService {
                     .build();
 
             PendingAccountOpeningRequest saved = pendingRequestRepository.save(pendingRequest);
-            log.info("✓ Request stored for admin approval | ID: {} | Legal ID: {} | AML: {}",
+            log.info("✓ Request stored for admin approval | ID: {} | Legal ID: {} | AML Status: {}",
                     saved.getId(), legalId, amlStatus);
 
             return mapToDto(saved);
@@ -240,8 +201,7 @@ public class OpenAccountServiceImpl implements OpenAccountService {
             log.warn("Request submission rejected | Legal ID: {} | Reason: {}", legalId, e.getMessage());
             throw e;
         } catch (Exception e) {
-            log.error("Request submission error | Legal ID: {}", legalId, e);
-            monitoringService.logAccountOpeningFailed(legalId, "SUBMISSION", e.getMessage(), e);
+            log.error("Request submission error | Legal ID: {} | Error: {}", legalId, e.getMessage(), e);
             throw e;
         }
     }
@@ -257,37 +217,32 @@ public class OpenAccountServiceImpl implements OpenAccountService {
                 .orElseThrow(() -> new NotFoundException("Request not found: " + requestId));
 
         if (pendingRequest.getStatus() != AccountOpeningRequestStatusEnum.PENDING) {
-            throw new OpenAccountException("INVALID_STATUS",
-                    "មានតែស្នើសុំដែលរង់ចាំប៉ុណ្ណោះដែលអាចផ្ល័ងផ្សាយបាន");
+            throw new OpenAccountException("INVALID_STATUS", AppConstants.INVALID_STATUS_ONLY_PENDING_CAN_APPROVE);
         }
 
-        // Extract customer data from stored JSON
         CustomerRequest customerRequest = null;
         try {
             if (pendingRequest.getRequestData() != null) {
                 customerRequest = objectMapper.readValue(pendingRequest.getRequestData(), CustomerRequest.class);
             }
         } catch (Exception e) {
-            log.error("Failed to parse customer data for request: {}", requestId, e);
-            throw new OpenAccountException("INVALID_REQUEST_DATA", "បរាជ័យក្នុងការញែកទិន្នន័យអតិថិជន");
+            log.error("Failed to parse customer data for request: {} | Error: {}", requestId, e.getMessage(), e);
+            throw new OpenAccountException("INVALID_REQUEST_DATA", AppConstants.FAILED_PARSE_CUSTOMER_DATA);
         }
 
-        // Create the actual account with stored customer data
         log.info("Creating account for approved request | Legal ID: {}", pendingRequest.getLegalId());
         try {
             CustomerResponse accountResponse = openAccount(customerRequest);
-            log.info("✓ Account created successfully for approved request | CIF: {}", accountResponse.getCif());
+            log.info("✓ Account created successfully | CIF: {}", accountResponse.getCif());
         } catch (Exception e) {
-            log.error("Failed to create account for approved request: {}", requestId, e);
-            throw new OpenAccountException("ACCOUNT_CREATION_FAILED", "បរាជ័យក្នុងការបង្កើតគណនី: " + e.getMessage());
+            log.error("Failed to create account for approved request: {} | Error: {}", requestId, e.getMessage(), e);
+            throw new OpenAccountException("ACCOUNT_CREATION_FAILED", AppConstants.FAILED_CREATE_ACCOUNT);
         }
 
-        // Mark as approved in pending request
         pendingRequest.setStatus(AccountOpeningRequestStatusEnum.APPROVED);
         pendingRequest.setRemark(dto.getRemark());
 
         PendingAccountOpeningRequest saved = pendingRequestRepository.save(pendingRequest);
-
         saveHistory(saved, AccountOpeningRequestStatusEnum.APPROVED, dto.getRemark());
 
         log.info("✓ Request approved and account created | ID: {} | Legal ID: {}", saved.getId(), saved.getLegalId());
@@ -306,19 +261,16 @@ public class OpenAccountServiceImpl implements OpenAccountService {
                 .orElseThrow(() -> new NotFoundException("Request not found: " + requestId));
 
         if (pendingRequest.getStatus() != AccountOpeningRequestStatusEnum.PENDING) {
-            throw new OpenAccountException("INVALID_STATUS",
-                    "មានតែស្នើសុំដែលរង់ចាំប៉ុណ្ណោះដែលអាចច្រានចោលបាន");
+            throw new OpenAccountException("INVALID_STATUS", AppConstants.INVALID_STATUS_ONLY_PENDING_CAN_REJECT);
         }
 
         pendingRequest.setStatus(AccountOpeningRequestStatusEnum.REJECTED);
         pendingRequest.setRemark(dto.getRemark());
 
         PendingAccountOpeningRequest saved = pendingRequestRepository.save(pendingRequest);
-
         saveHistory(saved, AccountOpeningRequestStatusEnum.REJECTED, dto.getRemark());
 
-        log.info("✓ Request rejected | ID: {} | Legal ID: {} | Remark: {}",
-                saved.getId(), saved.getLegalId(), dto.getRemark());
+        log.info("✓ Request rejected | ID: {} | Legal ID: {}", saved.getId(), saved.getLegalId());
 
         return mapToDto(saved);
     }
@@ -347,13 +299,13 @@ public class OpenAccountServiceImpl implements OpenAccountService {
 
     private String getStatusMessage(AccountOpeningRequestStatusEnum status) {
         if (status == null) {
-            return "មានបញ្ហាក្នុងការដំណើរការ";
+            return AppConstants.MSG_GENERIC_ERROR;
         }
         return switch (status) {
-            case PENDING -> "ស្នើសុំបង្កើតគណនីរបស់អ្នកត្រូវបានបញ្ជូនដោយជោគជ័យ។ សូមរងចាំការឆ្លើយប្រតិកម្មពីផ្នែកលទ្ធផលគ្រប់គ្រង។";
-            case APPROVED -> "ស្នើសុំបង្កើតគណនីត្រូវបានផ្ល័ងផ្សាយដោយជោគជ័យ។ គណនីនឹងត្រូវបានបង្កើតក្នុងរយៈពេលដែលមាន។";
-            case REJECTED -> "ស្នើសុំបង្កើតគណនីត្រូវបានច្រានចោលដោយជោគជ័យ។";
-            default -> "មានបញ្ហាក្នុងការដំណើរការ";
+            case PENDING -> AppConstants.SUBMIT_SUCCESS_MESSAGE;
+            case APPROVED -> AppConstants.APPROVE_SUCCESS_MESSAGE;
+            case REJECTED -> AppConstants.REJECT_SUCCESS_MESSAGE;
+            default -> AppConstants.MSG_GENERIC_ERROR;
         };
     }
 
@@ -505,7 +457,7 @@ public class OpenAccountServiceImpl implements OpenAccountService {
                     .remark(remark)
                     .build();
             historyRepository.save(history);
-            log.debug("✓ History saved | Request ID: {} | Status: {}", request.getId(), status);
+            log.info("✓ History saved | Request ID: {} | Status: {}", request.getId(), status);
         } catch (Exception e) {
             log.error("Failed to save history for request: {}", request.getId(), e);
         }
