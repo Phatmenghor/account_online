@@ -13,6 +13,7 @@ import {
   Phone,
   HelpCircle,
   Shield,
+  Hourglass,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { motion, AnimatePresence } from "framer-motion";
@@ -36,6 +37,7 @@ type ErrorType =
   | "connection-error"
   | "system-busy"
   | "request-limit"
+  | "pending-request"
   | "generic-error";
 
 const detectErrorType = (message?: string): ErrorType => {
@@ -44,6 +46,11 @@ const detectErrorType = (message?: string): ErrorType => {
   const lowerMsg = message.toLowerCase();
 
   if (
+    lowerMsg.includes("ដាក់ស្នើសុំបង្កើតគណនីរួចហើយ") ||
+    lowerMsg.includes("pending request")
+  ) {
+    return "pending-request";
+  } else if (
     lowerMsg.includes("សំណើរបស់អ្នក (AML High Risk)") ||
     lowerMsg.includes("aml") ||
     lowerMsg.includes("high risk")
@@ -161,6 +168,14 @@ const getErrorConfig = (errorType: ErrorType) => {
       titleColor: "text-orange-700",
       primaryBtn: "from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700",
       accentText: "text-orange-600",
+    },
+    "pending-request": {
+      Icon: Hourglass,
+      accent: "from-blue-400 via-blue-500 to-cyan-400",
+      iconBg: "from-blue-400 to-cyan-500",
+      titleColor: "text-blue-700",
+      primaryBtn: "from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600",
+      accentText: "text-blue-600",
     },
     "generic-error": {
       Icon: XCircle,

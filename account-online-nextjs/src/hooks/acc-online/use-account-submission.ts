@@ -231,6 +231,9 @@ export const useAccountSubmission = ({
       const errorMessage = error?.errorMessage || error?.message;
       const errorResponse = error?.rawError;
 
+      // Check if this is a pending request already exists message
+      const isPendingRequest = errorMessage?.toLowerCase().includes("ដាក់ស្នើសុំបង្កើតគណនីរួចហើយ");
+
       // Check if account already exists
       const isAccountExists =
         errorMessage?.toLowerCase().includes("exist") ||
@@ -238,7 +241,15 @@ export const useAccountSubmission = ({
         errorResponse?.message?.toLowerCase().includes("exist") ||
         errorResponse?.message?.toLowerCase().includes("already");
 
-      if (isAccountExists && errorResponse?.data) {
+      if (isPendingRequest) {
+        // Show as waiting message, not error
+        setSubmitErrorData({
+          title: "សូមរង់ចាំ",
+          message: errorMessage,
+          variant: "warning",
+        });
+        setShowSubmitErrorModal(true);
+      } else if (isAccountExists && errorResponse?.data) {
         // Show account exists modal with account details
         setAccountExistsData({
           cif: errorResponse.data.cif,
