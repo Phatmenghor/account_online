@@ -58,7 +58,6 @@ public class OpenAccountServiceImpl implements OpenAccountService {
     private final SecurityUtils securityUtils;
     private final ObjectMapper objectMapper;
 
-    @Override
     @Transactional
     public CustomerResponse openAccount(CustomerRequest request) throws Exception {
         String legalId = request.getLegalId();
@@ -247,105 +246,6 @@ public class OpenAccountServiceImpl implements OpenAccountService {
 
     @Override
     @Transactional
-    public CustomerResponse completeAccountOpening(Long requestId) throws Exception {
-        log.info("Completing account opening | Request ID: {}", requestId);
-
-        PendingAccountOpeningRequest pendingRequest = pendingRequestRepository.findById(requestId)
-                .orElseThrow(() -> new NotFoundException("Request not found: " + requestId));
-
-        if (pendingRequest.getStatus() != AccountOpeningRequestStatusEnum.APPROVED) {
-            throw new OpenAccountException("INVALID_STATUS",
-                    "Request must be APPROVED, current status: " + pendingRequest.getStatus());
-        }
-
-        String legalId = pendingRequest.getLegalId();
-        String currentStep = "COMPLETION";
-
-        try {
-            // Deserialize stored data
-            CustomerRequest request = objectMapper.readValue(pendingRequest.getRequestData(), CustomerRequest.class);
-            @SuppressWarnings("unchecked")
-            Map<String, String> customerInfo = objectMapper.readValue(pendingRequest.getCustomerInfo(), Map.class);
-
-            OpenAccountContext context = OpenAccountContext.builder()
-                    .request(request)
-                    .customerInfo(customerInfo)
-                    .build();
-
-            // Step 0: Check if account already exists (staff might have opened in T24)
-            log.debug("Step 0: Checking existing account in T24");
-            var existingAccountResult = bankingService.checkExistingCompleteAccountAndActivate(request);
-            if (existingAccountResult.isPresent()) {
-                var existingAccount = bankingService.getExistingAccountDetails(legalId);
-                if (existingAccount.isPresent()) {
-                    log.info("Account already exists in T24 (recovery mode) | Legal ID: {}", legalId);
-                    pendingRequest.setStatus(AccountOpeningRequestStatusEnum.COMPLETED);
-                    pendingRequestRepository.save(pendingRequest);
-
-                    return complianceService.buildCustomerAccInfo(
-                            existingAccount.get().getCif(),
-                            existingAccount.get().getKhrAccount(),
-                            existingAccount.get().getUsdAccount(),
-                            existingAccount.get().getMnemonic());
-                }
-            }
-
-            // Step 6: Create customer
-            log.debug("Step 6: Creating customer");
-            currentStep = AppConstants.CREATE_CUSTOMER;
-            CustomerCreationResult customerResult = bankingService.createCustomerIfNeeded(request, customerInfo);
-            context.setCif(customerResult.getCif());
-            context.setMnemonic(customerResult.getMnemonic());
-
-            // Step 7: Create KHR Account
-            log.debug("Step 7: Creating KHR account");
-            currentStep = AppConstants.CREATE_KHR_ACCOUNT;
-            context.setKhrAccount(bankingService.createAccountIfNeeded(request, customerInfo,
-                    context.getCif(), AppConstants.CURRENCY_KHR));
-
-            // Step 8: Create USD Account
-            log.debug("Step 8: Creating USD account");
-            currentStep = AppConstants.CREATE_USD_ACCOUNT;
-            context.setUsdAccount(bankingService.createAccountIfNeeded(request, customerInfo,
-                    context.getCif(), AppConstants.CURRENCY_USD));
-
-            // Step 9: Final Validation
-            log.debug("Step 9: Validating accounts");
-            currentStep = AppConstants.VALIDATE_ACCOUNT_CREATION;
-            bankingService.validateAllRequiredAccountsCreated(context.getCif(),
-                    context.getKhrAccount(),
-                    context.getUsdAccount());
-
-            // Step 10: Activate mobile banking
-            log.debug("Step 10: Activating mobile banking");
-            currentStep = AppConstants.ACTIVATE_MOBILE_BANKING;
-            context.setMbActivationCode(bankingService.activateMobileBanking(request, context.getCif(),
-                    context.getKhrAccount(), context.getUsdAccount()));
-
-            CustomerResponse accInfo = complianceService.buildCustomerAccInfo(
-                    context.getCif(), context.getKhrAccount(), context.getUsdAccount(),
-                    context.getMnemonic());
-
-            // Update pending request to COMPLETED
-            pendingRequest.setStatus(AccountOpeningRequestStatusEnum.COMPLETED);
-            pendingRequestRepository.save(pendingRequest);
-
-            eventPublisher.publishEvent(new AccountOpenedEvent(this, context));
-
-            log.info("✓ Account opening completed | Legal ID: {} | CIF: {} | KHR: {} | USD: {}",
-                    legalId, context.getCif(), context.getKhrAccount(), context.getUsdAccount());
-
-            return accInfo;
-
-        } catch (Exception e) {
-            log.error("Account opening completion failed at step: {} | Request ID: {}", currentStep, requestId, e);
-            monitoringService.logAccountOpeningFailed(legalId, currentStep, e.getMessage(), e);
-            throw e;
-        }
-    }
-
-    @Override
-    @Transactional
     public PendingAccountOpeningRequestDto approveAccountOpeningRequest(ApproveAccountOpeningRequestDto dto)
             throws Exception {
         Long requestId = dto.getRequestId();
@@ -399,38 +299,6 @@ public class OpenAccountServiceImpl implements OpenAccountService {
         return mapToDto(saved);
     }
 
-    @Override
-    public List<PendingAccountOpeningRequestDto> getPendingRequests() {
-        log.debug("Fetching pending requests");
-        return pendingRequestRepository.findByStatus(AccountOpeningRequestStatusEnum.PENDING)
-                .stream()
-                .map(this::mapToDto)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public PaginationResponse<PendingAccountOpeningRequestDto> getPendingRequests(int pageNo, int pageSize, String sortBy, String sortDirection) throws Exception {
-        log.debug("Fetching pending requests with pagination - Page: {}, Size: {}, Sort: {}", pageNo, pageSize, sortBy);
-
-        Sort.Direction direction = "DESC".equalsIgnoreCase(sortDirection) ? Sort.Direction.DESC : Sort.Direction.ASC;
-        PageRequest pageable = PageRequest.of(pageNo - 1, pageSize, Sort.by(direction, sortBy));
-
-        Page<PendingAccountOpeningRequest> page = pendingRequestRepository.findByStatus(AccountOpeningRequestStatusEnum.PENDING, pageable);
-        List<PendingAccountOpeningRequestDto> content = page.getContent().stream()
-                .map(this::mapToDto)
-                .collect(Collectors.toList());
-
-        log.info("Found {} pending requests", page.getTotalElements());
-        return new PaginationResponse<>(content, page.getNumber() + 1, page.getSize(), page.getTotalElements());
-    }
-
-    @Override
-    public PendingAccountOpeningRequestDto getPendingRequest(Long requestId) throws Exception {
-        return pendingRequestRepository.findById(requestId)
-                .map(this::mapToDto)
-                .orElseThrow(() -> new NotFoundException("Request not found: " + requestId));
-    }
-
     private PendingAccountOpeningRequestDto mapToDto(PendingAccountOpeningRequest entity) {
         Long createdAtMillis = null;
         if (entity.getCreatedAt() != null) {
@@ -448,31 +316,6 @@ public class OpenAccountServiceImpl implements OpenAccountService {
                 .remark(entity.getRemark())
                 .createdAt(createdAtMillis)
                 .build();
-    }
-
-    @Override
-    public List<PendingAccountOpeningRequestHistoryDto> getRequestHistory(Long requestId) throws Exception {
-        log.debug("Fetching history for request ID: {}", requestId);
-        return historyRepository.findByRequestIdOrderByCreatedAtDesc(requestId)
-                .stream()
-                .map(this::mapHistoryToDto)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public PaginationResponse<PendingAccountOpeningRequestHistoryDto> getRequestHistory(Long requestId, int pageNo, int pageSize, String sortBy, String sortDirection) throws Exception {
-        log.debug("Fetching history for request ID: {} with pagination", requestId);
-
-        Sort.Direction direction = "DESC".equalsIgnoreCase(sortDirection) ? Sort.Direction.DESC : Sort.Direction.ASC;
-        PageRequest pageable = PageRequest.of(pageNo - 1, pageSize, Sort.by(direction, sortBy));
-
-        Page<PendingAccountOpeningRequestHistory> page = historyRepository.findByRequestIdOrderByCreatedAtDesc(requestId, pageable);
-        List<PendingAccountOpeningRequestHistoryDto> content = page.getContent().stream()
-                .map(this::mapHistoryToDto)
-                .collect(Collectors.toList());
-
-        log.info("Found {} history records for request ID: {}", page.getTotalElements(), requestId);
-        return new PaginationResponse<>(content, page.getNumber() + 1, page.getSize(), page.getTotalElements());
     }
 
     private PendingAccountOpeningRequestHistoryDto mapHistoryToDto(PendingAccountOpeningRequestHistory entity) {
