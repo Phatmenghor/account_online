@@ -221,13 +221,13 @@ public class OpenAccountServiceImpl implements OpenAccountService {
         }
 
         CustomerRequest customerRequest = null;
-        try {
-            if (pendingRequest.getRequestData() != null) {
+        if (pendingRequest.getRequestData() != null) {
+            try {
                 customerRequest = objectMapper.readValue(pendingRequest.getRequestData(), CustomerRequest.class);
+            } catch (Exception e) {
+                log.error("Failed to parse customer data for request: {} | Error: {}", requestId, e.getMessage(), e);
+                throw new OpenAccountException("INVALID_REQUEST_DATA", AppConstants.FAILED_PARSE_CUSTOMER_DATA);
             }
-        } catch (Exception e) {
-            log.error("Failed to parse customer data for request: {} | Error: {}", requestId, e.getMessage(), e);
-            throw new OpenAccountException("INVALID_REQUEST_DATA", AppConstants.FAILED_PARSE_CUSTOMER_DATA);
         }
 
         log.info("Creating account for approved request | Legal ID: {}", pendingRequest.getLegalId());
