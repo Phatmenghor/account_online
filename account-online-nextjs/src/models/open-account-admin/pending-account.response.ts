@@ -132,7 +132,7 @@ export interface RequestHistoryRecord {
   status: string;
   actionUsername: string;
   remark?: string;
-  createdAt: number;
+  createdAt: string;
 }
 
 // Review History Response - Audit Trail

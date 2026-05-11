@@ -20,7 +20,7 @@ public class PendingAccountOpeningRequestDto {
     private AccountOpeningRequestStatusEnum status;
     private AmlStatusEnum amlStatus;
     private String remark;
-    private Long createdAt;
+    private String createdAt;
     private String message;
 
     // Customer personal details

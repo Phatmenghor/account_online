@@ -18,5 +18,5 @@ public class PendingAccountOpeningRequestHistoryDto {
     private AccountOpeningRequestStatusEnum status;
     private String actionUsername;
     private String remark;
-    private Long createdAt;
+    private String createdAt;
 }

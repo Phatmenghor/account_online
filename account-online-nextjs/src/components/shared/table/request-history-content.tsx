@@ -1,7 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { TableColumn } from "./data-table";
 import { RequestHistoryRecord } from "@/models/open-account-admin/pending-account.response";
-import { formatEpochTimestamp } from "@/utils/common/common";
 
 interface RequestHistoryTableHandlers {
   // Add handlers as needed
@@ -78,8 +77,8 @@ export const createRequestHistoryTableColumns = ({
       maxWidth: "180px",
       minWidth: "160px",
       render: (record) => (
-        <span className="font-medium">
-          {formatEpochTimestamp(record.createdAt)}
+        <span className="font-medium text-sm">
+          {record.createdAt || "---"}
         </span>
       ),
     },

@@ -41,6 +41,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -277,12 +278,10 @@ public class OpenAccountServiceImpl implements OpenAccountService {
     }
 
     private PendingAccountOpeningRequestDto mapToDto(PendingAccountOpeningRequest entity) {
-        Long createdAtMillis = null;
+        String createdAtIso = null;
         if (entity.getCreatedAt() != null) {
-            createdAtMillis = entity.getCreatedAt()
-                    .atZone(ZoneId.systemDefault())
-                    .toInstant()
-                    .toEpochMilli();
+            createdAtIso = entity.getCreatedAt()
+                    .format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
         }
 
         String message = getStatusMessage(entity.getStatus());
@@ -302,7 +301,7 @@ public class OpenAccountServiceImpl implements OpenAccountService {
                 .status(entity.getStatus())
                 .amlStatus(entity.getAmlStatus())
                 .remark(entity.getRemark())
-                .createdAt(createdAtMillis)
+                .createdAt(createdAtIso)
                 .message(message)
                 .amlResultData(entity.getAmlResultData())
                 .customerRole("OWNER");
@@ -364,12 +363,10 @@ public class OpenAccountServiceImpl implements OpenAccountService {
     }
 
     private PendingAccountOpeningRequestHistoryDto mapHistoryToDto(PendingAccountOpeningRequestHistory entity) {
-        Long createdAtMillis = null;
+        String createdAtIso = null;
         if (entity.getCreatedAt() != null) {
-            createdAtMillis = entity.getCreatedAt()
-                    .atZone(ZoneId.systemDefault())
-                    .toInstant()
-                    .toEpochMilli();
+            createdAtIso = entity.getCreatedAt()
+                    .format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
         }
 
         return PendingAccountOpeningRequestHistoryDto.builder()
@@ -379,7 +376,7 @@ public class OpenAccountServiceImpl implements OpenAccountService {
                 .status(entity.getStatus())
                 .actionUsername(entity.getActionUsername())
                 .remark(entity.getRemark())
-                .createdAt(createdAtMillis)
+                .createdAt(createdAtIso)
                 .build();
     }
 
@@ -443,12 +440,10 @@ public class OpenAccountServiceImpl implements OpenAccountService {
     }
 
     private PendingAccountAdminReviewDto mapToAdminReviewDto(PendingAccountOpeningRequest request, CustomerRequest customerData) {
-        Long createdAtMillis = null;
+        String createdAtIso = null;
         if (request.getCreatedAt() != null) {
-            createdAtMillis = request.getCreatedAt()
-                    .atZone(ZoneId.systemDefault())
-                    .toInstant()
-                    .toEpochMilli();
+            createdAtIso = request.getCreatedAt()
+                    .format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
         }
 
         PendingAccountAdminReviewDto.PendingAccountAdminReviewDtoBuilder builder = PendingAccountAdminReviewDto.builder()
@@ -456,7 +451,7 @@ public class OpenAccountServiceImpl implements OpenAccountService {
                 .legalId(request.getLegalId())
                 .status(request.getStatus())
                 .amlStatus(request.getAmlStatus())
-                .createdAt(createdAtMillis)
+                .createdAt(createdAtIso)
                 .amlResultData(request.getAmlResultData())
                 .remark(request.getRemark());
 

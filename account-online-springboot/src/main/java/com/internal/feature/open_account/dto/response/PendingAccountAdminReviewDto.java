@@ -18,7 +18,7 @@ public class PendingAccountAdminReviewDto {
     private String legalId;
     private AccountOpeningRequestStatusEnum status;
     private AmlStatusEnum amlStatus;
-    private Long createdAt;
+    private String createdAt;
 
     // Customer Personal Info
     private String title;
