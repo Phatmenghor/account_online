@@ -15,66 +15,21 @@ import lombok.NoArgsConstructor;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class PendingAccountOpeningRequestDto {
 
+    // Request metadata
     private Long id;
     private String legalId;
     private AccountOpeningRequestStatusEnum status;
-    private AmlStatusEnum amlStatus;
-    private String remark;
     private String createdAt;
     private String message;
+    private String remark;
 
-    // Customer personal details
-    private String title;
-    private String givenName;
-    private String familyName;
-    private String firstNameKh;
-    private String lastNameKh;
-    private String gender;
-    private String dateOfBirth;
-    private String nationality;
-    private String maritalStatus;
-    private String phoneNumber;
-    private String email;
-
-    // Current address
-    private String customerCurrentProvince;
-    private String customerCurrentDistrict;
-    private String customerCurrentCommune;
-    private String customerCurrentVillage;
-
-    // Legal information
-    private String legalAddress;
-    private String legalDocType;
-    private String legalHolderName;
-    private String legalIssAuth;
-    private String legalIssueDate;
-    private String legalExpireDate;
-
-    // Place of birth
-    private String customerPobProvince;
-    private String customerPobDistrict;
-    private String customerPobCommune;
-    private String customerPobVillage;
-    private String placeOfBirth;
-
-    // Employment and business
-    private String customerType;
-    private String companyName;
-    private String occupation;
-    private String industry;
-    private String sector;
-    private String averageIncome;
-
-    // Bank and account details
-    private String branchCode;
-    private String productAccount;
-    private String categoryAccount;
-    private String customerRole;
-
-    // Document images
-    private String nidImageName;
-    private String selfieImageName;
-
-    // AML and compliance
+    // AML information
+    private AmlStatusEnum amlStatus;
     private String amlResultData;
+
+    // Complete customer data (raw JSON from request)
+    private String requestData;
+
+    // AML raw data
+    private String customerInfo;
 }

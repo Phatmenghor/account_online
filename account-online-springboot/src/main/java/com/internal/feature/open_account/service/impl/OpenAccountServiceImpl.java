@@ -286,68 +286,18 @@ public class OpenAccountServiceImpl implements OpenAccountService {
 
         String message = getStatusMessage(entity.getStatus());
 
-        CustomerRequest customerData = null;
-        try {
-            if (entity.getRequestData() != null) {
-                customerData = objectMapper.readValue(entity.getRequestData(), CustomerRequest.class);
-            }
-        } catch (Exception e) {
-            log.warn("Failed to parse customer data for request: {}", entity.getId(), e);
-        }
-
-        PendingAccountOpeningRequestDto.PendingAccountOpeningRequestDtoBuilder builder = PendingAccountOpeningRequestDto.builder()
+        return PendingAccountOpeningRequestDto.builder()
                 .id(entity.getId())
                 .legalId(entity.getLegalId())
                 .status(entity.getStatus())
-                .amlStatus(entity.getAmlStatus())
-                .remark(entity.getRemark())
                 .createdAt(createdAtIso)
                 .message(message)
+                .remark(entity.getRemark())
+                .amlStatus(entity.getAmlStatus())
                 .amlResultData(entity.getAmlResultData())
-                .customerRole("OWNER");
-
-        if (customerData != null) {
-            builder.title(customerData.getTitle())
-                    .givenName(customerData.getGivenName())
-                    .familyName(customerData.getFamilyName())
-                    .firstNameKh(customerData.getFirstNameKh())
-                    .lastNameKh(customerData.getLastNameKh())
-                    .gender(customerData.getGender())
-                    .dateOfBirth(customerData.getDateOfBirth())
-                    .nationality(customerData.getNationality())
-                    .maritalStatus(customerData.getMaritalStatus())
-                    .phoneNumber(customerData.getPhoneNumber())
-                    .email(customerData.getEmail())
-                    .customerCurrentProvince(customerData.getCustomerCurrentProvince())
-                    .customerCurrentDistrict(customerData.getCustomerCurrentDistrict())
-                    .customerCurrentCommune(customerData.getCustomerCurrentCommune())
-                    .customerCurrentVillage(customerData.getCustomerCurrentVillage())
-                    .legalAddress(customerData.getLegalAddress())
-                    .customerPobProvince(customerData.getCustomerPobProvince())
-                    .customerPobDistrict(customerData.getCustomerPobDistrict())
-                    .customerPobCommune(customerData.getCustomerPobCommune())
-                    .customerPobVillage(customerData.getCustomerPobVillage())
-                    .placeOfBirth(customerData.getPlaceOfBirth())
-                    .legalDocType(customerData.getLegalDocType())
-                    .legalHolderName(customerData.getLegalHolderName())
-                    .legalIssAuth(customerData.getLegalIssAuth())
-                    .legalIssueDate(customerData.getLegalIssueDate())
-                    .legalExpireDate(customerData.getLegalExpireDate())
-                    .customerType(customerData.getCustomerType())
-                    .companyName(customerData.getCompanyName())
-                    .occupation(customerData.getOccupation())
-                    .industry(customerData.getIndustry())
-                    .sector(customerData.getSector())
-                    .averageIncome(customerData.getAverageIncome())
-                    .branchCode(customerData.getBranchCode())
-                    .productAccount(customerData.getProductAccount())
-                    .categoryAccount(customerData.getCategoryAccount())
-                    .customerRole(customerData.getCustomerRole())
-                    .nidImageName(customerData.getNidImageName())
-                    .selfieImageName(customerData.getSelfieImageName());
-        }
-
-        return builder.build();
+                .requestData(entity.getRequestData())
+                .customerInfo(entity.getCustomerInfo())
+                .build();
     }
 
     private String getStatusMessage(AccountOpeningRequestStatusEnum status) {
@@ -446,57 +396,17 @@ public class OpenAccountServiceImpl implements OpenAccountService {
                     .format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
         }
 
-        PendingAccountAdminReviewDto.PendingAccountAdminReviewDtoBuilder builder = PendingAccountAdminReviewDto.builder()
+        return PendingAccountAdminReviewDto.builder()
                 .requestId(request.getId())
                 .legalId(request.getLegalId())
                 .status(request.getStatus())
-                .amlStatus(request.getAmlStatus())
                 .createdAt(createdAtIso)
+                .amlStatus(request.getAmlStatus())
                 .amlResultData(request.getAmlResultData())
-                .remark(request.getRemark());
-
-        if (customerData != null) {
-            builder.title(customerData.getTitle())
-                    .givenName(customerData.getGivenName())
-                    .familyName(customerData.getFamilyName())
-                    .firstNameKh(customerData.getFirstNameKh())
-                    .lastNameKh(customerData.getLastNameKh())
-                    .gender(customerData.getGender())
-                    .dateOfBirth(customerData.getDateOfBirth())
-                    .nationality(customerData.getNationality())
-                    .maritalStatus(customerData.getMaritalStatus())
-                    .phoneNumber(customerData.getPhoneNumber())
-                    .email(customerData.getEmail())
-                    .customerCurrentProvince(customerData.getCustomerCurrentProvince())
-                    .customerCurrentDistrict(customerData.getCustomerCurrentDistrict())
-                    .customerCurrentCommune(customerData.getCustomerCurrentCommune())
-                    .customerCurrentVillage(customerData.getCustomerCurrentVillage())
-                    .legalAddress(customerData.getLegalAddress())
-                    .customerPobProvince(customerData.getCustomerPobProvince())
-                    .customerPobDistrict(customerData.getCustomerPobDistrict())
-                    .customerPobCommune(customerData.getCustomerPobCommune())
-                    .customerPobVillage(customerData.getCustomerPobVillage())
-                    .placeOfBirth(customerData.getPlaceOfBirth())
-                    .legalDocType(customerData.getLegalDocType())
-                    .legalHolderName(customerData.getLegalHolderName())
-                    .legalIssAuth(customerData.getLegalIssAuth())
-                    .legalIssueDate(customerData.getLegalIssueDate())
-                    .legalExpireDate(customerData.getLegalExpireDate())
-                    .customerType(customerData.getCustomerType())
-                    .companyName(customerData.getCompanyName())
-                    .occupation(customerData.getOccupation())
-                    .industry(customerData.getIndustry())
-                    .sector(customerData.getSector())
-                    .averageIncome(customerData.getAverageIncome())
-                    .branchCode(customerData.getBranchCode())
-                    .productAccount(customerData.getProductAccount())
-                    .categoryAccount(customerData.getCategoryAccount())
-                    .customerRole(customerData.getCustomerRole())
-                    .nidImageName(customerData.getNidImageName())
-                    .selfieImageName(customerData.getSelfieImageName());
-        }
-
-        return builder.build();
+                .remark(request.getRemark())
+                .requestData(request.getRequestData())
+                .customerInfo(request.getCustomerInfo())
+                .build();
     }
 
     @Override

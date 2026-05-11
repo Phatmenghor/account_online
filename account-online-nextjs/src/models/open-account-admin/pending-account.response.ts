@@ -8,97 +8,47 @@ export interface PaginationResponse<T> {
   last: boolean;
 }
 
-// Customer Address Information
-export interface AddressInfo {
-  province: string;
-  district: string;
-  commune: string;
-  village: string;
-}
-
-// Legal Document Information
-export interface LegalDocInfo {
-  type: string;
-  issueDate: string;
-  expirationDate: string;
-  holderName: string;
-  mrz1?: string;
-  mrz2?: string;
-  mrz3?: string;
-}
-
-// Business/Employment Information
-export interface BusinessInfo {
-  companyName: string;
-  occupation: string;
-  industry: string;
-  sector: string;
-  monthlyIncome: string;
-}
-
-// AML Result Information
-export interface AmlResult {
+// Pending Account Opening Request DTO
+export interface PendingAccountOpeningRequestDto {
+  // Request metadata
+  id: string;
+  legalId: string;
   status: string;
-  riskLevel: string;
-  screeningResult: string;
-  rulesTriggered: string;
-  totalRulesScore: number;
-  actionTaken: string;
-  serviceName: string;
-}
+  createdAt: string;
+  message?: string;
+  remark?: string;
 
-// Image File Information
-export interface ImageInfo {
-  nidImageName?: string;
-  nidImageUrl?: string;
-  selfieImageName?: string;
-  selfieImageUrl?: string;
+  // AML information
+  amlStatus: string;
+  amlResultData?: string;
+
+  // Complete customer data (raw JSON)
+  requestData?: string;
+
+  // Customer info JSON
+  customerInfo?: string;
 }
 
 // Main DTO for Pending Account Review
 export interface PendingAccountAdminReviewDto {
-  // Metadata
-  id: string;
+  // Request metadata
   requestId: string;
+  legalId: string;
   status: string;
   createdAt: string;
-  updatedAt: string;
 
-  // Personal Information
-  legalId: string;
-  givenName: string;
-  familyName: string;
-  firstNameKh: string;
-  lastNameKh: string;
-  gender: string;
-  dateOfBirth: string;
-  nationality: string;
-  maritalStatus: string;
-  phoneNumber: string;
-  email: string;
+  // AML information
+  amlStatus: string;
+  amlResultData?: string;
 
-  // Current Address
-  currentAddress: AddressInfo;
+  // Review remarks
+  remark?: string;
 
-  // Place of Birth
-  placeOfBirth: AddressInfo;
+  // Complete customer data (raw JSON)
+  requestData?: string;
 
-  // Legal Document
-  legalDocument: LegalDocInfo;
-
-  // Business/Employment
-  businessInfo: BusinessInfo;
-
-  // Images
-  images: ImageInfo;
-
-  // AML Information
-  amlInfo: AmlResult;
-
-  // Additional Fields
-  referralId?: string;
-  branchCode?: string;
-  legalAddress?: string;
+  // Customer info JSON
+  customerInfo?: string;
 }
 
 // Request for approving account
