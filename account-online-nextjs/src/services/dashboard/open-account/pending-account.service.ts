@@ -13,6 +13,7 @@ import {
 
 /**
  * 🔹 Fetch all pending account requests with pagination
+ * Supports filtering by status: "PENDING", "APPROVED", "REJECTED", or omit for all
  */
 export async function getAllPendingAccountsService(
   request: GetAllPendingAccountsRequest

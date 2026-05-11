@@ -30,6 +30,7 @@ import {
   PendingAccountAdminReviewDto,
 } from "@/models/open-account-admin/pending-account.response";
 import PendingAccountActionDialog from "@/components/shared/dialog/pending-account-action-dialog";
+import PendingAccountDetailModal from "@/components/shared/modal/pending-account-detail";
 import { AppToast } from "@/components/shared/toast/app-toast";
 
 function PendingReview() {
@@ -38,9 +39,14 @@ function PendingReview() {
     useState<PaginationResponse<PendingAccountAdminReviewDto> | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
+  // Detail Modal
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [selectedAccount, setSelectedAccount] =
+    useState<PendingAccountAdminReviewDto | null>(null);
+
   // Action Dialog
   const [isActionDialogOpen, setIsActionDialogOpen] = useState(false);
-  const [selectedAccount, setSelectedAccount] =
+  const [selectedAccountForAction, setSelectedAccountForAction] =
     useState<PendingAccountAdminReviewDto | null>(null);
   const [selectedAction, setSelectedAction] = useState<"APPROVE" | "REJECT" | null>(null);
   const [isActionLoading, setIsActionLoading] = useState(false);
@@ -92,36 +98,42 @@ function PendingReview() {
   };
 
   const handleViewDetail = (account: PendingAccountAdminReviewDto) => {
-    router.push(`/pending-review/${account.id}`);
+    setSelectedAccount(account);
+    setIsDetailModalOpen(true);
+  };
+
+  const handleCloseDetailModal = () => {
+    setSelectedAccount(null);
+    setIsDetailModalOpen(false);
   };
 
   const openApproveDialog = (account: PendingAccountAdminReviewDto) => {
-    setSelectedAccount(account);
+    setSelectedAccountForAction(account);
     setSelectedAction("APPROVE");
     setIsActionDialogOpen(true);
   };
 
   const openRejectDialog = (account: PendingAccountAdminReviewDto) => {
-    setSelectedAccount(account);
+    setSelectedAccountForAction(account);
     setSelectedAction("REJECT");
     setIsActionDialogOpen(true);
   };
 
   const handleConfirmAction = async (remark?: string) => {
-    if (!selectedAccount || !selectedAction) return;
+    if (!selectedAccountForAction || !selectedAction) return;
 
     setIsActionLoading(true);
     try {
       if (selectedAction === "APPROVE") {
         await approvePendingAccountService({
-          id: selectedAccount.id,
+          id: selectedAccountForAction.id,
           remark,
         });
 
         setPendingAccounts((prev) => {
           if (!prev) return null;
           const updatedList = prev.content.filter(
-            (item) => item.id !== selectedAccount.id
+            (item) => item.id !== selectedAccountForAction.id
           );
           return {
             ...prev,
@@ -134,19 +146,19 @@ function PendingReview() {
           AppToast({
             type: "success",
             message: "Account approved successfully",
-            description: `Account for ${selectedAccount.givenName} ${selectedAccount.familyName} has been approved.`,
+            description: `Account for ${selectedAccountForAction.givenName} ${selectedAccountForAction.familyName} has been approved.`,
           });
         });
       } else if (selectedAction === "REJECT") {
         await rejectPendingAccountService({
-          id: selectedAccount.id,
+          id: selectedAccountForAction.id,
           remark: remark || "No reason provided",
         });
 
         setPendingAccounts((prev) => {
           if (!prev) return null;
           const updatedList = prev.content.filter(
-            (item) => item.id !== selectedAccount.id
+            (item) => item.id !== selectedAccountForAction.id
           );
           return {
             ...prev,
@@ -159,7 +171,7 @@ function PendingReview() {
           AppToast({
             type: "success",
             message: "Account rejected successfully",
-            description: `Account for ${selectedAccount.givenName} ${selectedAccount.familyName} has been rejected.`,
+            description: `Account for ${selectedAccountForAction.givenName} ${selectedAccountForAction.familyName} has been rejected.`,
           });
         });
       }
@@ -173,7 +185,7 @@ function PendingReview() {
     } finally {
       setIsActionDialogOpen(false);
       setIsActionLoading(false);
-      setSelectedAccount(null);
+      setSelectedAccountForAction(null);
       setSelectedAction(null);
     }
   };
@@ -231,12 +243,20 @@ function PendingReview() {
           </div>
         </div>
 
+        {/* DETAIL MODAL */}
+        <PendingAccountDetailModal
+          isOpen={isDetailModalOpen}
+          onClose={handleCloseDetailModal}
+          account={selectedAccount || undefined}
+          isReadOnly={true}
+        />
+
         {/* ACTION DIALOG */}
         <PendingAccountActionDialog
           isOpen={isActionDialogOpen}
           onClose={() => setIsActionDialogOpen(false)}
           actionType={selectedAction || "APPROVE"}
-          account={selectedAccount || undefined}
+          account={selectedAccountForAction || undefined}
           onConfirm={handleConfirmAction}
           isLoading={isActionLoading}
         />
