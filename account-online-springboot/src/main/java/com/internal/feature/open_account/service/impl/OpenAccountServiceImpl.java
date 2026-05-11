@@ -182,7 +182,7 @@ public class OpenAccountServiceImpl implements OpenAccountService {
                 legalId, AccountOpeningRequestStatusEnum.PENDING);
         if (existingPending.isPresent()) {
             throw new OpenAccountException("PENDING_REQUEST_EXISTS",
-                    "Request already pending for legal ID: " + legalId);
+                    "ស្នើសុំបង្កើតគណនីបានកកដាច់ស្ថិតក្នុងស្ថានភាពរង់ចាំសម្រាប់លេខ ID ច្បាប់ប្រឹក្សា: " + legalId);
         }
 
         try {
@@ -196,7 +196,7 @@ public class OpenAccountServiceImpl implements OpenAccountService {
             var recoveryResult = bankingService.checkExistingCompleteAccountAndActivate(request);
             if (recoveryResult.isPresent()) {
                 throw new OpenAccountException("ACCOUNT_ALREADY_EXISTS",
-                        "Account already exists for legal ID: " + legalId);
+                        "គណនីបានបង្កើតរួចរាល់សម្រាប់លេខ ID ច្បាប់ប្រឹក្សា: " + legalId);
             }
 
             // Step 3: Get customer info
@@ -258,7 +258,7 @@ public class OpenAccountServiceImpl implements OpenAccountService {
 
         if (pendingRequest.getStatus() != AccountOpeningRequestStatusEnum.PENDING) {
             throw new OpenAccountException("INVALID_STATUS",
-                    "Only PENDING requests can be approved");
+                    "មានតែស្នើសុំដែលរង់ចាំប៉ុណ្ណោះដែលអាចផ្ល័ងផ្សាយបាន");
         }
 
         // Extract customer data from stored JSON
@@ -269,7 +269,7 @@ public class OpenAccountServiceImpl implements OpenAccountService {
             }
         } catch (Exception e) {
             log.error("Failed to parse customer data for request: {}", requestId, e);
-            throw new OpenAccountException("INVALID_REQUEST_DATA", "Failed to parse customer data");
+            throw new OpenAccountException("INVALID_REQUEST_DATA", "បរាជ័យក្នុងការញែកទិន្នន័យអតិថិជន");
         }
 
         // Create the actual account with stored customer data
@@ -279,7 +279,7 @@ public class OpenAccountServiceImpl implements OpenAccountService {
             log.info("✓ Account created successfully for approved request | CIF: {}", accountResponse.getCif());
         } catch (Exception e) {
             log.error("Failed to create account for approved request: {}", requestId, e);
-            throw new OpenAccountException("ACCOUNT_CREATION_FAILED", "Failed to create account: " + e.getMessage());
+            throw new OpenAccountException("ACCOUNT_CREATION_FAILED", "បរាជ័យក្នុងការបង្កើតគណនី: " + e.getMessage());
         }
 
         // Mark as approved in pending request
@@ -307,7 +307,7 @@ public class OpenAccountServiceImpl implements OpenAccountService {
 
         if (pendingRequest.getStatus() != AccountOpeningRequestStatusEnum.PENDING) {
             throw new OpenAccountException("INVALID_STATUS",
-                    "Only PENDING requests can be rejected");
+                    "មានតែស្នើសុំដែលរង់ចាំប៉ុណ្ណោះដែលអាចច្រានចោលបាន");
         }
 
         pendingRequest.setStatus(AccountOpeningRequestStatusEnum.REJECTED);

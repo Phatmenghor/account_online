@@ -128,8 +128,8 @@ export const useAccountSubmission = ({
 
     setLoadingState({
       isLoading: true,
-      title: translate("submitting") || "កំពុងដំណើរការ",
-      message: translate("submitting_message") || "កំពុងផ្ទុករូបភាព...",
+      title: "កំពុងដាក់ស្នើ",
+      message: "កំពុងផ្ទុករូបភាព...",
     });
 
     try {
@@ -166,7 +166,7 @@ export const useAccountSubmission = ({
       // ── 3. Update loading message ──
       setLoadingState((prev) => ({
         ...prev,
-        message: translate("creating_account") || "កំពុងបង្កើតគណនី...",
+        message: "កំពុងដាក់ស្នើសុំបង្កើតគណនីសម្រាប់ឆ្លើយប្រតិកម្ម...",
       }));
 
       // ── 4. Submit account ──
@@ -220,8 +220,8 @@ export const useAccountSubmission = ({
       uploadCache.current = { nidFileName: null, selfieFileName: null };
 
       setSuccessData({
-        title: translate("success_title") || "បង្កើតគណនីដោយជោគជ័យ",
-        message: response?.message || "គណនីរបស់អ្នកត្រូវបានបង្កើតដោយជោគជ័យ!",
+        title: "សូមស្វាគមន៍",
+        message: "ស្នើសុំបង្កើតគណនីរបស់អ្នកត្រូវបានបញ្ជូនដោយជោគជ័យ។ សូមរងចាំការឆ្ លើយប្រតិកម្មពីផ្នែកលទ្ធផលគ្រប់គ្រងរបស់យើងខ្ញុំក្នុងរយៈពេលដែលមាន។",
       });
       setShowSuccessModal(true);
     } catch (error: any) {

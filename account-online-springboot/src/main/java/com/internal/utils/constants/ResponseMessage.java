@@ -69,11 +69,11 @@ public final class ResponseMessage {
     // ===== Open Account =====
     public static final String ACCOUNT_RETRIEVED = "Account retrieved successfully";
     public static final String SUCCESS_ACCOUNTS_RETRIEVED = "Success accounts retrieved successfully";
-    public static final String PENDING_ACCOUNTS_RETRIEVED = "Pending accounts retrieved successfully";
+    public static final String PENDING_ACCOUNTS_RETRIEVED = "គណនីដែលរង់ចាំឆ្លើយប្រតិកម្មត្រូវបានទាញយកដោយជោគជ័យ";
     public static final String PENDING_ACCOUNT_RETRIEVED = "Pending account retrieved successfully";
-    public static final String PENDING_ACCOUNT_HISTORY_RETRIEVED = "Pending account history retrieved successfully";
-    public static final String ACCOUNT_APPROVED = "Account opening request approved successfully";
-    public static final String ACCOUNT_REJECTED = "Account opening request rejected successfully";
+    public static final String PENDING_ACCOUNT_HISTORY_RETRIEVED = "ប្រវត្តិគណនីដែលរង់ចាំឆ្លើយប្រតិកម្មត្រូវបានទាញយកដោយជោគជ័យ";
+    public static final String ACCOUNT_APPROVED = "ស្នើសុំបង្កើតគណនីត្រូវបានផ្ល័ងផ្សាយដោយជោគជ័យ។ គណនីនឹងត្រូវបានបង្កើតក្នុងរយៈពេលដែលមាន។";
+    public static final String ACCOUNT_REJECTED = "ស្នើសុំបង្កើតគណនីត្រូវបានច្រានចោលដោយជោគជ័យ។";
 
     // ===== Report =====
     public static final String REPORT_LOGS_RETRIEVED = "Account online report logs retrieved successfully";

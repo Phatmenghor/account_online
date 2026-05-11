@@ -32,7 +32,7 @@ public class AdminOpenAccountController {
 
         log.info("✓ Found {} pending accounts | Total: {}", response.getContent().size(), response.getTotalElements());
 
-        return ResponseEntity.ok(ApiResponse.success(ResponseMessage.PENDING_ACCOUNTS_RETRIEVED, response));
+        return ResponseEntity.ok(ApiResponse.success("គណនីដែលរង់ចាំឆ្លើយប្រតិកម្មត្រូវបានទាញយកដោយជោគជ័យ", response));
     }
 
     @PostMapping("/history-by-id/{requestId}")
@@ -43,6 +43,6 @@ public class AdminOpenAccountController {
 
         log.info("✓ Admin review details retrieved | Request ID: {} | Status: {}", requestId, response.getStatus());
 
-        return ResponseEntity.ok(ApiResponse.success(ResponseMessage.PENDING_ACCOUNT_HISTORY_RETRIEVED, response));
+        return ResponseEntity.ok(ApiResponse.success("ព័ត៌មានលម្អិតឆ្លើយប្រតិកម្មរបស់អ្នកគ្រប់គ្រងត្រូវបានទាញយកដោយជោគជ័យ", response));
     }
 }
