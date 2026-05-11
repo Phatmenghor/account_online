@@ -169,96 +169,68 @@ export const useAccountSubmission = ({
         message: "កំពុងដាក់ស្នើសុំបង្កើតគណនីសម្រាប់ឆ្លើយប្រតិកម្ម...",
       }));
 
-      // ── 4. Submit account ──
-      // Helper to only include fields with actual values
-      const buildAccountData = () => {
-        const data: Record<string, any> = {
-          // Personal Information - always required
-          familyName: formData.lastNameEn,
-          givenName: formData.firstNameEn,
-          firstNameKh: formData.firstNameKh,
-          lastNameKh: formData.lastNameKh,
-          gender: convertGenderToAPI(formData.gender),
-          dateOfBirth: formatDate(formData.dob),
-          phoneNumber: phoneNumber,
+      // ── 4. Submit account ── Submit ALL available form data directly
+      const accountData = {
+        // NID Data - from form
+        legalId: formData.idNumber,
+        familyName: formData.lastNameEn,
+        givenName: formData.firstNameEn,
+        firstNameKh: formData.firstNameKh,
+        lastNameKh: formData.lastNameKh,
+        gender: convertGenderToAPI(formData.gender),
+        dateOfBirth: formatDate(formData.dob),
+        legalAddress: formData.address,
+        placeOfBirth: formData.pob,
+        legalIssueDate: formatDate(formData.issuedDate),
+        legalExpireDate: formatDate(formData.expiredDate),
+        legalMrz1: formData.MRZ1,
+        legalMrz2: formData.MRZ2,
+        legalMrz3: formData.MRZ3,
 
-          // Legal Information - always required
-          legalId: formData.idNumber,
-          legalAddress: formData.address,
-          legalIssueDate: formatDate(formData.issuedDate),
-          legalExpireDate: formatDate(formData.expiredDate),
-          legalMrz1: formData.MRZ1,
-          legalMrz2: formData.MRZ2,
-          legalMrz3: formData.MRZ3,
+        // Legal Type Selection - submit all available data
+        legalDocType: selectedLegalType?.legalTypeValue,
 
-          // Place of Birth - always include
-          placeOfBirth: formData.pob,
+        // Phone and Contact
+        phoneNumber: phoneNumber,
 
-          // Branch and Images - always required
-          branchCode: selectedBranch!.branchID,
-          nidImageName: nidFileName!,
-          selfieImageName: selfieFileName!,
-          customerRole: "OWNER",
-        };
+        // Marital Status - submit all available data
+        maritalStatus: selectedMaritalStatus
+          ? getMaritalStatusString(selectedMaritalStatus.id.toString())
+          : undefined,
 
-        // Conditionally add fields if they have values
-        if (selectedLegalType?.legalTypeValue) {
-          data.legalDocType = selectedLegalType.legalTypeValue;
-        }
+        // Occupation - submit all available data
+        occupation: selectedOccupation?.occupationCode,
 
-        if (phoneNumber) {
-          data.phoneNumber = phoneNumber;
-        }
+        // Reference Bank - submit all available data
+        companyName: selectedReferenceBank?.nameEn,
 
-        if (selectedMaritalStatus) {
-          data.maritalStatus = getMaritalStatusString(selectedMaritalStatus.id.toString());
-        }
+        // Staff/Referral
+        referralId: staffCode,
+        releasedBy: staffCode,
 
-        if (selectedOccupation?.occupationCode) {
-          data.occupation = selectedOccupation.occupationCode;
-        }
+        // Branch - always required
+        branchCode: selectedBranch!.branchID,
 
-        if (selectedReferenceBank?.nameEn) {
-          data.companyName = selectedReferenceBank.nameEn;
-        }
+        // Current Address - submit all available codes
+        customerCurrentProvince: locationData.currentAddress.province?.provinceCode,
+        customerCurrentDistrict: locationData.currentAddress.district?.districtCode,
+        customerCurrentCommune: locationData.currentAddress.commune?.communeCode,
+        customerCurrentVillage: locationData.currentAddress.village?.villageCode,
 
-        if (staffCode) {
-          data.referralId = staffCode;
-          data.releasedBy = staffCode;
-        }
+        // Place of Birth Address - submit all available codes
+        customerPobProvince: locationData.placeOfBirth.province?.provinceCode,
+        customerPobDistrict: locationData.placeOfBirth.district?.districtCode,
+        customerPobCommune: locationData.placeOfBirth.commune?.communeCode,
+        customerPobVillage: locationData.placeOfBirth.village?.villageCode,
 
-        // Add address fields only if they have values
-        if (locationData.currentAddress.province?.provinceCode) {
-          data.customerCurrentProvince = locationData.currentAddress.province.provinceCode;
-        }
-        if (locationData.currentAddress.district?.districtCode) {
-          data.customerCurrentDistrict = locationData.currentAddress.district.districtCode;
-        }
-        if (locationData.currentAddress.commune?.communeCode) {
-          data.customerCurrentCommune = locationData.currentAddress.commune.communeCode;
-        }
-        if (locationData.currentAddress.village?.villageCode) {
-          data.customerCurrentVillage = locationData.currentAddress.village.villageCode;
-        }
+        // Images
+        nidImageName: nidFileName!,
+        selfieImageName: selfieFileName!,
 
-        // Place of birth address - only if provided
-        if (locationData.placeOfBirth.province?.provinceCode) {
-          data.customerPobProvince = locationData.placeOfBirth.province.provinceCode;
-        }
-        if (locationData.placeOfBirth.district?.districtCode) {
-          data.customerPobDistrict = locationData.placeOfBirth.district.districtCode;
-        }
-        if (locationData.placeOfBirth.commune?.communeCode) {
-          data.customerPobCommune = locationData.placeOfBirth.commune.communeCode;
-        }
-        if (locationData.placeOfBirth.village?.villageCode) {
-          data.customerPobVillage = locationData.placeOfBirth.village.villageCode;
-        }
-
-        return data;
+        // Default values
+        customerRole: "OWNER",
       };
 
-      const accountData = buildAccountData();
       const response = await createOpenAccountService(accountData);
 
       // ── 5. Clear cache on success ──
