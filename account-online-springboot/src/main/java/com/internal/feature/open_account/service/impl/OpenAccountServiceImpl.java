@@ -261,6 +261,28 @@ public class OpenAccountServiceImpl implements OpenAccountService {
                     "Only PENDING requests can be approved");
         }
 
+        // Extract customer data from stored JSON
+        CustomerRequest customerRequest = null;
+        try {
+            if (pendingRequest.getRequestData() != null) {
+                customerRequest = objectMapper.readValue(pendingRequest.getRequestData(), CustomerRequest.class);
+            }
+        } catch (Exception e) {
+            log.error("Failed to parse customer data for request: {}", requestId, e);
+            throw new OpenAccountException("INVALID_REQUEST_DATA", "Failed to parse customer data");
+        }
+
+        // Create the actual account with stored customer data
+        log.info("Creating account for approved request | Legal ID: {}", pendingRequest.getLegalId());
+        try {
+            CustomerResponse accountResponse = openAccount(customerRequest);
+            log.info("✓ Account created successfully for approved request | CIF: {}", accountResponse.getCif());
+        } catch (Exception e) {
+            log.error("Failed to create account for approved request: {}", requestId, e);
+            throw new OpenAccountException("ACCOUNT_CREATION_FAILED", "Failed to create account: " + e.getMessage());
+        }
+
+        // Mark as approved in pending request
         pendingRequest.setStatus(AccountOpeningRequestStatusEnum.APPROVED);
         pendingRequest.setRemark(dto.getRemark());
 
@@ -268,7 +290,7 @@ public class OpenAccountServiceImpl implements OpenAccountService {
 
         saveHistory(saved, AccountOpeningRequestStatusEnum.APPROVED, dto.getRemark());
 
-        log.info("✓ Request approved | ID: {} | Legal ID: {}", saved.getId(), saved.getLegalId());
+        log.info("✓ Request approved and account created | ID: {} | Legal ID: {}", saved.getId(), saved.getLegalId());
 
         return mapToDto(saved);
     }
