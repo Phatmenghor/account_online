@@ -20,3 +20,4 @@ public class PendingAccountOpeningRequestDto {
     private String remark;
     private Long createdAt;
     private String message;
+}
