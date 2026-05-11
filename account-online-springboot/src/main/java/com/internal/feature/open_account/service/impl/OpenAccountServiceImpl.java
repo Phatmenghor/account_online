@@ -286,7 +286,16 @@ public class OpenAccountServiceImpl implements OpenAccountService {
 
         String message = getStatusMessage(entity.getStatus());
 
-        return PendingAccountOpeningRequestDto.builder()
+        CustomerRequest customerData = null;
+        try {
+            if (entity.getRequestData() != null) {
+                customerData = objectMapper.readValue(entity.getRequestData(), CustomerRequest.class);
+            }
+        } catch (Exception e) {
+            log.warn("Failed to parse customer data for request: {}", entity.getId(), e);
+        }
+
+        PendingAccountOpeningRequestDto.PendingAccountOpeningRequestDtoBuilder builder = PendingAccountOpeningRequestDto.builder()
                 .id(entity.getId())
                 .legalId(entity.getLegalId())
                 .status(entity.getStatus())
@@ -294,7 +303,50 @@ public class OpenAccountServiceImpl implements OpenAccountService {
                 .remark(entity.getRemark())
                 .createdAt(createdAtMillis)
                 .message(message)
-                .build();
+                .amlResultData(entity.getAmlResultData());
+
+        if (customerData != null) {
+            builder.title(customerData.getTitle())
+                    .givenName(customerData.getGivenName())
+                    .familyName(customerData.getFamilyName())
+                    .firstNameKh(customerData.getFirstNameKh())
+                    .lastNameKh(customerData.getLastNameKh())
+                    .gender(customerData.getGender())
+                    .dateOfBirth(customerData.getDateOfBirth())
+                    .nationality(customerData.getNationality())
+                    .maritalStatus(customerData.getMaritalStatus())
+                    .phoneNumber(customerData.getPhoneNumber())
+                    .email(customerData.getEmail())
+                    .customerCurrentProvince(customerData.getCustomerCurrentProvince())
+                    .customerCurrentDistrict(customerData.getCustomerCurrentDistrict())
+                    .customerCurrentCommune(customerData.getCustomerCurrentCommune())
+                    .customerCurrentVillage(customerData.getCustomerCurrentVillage())
+                    .legalAddress(customerData.getLegalAddress())
+                    .customerPobProvince(customerData.getCustomerPobProvince())
+                    .customerPobDistrict(customerData.getCustomerPobDistrict())
+                    .customerPobCommune(customerData.getCustomerPobCommune())
+                    .customerPobVillage(customerData.getCustomerPobVillage())
+                    .placeOfBirth(customerData.getPlaceOfBirth())
+                    .legalDocType(customerData.getLegalDocType())
+                    .legalHolderName(customerData.getLegalHolderName())
+                    .legalIssAuth(customerData.getLegalIssAuth())
+                    .legalIssueDate(customerData.getLegalIssueDate())
+                    .legalExpireDate(customerData.getLegalExpireDate())
+                    .customerType(customerData.getCustomerType())
+                    .companyName(customerData.getCompanyName())
+                    .occupation(customerData.getOccupation())
+                    .industry(customerData.getIndustry())
+                    .sector(customerData.getSector())
+                    .averageIncome(customerData.getAverageIncome())
+                    .branchCode(customerData.getBranchCode())
+                    .productAccount(customerData.getProductAccount())
+                    .categoryAccount(customerData.getCategoryAccount())
+                    .customerRole(customerData.getCustomerRole())
+                    .nidImageName(customerData.getNidImageName())
+                    .selfieImageName(customerData.getSelfieImageName());
+        }
+
+        return builder.build();
     }
 
     private String getStatusMessage(AccountOpeningRequestStatusEnum status) {
