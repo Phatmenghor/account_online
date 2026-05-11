@@ -66,11 +66,18 @@ export const createPendingAccountTableColumns = ({
       truncate: true,
       maxWidth: "240px",
       minWidth: "180px",
-      render: (account) => (
-        <span className="font-medium">
-          {account.givenName} {account.familyName || "---"}
-        </span>
-      ),
+      render: (account) => {
+        let name = "---";
+        if (account.requestData) {
+          try {
+            const data = JSON.parse(account.requestData);
+            name = `${data.givenName || ""} ${data.familyName || ""}`.trim() || "---";
+          } catch (e) {
+            name = "---";
+          }
+        }
+        return <span className="font-medium">{name}</span>;
+      },
     },
 
     // AML Status
@@ -81,17 +88,17 @@ export const createPendingAccountTableColumns = ({
       maxWidth: "140px",
       minWidth: "120px",
       render: (account) => {
-        const amlStatus = account.amlInfo?.status || "---";
+        const amlStatus = account.amlStatus || "---";
         let badgeVariant: "default" | "secondary" | "destructive" | "outline" = "default";
-        
-        if (amlStatus === "PASS" || amlStatus === "CLEAR") {
+
+        if (amlStatus === "PASS" || amlStatus === "CLEAR" || amlStatus === "LOW_RISK") {
           badgeVariant = "default";
-        } else if (amlStatus === "FAIL" || amlStatus === "BLOCKED") {
+        } else if (amlStatus === "FAIL" || amlStatus === "BLOCKED" || amlStatus === "HIGH_RISK") {
           badgeVariant = "destructive";
-        } else if (amlStatus === "REVIEW" || amlStatus === "PENDING") {
+        } else if (amlStatus === "REVIEW" || amlStatus === "PENDING" || amlStatus === "MEDIUM_RISK") {
           badgeVariant = "secondary";
         }
-        
+
         return <Badge variant={badgeVariant}>{amlStatus}</Badge>;
       },
     },
