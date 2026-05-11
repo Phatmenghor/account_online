@@ -30,7 +30,7 @@ public class OpenAccountController {
         log.info("✓ Account opening request submitted for admin review | Request ID: {}", response.getId());
         log.info("  Legal ID: {} | AML Status: {}", response.getLegalId(), response.getAmlStatus());
 
-        return ResponseEntity.ok(ApiResponse.success(ResponseMessage.PENDING_ACCOUNTS_RETRIEVED, response));
+        return ResponseEntity.ok(ApiResponse.success("Account opening request submitted for admin review", response));
     }
 
     @PostMapping("/approve")

@@ -11,9 +11,11 @@ import com.internal.feature.open_account.dto.request.CustomerCreationResult;
 import com.internal.feature.open_account.dto.request.CustomerRequest;
 import com.internal.feature.open_account.dto.request.RejectAccountOpeningRequestDto;
 import com.internal.feature.open_account.dto.response.CustomerResponse;
+import com.internal.feature.open_account.dto.request.CustomerRequest;
 import com.internal.feature.open_account.dto.response.PendingAccountOpeningRequestDto;
 import com.internal.feature.open_account.dto.request.AllPendingAccountHistoryRequestDto;
 import com.internal.feature.open_account.dto.response.AllPendingAccountOpeningHistoryResponseDto;
+import com.internal.feature.open_account.dto.response.PendingAccountAdminReviewDto;
 import com.internal.feature.open_account.dto.response.PendingAccountOpeningHistoryDto;
 import com.internal.feature.open_account.dto.response.PendingAccountOpeningRequestHistoryDto;
 import com.internal.feature.open_account.event.AccountOpenedEvent;
@@ -364,23 +366,23 @@ public class OpenAccountServiceImpl implements OpenAccountService {
     }
 
     @Override
-    public PendingAccountOpeningHistoryDto getPendingAccountHistoryById(Long requestId) throws Exception {
-        log.info("Fetching history for request ID: {}", requestId);
+    public PendingAccountAdminReviewDto getPendingAccountHistoryById(Long requestId) throws Exception {
+        log.info("Fetching admin review details for request ID: {}", requestId);
 
         PendingAccountOpeningRequest request = pendingRequestRepository.findById(requestId)
                 .orElseThrow(() -> new NotFoundException("Request not found: " + requestId));
 
-        List<PendingAccountOpeningRequestHistoryDto> history = historyRepository.findByRequestIdOrderByCreatedAtDesc(requestId)
-                .stream()
-                .map(this::mapHistoryToDto)
-                .collect(Collectors.toList());
+        CustomerRequest customerData = null;
+        try {
+            if (request.getRequestData() != null) {
+                customerData = objectMapper.readValue(request.getRequestData(), CustomerRequest.class);
+            }
+        } catch (Exception e) {
+            log.warn("Failed to parse customer data for request: {}", requestId, e);
+        }
 
-        return PendingAccountOpeningHistoryDto.builder()
-                .requestId(request.getId())
-                .legalId(request.getLegalId())
-                .request(mapToDto(request))
-                .history(history)
-                .build();
+        log.info("✓ Admin review details retrieved | Request ID: {}", requestId);
+        return mapToAdminReviewDto(request, customerData);
     }
 
     private PendingAccountOpeningHistoryDto mapToDetailedHistoryDto(PendingAccountOpeningRequest entity) {
@@ -389,6 +391,68 @@ public class OpenAccountServiceImpl implements OpenAccountService {
                 .legalId(entity.getLegalId())
                 .request(mapToDto(entity))
                 .build();
+    }
+
+    private PendingAccountAdminReviewDto mapToAdminReviewDto(PendingAccountOpeningRequest request, CustomerRequest customerData) {
+        Long createdAtMillis = null;
+        if (request.getCreatedAt() != null) {
+            createdAtMillis = request.getCreatedAt()
+                    .atZone(ZoneId.systemDefault())
+                    .toInstant()
+                    .toEpochMilli();
+        }
+
+        PendingAccountAdminReviewDto.PendingAccountAdminReviewDtoBuilder builder = PendingAccountAdminReviewDto.builder()
+                .requestId(request.getId())
+                .legalId(request.getLegalId())
+                .status(request.getStatus())
+                .amlStatus(request.getAmlStatus())
+                .createdAt(createdAtMillis)
+                .amlResultData(request.getAmlResultData())
+                .remark(request.getRemark());
+
+        if (customerData != null) {
+            builder.title(customerData.getTitle())
+                    .givenName(customerData.getGivenName())
+                    .familyName(customerData.getFamilyName())
+                    .firstNameKh(customerData.getFirstNameKh())
+                    .lastNameKh(customerData.getLastNameKh())
+                    .gender(customerData.getGender())
+                    .dateOfBirth(customerData.getDateOfBirth())
+                    .nationality(customerData.getNationality())
+                    .maritalStatus(customerData.getMaritalStatus())
+                    .phoneNumber(customerData.getPhoneNumber())
+                    .email(customerData.getEmail())
+                    .customerCurrentProvince(customerData.getCustomerCurrentProvince())
+                    .customerCurrentDistrict(customerData.getCustomerCurrentDistrict())
+                    .customerCurrentCommune(customerData.getCustomerCurrentCommune())
+                    .customerCurrentVillage(customerData.getCustomerCurrentVillage())
+                    .legalAddress(customerData.getLegalAddress())
+                    .customerPobProvince(customerData.getCustomerPobProvince())
+                    .customerPobDistrict(customerData.getCustomerPobDistrict())
+                    .customerPobCommune(customerData.getCustomerPobCommune())
+                    .customerPobVillage(customerData.getCustomerPobVillage())
+                    .placeOfBirth(customerData.getPlaceOfBirth())
+                    .legalDocType(customerData.getLegalDocType())
+                    .legalHolderName(customerData.getLegalHolderName())
+                    .legalIssAuth(customerData.getLegalIssAuth())
+                    .legalIssueDate(customerData.getLegalIssueDate())
+                    .legalExpireDate(customerData.getLegalExpireDate())
+                    .customerType(customerData.getCustomerType())
+                    .companyName(customerData.getCompanyName())
+                    .occupation(customerData.getOccupation())
+                    .industry(customerData.getIndustry())
+                    .sector(customerData.getSector())
+                    .averageIncome(customerData.getAverageIncome())
+                    .branchCode(customerData.getBranchCode())
+                    .productAccount(customerData.getProductAccount())
+                    .categoryAccount(customerData.getCategoryAccount())
+                    .customerRole(customerData.getCustomerRole())
+                    .nidImageName(customerData.getNidImageName())
+                    .selfieImageName(customerData.getSelfieImageName());
+        }
+
+        return builder.build();
     }
 
     private void saveHistory(PendingAccountOpeningRequest request, AccountOpeningRequestStatusEnum status, String remark) {

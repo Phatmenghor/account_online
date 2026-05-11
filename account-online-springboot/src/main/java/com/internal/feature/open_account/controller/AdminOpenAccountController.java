@@ -3,6 +3,7 @@ package com.internal.feature.open_account.controller;
 import com.internal.exceptions.response.ApiResponse;
 import com.internal.feature.open_account.dto.request.AllPendingAccountHistoryRequestDto;
 import com.internal.feature.open_account.dto.response.AllPendingAccountOpeningHistoryResponseDto;
+import com.internal.feature.open_account.dto.response.PendingAccountAdminReviewDto;
 import com.internal.feature.open_account.dto.response.PendingAccountOpeningHistoryDto;
 import com.internal.feature.open_account.dto.response.PendingAccountOpeningRequestDto;
 import com.internal.feature.open_account.service.OpenAccountService;
@@ -35,12 +36,12 @@ public class AdminOpenAccountController {
     }
 
     @PostMapping("/history-by-id/{requestId}")
-    public ResponseEntity<ApiResponse<PendingAccountOpeningHistoryDto>> getHistoryById(@PathVariable Long requestId) throws Exception {
-        log.info("Fetching history for request ID: {}", requestId);
+    public ResponseEntity<ApiResponse<PendingAccountAdminReviewDto>> getHistoryById(@PathVariable Long requestId) throws Exception {
+        log.info("Fetching admin review details for request ID: {}", requestId);
 
-        PendingAccountOpeningHistoryDto response = openAccountService.getPendingAccountHistoryById(requestId);
+        PendingAccountAdminReviewDto response = openAccountService.getPendingAccountHistoryById(requestId);
 
-        log.info("✓ History retrieved | Request ID: {}", requestId);
+        log.info("✓ Admin review details retrieved | Request ID: {} | Status: {}", requestId, response.getStatus());
 
         return ResponseEntity.ok(ApiResponse.success(ResponseMessage.PENDING_ACCOUNT_HISTORY_RETRIEVED, response));
     }

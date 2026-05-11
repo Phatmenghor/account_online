@@ -5,6 +5,7 @@ import com.internal.feature.open_account.dto.request.ApproveAccountOpeningReques
 import com.internal.feature.open_account.dto.request.CustomerRequest;
 import com.internal.feature.open_account.dto.request.RejectAccountOpeningRequestDto;
 import com.internal.feature.open_account.dto.response.AllPendingAccountOpeningHistoryResponseDto;
+import com.internal.feature.open_account.dto.response.PendingAccountAdminReviewDto;
 import com.internal.feature.open_account.dto.response.PendingAccountOpeningHistoryDto;
 import com.internal.feature.open_account.dto.response.PendingAccountOpeningRequestDto;
 
@@ -18,5 +19,5 @@ public interface OpenAccountService {
 
     AllPendingAccountOpeningHistoryResponseDto getAllPendingAccountsHistory(AllPendingAccountHistoryRequestDto request) throws Exception;
 
-    PendingAccountOpeningHistoryDto getPendingAccountHistoryById(Long requestId) throws Exception;
+    PendingAccountAdminReviewDto getPendingAccountHistoryById(Long requestId) throws Exception;
 }
