@@ -7,7 +7,7 @@ import com.internal.feature.open_account.dto.response.PendingAccountAdminReviewD
 import com.internal.feature.open_account.dto.response.PendingAccountOpeningHistoryDto;
 import com.internal.feature.open_account.dto.response.PendingAccountOpeningRequestDto;
 import com.internal.feature.open_account.service.OpenAccountService;
-import com.internal.utils.constants.ResponseMessage;
+import com.internal.utils.constants.AppConstants;
 import com.internal.utils.pagination.PaginationResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,7 +32,7 @@ public class AdminOpenAccountController {
 
         log.info("✓ Found {} pending accounts | Total: {}", response.getContent().size(), response.getTotalElements());
 
-        return ResponseEntity.ok(ApiResponse.success("គណនីដែលរង់ចាំឆ្លើយប្រតិកម្មត្រូវបានទាញយកដោយជោគជ័យ", response));
+        return ResponseEntity.ok(ApiResponse.success(AppConstants.SUBMIT_SUCCESS_MESSAGE, response));
     }
 
     @PostMapping("/history-by-id/{requestId}")
@@ -43,6 +43,6 @@ public class AdminOpenAccountController {
 
         log.info("✓ Admin review details retrieved | Request ID: {} | Status: {}", requestId, response.getStatus());
 
-        return ResponseEntity.ok(ApiResponse.success("ព័ត៌មានលម្អិតឆ្លើយប្រតិកម្មរបស់អ្នកគ្រប់គ្រងត្រូវបានទាញយកដោយជោគជ័យ", response));
+        return ResponseEntity.ok(ApiResponse.success(AppConstants.SUBMIT_SUCCESS_MESSAGE, response));
     }
 }

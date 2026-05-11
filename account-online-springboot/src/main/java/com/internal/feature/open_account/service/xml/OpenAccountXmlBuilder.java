@@ -23,7 +23,7 @@ public class OpenAccountXmlBuilder {
     private static final DateTimeFormatter T24_DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd");
 
     public String buildCustomerCreationXml(CustomerRequest request) {
-        log.debug("Building customer creation XML for Legal ID: {}", request.getLegalId());
+        log.info("Building customer creation XML for Legal ID: {}", request.getLegalId());
 
         String username = cpbProperties.getT24().getUsername();
         String password = cpbProperties.getT24().getPassword();

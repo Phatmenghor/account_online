@@ -21,7 +21,7 @@ public class CustomerInfoRepository {
 
     public Map<String, String> findByLegalId(String legalId) {
         try {
-            log.debug("Querying customer info for Legal ID: {}", legalId);
+            log.info("Querying customer info for Legal ID: {}", legalId);
 
             String sql = "SELECT ACCT, MNEMONIC ,CUSTOMERCIF, CUSTOMER_RATING FROM V_CBS_OAO_CUST_CHECK_RATING WHERE legal_id = ?";
 
@@ -34,11 +34,11 @@ public class CustomerInfoRepository {
                 return map;
             }, legalId);
 
-            log.debug("Customer info found - CIF: {}, Rating: {}", result.get("CIF"), result.get("RATING"));
+            log.info("Customer info found - CIF: {}, Rating: {}", result.get("CIF"), result.get("RATING"));
             return result;
 
         } catch (EmptyResultDataAccessException e) {
-            log.debug("No customer found for Legal ID: {}", legalId);
+            log.info("No customer found for Legal ID: {}", legalId);
             return new HashMap<>();
         } catch (Exception e) {
             log.error("Error querying customer info for Legal ID {}: {}", legalId, e.getMessage());

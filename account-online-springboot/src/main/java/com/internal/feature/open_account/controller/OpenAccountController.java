@@ -30,7 +30,7 @@ public class OpenAccountController {
         log.info("✓ Account opening request submitted for admin review | Request ID: {}", response.getId());
         log.info("  Legal ID: {} | AML Status: {}", response.getLegalId(), response.getAmlStatus());
 
-        return ResponseEntity.ok(ApiResponse.success("ស្នើសុំបង្កើតគណនីរបស់អ្នកត្រូវបានបញ្ជូនដោយជោគជ័យ។ សូមរងចាំការឆ្លើយប្រតិកម្មពីផ្នែកគ្រប់គ្រង។", response));
+        return ResponseEntity.ok(ApiResponse.success(response.getMessage(), response));
     }
 
     @PostMapping("/approve")
