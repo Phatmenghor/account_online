@@ -349,7 +349,7 @@ public class OpenAccountServiceImpl implements OpenAccountService {
     }
 
     @Override
-    public AllPendingAccountOpeningHistoryResponseDto getAllPendingAccountsHistory(AllPendingAccountHistoryRequestDto request) throws Exception {
+    public PaginationResponse<PendingAccountAdminReviewDto> getAllPendingAccountsHistory(AllPendingAccountHistoryRequestDto request) throws Exception {
         log.info("Fetching accounts history with search: {} | Status filter: {}", request.getSearch(), request.getStatus());
 
         Sort.Direction direction = "DESC".equalsIgnoreCase(request.getSortDirection()) ? Sort.Direction.DESC : Sort.Direction.ASC;
@@ -363,20 +363,23 @@ public class OpenAccountServiceImpl implements OpenAccountService {
             page = pendingRequestRepository.findAll(pageable);
         }
 
-        List<PendingAccountOpeningHistoryDto> content = page.getContent().stream()
-                .map(this::mapToDetailedHistoryDto)
+        List<PendingAccountAdminReviewDto> content = page.getContent().stream()
+                .map(entity -> {
+                    CustomerRequest customerData = null;
+                    try {
+                        if (entity.getRequestData() != null) {
+                            customerData = objectMapper.readValue(entity.getRequestData(), CustomerRequest.class);
+                        }
+                    } catch (Exception e) {
+                        log.warn("Failed to parse customer data for request: {}", entity.getId(), e);
+                    }
+                    return mapToAdminReviewDto(entity, customerData);
+                })
                 .collect(Collectors.toList());
 
         log.info("Found {} account records", page.getTotalElements());
 
-        return AllPendingAccountOpeningHistoryResponseDto.builder()
-                .content(content)
-                .pageNo(page.getNumber() + 1)
-                .pageSize(page.getSize())
-                .totalElements(page.getTotalElements())
-                .totalPages(page.getTotalPages())
-                .last(page.isLast())
-                .build();
+        return new PaginationResponse<>(content, page.getNumber() + 1, page.getSize(), page.getTotalElements());
     }
 
     @Override

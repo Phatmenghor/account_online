@@ -126,14 +126,14 @@ function PendingReview() {
     try {
       if (selectedAction === "APPROVE") {
         await approvePendingAccountService({
-          id: selectedAccountForAction.id,
+          id: selectedAccountForAction.requestId,
           remark,
         });
 
         setPendingAccounts((prev) => {
           if (!prev) return null;
           const updatedList = prev.content.filter(
-            (item) => item.id !== selectedAccountForAction.id
+            (item) => item.requestId !== selectedAccountForAction.requestId
           );
           return {
             ...prev,
@@ -142,23 +142,27 @@ function PendingReview() {
           };
         });
 
+        const customerName = selectedAccountForAction.requestData
+          ? `${(selectedAccountForAction.requestData as any).givenName || (selectedAccountForAction.requestData as any).given_name || ""} ${(selectedAccountForAction.requestData as any).familyName || (selectedAccountForAction.requestData as any).family_name || ""}`.trim()
+          : "Unknown";
+
         startTransition(() => {
           AppToast({
             type: "success",
             message: "Account approved successfully",
-            description: `Account for ${selectedAccountForAction.givenName} ${selectedAccountForAction.familyName} has been approved.`,
+            description: `Account for ${customerName} has been approved.`,
           });
         });
       } else if (selectedAction === "REJECT") {
         await rejectPendingAccountService({
-          id: selectedAccountForAction.id,
+          id: selectedAccountForAction.requestId,
           remark: remark || "No reason provided",
         });
 
         setPendingAccounts((prev) => {
           if (!prev) return null;
           const updatedList = prev.content.filter(
-            (item) => item.id !== selectedAccountForAction.id
+            (item) => item.requestId !== selectedAccountForAction.requestId
           );
           return {
             ...prev,
@@ -167,11 +171,15 @@ function PendingReview() {
           };
         });
 
+        const customerName = selectedAccountForAction.requestData
+          ? `${(selectedAccountForAction.requestData as any).givenName || (selectedAccountForAction.requestData as any).given_name || ""} ${(selectedAccountForAction.requestData as any).familyName || (selectedAccountForAction.requestData as any).family_name || ""}`.trim()
+          : "Unknown";
+
         startTransition(() => {
           AppToast({
             type: "success",
             message: "Account rejected successfully",
-            description: `Account for ${selectedAccountForAction.givenName} ${selectedAccountForAction.familyName} has been rejected.`,
+            description: `Account for ${customerName} has been rejected.`,
           });
         });
       }

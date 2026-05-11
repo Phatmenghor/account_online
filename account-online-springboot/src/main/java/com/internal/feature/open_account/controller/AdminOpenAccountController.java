@@ -2,10 +2,7 @@ package com.internal.feature.open_account.controller;
 
 import com.internal.exceptions.response.ApiResponse;
 import com.internal.feature.open_account.dto.request.AllPendingAccountHistoryRequestDto;
-import com.internal.feature.open_account.dto.response.AllPendingAccountOpeningHistoryResponseDto;
 import com.internal.feature.open_account.dto.response.PendingAccountAdminReviewDto;
-import com.internal.feature.open_account.dto.response.PendingAccountOpeningHistoryDto;
-import com.internal.feature.open_account.dto.response.PendingAccountOpeningRequestDto;
 import com.internal.feature.open_account.dto.response.ReviewHistoryResponseDto;
 import com.internal.feature.open_account.service.OpenAccountService;
 import com.internal.utils.constants.AppConstants;
@@ -25,11 +22,11 @@ public class AdminOpenAccountController {
     private final OpenAccountService openAccountService;
 
     @PostMapping("/all-history")
-    public ResponseEntity<ApiResponse<AllPendingAccountOpeningHistoryResponseDto>> getAllHistory(
+    public ResponseEntity<ApiResponse<PaginationResponse<PendingAccountAdminReviewDto>>> getAllHistory(
             @Valid @RequestBody AllPendingAccountHistoryRequestDto request) throws Exception {
         log.info("Fetching all pending accounts history with search: {}", request.getSearch());
 
-        AllPendingAccountOpeningHistoryResponseDto response = openAccountService.getAllPendingAccountsHistory(request);
+        PaginationResponse<PendingAccountAdminReviewDto> response = openAccountService.getAllPendingAccountsHistory(request);
 
         log.info("✓ Found {} pending accounts | Total: {}", response.getContent().size(), response.getTotalElements());
 
