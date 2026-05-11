@@ -25,6 +25,10 @@ export const ROUTES = {
       MANAGEMENT: "/aml-management",
       HISTORY: "/aml-history",
     },
+    OPEN_ACCOUNT_ADMIN: {
+      PENDING_REVIEW: "/pending-review",
+      PENDING_REVIEW_DETAIL: "/pending-review/:id",
+    },
     ACCOUNT_ONLINE: "/account-online",
     REPORT: "/report",
     MENU_CONFIG: "/menu-config"

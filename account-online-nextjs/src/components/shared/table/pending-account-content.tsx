@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { indexDisplay } from "@/utils/common/common";
 import { CheckCircle, Eye, XCircle } from "lucide-react";
 import {
   Tooltip,
@@ -16,8 +17,8 @@ import { Badge } from "@/components/ui/badge";
 
 interface PendingAccountTableHandlers {
   handleViewDetail: (account: PendingAccountAdminReviewDto) => void;
-  handleApproveClick: (account: PendingAccountAdminReviewDto) => void;
-  handleRejectClick: (account: PendingAccountAdminReviewDto) => void;
+  openApproveDialog: (account: PendingAccountAdminReviewDto) => void;
+  openRejectDialog: (account: PendingAccountAdminReviewDto) => void;
 }
 
 interface PendingAccountTableOptions {
@@ -31,51 +32,11 @@ export const createPendingAccountTableColumns = ({
 }: PendingAccountTableOptions): TableColumn<PendingAccountAdminReviewDto>[] => {
   const {
     handleViewDetail,
-    handleApproveClick,
-    handleRejectClick,
+    openApproveDialog,
+    openRejectDialog,
   } = handlers;
 
   const tCommon = useTranslations("common");
-
-  const getStatusBadge = (status: string) => {
-    const statusLower = status?.toLowerCase() || "pending";
-    let variant: "default" | "secondary" | "destructive" | "outline" =
-      "default";
-    let bgColor = "bg-yellow-100 text-yellow-800";
-
-    if (statusLower.includes("pending")) {
-      bgColor = "bg-yellow-100 text-yellow-800";
-    } else if (statusLower.includes("approved")) {
-      bgColor = "bg-green-100 text-green-800";
-    } else if (statusLower.includes("rejected")) {
-      bgColor = "bg-red-100 text-red-800";
-    }
-
-    return (
-      <span className={`px-2 py-1 rounded-full text-xs font-medium ${bgColor}`}>
-        {status}
-      </span>
-    );
-  };
-
-  const getAmlStatusBadge = (amlStatus: string) => {
-    const statusLower = amlStatus?.toLowerCase() || "unknown";
-    let bgColor = "bg-gray-100 text-gray-800";
-
-    if (statusLower.includes("pass")) {
-      bgColor = "bg-green-100 text-green-800";
-    } else if (statusLower.includes("fail")) {
-      bgColor = "bg-red-100 text-red-800";
-    } else if (statusLower.includes("warning")) {
-      bgColor = "bg-orange-100 text-orange-800";
-    }
-
-    return (
-      <span className={`px-2 py-1 rounded-full text-xs font-medium ${bgColor}`}>
-        {amlStatus}
-      </span>
-    );
-  };
 
   return [
     {
@@ -91,35 +52,25 @@ export const createPendingAccountTableColumns = ({
       key: "legalId",
       label: "ID Number",
       truncate: true,
-      maxWidth: "150px",
-      minWidth: "120px",
+      maxWidth: "200px",
+      minWidth: "150px",
       render: (account) => (
-        <span className="font-medium text-blue-600">{account.legalId}</span>
+        <span className="font-medium">{account.legalId || "---"}</span>
       ),
     },
 
     // Customer Name
     {
-      key: "givenName",
+      key: "customerName",
       label: "Full Name",
       truncate: true,
-      maxWidth: "200px",
-      minWidth: "160px",
+      maxWidth: "240px",
+      minWidth: "180px",
       render: (account) => (
         <span className="font-medium">
-          {account.givenName} {account.familyName}
+          {account.givenName} {account.familyName || "---"}
         </span>
       ),
-    },
-
-    // Phone
-    {
-      key: "phoneNumber",
-      label: "Phone",
-      truncate: true,
-      maxWidth: "140px",
-      minWidth: "120px",
-      render: (account) => <span>{account.phoneNumber || "---"}</span>,
     },
 
     // AML Status
@@ -129,18 +80,43 @@ export const createPendingAccountTableColumns = ({
       truncate: true,
       maxWidth: "140px",
       minWidth: "120px",
-      render: (account) =>
-        getAmlStatusBadge(account.amlInfo?.status || "Unknown"),
+      render: (account) => {
+        const amlStatus = account.amlInfo?.status || "---";
+        let badgeVariant: "default" | "secondary" | "destructive" | "outline" = "default";
+        
+        if (amlStatus === "PASS" || amlStatus === "CLEAR") {
+          badgeVariant = "default";
+        } else if (amlStatus === "FAIL" || amlStatus === "BLOCKED") {
+          badgeVariant = "destructive";
+        } else if (amlStatus === "REVIEW" || amlStatus === "PENDING") {
+          badgeVariant = "secondary";
+        }
+        
+        return <Badge variant={badgeVariant}>{amlStatus}</Badge>;
+      },
     },
 
     // Request Status
     {
       key: "status",
-      label: "Status",
+      label: "Request Status",
       truncate: true,
       maxWidth: "140px",
       minWidth: "120px",
-      render: (account) => getStatusBadge(account.status),
+      render: (account) => {
+        const status = account.status || "---";
+        let badgeVariant: "default" | "secondary" | "destructive" | "outline" = "outline";
+        
+        if (status === "PENDING") {
+          badgeVariant = "secondary";
+        } else if (status === "APPROVED") {
+          badgeVariant = "default";
+        } else if (status === "REJECTED") {
+          badgeVariant = "destructive";
+        }
+        
+        return <Badge variant={badgeVariant}>{status}</Badge>;
+      },
     },
 
     // Created Date
@@ -149,10 +125,10 @@ export const createPendingAccountTableColumns = ({
       label: "Created At",
       truncate: true,
       maxWidth: "160px",
-      minWidth: "140px",
+      minWidth: "150px",
       render: (account) => (
-        <span className="text-sm">
-          {new Date(account.createdAt).toLocaleDateString()}
+        <span className="font-medium">
+          {new Date(account.createdAt).toLocaleString() || "---"}
         </span>
       ),
     },
@@ -188,8 +164,8 @@ export const createPendingAccountTableColumns = ({
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => handleApproveClick(account)}
-                  className="border-green-500 text-green-600 hover:bg-green-50"
+                  onClick={() => openApproveDialog(account)}
+                  className="border-orange-500 text-orange-600 hover:bg-orange-50"
                 >
                   <CheckCircle className="h-4 w-4" />
                 </Button>
@@ -205,7 +181,7 @@ export const createPendingAccountTableColumns = ({
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => handleRejectClick(account)}
+                  onClick={() => openRejectDialog(account)}
                   className="border-red-500 text-red-600 hover:bg-red-50"
                 >
                   <XCircle className="h-4 w-4" />
