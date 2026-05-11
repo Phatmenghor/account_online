@@ -1,0 +1,243 @@
+# ==============================================================
+# BASE CONFIGURATION — truly shared settings only
+# Default active profile: prod
+# ==============================================================
+spring:
+  profiles:
+    active: prod
+  application:
+    name: account_online
+  main:
+    allow-bean-definition-overriding: true
+
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 200MB
+      max-request-size: 200MB
+
+  jpa:
+    open-in-view: true
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: update
+      naming:
+        physical-strategy: org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+        jdbc:
+          lob:
+            non_contextual_creation: true
+          batch_size: 50
+        order_inserts: true
+        order_updates: true
+        batch_versioned_data: true
+        connection:
+          provider_disables_autocommit: true
+        cache:
+          use_second_level_cache: false
+
+  datasource:
+    username: postgres
+    password: 123cp!@#
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      auto-commit: false
+      maximum-pool-size: 20
+      minimum-idle: 10
+      connection-timeout: 30000
+      idle-timeout: 300000
+      max-lifetime: 900000
+      leak-detection-threshold: 60000
+      pool-name: PostgreSQL-Pool
+      connection-test-query: "SELECT 1"
+
+  mail:
+    host: 10.18.1.204
+    port: 25
+    username: ithelpdesk@cambodiapostbank.com.kh
+    password:
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: false
+          ssl:
+            trust: "*"
+    default-encoding: UTF-8
+
+  thymeleaf:
+    cache: false
+    prefix: classpath:/templates/
+    suffix: .html
+    encoding: UTF-8
+
+  task:
+    execution:
+      pool:
+        core-size: 5
+        max-size: 10
+        queue-capacity: 100
+        thread-name-prefix: async-request-log-
+    scheduling:
+      enabled: true
+
+email:
+  sender:
+    address: ithelpdesk@cambodiapostbank.com.kh
+
+file:
+  upload:
+    directory: /app/customer-image
+    nid: /nid
+    selfie: /selfie
+
+request:
+  log:
+    retention:
+      days: 30
+    enabled: true
+    exclude-paths:
+      - /swagger-ui
+      - /v3/api-docs
+      - /actuator
+      - /favicon.ico
+      - /webjars
+
+masterdata:
+  schema: DWH
+
+cpb:
+  defaults:
+    branch-code: KH0012011
+    sector: "4501"
+    cost-center: "1000"
+    industry: "4500"
+    target: "220"
+    language: "2"
+    customer-rating: "1"
+    customer-status: "1"
+    customer-type: ACTIVE
+    ownership: "304"
+    legal-holder-name: NATIONAL.ID
+    nationality: KH
+    product-code: SAVE.ACCT.ONLINE
+    account-activity: ACCOUNTS-NEW-ARRANGEMENT
+    new-arrangement: NEW
+  camdx:
+    auth:
+      token: d8a7f9e2-3c4b-4f10-9d75-1c9f2b84a7ec
+      tokenHeaderName: X-CPB-CamDx-Auth
+  otp:
+    length: 6
+    cooldownSeconds: 60
+    maxAttempts: 3
+    lockMinutes: 5
+    expiryMinutes: 5
+  validate:
+    nid: validate-nid
+    faceApiRoute: validate-nid-face
+  ocr:
+    apiRoute: ocr-idcard
+
+test:
+  skip-check-account: false
+  skip-check-cif: false
+
+aml:
+  api:
+    key: 34acefcd-6e4e-4a81-a553-852b21000c8a
+    secret-key: zH9iyS42JWYh4Ol+FeSGsuREwRJmoaDYBbZhgL4lBG0=
+
+jwt:
+  secret:
+    key: f7e8d9c6b5a4938271605f4de3d2c1b0a9f8e7d6c5b4a392817f6e5d4c3b2a1908f7e6d5c4b3a29180716f5e4d3c2b1a001
+  task:
+    execution:
+      pool:
+        core-size: 2
+        max-size: 5
+        queue-capacity: 100
+        thread-name-prefix: async-telegram-
+
+app:
+  default-users:
+    create: true
+  super:
+    idCard: phatmenghor19@gmail.com
+    password: 88889999
+    email: phatmenghor19@gmail.com
+  data-load:
+    batch-size: 1000
+    max-retries: 1
+    timeout-hours: 5
+    connection-timeout-minutes: 5
+    query-timeout-hours: 4
+    network-timeout-hours: 5
+    progress-log-interval-minutes: 10
+    heartbeat-interval-minutes: 5
+
+simulator:
+  report-logs: false
+  aml:
+    error: false
+    high-risk: false
+  camdx: false
+  banking:
+    camdx-error: false
+    internal-error: false
+
+logging:
+  level:
+    root: INFO
+    com.internal: INFO
+    org.springframework: WARN
+    org.hibernate: WARN
+    com.zaxxer.hikari: ERROR
+    com.internal.feature.auth.security.RequestLoggingFilter: DEBUG
+    com.internal.feature.auth.service.RequestLogService: INFO
+    com.internal.feature.auth.scheduler.RequestLogCleanupScheduler: INFO
+    com.internal.feature.open_account: DEBUG
+    com.internal.feature.aml: DEBUG
+  pattern:
+    console: "%d{HH:mm:ss.SSS} [%thread] %-5level [%logger{30}] - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level [%logger{50}] - [%X{userId}] %msg%n"
+  file:
+    name: logs/account_online.log
+    max-size: 100MB
+    max-history: 10
+  logback:
+    rollingpolicy:
+      max-file-size: 100MB
+      max-history: 30
+      total-size-cap: 1GB
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+    enabled: true
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+    operations-sorter: method
+    tags-sorter: alpha
+    disable-swagger-default-url: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,loggers,threaddump
+  endpoint:
+    health:
+      show-details: always
+  health:
+    db:
+      enabled: true
+  metrics:
+    export:
+      simple:
+        enabled: true

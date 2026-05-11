@@ -1,0 +1,33 @@
+export interface CreateOpenAccountReq {
+  familyName: string;
+  givenName: string;
+  firstNameKh: string;
+  lastNameKh: string;
+  dateOfBirth: string;
+  gender: string;
+  placeOfBirth: string;
+  companyName: string;
+  referralId: string;
+  branchCode: string;
+  occupation: string;
+  maritalStatus: string;
+  customerCurrentProvince: string;
+  customerCurrentDistrict: string;
+  customerCurrentCommune: string;
+  customerCurrentVillage: string;
+  customerPobProvince: string;
+  customerPobDistrict: string;
+  customerPobCommune: string;
+  customerPobVillage: string;
+  legalId: string;
+  legalIssueDate: string;
+  legalExpireDate: string;
+  legalAddress: string;
+  legalDocType: string;
+  legalMrz1: string;
+  legalMrz2: string;
+  legalMrz3: string;
+  phoneNumber: string;
+  nidImageName: string;
+  selfieImageName: string;
+}

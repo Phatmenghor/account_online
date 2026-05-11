@@ -1,0 +1,97 @@
+import { useState } from "react";
+import { useTranslations } from "next-intl";
+import { useClientLocale } from "@/context/provider/local-provider";
+import { MaritalModel } from "@/models/static/marital/marital.response";
+import { OccupationModel } from "@/models/static/occupation/occupation.response";
+import { ReferenceModel } from "@/models/static/reference/reference.response";
+import { LegalTypeModel } from "@/models/static/legal-type/legal-type.response";
+import {
+  useLegalTypes,
+  useMaritalStatuses,
+  useOccupations,
+  useReferenceBanks,
+} from "@/hooks/fetch-master";
+
+export const useMasterData = () => {
+  const { locale: currentLocale } = useClientLocale();
+
+  // Use custom hooks for data fetching
+  const { data: maritalStatuses, isLoading: isLoadingMarital } =
+    useMaritalStatuses();
+  const [selectedMaritalStatus, setSelectedMaritalStatus] =
+    useState<MaritalModel | null>(null);
+
+  const { data: occupations, isLoading: isLoadingOccupations } =
+    useOccupations();
+  const [selectedOccupation, setSelectedOccupation] =
+    useState<OccupationModel | null>(null);
+
+  const { data: referenceBanks, isLoading: isLoadingReferenceBanks } =
+    useReferenceBanks();
+  const [selectedReferenceBank, setSelectedReferenceBank] =
+    useState<ReferenceModel | null>(null);
+
+  const { data: legalTypes, isLoading: isLegalTypeLoading } = useLegalTypes();
+  const [selectedLegalType, setSelectedLegalType] =
+    useState<LegalTypeModel | null>(null);
+
+  // Helper function to get marital name based on locale
+  const getMaritalName = (marital: MaritalModel) => {
+    return currentLocale === "kh" ? marital.nameKh : marital.nameEn;
+  };
+
+  // Helper function to get occupation name based on locale
+  const getOccupationName = (occupation: OccupationModel) => {
+    return currentLocale === "kh" ? occupation.nameKh : occupation.nameEn;
+  };
+
+  // Helper function to get reference bank name based on locale
+  const getReferenceName = (reference: ReferenceModel) => {
+    return currentLocale === "kh" ? reference.nameKh : reference.nameEn;
+  };
+
+  const getLegalTypeName = (legalType: LegalTypeModel) => {
+    return currentLocale === "kh" ? legalType.nameKh : legalType.nameEn;
+  };
+
+  // Helper function to get marital status string
+  const getMaritalStatusString = (maritalId: string): string => {
+    const marital = maritalStatuses.find((m) => m.id.toString() === maritalId);
+    if (marital) {
+      return marital.nameEn.toUpperCase().replace(/\s+/g, ".");
+    }
+    return "SINGLE";
+  };
+
+  const resetMasterData = () => {
+    setSelectedMaritalStatus(null);
+    setSelectedOccupation(null);
+    setSelectedReferenceBank(null);
+    setSelectedLegalType(null);
+  };
+
+  return {
+    maritalStatuses,
+    isLoadingMarital,
+    selectedMaritalStatus,
+    setSelectedMaritalStatus,
+    occupations,
+    isLoadingOccupations,
+    selectedOccupation,
+    setSelectedOccupation,
+    referenceBanks,
+    isLoadingReferenceBanks,
+    selectedReferenceBank,
+    setSelectedReferenceBank,
+    legalTypes,
+    isLegalTypeLoading,
+    selectedLegalType,
+    setSelectedLegalType,
+    getMaritalName,
+    getOccupationName,
+    getReferenceName,
+    getLegalTypeName,
+    getMaritalStatusString,
+    resetMasterData,
+  };
+};

@@ -1,0 +1,283 @@
+import { useState, useRef } from "react";
+import { ResponseNID } from "@/models/open-acc-online/nid.response.model";
+import { MaritalModel } from "@/models/static/marital/marital.response";
+import { OccupationModel } from "@/models/static/occupation/occupation.response";
+import { ReferenceModel } from "@/models/static/reference/reference.response";
+import { LegalTypeModel } from "@/models/static/legal-type/legal-type.response";
+import { BranchModel } from "@/models/branch/branch.response";
+import { LocationSubmitData } from "@/models/open-acc-online/address/open-acc-address.request.model";
+import { formatDate } from "@/constants/AppResource/format-date/format-dd-mm-yyyy";
+import { createOpenAccountService } from "@/services/open-account/openAccount.service";
+import { uploadDocument } from "@/services/document/document.service";
+
+interface UseAccountSubmissionProps {
+  formData: ResponseNID;
+  uploadedImage: { idImage: string } | null;
+  selfieImage: string | null;
+  phoneNumber: string;
+  selectedMaritalStatus: MaritalModel | null;
+  selectedOccupation: OccupationModel | null;
+  selectedReferenceBank: ReferenceModel | null;
+  selectedLegalType: LegalTypeModel | null;
+  selectedBranch: BranchModel | null;
+  staffCode: string;
+  locationData: LocationSubmitData;
+  convertGenderToAPI: (gender: string) => string;
+  getMaritalStatusString: (id: string) => string;
+  translate: (key: string) => string;
+}
+
+interface LoadingState {
+  isLoading: boolean;
+  title: string;
+  message: string;
+}
+
+interface UploadCache {
+  nidFileName: string | null;
+  selfieFileName: string | null;
+}
+
+const GENERIC_ERROR = {
+  title: "មានបញ្ហាកើតឡើង",
+  message:
+    "មានបញ្ហាបច្ចេកទេស។ សូមពិនិត្យការតភ្ជាប់អ៊ីនធឺណិតរបស់អ្នក ហើយព្យាយាមម្តងទៀត។",
+  variant: "error" as const,
+};
+
+export const useAccountSubmission = ({
+  formData,
+  uploadedImage,
+  selfieImage,
+  phoneNumber,
+  selectedMaritalStatus,
+  selectedOccupation,
+  selectedReferenceBank,
+  selectedLegalType,
+  selectedBranch,
+  staffCode,
+  locationData,
+  convertGenderToAPI,
+  getMaritalStatusString,
+  translate,
+}: UseAccountSubmissionProps) => {
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [successData, setSuccessData] = useState({
+    title: "",
+    message: "",
+  });
+  const [showSubmitErrorModal, setShowSubmitErrorModal] = useState(false);
+  const [submitErrorData, setSubmitErrorData] = useState<{
+    title: string;
+    message: string;
+    variant?: "error" | "warning";
+  }>({
+    title: "",
+    message: "",
+    variant: "error",
+  });
+  const [showAccountExistsModal, setShowAccountExistsModal] = useState(false);
+  const [accountExistsData, setAccountExistsData] = useState<{
+    cif?: string;
+    accountNumber?: string;
+    accountName?: string;
+    message?: string;
+  } | null>(null);
+  const [loadingState, setLoadingState] = useState<LoadingState>({
+    isLoading: false,
+    title: "",
+    message: "",
+  });
+
+  // ── Cache uploaded filenames to prevent duplicate uploads ──
+  const uploadCache = useRef<UploadCache>({
+    nidFileName: null,
+    selfieFileName: null,
+  });
+
+  const showError = (override?: Partial<typeof GENERIC_ERROR>) => {
+    setSubmitErrorData({ ...GENERIC_ERROR, ...override });
+    setShowSubmitErrorModal(true);
+  };
+
+  // ── Call this when user retakes NID or Selfie photo ──
+  const resetUploadCache = () => {
+    uploadCache.current = { nidFileName: null, selfieFileName: null };
+  };
+
+  const handleSubmitAccount = async () => {
+    // ── 1. Guard: validate images exist ──
+    const nidBase64Full: string = uploadedImage?.idImage ?? "";
+    const selfieBase64Full: string = selfieImage ?? "";
+
+    if (!nidBase64Full) {
+      showError({
+        title: "រូបភាព NID បាត់",
+        message: "រូបភាព NID បាត់។ សូមថតរូបម្ដងទៀត រួចព្យាយាមម្ដងទៀត។",
+      });
+      return;
+    }
+
+    if (!selfieBase64Full) {
+      showError({
+        title: "រូបថតខ្លួនបាត់",
+        message: "រូបថតខ្លួនបាត់។ សូមថតរូបម្ដងទៀត រួចព្យាយាមម្ដងទៀត។",
+      });
+      return;
+    }
+
+    setLoadingState({
+      isLoading: true,
+      title: translate("submitting") || "កំពុងដំណើរការ",
+      message: translate("submitting_message") || "កំពុងផ្ទុករូបភាព...",
+    });
+
+    try {
+      // ── 2. Upload only if not already uploaded this session ──
+      if (
+        !uploadCache.current.nidFileName ||
+        !uploadCache.current.selfieFileName
+      ) {
+        const [nidFileName, selfieFileName] = await Promise.all([
+          uploadCache.current.nidFileName
+            ? Promise.resolve(uploadCache.current.nidFileName)
+            : uploadDocument(
+                nidBase64Full,
+                `nid_${formData.idNumber}.jpg`,
+                "nid",
+                formData.idNumber,
+              ),
+          uploadCache.current.selfieFileName
+            ? Promise.resolve(uploadCache.current.selfieFileName)
+            : uploadDocument(
+                selfieBase64Full,
+                `selfie_${formData.idNumber}.jpg`,
+                "selfie",
+                formData.idNumber,
+              ),
+        ]);
+
+        // Store in cache — retry reuses these, no duplicate upload
+        uploadCache.current = { nidFileName, selfieFileName };
+      }
+
+      const { nidFileName, selfieFileName } = uploadCache.current;
+
+      // ── 3. Update loading message ──
+      setLoadingState((prev) => ({
+        ...prev,
+        message: translate("creating_account") || "កំពុងបង្កើតគណនី...",
+      }));
+
+      // ── 4. Submit account ──
+      const accountData = {
+        familyName: formData.lastNameEn,
+        givenName: formData.firstNameEn,
+        firstNameKh: formData.firstNameKh,
+        lastNameKh: formData.lastNameKh,
+        dateOfBirth: formatDate(formData.dob),
+        gender: convertGenderToAPI(formData.gender),
+        placeOfBirth: formData.pob,
+        companyName: selectedReferenceBank?.nameEn || "",
+        referralId: staffCode || "",
+        branchCode: selectedBranch!.branchID,
+        occupation: selectedOccupation?.occupationCode || "",
+        maritalStatus: selectedMaritalStatus
+          ? getMaritalStatusString(selectedMaritalStatus.id.toString())
+          : "SINGLE",
+        customerCurrentProvince:
+          locationData.currentAddress.province?.provinceCode || "",
+        customerCurrentDistrict:
+          locationData.currentAddress.district?.districtCode || "",
+        customerCurrentCommune:
+          locationData.currentAddress.commune?.communeCode || "",
+        customerCurrentVillage:
+          locationData.currentAddress.village?.villageCode || "",
+        customerPobProvince:
+          locationData.placeOfBirth.province?.provinceCode || "",
+        customerPobDistrict:
+          locationData.placeOfBirth.district?.districtCode || "",
+        customerPobCommune:
+          locationData.placeOfBirth.commune?.communeCode || "",
+        customerPobVillage:
+          locationData.placeOfBirth.village?.villageCode || "",
+        legalId: formData.idNumber,
+        legalIssueDate: formatDate(formData.issuedDate),
+        legalExpireDate: formatDate(formData.expiredDate),
+        legalAddress: formData.address,
+        legalDocType: selectedLegalType?.legalTypeValue || "",
+        legalMrz1: formData.MRZ1,
+        legalMrz2: formData.MRZ2,
+        legalMrz3: formData.MRZ3,
+        phoneNumber: phoneNumber,
+        nidImageName: nidFileName!,
+        selfieImageName: selfieFileName!,
+      };
+
+      const response = await createOpenAccountService(accountData);
+
+      // ── 5. Clear cache on success ──
+      uploadCache.current = { nidFileName: null, selfieFileName: null };
+
+      setSuccessData({
+        title: translate("success_title") || "បង្កើតគណនីដោយជោគជ័យ",
+        message: response?.message || "គណនីរបស់អ្នកត្រូវបានបង្កើតដោយជោគជ័យ!",
+      });
+      setShowSuccessModal(true);
+    } catch (error: any) {
+      console.error("Submission error:", error);
+
+      // Extract actual error message from backend
+      const errorMessage = error?.errorMessage || error?.message;
+      const errorResponse = error?.rawError;
+
+      // Check if account already exists
+      const isAccountExists =
+        errorMessage?.toLowerCase().includes("exist") ||
+        errorMessage?.toLowerCase().includes("already") ||
+        errorResponse?.message?.toLowerCase().includes("exist") ||
+        errorResponse?.message?.toLowerCase().includes("already");
+
+      if (isAccountExists && errorResponse?.data) {
+        // Show account exists modal with account details
+        setAccountExistsData({
+          cif: errorResponse.data.cif,
+          accountNumber: errorResponse.data.accountNumber || errorResponse.data.khrAccount,
+          accountName: errorResponse.data.accountName || errorResponse.data.legalHolderName,
+          message: errorMessage || "គណនីធនាគារលក់ដ៏ងរបស់អ្នកបានបង្កើតរួចរាល់។ អ្នកអាចបង្ហាញលេខគណនីរបស់អ្នក ឬបន្តប្រើប្រាស់វា។",
+        });
+        setShowAccountExistsModal(true);
+      } else if (errorMessage) {
+        // Show actual backend error message
+        showError({
+          title: "មានបញ្ហាកើតឡើង",
+          message: errorMessage,
+        });
+      } else {
+        // Fallback to generic error only if no message available
+        showError();
+      }
+    } finally {
+      setLoadingState({ isLoading: false, title: "", message: "" });
+    }
+  };
+
+  return {
+    handleSubmitAccount,
+    resetUploadCache,
+    showSuccessModal,
+    setShowSuccessModal,
+    successData,
+    setSuccessData,
+    showSubmitErrorModal,
+    setShowSubmitErrorModal,
+    submitErrorData,
+    setSubmitErrorData,
+    showAccountExistsModal,
+    setShowAccountExistsModal,
+    accountExistsData,
+    setAccountExistsData,
+    loadingState,
+    setLoadingState,
+  };
+};
