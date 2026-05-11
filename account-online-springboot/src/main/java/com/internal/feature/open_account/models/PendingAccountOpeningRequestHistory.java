@@ -38,15 +38,15 @@ public class PendingAccountOpeningRequestHistory extends BaseEntity {
     private String actionUsername;
 
     @Lob
-    @Column(columnDefinition = "LONGTEXT")
+    @Column(columnDefinition = "TEXT")
     private String requestData;
 
     @Lob
-    @Column(columnDefinition = "LONGTEXT")
+    @Column(columnDefinition = "TEXT")
     private String customerInfo;
 
     @Lob
-    @Column(columnDefinition = "LONGTEXT")
+    @Column(columnDefinition = "TEXT")
     private String amlResultData;
 
     @Column(name = "remark", columnDefinition = "TEXT")

@@ -28,15 +28,15 @@ public class PendingAccountOpeningRequest extends BaseEntity {
     private AccountOpeningRequestStatusEnum status;
 
     @Lob
-    @Column(columnDefinition = "LONGTEXT")
+    @Column(columnDefinition = "TEXT")
     private String requestData;
 
     @Lob
-    @Column(columnDefinition = "LONGTEXT")
+    @Column(columnDefinition = "TEXT")
     private String customerInfo;
 
     @Lob
-    @Column(columnDefinition = "LONGTEXT")
+    @Column(columnDefinition = "TEXT")
     private String amlResultData;
 
     @Enumerated(EnumType.STRING)
