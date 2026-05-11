@@ -53,6 +53,10 @@ public class DefaultMenuInitializer implements CommandLineRunner {
                     MenuConstant.Account.Final.HREF, accountParent, MenuConstant.Account.Final.ORDER);
             findOrCreateMenu(MenuConstant.Account.Success.TITLE, MenuConstant.Account.Success.ICON,
                     MenuConstant.Account.Success.HREF, accountParent, MenuConstant.Account.Success.ORDER);
+            findOrCreateMenu(MenuConstant.Account.PendingReview.TITLE, MenuConstant.Account.PendingReview.ICON,
+                    MenuConstant.Account.PendingReview.HREF, accountParent, MenuConstant.Account.PendingReview.ORDER);
+            findOrCreateMenu(MenuConstant.Account.ReviewHistory.TITLE, MenuConstant.Account.ReviewHistory.ICON,
+                    MenuConstant.Account.ReviewHistory.HREF, accountParent, MenuConstant.Account.ReviewHistory.ORDER);
 
             // ── AML (parent + children) ────────────────────────────────────────
             Menu amlParent = findOrCreateMenu(MenuConstant.Aml.TITLE, MenuConstant.Aml.ICON,
