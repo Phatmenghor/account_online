@@ -5,10 +5,10 @@ import com.internal.feature.open_account.dto.response.PendingAccountOpeningReque
 import com.internal.feature.open_account.service.OpenAccountService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/admin/open-account")
@@ -18,12 +18,12 @@ public class AdminOpenAccountController {
     private final OpenAccountService openAccountService;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<PendingAccountOpeningRequestDto>>> listPendingRequests() {
-        log.info("Fetching all pending account opening requests");
+    public ResponseEntity<ApiResponse<Page<PendingAccountOpeningRequestDto>>> listPendingRequests(Pageable pageable) {
+        log.info("Fetching pending account opening requests - Page: {}, Size: {}", pageable.getPageNumber(), pageable.getPageSize());
 
-        List<PendingAccountOpeningRequestDto> response = openAccountService.getPendingRequests();
+        Page<PendingAccountOpeningRequestDto> response = openAccountService.getPendingRequests(pageable);
 
-        log.info("✓ Found {} pending requests", response.size());
+        log.info("✓ Found {} pending requests | Total: {}", response.getNumberOfElements(), response.getTotalElements());
 
         return ResponseEntity.ok(ApiResponse.success("Pending requests retrieved successfully", response));
     }

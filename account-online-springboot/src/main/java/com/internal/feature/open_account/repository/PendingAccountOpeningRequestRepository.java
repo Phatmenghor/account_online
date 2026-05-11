@@ -2,6 +2,8 @@ package com.internal.feature.open_account.repository;
 
 import com.internal.enumation.AccountOpeningRequestStatusEnum;
 import com.internal.feature.open_account.models.PendingAccountOpeningRequest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -16,6 +18,8 @@ public interface PendingAccountOpeningRequestRepository extends JpaRepository<Pe
     List<PendingAccountOpeningRequest> findByLegalIdOrderByCreatedAtDesc(String legalId);
 
     List<PendingAccountOpeningRequest> findByStatus(AccountOpeningRequestStatusEnum status);
+
+    Page<PendingAccountOpeningRequest> findByStatus(AccountOpeningRequestStatusEnum status, Pageable pageable);
 
     Optional<PendingAccountOpeningRequest> findFirstByLegalIdOrderByCreatedAtDesc(String legalId);
 }
