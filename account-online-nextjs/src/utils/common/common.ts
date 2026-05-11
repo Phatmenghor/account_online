@@ -36,3 +36,12 @@ export const indexDisplay = (
 ) => {
   return ((pageNo || 1) - 1) * (pageSize || 5) + index + 1;
 };
+
+export const formatEpochTimestamp = (epochMillis: number | null | undefined): string => {
+  if (!epochMillis) return "---";
+  try {
+    return new Date(epochMillis).toLocaleString();
+  } catch {
+    return "---";
+  }
+};

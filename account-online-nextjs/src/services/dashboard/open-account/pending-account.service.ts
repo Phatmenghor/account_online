@@ -9,6 +9,7 @@ import {
   PaginationResponse,
   PendingAccountAdminReviewDto,
   PendingAccountActionResponse,
+  ReviewHistoryResponseDto,
 } from "@/models/open-account-admin/pending-account.response";
 
 /**
@@ -129,6 +130,36 @@ export async function rejectPendingAccountService(
       throw {
         errorMessage:
           "An unexpected error occurred while rejecting pending account.",
+        rawError: error,
+      };
+    }
+  }
+}
+
+/**
+ * 🔹 Fetch review history (audit trail) for a specific request
+ */
+export async function getReviewHistoryService(
+  requestId: string
+): Promise<ReviewHistoryResponseDto> {
+  try {
+    const response = await axiosClientWithAuth.get(
+      `/api/v1/admin/open-account/review-history/${requestId}`
+    );
+
+    return response.data.data;
+  } catch (error: unknown) {
+    if (axios.isAxiosError(error)) {
+      const raw = error.response?.data;
+      const message = raw?.message || "Failed to fetch review history.";
+      console.error("[getReviewHistoryService] Axios error:", message);
+
+      throw { errorMessage: message, rawError: raw };
+    } else {
+      console.error("[getReviewHistoryService] Unexpected error:", error);
+      throw {
+        errorMessage:
+          "An unexpected error occurred while fetching review history.",
         rawError: error,
       };
     }

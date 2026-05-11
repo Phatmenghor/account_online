@@ -123,3 +123,21 @@ export interface PendingAccountActionResponse {
     updatedAt: string;
   };
 }
+
+// Request History Record (Audit Trail)
+export interface RequestHistoryRecord {
+  id: string;
+  requestId: string;
+  legalId: string;
+  status: string;
+  actionUsername: string;
+  remark?: string;
+  createdAt: number;
+}
+
+// Review History Response - Audit Trail
+export interface ReviewHistoryResponseDto {
+  requestId: string;
+  legalId: string;
+  history: RequestHistoryRecord[];
+}
