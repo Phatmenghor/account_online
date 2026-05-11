@@ -284,8 +284,6 @@ public class OpenAccountServiceImpl implements OpenAccountService {
                     .toEpochMilli();
         }
 
-        String message = getStatusMessage(entity.getStatus());
-
         CustomerRequest customerData = null;
         try {
             if (entity.getRequestData() != null) {
@@ -302,7 +300,6 @@ public class OpenAccountServiceImpl implements OpenAccountService {
                 .amlStatus(entity.getAmlStatus())
                 .remark(entity.getRemark())
                 .createdAt(createdAtMillis)
-                .message(message)
                 .amlResultData(entity.getAmlResultData());
 
         if (customerData != null) {
