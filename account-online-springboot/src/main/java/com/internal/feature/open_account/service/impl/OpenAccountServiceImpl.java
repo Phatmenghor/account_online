@@ -304,12 +304,9 @@ public class OpenAccountServiceImpl implements OpenAccountService {
                 .legalId(entity.getLegalId())
                 .status(entity.getStatus())
                 .createdAt(createdAtIso)
-                .message(message)
                 .remark(entity.getRemark())
                 .amlStatus(entity.getAmlStatus())
                 .amlResultData(entity.getAmlResultData())
-                .requestData(requestDataObj)
-                .customerInfo(customerInfoObj)
                 // Legal/NID info
                 .legalDocName(entity.getLegalDocName())
                 .legalHolderName(entity.getLegalHolderName())
@@ -337,28 +334,18 @@ public class OpenAccountServiceImpl implements OpenAccountService {
                 .averageIncome(entity.getAverageIncome())
                 .phoneNumber(entity.getPhoneNumber())
                 .email(entity.getEmail())
-                .customerType(entity.getCustomerType())
                 // Current address
-                .customerProvinceCode(entity.getCustomerProvinceCode())
                 .customerProvince(entity.getCustomerProvince())
-                .customerDistrictCode(entity.getCustomerDistrictCode())
                 .customerDistrict(entity.getCustomerDistrict())
-                .customerCommuneCode(entity.getCustomerCommuneCode())
                 .customerCommune(entity.getCustomerCommune())
-                .customerVillageCode(entity.getCustomerVillageCode())
                 .customerVillage(entity.getCustomerVillage())
                 // Place of birth
-                .customerPobProvinceCode(entity.getCustomerPobProvinceCode())
                 .customerPobProvince(entity.getCustomerPobProvince())
-                .customerPobDistrictCode(entity.getCustomerPobDistrictCode())
                 .customerPobDistrict(entity.getCustomerPobDistrict())
-                .customerPobCommuneCode(entity.getCustomerPobCommuneCode())
                 .customerPobCommune(entity.getCustomerPobCommune())
-                .customerPobVillageCode(entity.getCustomerPobVillageCode())
                 .customerPobVillage(entity.getCustomerPobVillage())
                 // Branch info
                 .branchCode(entity.getBranchCode())
-                .branchNameKh(entity.getBranchNameKh())
                 // Banking info
                 .productAccount(entity.getProductAccount())
                 .categoryAccount(entity.getCategoryAccount())
@@ -368,13 +355,6 @@ public class OpenAccountServiceImpl implements OpenAccountService {
                 // Images
                 .nidImageName(entity.getNidImageName())
                 .selfieImageName(entity.getSelfieImageName())
-                // AML details
-                .amlRiskLevel(entity.getAmlRiskLevel())
-                .amlActionTaken(entity.getAmlActionTaken())
-                .amlTotalRulesScore(entity.getAmlTotalRulesScore())
-                .amlTrxnId(entity.getAmlTrxnId())
-                .serviceName(entity.getServiceName())
-                .amlRulesTriggered(entity.getAmlRulesTriggered())
                 .build();
     }
 
@@ -503,8 +483,6 @@ public class OpenAccountServiceImpl implements OpenAccountService {
                 .amlStatus(request.getAmlStatus())
                 .amlResultData(request.getAmlResultData())
                 .remark(request.getRemark())
-                .requestData(requestDataObj)
-                .customerInfo(customerInfoObj)
                 // Legal/NID info
                 .legalDocName(request.getLegalDocName())
                 .legalHolderName(request.getLegalHolderName())
@@ -532,28 +510,18 @@ public class OpenAccountServiceImpl implements OpenAccountService {
                 .averageIncome(request.getAverageIncome())
                 .phoneNumber(request.getPhoneNumber())
                 .email(request.getEmail())
-                .customerType(request.getCustomerType())
                 // Current address
-                .customerProvinceCode(request.getCustomerProvinceCode())
                 .customerProvince(request.getCustomerProvince())
-                .customerDistrictCode(request.getCustomerDistrictCode())
                 .customerDistrict(request.getCustomerDistrict())
-                .customerCommuneCode(request.getCustomerCommuneCode())
                 .customerCommune(request.getCustomerCommune())
-                .customerVillageCode(request.getCustomerVillageCode())
                 .customerVillage(request.getCustomerVillage())
                 // Place of birth
-                .customerPobProvinceCode(request.getCustomerPobProvinceCode())
                 .customerPobProvince(request.getCustomerPobProvince())
-                .customerPobDistrictCode(request.getCustomerPobDistrictCode())
                 .customerPobDistrict(request.getCustomerPobDistrict())
-                .customerPobCommuneCode(request.getCustomerPobCommuneCode())
                 .customerPobCommune(request.getCustomerPobCommune())
-                .customerPobVillageCode(request.getCustomerPobVillageCode())
                 .customerPobVillage(request.getCustomerPobVillage())
                 // Branch info
                 .branchCode(request.getBranchCode())
-                .branchNameKh(request.getBranchNameKh())
                 // Banking info
                 .productAccount(request.getProductAccount())
                 .categoryAccount(request.getCategoryAccount())
@@ -563,13 +531,6 @@ public class OpenAccountServiceImpl implements OpenAccountService {
                 // Images
                 .nidImageName(request.getNidImageName())
                 .selfieImageName(request.getSelfieImageName())
-                // AML details
-                .amlRiskLevel(request.getAmlRiskLevel())
-                .amlActionTaken(request.getAmlActionTaken())
-                .amlTotalRulesScore(request.getAmlTotalRulesScore())
-                .amlTrxnId(request.getAmlTrxnId())
-                .serviceName(request.getServiceName())
-                .amlRulesTriggered(request.getAmlRulesTriggered())
                 .build();
     }
 
