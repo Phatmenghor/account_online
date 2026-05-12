@@ -14,14 +14,12 @@ interface AccountExistsModalProps {
     accountName?: string;
     message?: string;
   } | null;
-  onContinue?: () => void;
 }
 
 const AccountExistsModal = ({
   isOpen,
   onClose,
   data,
-  onContinue,
 }: AccountExistsModalProps) => {
   const translate = useTranslations("common");
 

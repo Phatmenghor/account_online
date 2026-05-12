@@ -519,10 +519,6 @@ export default function OpenAccountPage() {
           isOpen={showAccountExistsModal}
           onClose={() => setShowAccountExistsModal(false)}
           data={accountExistsData}
-          onContinue={() => {
-            // Clear form after account exists
-            setShowClearConfirm(true);
-          }}
         />
       </div>
     </FormStateProvider>
