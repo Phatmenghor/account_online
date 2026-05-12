@@ -285,20 +285,22 @@ function SuccessAccountExcelPageContent() {
         <Card className="h-full flex flex-col">
             <CardContent className="space-y-6 p-6 flex flex-col h-full">
                 {/* Header */}
-                <div className="flex justify-between">
-                    <div className="flex flex-wrap items-center justify-start gap-3 w-full">
-                        <div className="relative w-full md:w-[350px]">
-                            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                            <Input
-                                aria-label="search-success-account"
-                                type="search"
-                                placeholder="Search by Legal ID or Name"
-                                value={searchQuery}
-                                onChange={handleSearchChange}
-                                className="pl-8 w-full min-w-[200px] text-xs md:min-w-[300px] h-9"
-                            />
-                        </div>
+                <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                    {/* Search on left */}
+                    <div className="relative w-full md:w-[350px]">
+                        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Input
+                            aria-label="search-success-account"
+                            type="search"
+                            placeholder="Search by Legal ID or Name"
+                            value={searchQuery}
+                            onChange={handleSearchChange}
+                            className="pl-8 w-full min-w-[200px] text-xs md:min-w-[300px] h-9"
+                        />
+                    </div>
 
+                    {/* Filters on right */}
+                    <div className="flex flex-wrap items-center justify-end gap-2">
                         {/* From Date */}
                         <CustomDatePicker
                             value={fromDate}
