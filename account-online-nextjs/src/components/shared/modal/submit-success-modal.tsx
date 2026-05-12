@@ -1,12 +1,8 @@
 "use client";
 
-import {
-  Dialog,
-  DialogContent,
-} from "@/components/ui/dialog";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Clock } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
 
 interface SuccessModalProps {
   isOpen: boolean;
@@ -26,92 +22,81 @@ export default function SubmitSuccessModal({
   status = "PENDING",
 }: SuccessModalProps) {
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl p-0 max-h-[90vh] overflow-auto">
-        {/* HEADER */}
-        <div className="flex-shrink-0 border-b bg-gradient-to-r from-blue-50 to-blue-100 px-6 py-4 sticky top-0">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-blue-400 to-blue-500 flex items-center justify-center">
-                <Clock className="text-white" style={{ width: 20, height: 20 }} />
-              </div>
-              <div>
-                <h2 className="text-lg font-bold text-gray-900">{title || "ស្នើសុំបានដឹងគ្នា"}</h2>
-                <p className="text-xs text-gray-500 mt-0.5">ស្ថានភាពសម្ពាធរង់ចាំ</p>
-              </div>
-            </div>
-            <Badge variant="secondary" className="bg-amber-100 text-amber-800 border-amber-200">
-              {status === "PENDING" ? "ស្ថានភាពរង់ចាំ" : status}
-            </Badge>
-          </div>
-        </div>
-
-        {/* BODY */}
-        <div className="px-6 py-6">
-          {/* MESSAGE SECTION */}
-          <div className="bg-gray-50 p-4 rounded-lg border border-gray-100 mb-6">
-            <p className="text-xs font-semibold text-gray-600 mb-3 uppercase tracking-wide">
-              សូមរង់ចាំ
-            </p>
-            <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap font-khmer">
-              {message}
-            </p>
-          </div>
-
-          {/* INFO SECTION */}
-          <div className="bg-white p-4 rounded-lg border border-gray-100">
-            <h3 className="text-sm font-bold text-gray-900 mb-4">ព័ត៌មានលម្អិត</h3>
-            <div className="space-y-3">
-              <div className="py-3 border-b border-gray-100 last:border-b-0">
-                <p className="text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wide">
-                  ស្ថានភាពសម្ពាធ
-                </p>
-                <p className="text-sm text-gray-900">
-                  {status === "PENDING" ? "ស្ថានភាពរង់ចាំឆ្លើយប្រតិកម្ម" : status}
-                </p>
-              </div>
-              <div className="py-3 border-b border-gray-100 last:border-b-0">
-                <p className="text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wide">
-                  ពេលវេលាដែលរង់ចាំ
-                </p>
-                <p className="text-sm text-gray-900">១-៣ ថ្ងៃធ្វើការ</p>
-              </div>
-              <div className="py-3 border-b border-gray-100 last:border-b-0">
-                <p className="text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wide">
-                  ម៉ោងបើកលើ
-                </p>
-                <p className="text-sm text-gray-900">០៨:០០ - ១៨:០០ (ច័ន្ទ - សុក្រ)</p>
-              </div>
-              <div className="py-3">
-                <p className="text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wide">
-                  ទំនាក់ទំនង
-                </p>
-                <p className="text-sm text-gray-900">
-                  📞 ០៧ ២០០ ០០២ / ១៨០០ ២០០ ៨៨៨<br/>
-                  💬 support@cpbank.com
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* FOOTER */}
-        <div className="flex-shrink-0 border-t bg-white px-6 py-4 flex items-center justify-end gap-3 sticky bottom-0">
-          <Button
-            variant="outline"
+    <AnimatePresence>
+      {isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 bg-black/40"
             onClick={onClose}
-            className="hover:bg-gray-50"
+          />
+
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            className="relative bg-white w-full max-w-md rounded-2xl shadow-xl overflow-hidden z-10"
           >
-            ពិនិត្យរង់ចាំ
-          </Button>
-          <Button
-            onClick={onClose}
-            className="bg-blue-600 hover:bg-blue-700 text-white"
-          >
-            ស្វាគមន៍ចូល
-          </Button>
+            <div className="px-8 py-10 flex flex-col items-center text-center">
+              {/* Icon */}
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: "spring", damping: 15, stiffness: 150 }}
+                className="w-16 h-16 rounded-full bg-blue-500 flex items-center justify-center mb-6 shadow-lg"
+              >
+                <Clock className="text-white" style={{ width: 28, height: 28 }} />
+              </motion.div>
+
+              {/* Title */}
+              <motion.h2
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+                className="text-xl font-bold text-gray-900 mb-4"
+              >
+                {title || "សូមរង់ចាំ"}
+              </motion.h2>
+
+              {/* Message */}
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.15 }}
+                className="w-full mb-8"
+              >
+                <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
+                  {message}
+                </p>
+              </motion.div>
+
+              {/* Buttons */}
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="w-full flex gap-3"
+              >
+                <Button
+                  onClick={onClose}
+                  variant="outline"
+                  className="flex-1 border-gray-300 text-gray-600 hover:bg-gray-50 py-2 rounded-lg font-medium"
+                >
+                  ✕ ទេ
+                </Button>
+                <Button
+                  onClick={onClose}
+                  className="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-lg font-medium"
+                >
+                  ព្រងឹងលាងលាង
+                </Button>
+              </motion.div>
+            </div>
+          </motion.div>
         </div>
-      </DialogContent>
-    </Dialog>
+      )}
+    </AnimatePresence>
   );
 }
