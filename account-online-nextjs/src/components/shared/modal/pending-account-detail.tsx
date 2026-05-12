@@ -132,6 +132,9 @@ export default function PendingAccountDetailModal({
                       <Field label="Document Type" value={account.legalDocName} />
                       <Field label="Issued Date" value={account.legalIssuedDate} />
                       <Field label="Expiration Date" value={account.legalExpiredDate} />
+                      <Field label="MRZ Line 1" value={account.legalMRZ1} />
+                      <Field label="MRZ Line 2" value={account.legalMRZ2} />
+                      <Field label="MRZ Line 3" value={account.legalMRZ3} />
                       <Field label="Current Address" value={account.legalAddress} />
                       <Field label="Place of Birth" value={account.legalPlaceOfBirth} />
                       <Field label="Company Name" value={account.companyName} />
@@ -147,8 +150,42 @@ export default function PendingAccountDetailModal({
                     </div>
                   </div>
 
-                  {/* REMARKS */}
-                  {account.remark && (
+                  {/* CUSTOMER ADDRESS DETAILS */}
+                  <div className="bg-white p-4 rounded-lg border border-gray-100">
+                    <h3 className="text-sm font-bold text-gray-900 mb-4">Customer Address Details</h3>
+                    <div className="grid grid-cols-2 gap-4">
+                      <Field label="Province" value={account.customerProvince} />
+                      <Field label="District" value={account.customerDistrict} />
+                      <Field label="Commune" value={account.customerCommune} />
+                      <Field label="Village" value={account.customerVillage} />
+                      <Field label="Place of Birth - Province" value={account.customerPobProvince} />
+                      <Field label="Place of Birth - District" value={account.customerPobDistrict} />
+                      <Field label="Place of Birth - Commune" value={account.customerPobCommune} />
+                      <Field label="Place of Birth - Village" value={account.customerPobVillage} />
+                    </div>
+                  </div>
+
+                  {/* ACTION DETAILS - shown when viewing history */}
+                  {account.actionUsername && (
+                    <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">
+                      <h3 className="text-sm font-bold text-gray-900 mb-4">Action Details</h3>
+                      <div className="grid grid-cols-2 gap-4">
+                        <Field label="Action By" value={account.actionUsername} />
+                        <Field label="Action Date" value={account.createdAt ? new Date(account.createdAt).toLocaleString() : "---"} />
+                        {account.remark && (
+                          <div className="col-span-2">
+                            <div className="py-3 border-b border-blue-100 last:border-b-0">
+                              <p className="text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wide">Remark</p>
+                              <p className="text-sm text-gray-900">{account.remark}</p>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* REMARKS - Legacy fallback */}
+                  {!account.actionUsername && account.remark && (
                     <div className="bg-amber-50 border-l-4 border-amber-400 p-4 rounded">
                       <p className="text-xs font-bold text-amber-900 mb-1">Admin Remarks</p>
                       <p className="text-sm text-amber-900">{account.remark}</p>
