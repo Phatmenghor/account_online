@@ -17,6 +17,7 @@ import { SuccessAccountOnlineModel } from "@/models/open-acc-success/success-acc
 import { DateTimeFormat } from "@/utils/date/date-time-format";
 import { Separator } from "@/components/ui/separator";
 import AmlStatusBadge from "../badge/aml-badge";
+import { toProperCase } from "@/utils/common/common";
 
 interface SuccessAccountViewModalProps {
   account?: SuccessAccountOnlineModel;
@@ -48,7 +49,7 @@ export default function SuccessAccountViewModal({
               </DialogTitle>
               <DialogDescription className="text-base text-muted-foreground">
                 {account?.legalHolderName
-                  ? `Details for "${account.legalHolderName}"`
+                  ? `Details for "${toProperCase(account.legalHolderName)}"`
                   : account?.cif
                   ? `CIF: ${account.cif}`
                   : "Account information"}
@@ -127,7 +128,7 @@ export default function SuccessAccountViewModal({
                         Holder Name:
                       </Label>
                       <span className="text-sm font-semibold">
-                        {account.legalHolderName || "N/A"}
+                        {toProperCase(account.legalHolderName)}
                       </span>
                     </div>
 
@@ -145,7 +146,7 @@ export default function SuccessAccountViewModal({
                         First Name (EN):
                       </Label>
                       <span className="text-sm">
-                        {account.legalFirstNameEn || "N/A"}
+                        {toProperCase(account.legalFirstNameEn)}
                       </span>
                     </div>
 
@@ -154,7 +155,7 @@ export default function SuccessAccountViewModal({
                         Last Name (EN):
                       </Label>
                       <span className="text-sm">
-                        {account.legalLastNameEn || "N/A"}
+                        {toProperCase(account.legalLastNameEn)}
                       </span>
                     </div>
 

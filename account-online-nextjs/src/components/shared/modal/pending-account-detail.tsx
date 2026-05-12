@@ -11,6 +11,7 @@ import { PendingAccountAdminReviewDto } from "@/models/open-account-admin/pendin
 import { Shield, CheckCircle, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ImageDisplayCard from "@/components/shared/card/image-display-card";
+import { toProperCase } from "@/utils/common/common";
 
 interface PendingAccountDetailModalProps {
   account?: PendingAccountAdminReviewDto;
@@ -113,7 +114,7 @@ export default function PendingAccountDetailModal({
                       <Field label="Request Status" value={account.status} />
                       <Field label="AML Status" value={account.amlStatus} />
                       <Field label="Submitted Date" value={new Date(account.createdAt).toLocaleString()} />
-                      <Field label="Name (English)" value={`${account.legalLastNameEn || ""} ${account.legalFirstNameEn || ""}`.trim()} />
+                      <Field label="Name (English)" value={toProperCase(`${account.legalLastNameEn || ""} ${account.legalFirstNameEn || ""}`.trim())} />
                       <Field label="Name (Khmer)" value={`${account.legalLastNameKh || ""} ${account.legalFirstNameKh || ""}`.trim()} />
                       <Field label="Date of Birth" value={account.legalDateOfBirth} />
                       <Field label="Gender" value={account.legalGender} />

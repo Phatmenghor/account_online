@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { indexDisplay } from "@/utils/common/common";
+import { indexDisplay, toProperCase } from "@/utils/common/common";
 import { CheckCircle, Eye, XCircle } from "lucide-react";
 import {
   Tooltip,
@@ -67,7 +67,8 @@ export const createPendingAccountTableColumns = ({
       maxWidth: "240px",
       minWidth: "180px",
       render: (account) => {
-        const name = `${account.legalLastNameEn || ""} ${account.legalFirstNameEn || ""}`.trim() || "---";
+        const rawName = `${account.legalLastNameEn || ""} ${account.legalFirstNameEn || ""}`.trim() || "---";
+        const name = toProperCase(rawName);
         return <span className="font-medium">{name}</span>;
       },
     },

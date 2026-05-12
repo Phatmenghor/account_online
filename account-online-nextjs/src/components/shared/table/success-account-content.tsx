@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { indexDisplay } from "@/utils/common/common";
+import { indexDisplay, toProperCase } from "@/utils/common/common";
 import { Eye } from "lucide-react";
 import {
   Tooltip,
@@ -69,7 +69,7 @@ export const createSuccessAccountTableColumns = ({
       maxWidth: "250px",
       minWidth: "180px",
       render: (account) => (
-        <span className="font-medium">{account.legalHolderName || "---"}</span>
+        <span className="font-medium">{toProperCase(account.legalHolderName)}</span>
       ),
     },
     {

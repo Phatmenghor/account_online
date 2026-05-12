@@ -45,3 +45,12 @@ export const formatEpochTimestamp = (epochMillis: number | null | undefined): st
     return "---";
   }
 };
+
+export const toProperCase = (str: string | null | undefined): string => {
+  if (!str) return "---";
+  return str
+    .toLowerCase()
+    .split(" ")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+};
