@@ -51,11 +51,11 @@ export default function PendingAccountDetailModal({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-6xl h-[95vh] flex flex-col p-0">
         {/* HEADER */}
-        <div className="flex-shrink-0 border-b bg-gradient-to-r from-blue-50 to-blue-100 px-6 py-4">
+        <div className="flex-shrink-0 border-b bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-xl font-bold text-gray-900">{account.legalId}</h2>
-              <p className="text-xs text-gray-500 mt-1">Request ID: {account.requestId}</p>
+              <h2 className="text-xl font-bold text-white">{account.legalId}</h2>
+              <p className="text-xs text-blue-100 mt-1">Request ID: {account.requestId}</p>
             </div>
             <div className="flex gap-2">
               <Badge
@@ -74,11 +74,11 @@ export default function PendingAccountDetailModal({
         {/* BODY - TABS */}
         <div className="flex-1 overflow-hidden flex flex-col">
           <Tabs defaultValue="overview" className="w-full flex flex-col h-full">
-            <TabsList className="grid w-full grid-cols-2 flex-shrink-0 rounded-none border-b bg-white px-6 gap-0">
-              <TabsTrigger value="overview" className="text-xs data-[state=active]:bg-blue-50 data-[state=active]:text-blue-600 data-[state=active]:border-b-2 data-[state=active]:border-blue-600 rounded-none">
+            <TabsList className="grid w-full grid-cols-2 flex-shrink-0 rounded-none border-b bg-gray-50 px-6 gap-0">
+              <TabsTrigger value="overview" className="text-xs font-medium text-gray-600 data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:border-b-2 data-[state=active]:border-blue-600 rounded-none py-3 transition-all">
                 Overview
               </TabsTrigger>
-              <TabsTrigger value="aml" className="text-xs data-[state=active]:bg-blue-50 data-[state=active]:text-blue-600 data-[state=active]:border-b-2 data-[state=active]:border-blue-600 rounded-none">
+              <TabsTrigger value="aml" className="text-xs font-medium text-gray-600 data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:border-b-2 data-[state=active]:border-blue-600 rounded-none py-3 transition-all">
                 <Shield className="w-4 h-4 mr-1" />
                 AML Screening
               </TabsTrigger>
@@ -125,22 +125,15 @@ export default function PendingAccountDetailModal({
                     </div>
                   </div>
 
-                  {/* LEGAL DOCUMENT */}
+                  {/* LEGAL DOCUMENT & EMPLOYMENT BANKING */}
                   <div className="bg-white p-4 rounded-lg border border-gray-100">
-                    <h3 className="text-sm font-bold text-gray-900 mb-4">Legal Document</h3>
+                    <h3 className="text-sm font-bold text-gray-900 mb-4">Legal Document & Employment Banking</h3>
                     <div className="grid grid-cols-2 gap-4">
                       <Field label="Document Type" value={account.legalDocName} />
                       <Field label="Issued Date" value={account.legalIssuedDate} />
                       <Field label="Expiration Date" value={account.legalExpiredDate} />
                       <Field label="Current Address" value={account.legalAddress} />
                       <Field label="Place of Birth" value={account.legalPlaceOfBirth} />
-                    </div>
-                  </div>
-
-                  {/* EMPLOYMENT & BANKING */}
-                  <div className="bg-white p-4 rounded-lg border border-gray-100">
-                    <h3 className="text-sm font-bold text-gray-900 mb-4">Employment & Banking</h3>
-                    <div className="grid grid-cols-2 gap-4">
                       <Field label="Company Name" value={account.companyName} />
                       <Field label="Occupation" value={account.occupation} />
                       <Field label="Industry" value={account.industry} />
