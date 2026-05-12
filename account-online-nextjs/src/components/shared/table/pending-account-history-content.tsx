@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { indexDisplay, toProperCase } from "@/utils/common/common";
+import { indexDisplay, toProperCase, formatIsoDateTime } from "@/utils/common/common";
 import { Eye } from "lucide-react";
 import {
   Tooltip,
@@ -109,16 +109,16 @@ export const createPendingAccountHistoryTableColumns = ({
       },
     },
 
-    // Processed At (Updated At for history)
+    // Processed At (Created At for history)
     {
-      key: "updatedAt",
+      key: "createdAt",
       label: "Processed At",
       truncate: true,
       maxWidth: "160px",
       minWidth: "150px",
       render: (account) => (
         <span className="font-medium">
-          {new Date(account.updatedAt).toLocaleString() || "---"}
+          {formatIsoDateTime(account.createdAt) || "---"}
         </span>
       ),
     },
