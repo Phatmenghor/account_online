@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.internal.enumation.AccountOpeningRequestStatusEnum;
-import com.internal.enumation.AmlStatusEnum;
 import com.internal.exceptions.error.custom.NotFoundException;
 import com.internal.exceptions.error.openaccount.AccountExistsException;
 import com.internal.exceptions.error.openaccount.OpenAccountException;
