@@ -9,6 +9,7 @@ import { LocationSubmitData } from "@/models/open-acc-online/address/open-acc-ad
 import { formatDate } from "@/constants/AppResource/format-date/format-dd-mm-yyyy";
 import { createOpenAccountService } from "@/services/open-account/openAccount.service";
 import { uploadDocument } from "@/services/document/document.service";
+import { parseDate } from "@/utils/date-parser";
 
 interface UseAccountSubmissionProps {
   formData: ResponseNID;
@@ -114,8 +115,8 @@ export const useAccountSubmission = ({
 
     // Validate legal issue date (issuedDate from NID)
     if (formData.issuedDate) {
-      const issuedDate = new Date(formData.issuedDate);
-      if (isNaN(issuedDate.getTime())) {
+      const issuedDate = parseDate(formData.issuedDate);
+      if (!issuedDate) {
         showError({
           title: "កាលបរិច្ឆេទមិនត្រឹមត្រូវ",
           message: `មិនអាចវិश្ញាសនកាលបរិច្ឆេទចេញលិខិត (${formData.issuedDate})។ ទម្រង់ត្រឹមត្រូវគឺ DD/MM/YYYY ឬ YYYY-MM-DD។`,
@@ -135,8 +136,8 @@ export const useAccountSubmission = ({
 
     // Validate date of birth
     if (formData.dob) {
-      const dob = new Date(formData.dob);
-      if (isNaN(dob.getTime())) {
+      const dob = parseDate(formData.dob);
+      if (!dob) {
         showError({
           title: "កាលបរិច្ឆេទមិនត្រឹមត្រូវ",
           message: `មិនអាចវិស្ញាសនកាលបរិច្ឆេទកំណើត (${formData.dob})។ ទម្រង់ត្រឹមត្រូវគឺ DD/MM/YYYY ឬ YYYY-MM-DD។`,
