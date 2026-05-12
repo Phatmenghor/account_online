@@ -13,8 +13,10 @@ import {
 } from "@/models/open-account-admin/pending-account.response";
 
 /**
- * 🔹 Fetch all pending account requests with pagination
+ * 🔹 Fetch all account opening request history with pagination
+ * Returns data from PendingAccountOpeningRequestHistory table
  * Supports filtering by status: "PENDING", "APPROVED", "REJECTED", or omit for all
+ * Used for both pending-review (status: PENDING) and review-history (all statuses)
  */
 export async function getAllPendingAccountsService(
   request: GetAllPendingAccountsRequest
@@ -29,7 +31,7 @@ export async function getAllPendingAccountsService(
   } catch (error: unknown) {
     if (axios.isAxiosError(error)) {
       const raw = error.response?.data;
-      const message = raw?.message || "Failed to fetch pending accounts.";
+      const message = raw?.message || "Failed to fetch account history.";
       console.error("[getAllPendingAccountsService] Axios error:", message);
 
       throw { errorMessage: message, rawError: raw };
@@ -37,7 +39,7 @@ export async function getAllPendingAccountsService(
       console.error("[getAllPendingAccountsService] Unexpected error:", error);
       throw {
         errorMessage:
-          "An unexpected error occurred while fetching pending accounts.",
+          "An unexpected error occurred while fetching account history.",
         rawError: error,
       };
     }
