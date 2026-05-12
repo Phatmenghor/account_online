@@ -244,8 +244,9 @@ public class OpenAccountServiceImpl implements OpenAccountService {
         }
 
         log.info("Creating account for approved request | Legal ID: {}", pendingRequest.getLegalId());
+        CustomerResponse accountResponse = null;
         try {
-            CustomerResponse accountResponse = openAccountWithoutAml(customerRequest);
+            accountResponse = openAccountWithoutAml(customerRequest);
             log.info("✓ Account created successfully | CIF: {}", accountResponse.getCif());
         } catch (Exception e) {
             log.error("Failed to create account for approved request: {} | Error: {}", requestId, e.getMessage(), e);
@@ -257,10 +258,18 @@ public class OpenAccountServiceImpl implements OpenAccountService {
         pendingRequest.setStatus(AccountOpeningRequestStatusEnum.APPROVED);
         pendingRequest.setRemark(dto.getRemark());
 
+        // Store account details after successful creation
+        if (accountResponse != null) {
+            pendingRequest.setCif(accountResponse.getCif());
+            pendingRequest.setMnemonic(accountResponse.getMnemonic());
+            pendingRequest.setKhrAccount(accountResponse.getKhrAccount());
+            pendingRequest.setUsdAccount(accountResponse.getUsdAccount());
+        }
+
         PendingAccountOpeningRequest saved = pendingRequestRepository.save(pendingRequest);
         saveHistory(saved, AccountOpeningRequestStatusEnum.APPROVED, dto.getRemark());
 
-        log.info("✓ Request approved and account created | ID: {} | Legal ID: {}", saved.getId(), saved.getLegalId());
+        log.info("✓ Request approved and account created | ID: {} | Legal ID: {} | CIF: {}", saved.getId(), saved.getLegalId(), saved.getCif());
 
         return mapToDto(saved);
     }
@@ -382,6 +391,11 @@ public class OpenAccountServiceImpl implements OpenAccountService {
                 // Images
                 .nidImageName(entity.getNidImageName())
                 .selfieImageName(entity.getSelfieImageName())
+                // Account details (populated after approval)
+                .cif(entity.getCif())
+                .mnemonic(entity.getMnemonic())
+                .khrAccount(entity.getKhrAccount())
+                .usdAccount(entity.getUsdAccount())
                 .build();
     }
 

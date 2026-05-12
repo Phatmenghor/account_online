@@ -82,4 +82,10 @@ public class PendingAccountOpeningRequestDto {
     // === IMAGES ===
     private String nidImageName;
     private String selfieImageName;
+
+    // === ACCOUNT DETAILS (populated after approval) ===
+    private String cif;
+    private String mnemonic;
+    private String khrAccount;
+    private String usdAccount;
 }
