@@ -199,34 +199,3 @@ export async function getReviewHistoryService(
     }
   }
 }
-
-/**
- * 🔹 Fetch all opening request history with pagination (audit trail)
- */
-export async function getAllOpeningRequestHistoryService(
-  request: GetAllPendingAccountsRequest
-): Promise<PaginationResponse<any>> {
-  try {
-    const response = await axiosClientWithAuth.post(
-      "/api/v1/admin/open-account/opening-request-history",
-      request
-    );
-
-    return response.data.data;
-  } catch (error: unknown) {
-    if (axios.isAxiosError(error)) {
-      const raw = error.response?.data;
-      const message = raw?.message || "Failed to fetch opening request history.";
-      console.error("[getAllOpeningRequestHistoryService] Axios error:", message);
-
-      throw { errorMessage: message, rawError: raw };
-    } else {
-      console.error("[getAllOpeningRequestHistoryService] Unexpected error:", error);
-      throw {
-        errorMessage:
-          "An unexpected error occurred while fetching opening request history.",
-        rawError: error,
-      };
-    }
-  }
-}
