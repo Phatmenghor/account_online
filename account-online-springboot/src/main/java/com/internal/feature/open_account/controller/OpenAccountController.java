@@ -6,6 +6,7 @@ import com.internal.feature.open_account.dto.request.CustomerRequest;
 import com.internal.feature.open_account.dto.request.RejectAccountOpeningRequestDto;
 import com.internal.feature.open_account.dto.response.PendingAccountOpeningRequestDto;
 import com.internal.feature.open_account.service.OpenAccountService;
+import com.internal.feature.telegram_alerts.service.AlertsOpenAccOnlineService;
 import com.internal.utils.constants.AppConstants;
 import com.internal.utils.constants.ResponseMessage;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,7 @@ import javax.validation.Valid;
 @Slf4j
 public class OpenAccountController {
     private final OpenAccountService openAccountService;
+    private final AlertsOpenAccOnlineService alertsOpenAccOnlineService;
 
     @PostMapping("/submit")
     public ResponseEntity<ApiResponse<PendingAccountOpeningRequestDto>> submitAccountOpeningRequest(
@@ -30,6 +32,13 @@ public class OpenAccountController {
 
         log.info("✓ Account opening request submitted for admin review | Request ID: {}", response.getId());
         log.info("  Legal ID: {} | AML Status: {}", response.getLegalId(), response.getAmlStatus());
+
+        // Send Telegram alert
+        try {
+            alertsOpenAccOnlineService.sendAccountOpeningAlert(response, "CREATED");
+        } catch (Exception e) {
+            log.error("Failed to send Telegram alert for account creation: {}", e.getMessage());
+        }
 
         return ResponseEntity.ok(ApiResponse.success(AppConstants.ACCOUNT_OPENING_SUBMITTED, response));
 }
@@ -42,6 +51,13 @@ public class OpenAccountController {
         PendingAccountOpeningRequestDto response = openAccountService.approveAccountOpeningRequest(dto);
 
         log.info("✓ Request approved | Legal ID: {}", response.getLegalId());
+
+        // Send Telegram alert
+        try {
+            alertsOpenAccOnlineService.sendAccountOpeningAlert(response, "APPROVED");
+        } catch (Exception e) {
+            log.error("Failed to send Telegram alert for account approval: {}", e.getMessage());
+        }
 
         return ResponseEntity.ok(ApiResponse.success(AppConstants.ACCOUNT_OPENING_APPROVED, response));
     }

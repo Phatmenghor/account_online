@@ -3,6 +3,7 @@ package com.internal.feature.telegram_alerts.service.serviceImpl;
 import com.internal.enumation.AmlStatusEnum;
 import com.internal.enumation.OpenAccStatusEnum;
 import com.internal.feature.aml.dto.response.AmlStatusDto;
+import com.internal.feature.open_account.dto.response.PendingAccountOpeningRequestDto;
 import com.internal.feature.telegram_alerts.config.TelegramService;
 import com.internal.feature.telegram_alerts.service.AlertsOpenAccOnlineService;
 import lombok.RequiredArgsConstructor;
@@ -305,5 +306,52 @@ public class OpenAccountTelegramAlertServiceImpl implements AlertsOpenAccOnlineS
                 "Status: " + escapeMarkdown(status) + "\n" +
                 (user != null && !user.isEmpty() ? "By: " + escapeMarkdown(user) + "\n" : "") +
                 "Time: " + now;
+    }
+
+    @Override
+    public void sendAccountOpeningAlert(PendingAccountOpeningRequestDto request, String eventType) {
+        if (request == null) {
+            log.warn("Account Opening Telegram alert - request is null");
+            return;
+        }
+
+        try {
+            String header = "*Account Opening " + eventType.toUpperCase() + "*";
+            StringBuilder bodyBuilder = new StringBuilder();
+
+            appendIfNotEmpty(bodyBuilder, "Request ID", request.getId());
+            appendIfNotEmpty(bodyBuilder, "Legal ID", request.getLegalId());
+            appendIfNotEmpty(bodyBuilder, "Phone Number", request.getPhoneNumber());
+            appendIfNotEmpty(bodyBuilder, "Branch Code", request.getBranchCode());
+            appendIfNotEmpty(bodyBuilder, "AML Status", request.getAmlStatus());
+
+            String customerName = joinNonNull(request.getLegalFirstNameEn(), request.getLegalLastNameEn());
+            if (customerName.isEmpty()) {
+                customerName = joinNonNull(request.getLegalFirstNameKh(), request.getLegalLastNameKh());
+            }
+            appendIfNotEmpty(bodyBuilder, "Name", customerName);
+            appendIfNotEmpty(bodyBuilder, "Gender", request.getGender());
+            appendIfNotEmpty(bodyBuilder, "DOB", request.getLegalDateOfBirth());
+            appendIfNotEmpty(bodyBuilder, "Nationality", request.getNationality());
+            appendIfNotEmpty(bodyBuilder, "Address", request.getLegalAddress());
+
+            String statusText = request.getStatus() != null ? request.getStatus() : "N/A";
+            String byUser = request.getProcessedBy() != null && !request.getProcessedBy().isEmpty() ? request.getProcessedBy() : "";
+            String timeFormatted = request.getUpdatedAt() != null
+                    ? request.getUpdatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+                    : LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+
+            String footer = "Status: " + escapeMarkdown(statusText) + "\n" +
+                    (byUser.isEmpty() ? "" : "By: " + escapeMarkdown(byUser) + "\n") +
+                    "Time: " + escapeMarkdown(timeFormatted);
+
+            String message = header + "\n" + SEPARATOR + "\n" + bodyBuilder + SEPARATOR + "\n" + footer;
+
+            telegramService.sendMarkdownAccountOnlineMonitorMessage(message);
+            log.info("Account Opening {} alert sent to Telegram for ID: {}", eventType, request.getLegalId());
+
+        } catch (Exception e) {
+            log.error("Failed to send Account Opening alert to Telegram: {}", e.getMessage(), e);
+        }
     }
 }
