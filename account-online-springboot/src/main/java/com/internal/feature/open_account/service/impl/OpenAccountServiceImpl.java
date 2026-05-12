@@ -576,6 +576,12 @@ public class OpenAccountServiceImpl implements OpenAccountService {
     }
 
     private PendingAccountOpeningRequest mapRequestToPendingEntity(CustomerRequest request, Map<String, String> customerInfo, AmlStatusDto amlResult) throws JsonProcessingException {
+        // Enrich AML result with image data before serialization
+        if (amlResult != null) {
+            amlResult.setNidImageName(request.getNidImageName());
+            amlResult.setSelfieImageName(request.getSelfieImageName());
+        }
+
         PendingAccountOpeningRequest.PendingAccountOpeningRequestBuilder builder = PendingAccountOpeningRequest.builder()
                 .legalId(request.getLegalId())
                 .status(AccountOpeningRequestStatusEnum.PENDING)
