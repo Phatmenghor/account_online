@@ -96,9 +96,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public void logout(String username) {
-        UserEntity user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new NotFoundException("User not found"));
-        refreshTokenService.deleteByUser(user);
+        log.info("User logged out: {}", username);
     }
 
     @Override
