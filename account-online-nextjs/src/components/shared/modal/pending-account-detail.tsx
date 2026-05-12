@@ -66,15 +66,6 @@ export default function PendingAccountDetailModal({
               >
                 {account.status}
               </Badge>
-              <Badge
-                className={
-                  account.amlStatus === "APPROVE" ? "bg-green-100 text-green-800" :
-                  account.amlStatus === "REJECT" ? "bg-red-100 text-red-800" :
-                  "bg-yellow-100 text-yellow-800"
-                }
-              >
-                {account.amlStatus}
-              </Badge>
             </div>
           </div>
         </div>
