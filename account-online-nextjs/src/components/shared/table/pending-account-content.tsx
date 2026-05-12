@@ -72,6 +72,42 @@ export const createPendingAccountTableColumns = ({
       },
     },
 
+    // Phone Number
+    {
+      key: "phoneNumber",
+      label: "Phone Number",
+      truncate: true,
+      maxWidth: "150px",
+      minWidth: "120px",
+      render: (account) => (
+        <span className="font-medium">{account.phoneNumber || "---"}</span>
+      ),
+    },
+
+    // Branch Code
+    {
+      key: "branchCode",
+      label: "Branch Code",
+      truncate: true,
+      maxWidth: "120px",
+      minWidth: "100px",
+      render: (account) => (
+        <span className="font-medium">{account.branchCode || "---"}</span>
+      ),
+    },
+
+    // Email
+    {
+      key: "email",
+      label: "Email",
+      truncate: true,
+      maxWidth: "180px",
+      minWidth: "140px",
+      render: (account) => (
+        <span className="font-medium">{account.email || "---"}</span>
+      ),
+    },
+
     // AML Status
     {
       key: "amlStatus",
