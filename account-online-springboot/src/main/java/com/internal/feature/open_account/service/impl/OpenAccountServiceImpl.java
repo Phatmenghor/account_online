@@ -295,11 +295,15 @@ public class OpenAccountServiceImpl implements OpenAccountService {
         }
 
         // Save rejection to history table only (don't update main table)
-        saveHistory(pendingRequest, AccountOpeningRequestStatusEnum.REJECTED, dto.getRemark());
+        PendingAccountOpeningRequestHistory historyRecord = saveHistory(pendingRequest, AccountOpeningRequestStatusEnum.REJECTED, dto.getRemark());
 
         log.info("✓ History saved | Request ID: {} | Status: REJECTED | Legal ID: {}", pendingRequest.getId(), pendingRequest.getLegalId());
 
-        return mapToDto(pendingRequest);
+        // Return response with REJECTED status and remark
+        PendingAccountOpeningRequestDto response = mapToDto(pendingRequest);
+        response.setStatus(AccountOpeningRequestStatusEnum.REJECTED);
+        response.setRemark(dto.getRemark());
+        return response;
     }
 
     private PendingAccountOpeningRequestDto mapToDto(PendingAccountOpeningRequest entity) {
@@ -685,7 +689,7 @@ public class OpenAccountServiceImpl implements OpenAccountService {
         return new PaginationResponse<>(content, request.getPageNo(), request.getPageSize(), page.getTotalElements());
     }
 
-    private void saveHistory(PendingAccountOpeningRequest request, AccountOpeningRequestStatusEnum status, String remark) {
+    private PendingAccountOpeningRequestHistory saveHistory(PendingAccountOpeningRequest request, AccountOpeningRequestStatusEnum status, String remark) {
         try {
             String actionUsername = "System";
             try {
@@ -725,10 +729,12 @@ public class OpenAccountServiceImpl implements OpenAccountService {
                     .nidImageName(request.getNidImageName())
                     .selfieImageName(request.getSelfieImageName())
                     .build();
-            historyRepository.save(history);
+            history = historyRepository.save(history);
             log.info("✓ History saved | Request ID: {} | Status: {} | By: {}", request.getId(), status, actionUsername);
+            return history;
         } catch (Exception e) {
             log.error("Failed to save history for request: {}", request.getId(), e);
+            return null;
         }
     }
 
