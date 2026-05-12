@@ -15,12 +15,12 @@ export interface GetPendingAccountByIdRequest {
 
 // Request for approving pending account
 export interface ApprovePendingAccountRequest {
-  id: string;
+  requestId: string;
   remark?: string;
 }
 
 // Request for rejecting pending account
 export interface RejectPendingAccountRequest {
-  id: string;
+  requestId: string;
   remark: string;
 }

@@ -127,7 +127,7 @@ function PendingReview() {
     try {
       if (selectedAction === "APPROVE") {
         await approvePendingAccountService({
-          id: selectedAccountForAction.requestId,
+          requestId: selectedAccountForAction.requestId,
           remark,
         });
 
@@ -154,7 +154,7 @@ function PendingReview() {
         });
       } else if (selectedAction === "REJECT") {
         await rejectPendingAccountService({
-          id: selectedAccountForAction.requestId,
+          requestId: selectedAccountForAction.requestId,
           remark: remark || "No reason provided",
         });
 
