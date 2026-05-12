@@ -74,12 +74,12 @@ export default function PendingAccountDetailModal({
         {/* BODY - TABS */}
         <div className="flex-1 overflow-hidden flex flex-col">
           <Tabs defaultValue="overview" className="w-full flex flex-col h-full">
-            <TabsList className="grid w-full grid-cols-2 flex-shrink-0 rounded-none border-b bg-gray-50 px-6 gap-0">
-              <TabsTrigger value="overview" className="text-xs font-medium text-gray-600 data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:border-b-2 data-[state=active]:border-blue-600 rounded-none py-3 transition-all">
+            <TabsList className="grid w-full grid-cols-2 flex-shrink-0 rounded-none border-b bg-white px-6 gap-0">
+              <TabsTrigger value="overview" className="text-sm font-semibold text-gray-600 hover:text-gray-900 data-[state=active]:text-blue-600 data-[state=active]:border-b-3 data-[state=active]:border-blue-600 data-[state=active]:bg-blue-50 rounded-none py-3 px-4 transition-all duration-200">
                 Overview
               </TabsTrigger>
-              <TabsTrigger value="aml" className="text-xs font-medium text-gray-600 data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:border-b-2 data-[state=active]:border-blue-600 rounded-none py-3 transition-all">
-                <Shield className="w-4 h-4 mr-1" />
+              <TabsTrigger value="aml" className="text-sm font-semibold text-gray-600 hover:text-gray-900 data-[state=active]:text-blue-600 data-[state=active]:border-b-3 data-[state=active]:border-blue-600 data-[state=active]:bg-blue-50 rounded-none py-3 px-4 transition-all duration-200 flex items-center justify-center">
+                <Shield className="w-4 h-4 mr-2" />
                 AML Screening
               </TabsTrigger>
             </TabsList>
