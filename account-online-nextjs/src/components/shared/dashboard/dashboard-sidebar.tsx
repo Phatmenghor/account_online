@@ -30,7 +30,7 @@ const getIconComponent = (iconName: string | null) => {
   return Icon || LucideIcons.Circle;
 };
 
-export function DashboardSidebar({ isOpen, onToggle }: DashboardSidebarProps) {
+export function DashboardSidebar({ isOpen = false, onToggle }: DashboardSidebarProps) {
   const pathname = usePathname();
   const isMobile = useIsMobile();
   const [authUser, setAuthUser] = useState<UserModel | null>(null);
@@ -85,63 +85,6 @@ export function DashboardSidebar({ isOpen, onToggle }: DashboardSidebarProps) {
     };
   };
 
-  // Initialize submenus as open if they contain active route
-  useEffect(() => {
-    if (menuItems.length === 0) return;
-
-    const initialOpenState: Record<string, boolean> = {};
-
-    const normalizePath = (path: string) => {
-      if (!path) return "";
-      let p = path;
-      if (!p.startsWith("/")) p = "/" + p;
-      if (p.endsWith("/")) p = p.slice(0, -1);
-      return p.toLowerCase();
-    };
-
-    const checkActive = (items: any[]): boolean => {
-      let anyChildActive = false;
-
-      items.forEach((item) => {
-        let isActivePath = false;
-
-        // 1. Check if Self is Active (Exact or SubRoute)
-        const href = item.href;
-        if (href && href !== "#") {
-          const normalizedPath = normalizePath(pathname);
-          const normalizedHref = normalizePath(href);
-
-          const isExactMatch = normalizedPath === normalizedHref;
-          const isSubRoute = normalizedPath.startsWith(normalizedHref + "/");
-          if (isExactMatch || isSubRoute) {
-            isActivePath = true;
-          }
-        }
-
-        // 2. Check Children Logic
-        if (item.subItems && item.subItems.length > 0) {
-          const childActive = checkActive(item.subItems);
-          if (childActive) {
-            isActivePath = true;
-          }
-
-          // If I am active (via self OR child), and I have subitems -> OPEN ME
-          if (isActivePath) {
-            initialOpenState[item.title] = true;
-          }
-        }
-
-        if (isActivePath) {
-          anyChildActive = true;
-        }
-      });
-
-      return anyChildActive;
-    };
-
-    checkActive(menuItems);
-    setOpenSubmenus((prev) => ({ ...prev, ...initialOpenState }));
-  }, [menuItems, pathname]);
 
   // Hide sidebar on mobile
   if (isMobile && !isOpen) {
