@@ -30,7 +30,7 @@ const getIconComponent = (iconName: string | null) => {
   return Icon || LucideIcons.Circle;
 };
 
-export function DashboardSidebar({ isOpen = false, onToggle }: DashboardSidebarProps) {
+export function DashboardSidebar({ isOpen = true, onToggle }: DashboardSidebarProps) {
   const pathname = usePathname();
   const isMobile = useIsMobile();
   const [authUser, setAuthUser] = useState<UserModel | null>(null);
