@@ -2,6 +2,7 @@ package com.internal.feature.open_account.service.xml;
 
 import com.internal.config.CpbProperties;
 import com.internal.config.DefaultProperties;
+import com.internal.exceptions.error.openaccount.OpenAccountException;
 import com.internal.feature.open_account.dto.request.CustomerRequest;
 import com.internal.utils.constants.DefaultConstants;
 import lombok.RequiredArgsConstructor;
@@ -250,11 +251,26 @@ public class OpenAccountXmlBuilder {
             return "";
         }
         try {
+            LocalDate localDate = null;
+
             if (date.matches("\\d{8}")) {
-                return date;
+                // Try to parse as T24 format (yyyyMMdd)
+                localDate = LocalDate.parse(date, T24_DATE_FORMATTER);
+            } else {
+                // Try to parse as ISO format (yyyy-MM-dd)
+                localDate = LocalDate.parse(date, DATE_FORMATTER);
             }
-            LocalDate localDate = LocalDate.parse(date, DATE_FORMATTER);
+
+            // Validate date is not in the future
+            if (localDate.isAfter(LocalDate.now())) {
+                log.error("Invalid date: {} is in the future. T24 does not accept future dates.", date);
+                throw new OpenAccountException("INVALID_DATE",
+                    "The date " + date + " is in the future. Please provide a valid date.");
+            }
+
             return localDate.format(T24_DATE_FORMATTER);
+        } catch (OpenAccountException e) {
+            throw e;
         } catch (Exception e) {
             log.warn("Could not format date {}, using as-is: {}", date, e.getMessage());
             return date;
