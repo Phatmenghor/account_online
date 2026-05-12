@@ -142,12 +142,8 @@ export default function PendingAccountDetailModal({
 
                   {/* ADDRESS */}
                   <div className="space-y-1">
-                    <Field label="Address" value={account.legalAddress} />
-                    <Field label="Current Address" value={account.currentAddressName} />
-                    {account.currentAddressCode && <Field label="Current Address Code" value={account.currentAddressCode} />}
+                    <Field label="Current Address" value={account.legalAddress} />
                     <Field label="Place of Birth" value={account.legalPlaceOfBirth} />
-                    <Field label="Place of Birth Address" value={account.placeOfBirthName} />
-                    {account.placeOfBirthCode && <Field label="Place of Birth Code" value={account.placeOfBirthCode} />}
                   </div>
 
                   {/* EMPLOYMENT & BANKING */}

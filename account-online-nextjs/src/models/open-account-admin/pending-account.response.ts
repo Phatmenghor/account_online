@@ -94,17 +94,13 @@ export interface PendingAccountOpeningRequestDto {
   phoneNumber?: string;
   email?: string;
 
-  // Current address (full formatted strings)
-  currentAddressName?: string;
-  currentAddressCode?: string;
+  // Current address
   customerProvince?: string;
   customerDistrict?: string;
   customerCommune?: string;
   customerVillage?: string;
 
-  // Place of birth (full formatted strings)
-  placeOfBirthName?: string;
-  placeOfBirthCode?: string;
+  // Place of birth
   customerPobProvince?: string;
   customerPobDistrict?: string;
   customerPobCommune?: string;
@@ -168,17 +164,13 @@ export interface PendingAccountAdminReviewDto {
   phoneNumber?: string;
   email?: string;
 
-  // Current address (full formatted strings)
-  currentAddressName?: string;
-  currentAddressCode?: string;
+  // Current address
   customerProvince?: string;
   customerDistrict?: string;
   customerCommune?: string;
   customerVillage?: string;
 
-  // Place of birth (full formatted strings)
-  placeOfBirthName?: string;
-  placeOfBirthCode?: string;
+  // Place of birth
   customerPobProvince?: string;
   customerPobDistrict?: string;
   customerPobCommune?: string;
