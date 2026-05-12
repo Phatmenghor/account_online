@@ -239,9 +239,9 @@
   },
   "adminReview": {
     "approveSuccess": "គណនីបានអនុម័តដោយជោគជ័យ",
-    "approveSuccessDesc": "គណនីរបស់លោក/លោកស្រី {{customerName}} បានអនុម័តរួចរាល់។ អតិថិជននឹងទទួលបានការជូនដំណឹង ហើយការបង្កើតគណនីនឹងបានបង្កើតក្នុងរយៈពេល ១-៣ ថ្ងៃធ្វើការ។",
+    "approveSuccessDesc": "សម្ពាធ {{requestId}} - {{customerName}} បានអនុម័ត",
     "rejectSuccess": "គណនីបានច្រានចោលដោយជោគជ័យ",
-    "rejectSuccessDesc": "គណនីរបស់លោក/លោកស្រី {{customerName}} បានច្រានចោលរួចរាល់។ អតិថិជននឹងទទួលបានការជូនដំណឹងរហូតដល់ហេតុផលច្រានចោល។",
+    "rejectSuccessDesc": "សម្ពាធ {{requestId}} - {{customerName}} បានច្រានចោល",
     "pendingReview": "កំពុងពិនិត្យលម្អិត",
     "statusUpdated": "ស្ថានភាពគណនីបានធ្វើបច្ចុប្បន្នភាព",
     "processedAt": "បានដំណើរការលើ"
