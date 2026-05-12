@@ -629,14 +629,7 @@ public class OpenAccountServiceImpl implements OpenAccountService {
 
         log.info("✓ Found {} history records | Total: {} | Page: {}", content.size(), page.getTotalElements(), request.getPageNo());
 
-        return PaginationResponse.<PendingAccountOpeningRequestHistoryDto>builder()
-                .content(content)
-                .pageNo(request.getPageNo())
-                .pageSize(request.getPageSize())
-                .totalElements(page.getTotalElements())
-                .totalPages(page.getTotalPages())
-                .last(page.isLast())
-                .build();
+        return new PaginationResponse<>(content, request.getPageNo(), request.getPageSize(), page.getTotalElements());
     }
 
     private void saveHistory(PendingAccountOpeningRequest request, AccountOpeningRequestStatusEnum status, String remark) {
