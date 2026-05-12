@@ -249,7 +249,9 @@ public class OpenAccountServiceImpl implements OpenAccountService {
             log.info("✓ Account created successfully | CIF: {}", accountResponse.getCif());
         } catch (Exception e) {
             log.error("Failed to create account for approved request: {} | Error: {}", requestId, e.getMessage(), e);
-            throw new OpenAccountException("ACCOUNT_CREATION_FAILED", AppConstants.FAILED_CREATE_ACCOUNT);
+            // Pass the actual error message to admin (e.g., date validation errors)
+            String errorMessage = e.getMessage() != null ? e.getMessage() : AppConstants.FAILED_CREATE_ACCOUNT;
+            throw new OpenAccountException("ACCOUNT_CREATION_FAILED", errorMessage);
         }
 
         pendingRequest.setStatus(AccountOpeningRequestStatusEnum.APPROVED);
