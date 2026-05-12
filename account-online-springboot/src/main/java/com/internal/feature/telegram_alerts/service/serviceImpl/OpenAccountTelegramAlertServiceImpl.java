@@ -339,7 +339,17 @@ public class OpenAccountTelegramAlertServiceImpl implements AlertsOpenAccOnlineS
                     ? request.getLegalDateOfBirth().format(DateTimeFormatter.ofPattern("dd MMM yyyy"))
                     : null);
             appendIfNotEmpty(bodyBuilder, "Nationality", request.getNationality());
-            appendIfNotEmpty(bodyBuilder, "Address", request.getLegalAddress());
+
+            // Legal Address
+            appendIfNotEmpty(bodyBuilder, "Legal Address", request.getLegalAddress());
+
+            // Current Address
+            String currentAddress = buildAddressString(
+                    request.getCustomerProvince(),
+                    request.getCustomerDistrict(),
+                    request.getCustomerCommune(),
+                    request.getCustomerVillage());
+            appendIfNotEmpty(bodyBuilder, "Current Address", currentAddress);
 
             String statusText = request.getStatus() != null ? request.getStatus().name() : "N/A";
             String timeFormatted = request.getCreatedAt() != null ? request.getCreatedAt() : LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
@@ -356,4 +366,23 @@ public class OpenAccountTelegramAlertServiceImpl implements AlertsOpenAccOnlineS
             log.error("Failed to send Account Opening alert to Telegram: {}", e.getMessage(), e);
         }
     }
-}
+
+    private String buildAddressString(String province, String district, String commune, String village) {
+        StringBuilder address = new StringBuilder();
+        if (village != null && !village.isEmpty()) {
+            address.append(village);
+        }
+        if (commune != null && !commune.isEmpty()) {
+            if (address.length() > 0) address.append(", ");
+            address.append(commune);
+        }
+        if (district != null && !district.isEmpty()) {
+            if (address.length() > 0) address.append(", ");
+            address.append(district);
+        }
+        if (province != null && !province.isEmpty()) {
+            if (address.length() > 0) address.append(", ");
+            address.append(province);
+        }
+        return address.toString();
+    }
