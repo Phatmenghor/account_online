@@ -10,28 +10,18 @@ import { Separator } from "@/components/ui/separator";
 import { ROUTES } from "@/constants/AppRoutes/routes";
 import { usePagination } from "@/hooks/use-pagination";
 import { useDebounce } from "@/utils/debounce/debounce";
-import { Search } from "lucide-react";
+import { Search, Eye } from "lucide-react";
 import Loading from "@/components/shared/common/loading";
 import { createPendingAccountHistoryTableColumns } from "@/components/shared/table/pending-account-history-content";
 import {
   getAllPendingAccountsService,
-  getReviewHistoryService,
 } from "@/services/dashboard/open-account/pending-account.service";
 import {
   PaginationResponse,
   PendingAccountAdminReviewDto,
-  ReviewHistoryResponseDto,
 } from "@/models/open-account-admin/pending-account.response";
 import PendingAccountDetailModal from "@/components/shared/modal/pending-account-detail";
-import RequestAuditTrailModal from "@/components/shared/modal/request-audit-trail";
 import { AppToast } from "@/components/shared/toast/app-toast";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
 function ReviewHistory() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -44,21 +34,12 @@ function ReviewHistory() {
   const [selectedAccount, setSelectedAccount] =
     useState<PendingAccountAdminReviewDto | null>(null);
 
-  // Audit Trail Modal
-  const [isAuditTrailOpen, setIsAuditTrailOpen] = useState(false);
-  const [auditTrailData, setAuditTrailData] =
-    useState<ReviewHistoryResponseDto | null>(null);
-  const [isAuditTrailLoading, setIsAuditTrailLoading] = useState(false);
-
-  // Status Filter
-  const [statusFilter, setStatusFilter] = useState<string>("ALL");
-
   const debouncedSearchQuery = useDebounce(searchQuery, 400);
   const { currentPage, handlePageChange } = usePagination({
     baseRoute: "/review-history",
   });
 
-  // Load history from API
+  // Load pending reviews only
   const loadHistory = useCallback(async () => {
     setIsLoading(true);
     try {
@@ -66,25 +47,22 @@ function ReviewHistory() {
         search: debouncedSearchQuery,
         pageNo: currentPage,
         pageSize: 15,
+        status: "PENDING",
       };
-
-      if (statusFilter !== "ALL") {
-        payload.status = statusFilter;
-      }
 
       const response = await getAllPendingAccountsService(payload);
       setHistoryData(response);
     } catch (error) {
-      console.error("Failed to fetch history:", error);
+      console.error("Failed to fetch pending reviews:", error);
       AppToast({
         type: "error",
-        message: "Failed to load history",
+        message: "Failed to load pending reviews",
         description: "Please try again later",
       });
     } finally {
       setIsLoading(false);
     }
-  }, [debouncedSearchQuery, currentPage, statusFilter]);
+  }, [debouncedSearchQuery, currentPage]);
 
   useEffect(() => {
     loadHistory();
@@ -94,35 +72,9 @@ function ReviewHistory() {
     setSearchQuery(e.target.value);
   };
 
-  const handleStatusChange = (status: string) => {
-    setStatusFilter(status);
-  };
-
   const handleViewDetail = (account: PendingAccountAdminReviewDto) => {
     setSelectedAccount(account);
     setIsDetailModalOpen(true);
-  };
-
-  const handleViewAuditTrail = async (
-    account: PendingAccountAdminReviewDto
-  ) => {
-    setIsAuditTrailLoading(true);
-    try {
-      const response = await getReviewHistoryService(
-        account.requestId || account.id
-      );
-      setAuditTrailData(response);
-      setIsAuditTrailOpen(true);
-    } catch (error) {
-      console.error("Failed to fetch audit trail:", error);
-      AppToast({
-        type: "error",
-        message: "Failed to load audit trail",
-        description: "Please try again later",
-      });
-    } finally {
-      setIsAuditTrailLoading(false);
-    }
   };
 
   const handleCloseDetailModal = () => {
@@ -130,13 +82,8 @@ function ReviewHistory() {
     setIsDetailModalOpen(false);
   };
 
-  const handleCloseAuditTrail = () => {
-    setAuditTrailData(null);
-    setIsAuditTrailOpen(false);
-  };
-
-  // Enhance columns to include audit trail button
-  const columnsWithAuditTrail = createPendingAccountHistoryTableColumns({
+  // Columns with eye icon for viewing
+  const columnsWithEyeIcon = createPendingAccountHistoryTableColumns({
     data: historyData,
     handlers: {
       handleViewDetail,
@@ -146,22 +93,13 @@ function ReviewHistory() {
       return {
         ...col,
         render: (account: PendingAccountAdminReviewDto) => (
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => handleViewDetail(account)}
-            >
-              View
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => handleViewAuditTrail(account)}
-            >
-              History
-            </Button>
-          </div>
+          <button
+            onClick={() => handleViewDetail(account)}
+            className="text-gray-600 hover:text-gray-900 p-1"
+            title="View details"
+          >
+            <Eye className="h-5 w-5" />
+          </button>
         ),
       };
     }
@@ -176,7 +114,7 @@ function ReviewHistory() {
           <div className="relative flex-1 min-w-[250px]">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              aria-label="search-history"
+              aria-label="search-pending-reviews"
               type="search"
               placeholder="Search by Legal ID or Name"
               value={searchQuery}
@@ -185,32 +123,13 @@ function ReviewHistory() {
             />
           </div>
 
-          <div className="w-[150px]">
-            <Select value={statusFilter} onValueChange={handleStatusChange}>
-              <SelectTrigger className="h-9 text-xs">
-                <SelectValue placeholder="Filter by Status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="ALL">All Status</SelectItem>
-                <SelectItem value="PENDING">Pending</SelectItem>
-                <SelectItem value="APPROVED">Approved</SelectItem>
-                <SelectItem value="REJECTED">Rejected</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="flex gap-2">
-            <Button
-              size="default"
-              variant="outline"
-              onClick={() => {
-                setSearchQuery("");
-                setStatusFilter("ALL");
-              }}
-            >
-              Reset
-            </Button>
-          </div>
+          <Button
+            size="default"
+            variant="outline"
+            onClick={() => setSearchQuery("")}
+          >
+            Reset
+          </Button>
         </div>
 
         <Separator className="bg-gray-300" />
@@ -221,9 +140,9 @@ function ReviewHistory() {
             <div className="flex-1 overflow-x-auto">
               <DataTable
                 data={historyData?.content || []}
-                columns={columnsWithAuditTrail}
+                columns={columnsWithEyeIcon}
                 loading={isLoading}
-                emptyMessage="No history records found"
+                emptyMessage="No pending reviews found"
                 getRowKey={(account) => account.id ?? crypto.randomUUID()}
               />
 
@@ -248,14 +167,6 @@ function ReviewHistory() {
             isReadOnly={true}
           />
         )}
-
-        {/* AUDIT TRAIL MODAL */}
-        <RequestAuditTrailModal
-          isOpen={isAuditTrailOpen}
-          onClose={handleCloseAuditTrail}
-          auditTrail={auditTrailData}
-          isLoading={isAuditTrailLoading}
-        />
       </CardContent>
     </Card>
   );
