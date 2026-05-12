@@ -14,7 +14,7 @@ import { Search, Eye } from "lucide-react";
 import Loading from "@/components/shared/common/loading";
 import { createPendingAccountHistoryTableColumns } from "@/components/shared/table/pending-account-history-content";
 import {
-  getAllPendingAccountsService,
+  getAllOpeningRequestHistoryService,
 } from "@/services/dashboard/open-account/pending-account.service";
 import {
   PaginationResponse,
@@ -47,7 +47,7 @@ function ReviewHistory() {
     baseRoute: "/review-history",
   });
 
-  // Load history with optional status filter
+  // Load history from history table with all status changes
   const loadHistory = useCallback(async () => {
     setIsLoading(true);
     try {
@@ -61,7 +61,7 @@ function ReviewHistory() {
         payload.status = statusFilter;
       }
 
-      const response = await getAllPendingAccountsService(payload);
+      const response = await getAllOpeningRequestHistoryService(payload);
       setHistoryData(response);
     } catch (error) {
       console.error("Failed to fetch review history:", error);

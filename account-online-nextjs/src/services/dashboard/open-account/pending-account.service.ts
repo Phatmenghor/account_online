@@ -14,9 +14,8 @@ import {
 
 /**
  * 🔹 Fetch all account opening request history with pagination
- * Returns data from PendingAccountOpeningRequestHistory table
- * Supports filtering by status: "PENDING", "APPROVED", "REJECTED", or omit for all
- * Used for both pending-review (status: PENDING) and review-history (all statuses)
+ * Returns data from PendingAccountOpeningRequest table (current state)
+ * Used for pending-review page (status: PENDING) and quick filtering
  */
 export async function getAllPendingAccountsService(
   request: GetAllPendingAccountsRequest
@@ -132,6 +131,39 @@ export async function rejectPendingAccountService(
       throw {
         errorMessage:
           "An unexpected error occurred while rejecting pending account.",
+        rawError: error,
+      };
+    }
+  }
+}
+
+/**
+ * 🔹 Fetch all opening request history from history table
+ * Returns complete audit trail with all status changes, remarks, updated_by
+ * Used for review-history page to show all changes per account
+ */
+export async function getAllOpeningRequestHistoryService(
+  request: GetAllPendingAccountsRequest
+): Promise<PaginationResponse<PendingAccountAdminReviewDto>> {
+  try {
+    const response = await axiosClientWithAuth.post(
+      "/api/v1/admin/open-account/opening-request-history",
+      request
+    );
+
+    return response.data.data;
+  } catch (error: unknown) {
+    if (axios.isAxiosError(error)) {
+      const raw = error.response?.data;
+      const message = raw?.message || "Failed to fetch request history.";
+      console.error("[getAllOpeningRequestHistoryService] Axios error:", message);
+
+      throw { errorMessage: message, rawError: raw };
+    } else {
+      console.error("[getAllOpeningRequestHistoryService] Unexpected error:", error);
+      throw {
+        errorMessage:
+          "An unexpected error occurred while fetching request history.",
         rawError: error,
       };
     }
