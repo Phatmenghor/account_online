@@ -39,7 +39,7 @@ function ReviewHistory() {
     baseRoute: "/review-history",
   });
 
-  // Load pending reviews only
+  // Load history for all statuses
   const loadHistory = useCallback(async () => {
     setIsLoading(true);
     try {
@@ -47,16 +47,15 @@ function ReviewHistory() {
         search: debouncedSearchQuery,
         pageNo: currentPage,
         pageSize: 15,
-        status: "PENDING",
       };
 
       const response = await getAllPendingAccountsService(payload);
       setHistoryData(response);
     } catch (error) {
-      console.error("Failed to fetch pending reviews:", error);
+      console.error("Failed to fetch review history:", error);
       AppToast({
         type: "error",
-        message: "Failed to load pending reviews",
+        message: "Failed to load review history",
         description: "Please try again later",
       });
     } finally {
@@ -114,7 +113,7 @@ function ReviewHistory() {
           <div className="relative flex-1 min-w-[250px]">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              aria-label="search-pending-reviews"
+              aria-label="search-review-history"
               type="search"
               placeholder="Search by Legal ID or Name"
               value={searchQuery}
@@ -142,7 +141,7 @@ function ReviewHistory() {
                 data={historyData?.content || []}
                 columns={columnsWithEyeIcon}
                 loading={isLoading}
-                emptyMessage="No pending reviews found"
+                emptyMessage="No history records found"
                 getRowKey={(account) => account.id ?? crypto.randomUUID()}
               />
 
