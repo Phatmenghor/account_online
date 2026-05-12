@@ -132,6 +132,9 @@ export interface PendingAccountAdminReviewDto {
   amlStatus?: string;
   remark?: string;
 
+  // Audit trail fields (for history records)
+  actionUsername?: string;
+
   // AML result data (clean AML screening data only)
   amlResultData?: AmlResultForPendingAccountDto;
 
