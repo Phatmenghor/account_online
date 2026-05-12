@@ -49,6 +49,13 @@ public class MenuConstant {
             public static final String HREF = "/account-online-success";
             public static final int ORDER = 4;
         }
+
+        public static class ReportSuccess {
+            public static final String TITLE = "Report Success Account";
+            public static final String ICON = null;
+            public static final String HREF = "/report-account-online-success";
+            public static final int ORDER = 5;
+        }
     }
 
     public static class Aml {
