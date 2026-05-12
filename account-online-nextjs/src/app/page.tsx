@@ -506,6 +506,7 @@ export default function OpenAccountPage() {
           onClose={handleSuccessModalClose}
           title={successData.title}
           message={successData.message}
+          status={successData.status}
         />
         <SubmitErrorModal
           isOpen={showSubmitErrorModal}

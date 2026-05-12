@@ -11,6 +11,7 @@ interface SuccessModalProps {
   title?: string;
   message?: string;
   description?: string;
+  status?: string;
 }
 
 export default function SubmitSuccessModal({
@@ -19,8 +20,23 @@ export default function SubmitSuccessModal({
   title,
   message,
   description,
+  status = "PENDING",
 }: SuccessModalProps) {
   const translate = useTranslations("NIDPage");
+  const getStatusDisplay = (s: string) => {
+    switch (s?.toUpperCase()) {
+      case "PENDING":
+        return { label: "ស្ថានភាពរង់ចាំ", color: "text-amber-600", bg: "from-amber-50 to-yellow-50", border: "border-amber-200" };
+      case "APPROVED":
+        return { label: "ឯកភាព", color: "text-emerald-600", bg: "from-emerald-50 to-green-50", border: "border-emerald-200" };
+      case "REJECTED":
+        return { label: "បដិសេធ", color: "text-red-600", bg: "from-red-50 to-rose-50", border: "border-red-200" };
+      default:
+        return { label: s, color: "text-gray-600", bg: "from-gray-50 to-slate-50", border: "border-gray-200" };
+    }
+  };
+
+  const statusDisplay = getStatusDisplay(status);
 
   return (
     <AnimatePresence>
@@ -88,6 +104,21 @@ export default function SubmitSuccessModal({
               >
                 {message}
               </motion.p>
+
+              {/* Status Section */}
+              <motion.div
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className={`w-full bg-gradient-to-br ${statusDisplay.bg} border ${statusDisplay.border} rounded-2xl p-4 mb-5`}
+              >
+                <p className={`text-xs font-semibold ${statusDisplay.color} uppercase tracking-wider mb-2`}>
+                  ស្ថានភាព
+                </p>
+                <p className={`text-lg sm:text-xl font-bold ${statusDisplay.color}`}>
+                  {statusDisplay.label}
+                </p>
+              </motion.div>
 
               {description && (
                 <motion.div

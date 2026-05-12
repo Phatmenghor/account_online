@@ -65,6 +65,7 @@ export const useAccountSubmission = ({
   const [successData, setSuccessData] = useState({
     title: "",
     message: "",
+    status: "PENDING",
   });
   const [showSubmitErrorModal, setShowSubmitErrorModal] = useState(false);
   const [submitErrorData, setSubmitErrorData] = useState<{
@@ -239,6 +240,7 @@ export const useAccountSubmission = ({
       setSuccessData({
         title: "សូមស្វាគមន៍",
         message: response?.message || "ស្នើសុំបង្កើតគណនីរបស់អ្នកត្រូវបានបញ្ជូនដោយជោគជ័យ។",
+        status: "PENDING",
       });
       setShowSuccessModal(true);
     } catch (error: any) {
