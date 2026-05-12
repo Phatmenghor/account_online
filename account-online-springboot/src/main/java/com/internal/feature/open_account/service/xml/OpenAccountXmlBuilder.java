@@ -254,31 +254,36 @@ public class OpenAccountXmlBuilder {
             LocalDate localDate = null;
             LocalDate now = LocalDate.now();
 
+            log.debug("Formatting date for T24: input='{}', today={}", date, now);
+
             if (date.matches("\\d{8}")) {
                 // Try to parse as T24 format (yyyyMMdd)
                 localDate = LocalDate.parse(date, T24_DATE_FORMATTER);
                 log.debug("Parsed date {} as T24 format (yyyyMMdd): {}", date, localDate);
-            } else {
+            } else if (date.matches("\\d{4}-\\d{2}-\\d{2}")) {
                 // Try to parse as ISO format (yyyy-MM-dd)
                 localDate = LocalDate.parse(date, DATE_FORMATTER);
                 log.debug("Parsed date {} as ISO format (yyyy-MM-dd): {}", date, localDate);
+            } else {
+                log.warn("Date {} does not match expected formats (yyyyMMdd or yyyy-MM-dd), attempting to parse anyway", date);
+                localDate = LocalDate.parse(date, DATE_FORMATTER);
             }
 
             // Validate date is not in the future
             if (localDate.isAfter(now)) {
                 String currentDate = now.format(DATE_FORMATTER);
-                log.error("Date validation failed: {} is AFTER current date {}. T24 does not accept future dates.", localDate, currentDate);
+                log.error("Date validation FAILED: parsed_date={} is AFTER current_date={}. NID issued dates cannot be in future.", localDate, currentDate);
                 throw new OpenAccountException("INVALID_DATE",
-                    "The date " + date + " is in the future (current date: " + currentDate + "). Please provide a valid date.");
+                    "The date " + localDate.format(DATE_FORMATTER) + " is in the future (current date: " + currentDate + "). Issued dates and birth dates must be in the past. Please verify the NID data.");
             }
 
             String formatted = localDate.format(T24_DATE_FORMATTER);
-            log.debug("Formatted date {} → {} (T24 format)", date, formatted);
+            log.info("Date formatted successfully: {} → {} (T24 format)", date, formatted);
             return formatted;
         } catch (OpenAccountException e) {
             throw e;
         } catch (Exception e) {
-            log.warn("Could not format date {}, using as-is: {}", date, e.getMessage());
+            log.error("Failed to parse date {} with message: {}. Defaulting to original value.", date, e.getMessage());
             return date;
         }
     }

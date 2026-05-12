@@ -30,10 +30,12 @@ public class OpenAccountExceptionHandler {
 
     @ExceptionHandler(OpenAccountException.class)
     public ResponseEntity<ErrorResponse> handleOpenAccountException(OpenAccountException ex) {
-        log.warn("Open account error [{}]: {}", ex.getErrorCode(), ex.getMessage());
+        String logLevel = "INVALID_DATE".equals(ex.getErrorCode()) ? "INFO" : "WARN";
+        log.warn("Open account error [{}]: {} [{}]", ex.getErrorCode(), ex.getMessage(), logLevel);
 
         Map<String, Object> details = new HashMap<>();
         details.put("errorCode", ex.getErrorCode());
+        details.put("timestamp", LocalDateTime.now().toString());
         if (ex.getData() != null) {
             details.putAll(ex.getData());
         }

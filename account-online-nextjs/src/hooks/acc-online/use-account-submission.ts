@@ -110,31 +110,51 @@ export const useAccountSubmission = ({
   const validateDates = (): boolean => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
+    const todayFormatted = today.toISOString().split('T')[0];
 
     // Validate legal issue date (issuedDate from NID)
     if (formData.issuedDate) {
       const issuedDate = new Date(formData.issuedDate);
+      if (isNaN(issuedDate.getTime())) {
+        showError({
+          title: "កាលបរិច្ឆេទមិនត្រឹមត្រូវ",
+          message: `មិនអាចវិश្ញាសនកាលបរិច្ឆេទចេញលិខិត (${formData.issuedDate})។ ទម្រង់ត្រឹមត្រូវគឺ DD/MM/YYYY ឬ YYYY-MM-DD។`,
+        });
+        return false;
+      }
+
+      issuedDate.setHours(0, 0, 0, 0);
       if (issuedDate > today) {
         showError({
           title: "កាលបរិច្ឆេទមិនត្រឹមត្រូវ",
-          message: `កាលបរិច្ឆេទចេញលិខិត (${formData.issuedDate}) មិនអាចជាកាលបរិច្ឆេទពេលអនាគតបានទេ។ សូមពិនិត្យឡើងវិញ និងព្យាយាមម្ដងទៀត។`,
+          message: `កាលបរិច្ឆេទចេញលិខិត (${formData.issuedDate}) មិនអាចជាកាលបរិច្ឆេទពេលអនាគតបានទេ។ សូមប្រើនឹង៖ ${todayFormatted} ឬលឿងជាង។`,
         });
         return false;
       }
     }
 
-    // Validate date of birth (not too far in future)
+    // Validate date of birth
     if (formData.dob) {
       const dob = new Date(formData.dob);
+      if (isNaN(dob.getTime())) {
+        showError({
+          title: "កាលបរិច្ឆេទមិនត្រឹមត្រូវ",
+          message: `មិនអាចវិស្ញាសនកាលបរិច្ឆេទកំណើត (${formData.dob})។ ទម្រង់ត្រឹមត្រូវគឺ DD/MM/YYYY ឬ YYYY-MM-DD។`,
+        });
+        return false;
+      }
+
+      dob.setHours(0, 0, 0, 0);
       if (dob > today) {
         showError({
           title: "កាលបរិច្ឆេទមិនត្រឹមត្រូវ",
-          message: `កាលបរិច្ឆេទកំណើត (${formData.dob}) មិនអាចជាកាលបរិច្ឆេទពេលអនាគតបានទេ។ សូមពិនិត្យឡើងវិញ និងព្យាយាមម្ដងទៀត។`,
+          message: `កាលបរិច្ឆេទកំណើត (${formData.dob}) មិនអាចជាកាលបរិច្ឆេទពេលអនាគតបានទេ។ សូមប្រើ៖ ${todayFormatted} ឬលឿងជាង។`,
         });
         return false;
       }
     }
 
+    // Expiration date is allowed to be in future - no validation needed
     return true;
   };
 
