@@ -41,24 +41,9 @@ export default function PendingAccountDetailModal({
     );
   };
 
-  const buildFullAddress = () => {
-    const parts = [
-      account.customerVillage,
-      account.customerCommune,
-      account.customerDistrict,
-      account.customerProvince
-    ].filter(p => p && p !== "");
-    return parts.reverse().join(", ");
-  };
-
-  const buildPlaceOfBirth = () => {
-    const parts = [
-      account.customerPobVillage,
-      account.customerPobCommune,
-      account.customerPobDistrict,
-      account.customerPobProvince
-    ].filter(p => p && p !== "");
-    return parts.reverse().join(", ");
+  // Get nationality from amlResultData.customerInfo if not available at top level
+  const getNationality = () => {
+    return account.nationality || account.amlResultData?.customerInfo?.nationality;
   };
 
   return (
@@ -135,7 +120,7 @@ export default function PendingAccountDetailModal({
                     <Field label="Name (KH)" value={`${account.legalFirstNameKh || ""} ${account.legalLastNameKh || ""}`.trim()} />
                     <Field label="Date of Birth" value={account.legalDateOfBirth} />
                     <Field label="Gender" value={account.legalGender} />
-                    <Field label="Nationality" value={account.nationality} />
+                    <Field label="Nationality" value={getNationality()} />
                     <Field label="Marital Status" value={account.maritalStatus} />
                     <Field label="Phone" value={account.phoneNumber} />
                     <Field label="Email" value={account.email} />
@@ -146,8 +131,6 @@ export default function PendingAccountDetailModal({
                     <Field label="Document Type" value={account.legalDocName} />
                     <Field label="Issued Date" value={account.legalIssuedDate} />
                     <Field label="Expiration Date" value={account.legalExpiredDate} />
-                    <Field label="Legal Address" value={account.legalAddress} />
-                    <Field label="Place of Birth" value={account.legalPlaceOfBirth} />
                     {account.legalMRZ1 && (
                       <div className="mt-2 p-2 bg-gray-100 rounded text-xs">
                         <p className="font-mono">{account.legalMRZ1}</p>
@@ -157,14 +140,10 @@ export default function PendingAccountDetailModal({
                     )}
                   </div>
 
-                  {/* CURRENT ADDRESS - Full */}
+                  {/* ADDRESS */}
                   <div className="space-y-1">
-                    <Field label="Current Address" value={buildFullAddress()} />
-                  </div>
-
-                  {/* PLACE OF BIRTH - Full */}
-                  <div className="space-y-1">
-                    <Field label="Place of Birth Address" value={buildPlaceOfBirth()} />
+                    <Field label="Address" value={account.legalAddress} />
+                    <Field label="Place of Birth" value={account.legalPlaceOfBirth} />
                   </div>
 
                   {/* EMPLOYMENT & BANKING */}
