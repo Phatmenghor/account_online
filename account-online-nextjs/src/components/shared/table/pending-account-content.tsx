@@ -96,29 +96,6 @@ export const createPendingAccountTableColumns = ({
       ),
     },
 
-    // AML Status
-    {
-      key: "amlStatus",
-      label: "AML Status",
-      truncate: true,
-      maxWidth: "140px",
-      minWidth: "120px",
-      render: (account) => {
-        const amlStatus = account.amlStatus || "---";
-        let badgeVariant: "default" | "secondary" | "destructive" | "outline" = "default";
-
-        if (amlStatus === "PASS" || amlStatus === "CLEAR" || amlStatus === "LOW_RISK") {
-          badgeVariant = "default";
-        } else if (amlStatus === "FAIL" || amlStatus === "BLOCKED" || amlStatus === "HIGH_RISK") {
-          badgeVariant = "destructive";
-        } else if (amlStatus === "REVIEW" || amlStatus === "PENDING" || amlStatus === "MEDIUM_RISK") {
-          badgeVariant = "secondary";
-        }
-
-        return <Badge variant={badgeVariant}>{amlStatus}</Badge>;
-      },
-    },
-
     // Request Status
     {
       key: "status",
