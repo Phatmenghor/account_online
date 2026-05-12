@@ -177,6 +177,9 @@ public class OpenAccountServiceImpl implements OpenAccountService {
             throw new OpenAccountException("PENDING_REQUEST_EXISTS", AppConstants.PENDING_REQUEST_ALREADY_EXISTS);
         }
 
+        // Validate dates are not in the future at submission stage
+        validateSubmissionDates(request);
+
         try {
             log.info("Step 1: Testing connection");
             bankingService.testConnection();
@@ -775,6 +778,46 @@ public class OpenAccountServiceImpl implements OpenAccountService {
         }
 
         return builder.build();
+    }
+
+    private void validateSubmissionDates(CustomerRequest request) {
+        String today = LocalDate.now().format(DateTimeFormatter.ISO_DATE);
+
+        // Validate legal issue date (must be in the past)
+        if (request.getLegalIssueDate() != null && !request.getLegalIssueDate().isEmpty()) {
+            try {
+                LocalDate issueDate = LocalDate.parse(request.getLegalIssueDate(), DateTimeFormatter.ISO_DATE);
+                if (issueDate.isAfter(LocalDate.now())) {
+                    log.error("Invalid legal issue date at submission: {} is in the future. Current date: {}",
+                            request.getLegalIssueDate(), today);
+                    throw new OpenAccountException("INVALID_ISSUE_DATE",
+                            "The legal issue date (" + request.getLegalIssueDate() + ") cannot be in the future (current date: " + today + "). Please provide a valid date.");
+                }
+            } catch (Exception e) {
+                if (e instanceof OpenAccountException) {
+                    throw (OpenAccountException) e;
+                }
+                log.warn("Could not parse legal issue date: {}", request.getLegalIssueDate());
+            }
+        }
+
+        // Validate date of birth (must be in the past)
+        if (request.getDateOfBirth() != null && !request.getDateOfBirth().isEmpty()) {
+            try {
+                LocalDate dob = LocalDate.parse(request.getDateOfBirth(), DateTimeFormatter.ISO_DATE);
+                if (dob.isAfter(LocalDate.now())) {
+                    log.error("Invalid date of birth at submission: {} is in the future. Current date: {}",
+                            request.getDateOfBirth(), today);
+                    throw new OpenAccountException("INVALID_DOB",
+                            "The date of birth (" + request.getDateOfBirth() + ") cannot be in the future (current date: " + today + "). Please provide a valid date.");
+                }
+            } catch (Exception e) {
+                if (e instanceof OpenAccountException) {
+                    throw (OpenAccountException) e;
+                }
+                log.warn("Could not parse date of birth: {}", request.getDateOfBirth());
+            }
+        }
     }
 
     private AmlResultForPendingAccountDto mapToCleanAmlResultDto(AmlStatusDto amlResult) {
