@@ -205,6 +205,9 @@ public class OpenAccountServiceImpl implements OpenAccountService {
             log.info("✓ Request stored for admin approval | ID: {} | Legal ID: {} | AML Status: {}",
                     saved.getId(), legalId, amlStatus);
 
+            // Save initial PENDING status to history
+            saveHistory(saved, AccountOpeningRequestStatusEnum.PENDING, "Account opening request submitted");
+
             return mapToDto(saved);
 
         } catch (OpenAccountException e) {
