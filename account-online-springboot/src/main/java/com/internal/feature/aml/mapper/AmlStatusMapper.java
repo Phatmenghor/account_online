@@ -120,7 +120,6 @@ public interface AmlStatusMapper {
             // Address to customerInfo
             @Mapping(target = "customerInfo.legalAddress", source = "currentAddressName"),
 
-
             @Mapping(target = "placeOfBirthName", source = "placeOfBirthName"),
 
             // AML external info
@@ -136,7 +135,7 @@ public interface AmlStatusMapper {
             @Mapping(target = "rejectedBy", source = "rejectedBy"),
             // Image filenames
             @Mapping(target = "nidImageName", source = "nidImageName"),
-            @Mapping(target = "selfieImageName", source = "selfieImageName"),
+            @Mapping(target = "selfieImageName", source = "selfieImageName")
     })
     AmlStatusDto toStatusDto(AmlStatus status);
 

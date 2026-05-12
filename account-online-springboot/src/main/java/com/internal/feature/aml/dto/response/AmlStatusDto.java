@@ -21,11 +21,11 @@ public class AmlStatusDto {
     // CUSTOMER FIELDS (from CustomerAmlDto)
     private CustomerAmlDto customerInfo; // Nested DTO for customer details
 
-    // AML
+    // AML SCREENING RESULT
     private AmlStatusEnum status;
     private String screeningResult;
 
-    // AML EXTERNAL
+    // AML EXTERNAL SCREENING DATA
     private String riskLevel;
     private String actionTaken;
     private String rulesTriggered;
@@ -33,12 +33,13 @@ public class AmlStatusDto {
     private int totalRulesScore;
     private String trxnID;
 
-    // AUDIT
+    // AUDIT FIELDS
     private UserResponseDto approvedBy;
     private UserResponseDto rejectedBy;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
+    // ADDRESS & CUSTOMER DATA (kept for service use, excluded from API responses)
     private String currentAddressName;
     private String currentAddressCode;
     private String placeOfBirthName;
@@ -46,9 +47,7 @@ public class AmlStatusDto {
     private String maritalStatus;
     private String occupationCode;
     private String occupationStatus;
-
     private String remarks;
-
     private String nidImageName;
     private String selfieImageName;
 }

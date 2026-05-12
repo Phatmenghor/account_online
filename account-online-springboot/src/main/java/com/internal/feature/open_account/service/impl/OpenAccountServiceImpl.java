@@ -358,6 +358,23 @@ public class OpenAccountServiceImpl implements OpenAccountService {
                 .build();
     }
 
+    private AmlStatusDto filterAmlResultData(AmlStatusDto amlResult) {
+        if (amlResult == null) {
+            return null;
+        }
+        // Clear duplicate customer fields to keep amlResultData clean and focused on AML screening
+        amlResult.setCurrentAddressName(null);
+        amlResult.setCurrentAddressCode(null);
+        amlResult.setPlaceOfBirthName(null);
+        amlResult.setPlaceOfBirthCode(null);
+        amlResult.setMaritalStatus(null);
+        amlResult.setOccupationCode(null);
+        amlResult.setOccupationStatus(null);
+        amlResult.setRemarks(null);
+        // Keep nidImageName and selfieImageName as they're part of the AML audit trail
+        return amlResult;
+    }
+
     private String getStatusMessage(AccountOpeningRequestStatusEnum status) {
         if (status == null) {
             return AppConstants.MSG_GENERIC_ERROR;
@@ -582,9 +599,12 @@ public class OpenAccountServiceImpl implements OpenAccountService {
             amlResult.setSelfieImageName(request.getSelfieImageName());
         }
 
-        // Serialize with null exclusion
+        // Serialize with null exclusion (only AML screening fields, not customer data duplicates)
         ObjectMapper nonNullMapper = new ObjectMapper()
                 .setSerializationInclusion(com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL);
+
+        // Filter out duplicate customer fields from amlResultData
+        amlResult = filterAmlResultData(amlResult);
 
         PendingAccountOpeningRequest.PendingAccountOpeningRequestBuilder builder = PendingAccountOpeningRequest.builder()
                 .legalId(request.getLegalId())
