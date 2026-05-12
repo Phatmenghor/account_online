@@ -22,9 +22,17 @@ import {
 } from "@/models/open-account-admin/pending-account.response";
 import PendingAccountDetailModal from "@/components/shared/modal/pending-account-detail";
 import { AppToast } from "@/components/shared/toast/app-toast";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 function ReviewHistory() {
   const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("ALL");
   const [historyData, setHistoryData] =
     useState<PaginationResponse<PendingAccountAdminReviewDto> | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -39,7 +47,7 @@ function ReviewHistory() {
     baseRoute: "/review-history",
   });
 
-  // Load history for all statuses
+  // Load history with optional status filter
   const loadHistory = useCallback(async () => {
     setIsLoading(true);
     try {
@@ -48,6 +56,10 @@ function ReviewHistory() {
         pageNo: currentPage,
         pageSize: 15,
       };
+
+      if (statusFilter !== "ALL") {
+        payload.status = statusFilter;
+      }
 
       const response = await getAllPendingAccountsService(payload);
       setHistoryData(response);
@@ -61,7 +73,7 @@ function ReviewHistory() {
     } finally {
       setIsLoading(false);
     }
-  }, [debouncedSearchQuery, currentPage]);
+  }, [debouncedSearchQuery, currentPage, statusFilter]);
 
   useEffect(() => {
     loadHistory();
@@ -69,6 +81,10 @@ function ReviewHistory() {
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
+  };
+
+  const handleStatusChange = (status: string) => {
+    setStatusFilter(status);
   };
 
   const handleViewDetail = (account: PendingAccountAdminReviewDto) => {
@@ -122,10 +138,27 @@ function ReviewHistory() {
             />
           </div>
 
+          <div className="w-[150px]">
+            <Select value={statusFilter} onValueChange={handleStatusChange}>
+              <SelectTrigger className="h-9 text-xs">
+                <SelectValue placeholder="Filter by Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ALL">All Status</SelectItem>
+                <SelectItem value="PENDING">Pending</SelectItem>
+                <SelectItem value="APPROVED">Approved</SelectItem>
+                <SelectItem value="REJECTED">Rejected</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
           <Button
             size="default"
             variant="outline"
-            onClick={() => setSearchQuery("")}
+            onClick={() => {
+              setSearchQuery("");
+              setStatusFilter("ALL");
+            }}
           >
             Reset
           </Button>

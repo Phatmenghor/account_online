@@ -63,6 +63,30 @@ export const createPendingAccountHistoryTableColumns = ({
       },
     },
 
+    // Phone Number
+    {
+      key: "phoneNumber",
+      label: "Phone Number",
+      truncate: true,
+      maxWidth: "150px",
+      minWidth: "130px",
+      render: (account) => (
+        <span className="font-medium">{account.phoneNumber || "---"}</span>
+      ),
+    },
+
+    // Branch Code
+    {
+      key: "branchCode",
+      label: "Branch Code",
+      truncate: true,
+      maxWidth: "120px",
+      minWidth: "100px",
+      render: (account) => (
+        <span className="font-medium">{account.branchCode || "---"}</span>
+      ),
+    },
+
     // Status
     {
       key: "status",
@@ -95,30 +119,6 @@ export const createPendingAccountHistoryTableColumns = ({
         <span className="font-medium">
           {new Date(account.updatedAt).toLocaleString() || "---"}
         </span>
-      ),
-    },
-
-    // Phone Number
-    {
-      key: "phoneNumber",
-      label: "Phone Number",
-      truncate: true,
-      maxWidth: "150px",
-      minWidth: "130px",
-      render: (account) => (
-        <span className="font-medium">{account.phoneNumber || "---"}</span>
-      ),
-    },
-
-    // Branch Code
-    {
-      key: "branchCode",
-      label: "Branch Code",
-      truncate: true,
-      maxWidth: "120px",
-      minWidth: "100px",
-      render: (account) => (
-        <span className="font-medium">{account.branchCode || "---"}</span>
       ),
     },
 
