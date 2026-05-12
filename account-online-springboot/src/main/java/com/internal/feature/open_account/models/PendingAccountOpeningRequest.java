@@ -226,4 +226,17 @@ public class PendingAccountOpeningRequest extends BaseEntity {
 
     @Column(name = "aml_rules_triggered", columnDefinition = "TEXT")
     private String amlRulesTriggered;
+
+    // === ACCOUNT DETAILS (populated after approval) ===
+    @Column(name = "cif", length = 50)
+    private String cif;
+
+    @Column(name = "mnemonic", length = 50)
+    private String mnemonic;
+
+    @Column(name = "khr_account", length = 50)
+    private String khrAccount;
+
+    @Column(name = "usd_account", length = 50)
+    private String usdAccount;
 }
