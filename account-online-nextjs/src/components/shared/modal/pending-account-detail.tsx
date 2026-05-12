@@ -34,9 +34,9 @@ export default function PendingAccountDetailModal({
   const Field = ({ label, value }: { label: string; value?: any }) => {
     if (!value && value !== 0) return null;
     return (
-      <div className="py-2 border-b border-gray-100 last:border-b-0">
-        <p className="text-xs text-gray-500 mb-0.5">{label}</p>
-        <p className="text-sm font-medium text-gray-900 truncate">{value}</p>
+      <div className="py-3 border-b border-gray-100 last:border-b-0">
+        <p className="text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wide">{label}</p>
+        <p className="text-sm text-gray-900">{value}</p>
       </div>
     );
   };
@@ -95,9 +95,9 @@ export default function PendingAccountDetailModal({
             {/* OVERVIEW TAB */}
             <TabsContent value="overview" className="flex-1 overflow-hidden m-0">
               <ScrollArea className="h-full w-full">
-                <div className="p-6 space-y-6 bg-gray-50">
+                <div className="p-6 space-y-6 bg-white">
                   {/* IMAGES FIRST */}
-                  <div>
+                  <div className="bg-gray-50 p-4 rounded-lg border border-gray-100">
                     <h3 className="text-sm font-bold text-gray-900 mb-4">Identity Documents</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <ImageDisplayCard
@@ -116,7 +116,7 @@ export default function PendingAccountDetailModal({
                   </div>
 
                   {/* REQUEST INFO */}
-                  <div>
+                  <div className="bg-gray-50 p-4 rounded-lg border border-gray-100">
                     <h3 className="text-sm font-bold text-gray-900 mb-4">Request Information</h3>
                     <div className="grid grid-cols-2 gap-4">
                       <Field label="Request Status" value={account.status} />
@@ -126,7 +126,7 @@ export default function PendingAccountDetailModal({
                   </div>
 
                   {/* PERSONAL INFO */}
-                  <div>
+                  <div className="bg-white p-4 rounded-lg border border-gray-100">
                     <h3 className="text-sm font-bold text-gray-900 mb-4">Personal Information</h3>
                     <div className="grid grid-cols-2 gap-4">
                       <Field label="Name (English)" value={`${account.legalFirstNameEn || ""} ${account.legalLastNameEn || ""}`.trim()} />
@@ -141,7 +141,7 @@ export default function PendingAccountDetailModal({
                   </div>
 
                   {/* LEGAL DOCUMENT */}
-                  <div>
+                  <div className="bg-white p-4 rounded-lg border border-gray-100">
                     <h3 className="text-sm font-bold text-gray-900 mb-4">Legal Document</h3>
                     <div className="grid grid-cols-2 gap-4">
                       <Field label="Document Type" value={account.legalDocName} />
@@ -153,7 +153,7 @@ export default function PendingAccountDetailModal({
                   </div>
 
                   {/* EMPLOYMENT & BANKING */}
-                  <div>
+                  <div className="bg-white p-4 rounded-lg border border-gray-100">
                     <h3 className="text-sm font-bold text-gray-900 mb-4">Employment & Banking</h3>
                     <div className="grid grid-cols-2 gap-4">
                       <Field label="Company Name" value={account.companyName} />
@@ -183,15 +183,15 @@ export default function PendingAccountDetailModal({
             {/* AML TAB */}
             <TabsContent value="aml" className="flex-1 overflow-hidden m-0">
               <ScrollArea className="h-full w-full">
-                <div className="p-6 space-y-6 bg-gray-50">
+                <div className="p-6 space-y-6 bg-white">
                   {account.amlResultData ? (
                     <>
                       {/* AML SCREENING RESULT */}
-                      <div>
+                      <div className="bg-white p-4 rounded-lg border border-gray-100">
                         <h3 className="text-sm font-bold text-gray-900 mb-4">AML Screening Result</h3>
-                        <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg">
-                          <div>
-                            <p className="text-xs text-gray-500 mb-1">Status</p>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="py-3 border-b border-gray-100">
+                            <p className="text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wide">Status</p>
                             <Badge className={
                               account.amlResultData.status === "APPROVE" ? "bg-green-600" :
                               account.amlResultData.status === "REJECT" ? "bg-red-600" :
@@ -200,40 +200,38 @@ export default function PendingAccountDetailModal({
                               {account.amlResultData.status}
                             </Badge>
                           </div>
-                          <div>
-                            <p className="text-xs text-gray-500 mb-1">Risk Level</p>
-                            <p className="text-sm font-medium text-gray-900">{account.amlResultData.riskLevel}</p>
+                          <div className="py-3 border-b border-gray-100">
+                            <p className="text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wide">Risk Level</p>
+                            <p className="text-sm text-gray-900">{account.amlResultData.riskLevel}</p>
                           </div>
-                          <div>
-                            <p className="text-xs text-gray-500 mb-1">Service Name</p>
-                            <p className="text-sm font-medium text-gray-900 truncate">{account.amlResultData.serviceName}</p>
+                          <div className="py-3 border-b border-gray-100">
+                            <p className="text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wide">Service Name</p>
+                            <p className="text-sm text-gray-900">{account.amlResultData.serviceName}</p>
                           </div>
-                          <div>
-                            <p className="text-xs text-gray-500 mb-1">Rules Score</p>
-                            <p className="text-sm font-medium text-gray-900">{account.amlResultData.totalRulesScore}</p>
+                          <div className="py-3 border-b border-gray-100">
+                            <p className="text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wide">Rules Score</p>
+                            <p className="text-sm text-gray-900">{account.amlResultData.totalRulesScore}</p>
                           </div>
-                          <div className="col-span-2">
-                            <p className="text-xs text-gray-500 mb-1">Transaction ID</p>
-                            <p className="text-sm font-medium text-gray-900 truncate">{account.amlResultData.trxnID}</p>
+                          <div className="col-span-2 py-3 border-b border-gray-100">
+                            <p className="text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wide">Transaction ID</p>
+                            <p className="text-sm text-gray-900">{account.amlResultData.trxnID}</p>
                           </div>
                         </div>
                       </div>
 
                       {/* SCREENING DETAILS */}
                       {account.amlResultData.screeningResult && (
-                        <div>
+                        <div className="bg-white p-4 rounded-lg border border-gray-100">
                           <h3 className="text-sm font-bold text-gray-900 mb-4">Screening Details</h3>
-                          <div className="bg-white border border-gray-200 p-4 rounded-lg">
-                            <p className="text-sm text-gray-700 font-mono break-words">{account.amlResultData.screeningResult}</p>
-                          </div>
+                          <p className="text-sm text-gray-700 font-mono break-words">{account.amlResultData.screeningResult}</p>
                         </div>
                       )}
 
                       {/* VERIFIED CUSTOMER DATA */}
                       {account.amlResultData.customerInfo && (
-                        <div>
+                        <div className="bg-white p-4 rounded-lg border border-gray-100">
                           <h3 className="text-sm font-bold text-gray-900 mb-4">Verified Customer Data</h3>
-                          <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg">
+                          <div className="grid grid-cols-2 gap-4">
                             <Field label="Legal ID" value={account.amlResultData.customerInfo.legalId} />
                             <Field label="Name" value={`${account.amlResultData.customerInfo.givenName || ""} ${account.amlResultData.customerInfo.familyName || ""}`.trim()} />
                             <Field label="Date of Birth" value={account.amlResultData.customerInfo.dateOfBirth} />
@@ -248,7 +246,7 @@ export default function PendingAccountDetailModal({
                       )}
 
                       {/* AUDIT TRAIL */}
-                      <div>
+                      <div className="bg-white p-4 rounded-lg border border-gray-100">
                         <h3 className="text-sm font-bold text-gray-900 mb-4">Audit Trail</h3>
                         <div className="grid grid-cols-2 gap-4">
                           <Field label="Created At" value={account.amlResultData.createdAt} />
