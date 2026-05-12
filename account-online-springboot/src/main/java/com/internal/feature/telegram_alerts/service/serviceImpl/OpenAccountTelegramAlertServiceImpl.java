@@ -384,3 +384,4 @@ public class OpenAccountTelegramAlertServiceImpl implements AlertsOpenAccOnlineS
         }
         return address.toString();
     }
+}
