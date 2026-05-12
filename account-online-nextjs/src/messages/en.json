@@ -239,9 +239,9 @@
   },
   "adminReview": {
     "approveSuccess": "Account Approved Successfully",
-    "approveSuccessDesc": "Account for {{customerName}} has been approved and is now pending activation.",
+    "approveSuccessDesc": "Account for {{customerName}} has been approved. The customer will be notified and account activation will proceed within 1-3 business days.",
     "rejectSuccess": "Account Rejected Successfully",
-    "rejectSuccessDesc": "Account for {{customerName}} has been rejected due to review findings.",
+    "rejectSuccessDesc": "Account for {{customerName}} has been rejected. The customer will be notified with the rejection reason.",
     "pendingReview": "Pending Review",
     "statusUpdated": "Account Status Updated",
     "processedAt": "Processed At"
