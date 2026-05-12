@@ -31,6 +31,9 @@ public class PendingAccountOpeningRequestHistoryDto {
     private String legalGender;
     private String legalAddress;
     private String legalPlaceOfBirth;
+    private String legalMRZ1;
+    private String legalMRZ2;
+    private String legalMRZ3;
 
     // === CUSTOMER INFO ===
     private String phoneNumber;
@@ -41,6 +44,25 @@ public class PendingAccountOpeningRequestHistoryDto {
     private String maritalStatus;
     private String nationality;
     private String amlStatus;
+
+    // === CUSTOMER ADDRESS ===
+    private String customerProvince;
+    private String customerDistrict;
+    private String customerCommune;
+    private String customerVillage;
+
+    // === PLACE OF BIRTH ===
+    private String customerPobProvince;
+    private String customerPobDistrict;
+    private String customerPobCommune;
+    private String customerPobVillage;
+
+    // === BANKING INFO ===
+    private String productAccount;
+    private String categoryAccount;
+    private String customerRole;
+    private String loanOfficer;
+    private String releasedBy;
 
     // === IMAGES ===
     private String nidImageName;

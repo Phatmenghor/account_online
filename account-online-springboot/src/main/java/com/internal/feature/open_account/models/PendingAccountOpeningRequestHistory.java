@@ -84,6 +84,15 @@ public class PendingAccountOpeningRequestHistory extends BaseEntity {
     @Column(name = "legal_place_of_birth")
     private String legalPlaceOfBirth;
 
+    @Column(name = "legal_mrz1", columnDefinition = "TEXT")
+    private String legalMRZ1;
+
+    @Column(name = "legal_mrz2", columnDefinition = "TEXT")
+    private String legalMRZ2;
+
+    @Column(name = "legal_mrz3", columnDefinition = "TEXT")
+    private String legalMRZ3;
+
     @Column(name = "phone_number")
     private String phoneNumber;
 
@@ -107,6 +116,48 @@ public class PendingAccountOpeningRequestHistory extends BaseEntity {
 
     @Column(name = "aml_status")
     private String amlStatus;
+
+    // === CUSTOMER ADDRESS ===
+    @Column(name = "customer_province")
+    private String customerProvince;
+
+    @Column(name = "customer_district")
+    private String customerDistrict;
+
+    @Column(name = "customer_commune")
+    private String customerCommune;
+
+    @Column(name = "customer_village")
+    private String customerVillage;
+
+    // === PLACE OF BIRTH ===
+    @Column(name = "customer_pob_province")
+    private String customerPobProvince;
+
+    @Column(name = "customer_pob_district")
+    private String customerPobDistrict;
+
+    @Column(name = "customer_pob_commune")
+    private String customerPobCommune;
+
+    @Column(name = "customer_pob_village")
+    private String customerPobVillage;
+
+    // === BANKING INFO ===
+    @Column(name = "product_account")
+    private String productAccount;
+
+    @Column(name = "category_account")
+    private String categoryAccount;
+
+    @Column(name = "customer_role")
+    private String customerRole;
+
+    @Column(name = "loan_officer")
+    private String loanOfficer;
+
+    @Column(name = "released_by")
+    private String releasedBy;
 
     // === IMAGE FILES ===
     @Column(name = "nid_image_name")
