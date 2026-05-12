@@ -53,7 +53,7 @@ public class OpenAccountXmlBuilder {
         // Format dates to T24 format (YYYYMMDD)
         String dateOfBirth = formatDateForT24(request.getDateOfBirth());
         String legalIssueDate = formatDateForT24(request.getLegalIssueDate());
-        String legalExpDate = formatDateForT24(request.getLegalExpireDate());
+        String legalExpDate = formatDateForT24NoFutureCheck(request.getLegalExpireDate());
 
         // Determine title from gender (use request title if provided)
         String title = getOrDefault(request.getTitle(), determineTitle(request.getGender()));
@@ -274,6 +274,26 @@ public class OpenAccountXmlBuilder {
             throw e;
         } catch (Exception e) {
             log.warn("Could not format date {}, using as-is: {}", date, e.getMessage());
+            return date;
+        }
+    }
+
+    private String formatDateForT24NoFutureCheck(String date) {
+        if (date == null || date.isEmpty()) {
+            return "";
+        }
+        try {
+            LocalDate localDate = null;
+
+            if (date.matches("\\d{8}")) {
+                localDate = LocalDate.parse(date, T24_DATE_FORMATTER);
+            } else {
+                localDate = LocalDate.parse(date, DATE_FORMATTER);
+            }
+
+            return localDate.format(T24_DATE_FORMATTER);
+        } catch (Exception e) {
+            log.warn("Could not format expiration date {}, using as-is: {}", date, e.getMessage());
             return date;
         }
     }
