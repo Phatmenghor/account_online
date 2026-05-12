@@ -252,24 +252,29 @@ public class OpenAccountXmlBuilder {
         }
         try {
             LocalDate localDate = null;
+            LocalDate now = LocalDate.now();
 
             if (date.matches("\\d{8}")) {
                 // Try to parse as T24 format (yyyyMMdd)
                 localDate = LocalDate.parse(date, T24_DATE_FORMATTER);
+                log.debug("Parsed date {} as T24 format (yyyyMMdd): {}", date, localDate);
             } else {
                 // Try to parse as ISO format (yyyy-MM-dd)
                 localDate = LocalDate.parse(date, DATE_FORMATTER);
+                log.debug("Parsed date {} as ISO format (yyyy-MM-dd): {}", date, localDate);
             }
 
             // Validate date is not in the future
-            if (localDate.isAfter(LocalDate.now())) {
-                String currentDate = LocalDate.now().format(DATE_FORMATTER);
-                log.error("Invalid date: {} is in the future. Current date: {}. T24 does not accept future dates.", date, currentDate);
+            if (localDate.isAfter(now)) {
+                String currentDate = now.format(DATE_FORMATTER);
+                log.error("Date validation failed: {} is AFTER current date {}. T24 does not accept future dates.", localDate, currentDate);
                 throw new OpenAccountException("INVALID_DATE",
                     "The date " + date + " is in the future (current date: " + currentDate + "). Please provide a valid date.");
             }
 
-            return localDate.format(T24_DATE_FORMATTER);
+            String formatted = localDate.format(T24_DATE_FORMATTER);
+            log.debug("Formatted date {} → {} (T24 format)", date, formatted);
+            return formatted;
         } catch (OpenAccountException e) {
             throw e;
         } catch (Exception e) {
