@@ -180,12 +180,17 @@ function PendingReview() {
           });
         });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error performing action:", error);
+      
+      // Extract specific error message from backend
+      const errorMessage = error?.errorMessage || error?.message || "Failed to process action";
+      const errorDescription = error?.rawError?.message || "Please try again later";
+      
       AppToast({
         type: "error",
-        message: "Failed to process action",
-        description: "Please try again later",
+        message: errorMessage,
+        description: errorDescription,
       });
     } finally {
       setIsActionDialogOpen(false);
