@@ -3,20 +3,21 @@
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
-  DialogTitle,
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PendingAccountAdminReviewDto } from "@/models/open-account-admin/pending-account.response";
-import { Shield, Briefcase, Image as ImageIcon } from "lucide-react";
+import { Shield, ImageIcon, CheckCircle, XCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import ImageDisplayCard from "@/components/shared/card/image-display-card";
 
 interface PendingAccountDetailModalProps {
   account?: PendingAccountAdminReviewDto;
   isOpen: boolean;
   onClose: () => void;
+  onApprove?: (account: PendingAccountAdminReviewDto) => void;
+  onReject?: (account: PendingAccountAdminReviewDto) => void;
   isReadOnly?: boolean;
 }
 
@@ -24,6 +25,9 @@ export default function PendingAccountDetailModal({
   account,
   isOpen,
   onClose,
+  onApprove,
+  onReject,
+  isReadOnly = false,
 }: PendingAccountDetailModalProps) {
   if (!account) return null;
 
@@ -44,21 +48,16 @@ export default function PendingAccountDetailModal({
     </div>
   );
 
-  const getStatusColor = (status?: string) => {
-    if (!status) return "bg-gray-50 border-gray-200";
-    if (status === "PENDING") return "bg-yellow-50 border-yellow-200";
-    if (status === "APPROVED") return "bg-green-50 border-green-200";
-    if (status === "REJECTED") return "bg-red-50 border-red-200";
-    return "bg-gray-50 border-gray-200";
-  };
-
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-5xl max-h-[90vh] overflow-hidden flex flex-col">
-        {/* Clean Header */}
-        <DialogHeader className="flex-shrink-0 pb-3 border-b">
+      <DialogContent className="max-w-5xl max-h-[95vh] overflow-hidden flex flex-col p-0">
+        {/* HEADER */}
+        <div className="flex-shrink-0 border-b bg-white px-6 py-4">
           <div className="flex items-center justify-between">
-            <DialogTitle className="text-lg">{account.legalId}</DialogTitle>
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900">{account.legalId}</h2>
+              <p className="text-xs text-gray-500 mt-1">Request ID: {account.requestId}</p>
+            </div>
             <div className="flex gap-2">
               <Badge
                 variant={
@@ -72,17 +71,17 @@ export default function PendingAccountDetailModal({
               <Badge variant="outline">{account.amlStatus}</Badge>
             </div>
           </div>
-        </DialogHeader>
+        </div>
 
-        {/* Tabs */}
+        {/* BODY */}
         <div className="flex-1 overflow-hidden flex flex-col">
           <Tabs defaultValue="overview" className="w-full flex flex-col h-full">
-            <TabsList className="grid w-full grid-cols-4 flex-shrink-0">
+            <TabsList className="grid w-full grid-cols-4 flex-shrink-0 rounded-none border-b bg-gray-50 px-6">
               <TabsTrigger value="overview" className="text-xs">
                 Overview
               </TabsTrigger>
               <TabsTrigger value="details" className="text-xs">
-                Customer Details
+                Details
               </TabsTrigger>
               <TabsTrigger value="aml" className="text-xs">
                 <Shield className="w-4 h-4 mr-1" />
@@ -97,30 +96,29 @@ export default function PendingAccountDetailModal({
             {/* OVERVIEW TAB */}
             <TabsContent value="overview" className="flex-1 overflow-hidden">
               <ScrollArea className="h-full">
-                <div className="p-4 space-y-4">
+                <div className="p-6 space-y-4">
                   {/* Request Info */}
                   <Section title="Request Information">
-                    <Field label="Request ID" value={account.requestId} />
-                    <Field label="Legal ID" value={account.legalId} />
                     <Field label="Status" value={account.status} />
+                    <Field label="AML Status" value={account.amlStatus} />
                     <Field label="Submitted" value={new Date(account.createdAt).toLocaleString()} />
                     {account.updatedAt && <Field label="Updated" value={new Date(account.updatedAt).toLocaleString()} />}
                   </Section>
 
                   {/* AML Summary */}
                   {account.amlResultData && (
-                    <div className={`p-3 rounded-lg border-2 ${
+                    <div className={`p-4 rounded-lg border-2 ${
                       account.amlResultData.status === "APPROVE"
                         ? "bg-green-50 border-green-300"
                         : account.amlResultData.status === "REJECT"
                         ? "bg-red-50 border-red-300"
                         : "bg-yellow-50 border-yellow-300"
                     }`}>
-                      <div className="flex items-center gap-2 mb-2">
-                        <Shield className="h-4 w-4" />
-                        <span className="font-semibold text-sm">AML: {account.amlResultData.status}</span>
+                      <div className="flex items-center gap-2 mb-3">
+                        <Shield className="h-5 w-5" />
+                        <span className="font-semibold">AML: {account.amlResultData.status}</span>
                       </div>
-                      <div className="text-xs space-y-1">
+                      <div className="text-sm space-y-1">
                         <p>Risk Level: <span className="font-semibold">{account.amlResultData.riskLevel}</span></p>
                         <p>Rules Score: <span className="font-semibold">{account.amlResultData.totalRulesScore}</span></p>
                         {account.amlResultData.serviceName && (
@@ -132,7 +130,8 @@ export default function PendingAccountDetailModal({
 
                   {/* Customer Quick View */}
                   <Section title="Customer Information">
-                    <Field label="Full Name" value={`${account.legalFirstNameEn || ""} ${account.legalLastNameEn || ""}`.trim()} />
+                    <Field label="Full Name (EN)" value={`${account.legalFirstNameEn || ""} ${account.legalLastNameEn || ""}`.trim()} />
+                    <Field label="Full Name (KH)" value={`${account.legalFirstNameKh || ""} ${account.legalLastNameKh || ""}`.trim()} />
                     <Field label="Date of Birth" value={account.legalDateOfBirth} />
                     <Field label="Phone Number" value={account.phoneNumber} />
                     <Field label="Email" value={account.email} />
@@ -150,10 +149,10 @@ export default function PendingAccountDetailModal({
               </ScrollArea>
             </TabsContent>
 
-            {/* CUSTOMER DETAILS TAB (Personal + Address + Legal + Business) */}
+            {/* DETAILS TAB */}
             <TabsContent value="details" className="flex-1 overflow-hidden">
               <ScrollArea className="h-full">
-                <div className="p-4 space-y-4">
+                <div className="p-6 space-y-4">
                   {/* Personal Information */}
                   <Section title="Personal Information">
                     <Field label="Given Name (EN)" value={account.legalFirstNameEn} />
@@ -233,12 +232,12 @@ export default function PendingAccountDetailModal({
             {/* AML TAB */}
             <TabsContent value="aml" className="flex-1 overflow-hidden">
               <ScrollArea className="h-full">
-                <div className="p-4 space-y-4">
+                <div className="p-6 space-y-4">
                   {account.amlResultData ? (
                     <>
                       {/* AML Status */}
                       <Section title="AML Screening Result">
-                        <div className={`p-3 rounded-lg border-2 ${
+                        <div className={`p-4 rounded-lg border-2 ${
                           account.amlResultData.status === "APPROVE"
                             ? "bg-green-50 border-green-300"
                             : account.amlResultData.status === "REJECT"
@@ -306,7 +305,7 @@ export default function PendingAccountDetailModal({
             {/* IMAGES TAB */}
             <TabsContent value="images" className="flex-1 overflow-hidden">
               <ScrollArea className="h-full">
-                <div className="p-4">
+                <div className="p-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <ImageDisplayCard
                       title="National ID Document"
@@ -326,6 +325,33 @@ export default function PendingAccountDetailModal({
             </TabsContent>
           </Tabs>
         </div>
+
+        {/* FOOTER */}
+        {!isReadOnly && (account.status === "PENDING") && (
+          <div className="flex-shrink-0 border-t bg-gray-50 px-6 py-4 flex items-center justify-end gap-3">
+            <Button
+              variant="outline"
+              onClick={onClose}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="outline"
+              className="border-red-300 text-red-700 hover:bg-red-50"
+              onClick={() => onReject?.(account)}
+            >
+              <XCircle className="w-4 h-4 mr-2" />
+              Reject
+            </Button>
+            <Button
+              className="bg-green-600 hover:bg-green-700 text-white"
+              onClick={() => onApprove?.(account)}
+            >
+              <CheckCircle className="w-4 h-4 mr-2" />
+              Approve
+            </Button>
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   );

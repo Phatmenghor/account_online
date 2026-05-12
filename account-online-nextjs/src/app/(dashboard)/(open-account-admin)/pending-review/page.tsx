@@ -253,7 +253,14 @@ function PendingReview() {
           isOpen={isDetailModalOpen}
           onClose={handleCloseDetailModal}
           account={selectedAccount || undefined}
-          isReadOnly={true}
+          onApprove={(account) => {
+            setIsDetailModalOpen(false);
+            openApproveDialog(account);
+          }}
+          onReject={(account) => {
+            setIsDetailModalOpen(false);
+            openRejectDialog(account);
+          }}
         />
 
         {/* ACTION DIALOG */}
