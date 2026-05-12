@@ -129,8 +129,8 @@ export default function PendingAccountDetailModal({
                   <div className="bg-white p-4 rounded-lg border border-gray-100">
                     <h3 className="text-sm font-bold text-gray-900 mb-4">Personal Information</h3>
                     <div className="grid grid-cols-2 gap-4">
-                      <Field label="Name (English)" value={`${account.legalFirstNameEn || ""} ${account.legalLastNameEn || ""}`.trim()} />
-                      <Field label="Name (Khmer)" value={`${account.legalFirstNameKh || ""} ${account.legalLastNameKh || ""}`.trim()} />
+                      <Field label="Name (English)" value={`${account.legalLastNameEn || ""} ${account.legalFirstNameEn || ""}`.trim()} />
+                      <Field label="Name (Khmer)" value={`${account.legalLastNameKh || ""} ${account.legalFirstNameKh || ""}`.trim()} />
                       <Field label="Date of Birth" value={account.legalDateOfBirth} />
                       <Field label="Gender" value={account.legalGender} />
                       <Field label="Nationality" value={getNationality()} />

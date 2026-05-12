@@ -148,7 +148,7 @@ export default function PendingAccountActionDialog({
                 <DetailRow label="Legal ID" value={account.legalId} />
                 <DetailRow
                   label="Name"
-                  value={`${account.legalFirstNameEn || ""} ${account.legalLastNameEn || ""}`.trim()}
+                  value={`${account.legalLastNameEn || ""} ${account.legalFirstNameEn || ""}`.trim()}
                 />
                 <DetailRow label="Phone" value={account.phoneNumber} />
                 <DetailRow

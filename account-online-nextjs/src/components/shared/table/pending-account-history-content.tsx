@@ -58,7 +58,7 @@ export const createPendingAccountHistoryTableColumns = ({
       maxWidth: "240px",
       minWidth: "180px",
       render: (account) => {
-        const name = `${account.legalFirstNameEn || ""} ${account.legalLastNameEn || ""}`.trim() || "---";
+        const name = `${account.legalLastNameEn || ""} ${account.legalFirstNameEn || ""}`.trim() || "---";
         return <span className="font-medium">{name}</span>;
       },
     },

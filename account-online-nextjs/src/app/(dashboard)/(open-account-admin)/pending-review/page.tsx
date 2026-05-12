@@ -143,7 +143,7 @@ function PendingReview() {
           };
         });
 
-        const customerName = `${selectedAccountForAction.legalFirstNameEn || ""} ${selectedAccountForAction.legalLastNameEn || ""}`.trim() || "Unknown";
+        const customerName = `${selectedAccountForAction.legalLastNameEn || ""} ${selectedAccountForAction.legalFirstNameEn || ""}`.trim() || "Unknown";
 
         startTransition(() => {
           AppToast({
@@ -170,7 +170,7 @@ function PendingReview() {
           };
         });
 
-        const customerName = `${selectedAccountForAction.legalFirstNameEn || ""} ${selectedAccountForAction.legalLastNameEn || ""}`.trim() || "Unknown";
+        const customerName = `${selectedAccountForAction.legalLastNameEn || ""} ${selectedAccountForAction.legalFirstNameEn || ""}`.trim() || "Unknown";
 
         startTransition(() => {
           AppToast({
