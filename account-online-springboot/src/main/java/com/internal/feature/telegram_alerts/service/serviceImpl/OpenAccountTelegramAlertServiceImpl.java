@@ -319,30 +319,32 @@ public class OpenAccountTelegramAlertServiceImpl implements AlertsOpenAccOnlineS
             String header = "*Account Opening " + eventType.toUpperCase() + "*";
             StringBuilder bodyBuilder = new StringBuilder();
 
-            appendIfNotEmpty(bodyBuilder, "Request ID", request.getId());
+            // Request metadata
+            appendIfNotEmpty(bodyBuilder, "Request ID", request.getId() != null ? String.valueOf(request.getId()) : null);
             appendIfNotEmpty(bodyBuilder, "Legal ID", request.getLegalId());
             appendIfNotEmpty(bodyBuilder, "Phone Number", request.getPhoneNumber());
             appendIfNotEmpty(bodyBuilder, "Branch Code", request.getBranchCode());
-            appendIfNotEmpty(bodyBuilder, "AML Status", request.getAmlStatus());
+            appendIfNotEmpty(bodyBuilder, "AML Status", request.getAmlStatus() != null ? request.getAmlStatus().name() : null);
 
-            String customerName = joinNonNull(request.getLegalFirstNameEn(), request.getLegalLastNameEn());
+            // Customer name (Family Name + Given Name)
+            String customerName = joinNonNull(request.getLegalLastNameEn(), request.getLegalFirstNameEn());
             if (customerName.isEmpty()) {
-                customerName = joinNonNull(request.getLegalFirstNameKh(), request.getLegalLastNameKh());
+                customerName = joinNonNull(request.getLegalLastNameKh(), request.getLegalFirstNameKh());
             }
             appendIfNotEmpty(bodyBuilder, "Name", customerName);
-            appendIfNotEmpty(bodyBuilder, "Gender", request.getGender());
-            appendIfNotEmpty(bodyBuilder, "DOB", request.getLegalDateOfBirth());
+
+            // Personal details
+            appendIfNotEmpty(bodyBuilder, "Gender", request.getLegalGender());
+            appendIfNotEmpty(bodyBuilder, "DOB", request.getLegalDateOfBirth() != null
+                    ? request.getLegalDateOfBirth().format(DateTimeFormatter.ofPattern("dd MMM yyyy"))
+                    : null);
             appendIfNotEmpty(bodyBuilder, "Nationality", request.getNationality());
             appendIfNotEmpty(bodyBuilder, "Address", request.getLegalAddress());
 
-            String statusText = request.getStatus() != null ? request.getStatus() : "N/A";
-            String byUser = request.getProcessedBy() != null && !request.getProcessedBy().isEmpty() ? request.getProcessedBy() : "";
-            String timeFormatted = request.getUpdatedAt() != null
-                    ? request.getUpdatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
-                    : LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+            String statusText = request.getStatus() != null ? request.getStatus().name() : "N/A";
+            String timeFormatted = request.getCreatedAt() != null ? request.getCreatedAt() : LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
 
             String footer = "Status: " + escapeMarkdown(statusText) + "\n" +
-                    (byUser.isEmpty() ? "" : "By: " + escapeMarkdown(byUser) + "\n") +
                     "Time: " + escapeMarkdown(timeFormatted);
 
             String message = header + "\n" + SEPARATOR + "\n" + bodyBuilder + SEPARATOR + "\n" + footer;
