@@ -152,7 +152,7 @@ function PendingReview() {
           });
         });
       } else if (selectedAction === "REJECT") {
-        await rejectPendingAccountService({
+        const rejectResponse = await rejectPendingAccountService({
           requestId: selectedAccountForAction.requestId,
           remark: remark || "No reason provided",
         });

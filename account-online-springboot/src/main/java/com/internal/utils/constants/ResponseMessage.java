@@ -76,7 +76,7 @@ public final class ResponseMessage {
     public static final String ACCOUNT_OPENING_SUBMITTED = "ស្នើសុំបង្កើតគណនីរបស់អ្នកត្រូវបានបញ្ជូនដោយជោគជ័យ។\n\nយើ្ងកំពុងដំណើរការស្នើសុំរបស់អ្នក ដែលរួមបញ្ចូល៖\n• ពិនិត្យលម្អិតព័ត៌មាន\n• ផ្ទៀងផ្ទាត់ឯកសារ\n• វាយតម្លៃហានិភัយ\n\nសូមរង់ចាំក្នុងរយៈពេល ១-៣ ថ្ងៃធ្វើការ។\n\nប្រសិនបើអ្នកមានសំណួរ សូមទាក់ទងយើ្ង៖\n📞 ទូរស័ព្ទ: ០៧ ២០០ ០០២ ឬ ១៨០០ ២០០ ៨៨៨\n🕐 ម៉ោងបើកលើ: ០៨:០០ - ១៨:០០ (ច័ន្ទ - សុក្រ)\n💬 អ៊ីមែល: support@cpbank.com";
     public static final String PENDING_REQUEST_ALREADY_SUBMITTED = "សូមរង់ចាំ\nលោកអ្នកបានដាក់ស្នើសុំបង្កើតគណនីរួចហើយ។ សូមរងចាំការឆ្លើយប្រតិកម្មពីផ្នែកលទ្ធផលគ្រប់គ្រង។ ប្រសិនបើលោកអ្នកមានសំណួរ សូមទំនាក់ទំនង 070 200 002 ឬ 1800 200 888 ដើម្បីទទួលបានជំនួយបន្ថែម។";
     public static final String ACCOUNT_APPROVED = "ស្នើសុំបង្កើតគណនីត្រូវបានផ្ល័ងផ្សាយដោយជោគជ័យ។ គណនីនឹងត្រូវបានបង្កើតក្នុងរយៈពេលដែលមាន។";
-    public static final String ACCOUNT_REJECTED = "ស្នើសុំបង្កើតគណនីត្រូវបានច្រានចោលដោយជោគជ័យ។";
+    public static final String ACCOUNT_REJECTED = "ស្នើសុំបង្កើតគណនីរបស់អ្នកត្រូវបានច្រានចោលដោយផ្នែកលទ្ធផលគ្រប់គ្រង។\n\nប្រសិនបើលោកអ្នកមានសំណួរ ឬចង់រៀបចំឡើងវិញ សូមទំនាក់ទំនង៖\n📞 ទូរស័ព្ទ: ០៧ ២០០ ០០២ ឬ ១៨០០ ២០០ ៨៨៨\n🕐 ម៉ោងបើកលើ: ០៨:០០ - ១៨:០០ (ច័ន្ទ - សុក្រ)\n💬 អ៊ីមែល: support@cpbank.com";
 
     // ===== Report =====
     public static final String REPORT_LOGS_RETRIEVED = "Account online report logs retrieved successfully";
