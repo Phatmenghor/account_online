@@ -142,9 +142,7 @@ function PendingReview() {
           };
         });
 
-        const customerName = selectedAccountForAction.requestData
-          ? `${(selectedAccountForAction.requestData as any).givenName || (selectedAccountForAction.requestData as any).given_name || ""} ${(selectedAccountForAction.requestData as any).familyName || (selectedAccountForAction.requestData as any).family_name || ""}`.trim()
-          : "Unknown";
+        const customerName = `${selectedAccountForAction.legalFirstNameEn || ""} ${selectedAccountForAction.legalLastNameEn || ""}`.trim() || "Unknown";
 
         startTransition(() => {
           AppToast({
@@ -171,9 +169,7 @@ function PendingReview() {
           };
         });
 
-        const customerName = selectedAccountForAction.requestData
-          ? `${(selectedAccountForAction.requestData as any).givenName || (selectedAccountForAction.requestData as any).given_name || ""} ${(selectedAccountForAction.requestData as any).familyName || (selectedAccountForAction.requestData as any).family_name || ""}`.trim()
-          : "Unknown";
+        const customerName = `${selectedAccountForAction.legalFirstNameEn || ""} ${selectedAccountForAction.legalLastNameEn || ""}`.trim() || "Unknown";
 
         startTransition(() => {
           AppToast({
@@ -236,7 +232,7 @@ function PendingReview() {
                 })}
                 loading={isLoading}
                 emptyMessage="No pending account requests found"
-                getRowKey={(account) => account.id ?? crypto.randomUUID()}
+                getRowKey={(account) => account.requestId?.toString() ?? crypto.randomUUID()}
               />
 
               <div className="border-t bg-background p-2 flex justify-end">
