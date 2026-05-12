@@ -49,14 +49,14 @@ public class DefaultMenuInitializer implements CommandLineRunner {
             // ── Account (parent + children) ────────────────────────────────────
             Menu accountParent = findOrCreateMenu(MenuConstant.Account.TITLE, MenuConstant.Account.ICON,
                     MenuConstant.Account.HREF, null, MenuConstant.Account.ORDER);
-            findOrCreateMenu(MenuConstant.Account.Final.TITLE, MenuConstant.Account.Final.ICON,
-                    MenuConstant.Account.Final.HREF, accountParent, MenuConstant.Account.Final.ORDER);
-            findOrCreateMenu(MenuConstant.Account.Success.TITLE, MenuConstant.Account.Success.ICON,
-                    MenuConstant.Account.Success.HREF, accountParent, MenuConstant.Account.Success.ORDER);
             findOrCreateMenu(MenuConstant.Account.PendingReview.TITLE, MenuConstant.Account.PendingReview.ICON,
                     MenuConstant.Account.PendingReview.HREF, accountParent, MenuConstant.Account.PendingReview.ORDER);
             findOrCreateMenu(MenuConstant.Account.ReviewHistory.TITLE, MenuConstant.Account.ReviewHistory.ICON,
                     MenuConstant.Account.ReviewHistory.HREF, accountParent, MenuConstant.Account.ReviewHistory.ORDER);
+            findOrCreateMenu(MenuConstant.Account.Final.TITLE, MenuConstant.Account.Final.ICON,
+                    MenuConstant.Account.Final.HREF, accountParent, MenuConstant.Account.Final.ORDER);
+            findOrCreateMenu(MenuConstant.Account.Success.TITLE, MenuConstant.Account.Success.ICON,
+                    MenuConstant.Account.Success.HREF, accountParent, MenuConstant.Account.Success.ORDER);
 
             // ── AML (parent + children) ────────────────────────────────────────
             Menu amlParent = findOrCreateMenu(MenuConstant.Aml.TITLE, MenuConstant.Aml.ICON,

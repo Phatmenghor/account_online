@@ -22,31 +22,31 @@ public class MenuConstant {
         public static final String HREF = null;
         public static final int ORDER = 3;
 
-        public static class Final {
-            public static final String TITLE = "Account Final";
-            public static final String ICON = null;
-            public static final String HREF = "/account-online";
-            public static final int ORDER = 1;
-        }
-
-        public static class Success {
-            public static final String TITLE = "Success Accounts";
-            public static final String ICON = null;
-            public static final String HREF = "/account-online-success";
-            public static final int ORDER = 2;
-        }
-
         public static class PendingReview {
             public static final String TITLE = "Pending Review";
             public static final String ICON = null;
             public static final String HREF = "/pending-review";
-            public static final int ORDER = 3;
+            public static final int ORDER = 1;
         }
 
         public static class ReviewHistory {
             public static final String TITLE = "Review History";
             public static final String ICON = null;
             public static final String HREF = "/review-history";
+            public static final int ORDER = 2;
+        }
+
+        public static class Final {
+            public static final String TITLE = "Account Final";
+            public static final String ICON = null;
+            public static final String HREF = "/account-online";
+            public static final int ORDER = 3;
+        }
+
+        public static class Success {
+            public static final String TITLE = "Success Accounts";
+            public static final String ICON = null;
+            public static final String HREF = "/account-online-success";
             public static final int ORDER = 4;
         }
     }
