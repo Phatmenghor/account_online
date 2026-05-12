@@ -17,16 +17,85 @@ export interface PendingAccountOpeningRequestDto {
   createdAt: string;
   message?: string;
   remark?: string;
+  amlStatus?: string;
 
-  // AML information
-  amlStatus: string;
+  // Raw JSON data (backup)
   amlResultData?: any;
-
-  // Complete customer data (parsed JSON object)
   requestData?: any;
-
-  // Customer info JSON (parsed object)
   customerInfo?: any;
+
+  // Legal/NID info
+  legalDocName?: string;
+  legalHolderName?: string;
+  legalFirstNameEn?: string;
+  legalLastNameEn?: string;
+  legalFirstNameKh?: string;
+  legalLastNameKh?: string;
+  legalDateOfBirth?: string;
+  legalGender?: string;
+  legalAddress?: string;
+  legalPlaceOfBirth?: string;
+  legalIssuedDate?: string;
+  legalExpiredDate?: string;
+  legalMRZ1?: string;
+  legalMRZ2?: string;
+  legalMRZ3?: string;
+
+  // Customer info
+  title?: string;
+  maritalStatus?: string;
+  nationality?: string;
+  companyName?: string;
+  occupation?: string;
+  industry?: string;
+  sector?: string;
+  averageIncome?: string;
+  phoneNumber?: string;
+  email?: string;
+  customerType?: string;
+
+  // Current address
+  customerProvinceCode?: string;
+  customerProvince?: string;
+  customerDistrictCode?: string;
+  customerDistrict?: string;
+  customerCommuneCode?: string;
+  customerCommune?: string;
+  customerVillageCode?: string;
+  customerVillage?: string;
+
+  // Place of birth
+  customerPobProvinceCode?: string;
+  customerPobProvince?: string;
+  customerPobDistrictCode?: string;
+  customerPobDistrict?: string;
+  customerPobCommuneCode?: string;
+  customerPobCommune?: string;
+  customerPobVillageCode?: string;
+  customerPobVillage?: string;
+
+  // Branch info
+  branchCode?: string;
+  branchNameKh?: string;
+
+  // Banking info
+  productAccount?: string;
+  categoryAccount?: string;
+  customerRole?: string;
+  loanOfficer?: string;
+  releasedBy?: string;
+
+  // Images
+  nidImageName?: string;
+  selfieImageName?: string;
+
+  // AML details
+  amlRiskLevel?: string;
+  amlActionTaken?: string;
+  amlTotalRulesScore?: number;
+  amlTrxnId?: string;
+  serviceName?: string;
+  amlRulesTriggered?: string;
 }
 
 // Main DTO for Pending Account Review
@@ -36,19 +105,86 @@ export interface PendingAccountAdminReviewDto {
   legalId: string;
   status: string;
   createdAt: string;
-
-  // AML information
-  amlStatus: string;
-  amlResultData?: any;
-
-  // Review remarks
+  amlStatus?: string;
   remark?: string;
 
-  // Complete customer data (parsed JSON object)
+  // Raw JSON data (backup)
+  amlResultData?: any;
   requestData?: any;
-
-  // Customer info JSON (parsed object)
   customerInfo?: any;
+
+  // Legal/NID info
+  legalDocName?: string;
+  legalHolderName?: string;
+  legalFirstNameEn?: string;
+  legalLastNameEn?: string;
+  legalFirstNameKh?: string;
+  legalLastNameKh?: string;
+  legalDateOfBirth?: string;
+  legalGender?: string;
+  legalAddress?: string;
+  legalPlaceOfBirth?: string;
+  legalIssuedDate?: string;
+  legalExpiredDate?: string;
+  legalMRZ1?: string;
+  legalMRZ2?: string;
+  legalMRZ3?: string;
+
+  // Customer info
+  title?: string;
+  maritalStatus?: string;
+  nationality?: string;
+  companyName?: string;
+  occupation?: string;
+  industry?: string;
+  sector?: string;
+  averageIncome?: string;
+  phoneNumber?: string;
+  email?: string;
+  customerType?: string;
+
+  // Current address
+  customerProvinceCode?: string;
+  customerProvince?: string;
+  customerDistrictCode?: string;
+  customerDistrict?: string;
+  customerCommuneCode?: string;
+  customerCommune?: string;
+  customerVillageCode?: string;
+  customerVillage?: string;
+
+  // Place of birth
+  customerPobProvinceCode?: string;
+  customerPobProvince?: string;
+  customerPobDistrictCode?: string;
+  customerPobDistrict?: string;
+  customerPobCommuneCode?: string;
+  customerPobCommune?: string;
+  customerPobVillageCode?: string;
+  customerPobVillage?: string;
+
+  // Branch info
+  branchCode?: string;
+  branchNameKh?: string;
+
+  // Banking info
+  productAccount?: string;
+  categoryAccount?: string;
+  customerRole?: string;
+  loanOfficer?: string;
+  releasedBy?: string;
+
+  // Images
+  nidImageName?: string;
+  selfieImageName?: string;
+
+  // AML details
+  amlRiskLevel?: string;
+  amlActionTaken?: string;
+  amlTotalRulesScore?: number;
+  amlTrxnId?: string;
+  serviceName?: string;
+  amlRulesTriggered?: string;
 }
 
 // Request for approving account

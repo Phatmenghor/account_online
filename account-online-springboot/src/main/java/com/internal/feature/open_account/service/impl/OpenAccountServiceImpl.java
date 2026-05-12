@@ -1,17 +1,18 @@
 package com.internal.feature.open_account.service.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.internal.enumation.AccountOpeningRequestStatusEnum;
 import com.internal.enumation.AmlStatusEnum;
 import com.internal.exceptions.error.custom.NotFoundException;
 import com.internal.exceptions.error.openaccount.OpenAccountException;
+import com.internal.feature.aml.dto.response.AmlStatusDto;
 import com.internal.feature.open_account.dto.OpenAccountContext;
 import com.internal.feature.open_account.dto.request.ApproveAccountOpeningRequestDto;
 import com.internal.feature.open_account.dto.request.CustomerCreationResult;
 import com.internal.feature.open_account.dto.request.CustomerRequest;
 import com.internal.feature.open_account.dto.request.RejectAccountOpeningRequestDto;
 import com.internal.feature.open_account.dto.response.CustomerResponse;
-import com.internal.feature.open_account.dto.request.CustomerRequest;
 import com.internal.feature.open_account.dto.response.PendingAccountOpeningRequestDto;
 import com.internal.feature.open_account.dto.request.AllPendingAccountHistoryRequestDto;
 import com.internal.feature.open_account.dto.response.AllPendingAccountOpeningHistoryResponseDto;
@@ -40,6 +41,7 @@ import com.internal.utils.pagination.PaginationResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -184,14 +186,7 @@ public class OpenAccountServiceImpl implements OpenAccountService {
             complianceService.sentMessageOnHighRisk(request, amlResult);
 
             log.info("Step 6: Storing request for admin review | Legal ID: {}", legalId);
-            PendingAccountOpeningRequest pendingRequest = PendingAccountOpeningRequest.builder()
-                    .legalId(legalId)
-                    .status(AccountOpeningRequestStatusEnum.PENDING)
-                    .requestData(objectMapper.writeValueAsString(request))
-                    .customerInfo(objectMapper.writeValueAsString(customerInfo))
-                    .amlResultData(objectMapper.writeValueAsString(amlResult))
-                    .amlStatus(amlResult != null ? amlResult.getStatus() : null)
-                    .build();
+            PendingAccountOpeningRequest pendingRequest = mapRequestToPendingEntity(request, customerInfo, amlResult);
 
             PendingAccountOpeningRequest saved = pendingRequestRepository.save(pendingRequest);
             log.info("✓ Request stored for admin approval | ID: {} | Legal ID: {} | AML Status: {}",
@@ -315,6 +310,71 @@ public class OpenAccountServiceImpl implements OpenAccountService {
                 .amlResultData(entity.getAmlResultData())
                 .requestData(requestDataObj)
                 .customerInfo(customerInfoObj)
+                // Legal/NID info
+                .legalDocName(entity.getLegalDocName())
+                .legalHolderName(entity.getLegalHolderName())
+                .legalFirstNameEn(entity.getLegalFirstNameEn())
+                .legalLastNameEn(entity.getLegalLastNameEn())
+                .legalFirstNameKh(entity.getLegalFirstNameKh())
+                .legalLastNameKh(entity.getLegalLastNameKh())
+                .legalDateOfBirth(entity.getLegalDateOfBirth())
+                .legalGender(entity.getLegalGender())
+                .legalAddress(entity.getLegalAddress())
+                .legalPlaceOfBirth(entity.getLegalPlaceOfBirth())
+                .legalIssuedDate(entity.getLegalIssuedDate())
+                .legalExpiredDate(entity.getLegalExpiredDate())
+                .legalMRZ1(entity.getLegalMRZ1())
+                .legalMRZ2(entity.getLegalMRZ2())
+                .legalMRZ3(entity.getLegalMRZ3())
+                // Customer info
+                .title(entity.getTitle())
+                .maritalStatus(entity.getMaritalStatus())
+                .nationality(entity.getNationality())
+                .companyName(entity.getCompanyName())
+                .occupation(entity.getOccupation())
+                .industry(entity.getIndustry())
+                .sector(entity.getSector())
+                .averageIncome(entity.getAverageIncome())
+                .phoneNumber(entity.getPhoneNumber())
+                .email(entity.getEmail())
+                .customerType(entity.getCustomerType())
+                // Current address
+                .customerProvinceCode(entity.getCustomerProvinceCode())
+                .customerProvince(entity.getCustomerProvince())
+                .customerDistrictCode(entity.getCustomerDistrictCode())
+                .customerDistrict(entity.getCustomerDistrict())
+                .customerCommuneCode(entity.getCustomerCommuneCode())
+                .customerCommune(entity.getCustomerCommune())
+                .customerVillageCode(entity.getCustomerVillageCode())
+                .customerVillage(entity.getCustomerVillage())
+                // Place of birth
+                .customerPobProvinceCode(entity.getCustomerPobProvinceCode())
+                .customerPobProvince(entity.getCustomerPobProvince())
+                .customerPobDistrictCode(entity.getCustomerPobDistrictCode())
+                .customerPobDistrict(entity.getCustomerPobDistrict())
+                .customerPobCommuneCode(entity.getCustomerPobCommuneCode())
+                .customerPobCommune(entity.getCustomerPobCommune())
+                .customerPobVillageCode(entity.getCustomerPobVillageCode())
+                .customerPobVillage(entity.getCustomerPobVillage())
+                // Branch info
+                .branchCode(entity.getBranchCode())
+                .branchNameKh(entity.getBranchNameKh())
+                // Banking info
+                .productAccount(entity.getProductAccount())
+                .categoryAccount(entity.getCategoryAccount())
+                .customerRole(entity.getCustomerRole())
+                .loanOfficer(entity.getLoanOfficer())
+                .releasedBy(entity.getReleasedBy())
+                // Images
+                .nidImageName(entity.getNidImageName())
+                .selfieImageName(entity.getSelfieImageName())
+                // AML details
+                .amlRiskLevel(entity.getAmlRiskLevel())
+                .amlActionTaken(entity.getAmlActionTaken())
+                .amlTotalRulesScore(entity.getAmlTotalRulesScore())
+                .amlTrxnId(entity.getAmlTrxnId())
+                .serviceName(entity.getServiceName())
+                .amlRulesTriggered(entity.getAmlRulesTriggered())
                 .build();
     }
 
@@ -445,6 +505,71 @@ public class OpenAccountServiceImpl implements OpenAccountService {
                 .remark(request.getRemark())
                 .requestData(requestDataObj)
                 .customerInfo(customerInfoObj)
+                // Legal/NID info
+                .legalDocName(request.getLegalDocName())
+                .legalHolderName(request.getLegalHolderName())
+                .legalFirstNameEn(request.getLegalFirstNameEn())
+                .legalLastNameEn(request.getLegalLastNameEn())
+                .legalFirstNameKh(request.getLegalFirstNameKh())
+                .legalLastNameKh(request.getLegalLastNameKh())
+                .legalDateOfBirth(request.getLegalDateOfBirth())
+                .legalGender(request.getLegalGender())
+                .legalAddress(request.getLegalAddress())
+                .legalPlaceOfBirth(request.getLegalPlaceOfBirth())
+                .legalIssuedDate(request.getLegalIssuedDate())
+                .legalExpiredDate(request.getLegalExpiredDate())
+                .legalMRZ1(request.getLegalMRZ1())
+                .legalMRZ2(request.getLegalMRZ2())
+                .legalMRZ3(request.getLegalMRZ3())
+                // Customer info
+                .title(request.getTitle())
+                .maritalStatus(request.getMaritalStatus())
+                .nationality(request.getNationality())
+                .companyName(request.getCompanyName())
+                .occupation(request.getOccupation())
+                .industry(request.getIndustry())
+                .sector(request.getSector())
+                .averageIncome(request.getAverageIncome())
+                .phoneNumber(request.getPhoneNumber())
+                .email(request.getEmail())
+                .customerType(request.getCustomerType())
+                // Current address
+                .customerProvinceCode(request.getCustomerProvinceCode())
+                .customerProvince(request.getCustomerProvince())
+                .customerDistrictCode(request.getCustomerDistrictCode())
+                .customerDistrict(request.getCustomerDistrict())
+                .customerCommuneCode(request.getCustomerCommuneCode())
+                .customerCommune(request.getCustomerCommune())
+                .customerVillageCode(request.getCustomerVillageCode())
+                .customerVillage(request.getCustomerVillage())
+                // Place of birth
+                .customerPobProvinceCode(request.getCustomerPobProvinceCode())
+                .customerPobProvince(request.getCustomerPobProvince())
+                .customerPobDistrictCode(request.getCustomerPobDistrictCode())
+                .customerPobDistrict(request.getCustomerPobDistrict())
+                .customerPobCommuneCode(request.getCustomerPobCommuneCode())
+                .customerPobCommune(request.getCustomerPobCommune())
+                .customerPobVillageCode(request.getCustomerPobVillageCode())
+                .customerPobVillage(request.getCustomerPobVillage())
+                // Branch info
+                .branchCode(request.getBranchCode())
+                .branchNameKh(request.getBranchNameKh())
+                // Banking info
+                .productAccount(request.getProductAccount())
+                .categoryAccount(request.getCategoryAccount())
+                .customerRole(request.getCustomerRole())
+                .loanOfficer(request.getLoanOfficer())
+                .releasedBy(request.getReleasedBy())
+                // Images
+                .nidImageName(request.getNidImageName())
+                .selfieImageName(request.getSelfieImageName())
+                // AML details
+                .amlRiskLevel(request.getAmlRiskLevel())
+                .amlActionTaken(request.getAmlActionTaken())
+                .amlTotalRulesScore(request.getAmlTotalRulesScore())
+                .amlTrxnId(request.getAmlTrxnId())
+                .serviceName(request.getServiceName())
+                .amlRulesTriggered(request.getAmlRulesTriggered())
                 .build();
     }
 
@@ -487,5 +612,107 @@ public class OpenAccountServiceImpl implements OpenAccountService {
         } catch (Exception e) {
             log.error("Failed to save history for request: {}", request.getId(), e);
         }
+    }
+
+    private PendingAccountOpeningRequest mapRequestToPendingEntity(CustomerRequest request, Map<String, String> customerInfo, AmlStatusDto amlResult) throws JsonProcessingException {
+        PendingAccountOpeningRequest.PendingAccountOpeningRequestBuilder builder = PendingAccountOpeningRequest.builder()
+                .legalId(request.getLegalId())
+                .status(AccountOpeningRequestStatusEnum.PENDING)
+                .requestData(objectMapper.writeValueAsString(request))
+                .customerInfo(objectMapper.writeValueAsString(customerInfo))
+                .amlResultData(objectMapper.writeValueAsString(amlResult))
+                .amlStatus(amlResult != null ? amlResult.getStatus() : null);
+
+        // === LEGAL / NID INFO ===
+        builder.legalDocName(request.getLegalDocType())
+                .legalFirstNameEn(request.getGivenName())
+                .legalLastNameEn(request.getFamilyName())
+                .legalFirstNameKh(request.getFirstNameKh())
+                .legalLastNameKh(request.getLastNameKh())
+                .legalGender(request.getGender())
+                .legalAddress(request.getLegalAddress())
+                .legalPlaceOfBirth(request.getPlaceOfBirth());
+
+        if (request.getDateOfBirth() != null) {
+            try {
+                builder.legalDateOfBirth(LocalDate.parse(request.getDateOfBirth()));
+            } catch (Exception e) {
+                log.warn("Failed to parse date of birth: {}", request.getDateOfBirth());
+            }
+        }
+
+        if (request.getLegalIssueDate() != null) {
+            try {
+                builder.legalIssuedDate(LocalDate.parse(request.getLegalIssueDate()));
+            } catch (Exception e) {
+                log.warn("Failed to parse issued date: {}", request.getLegalIssueDate());
+            }
+        }
+
+        if (request.getLegalExpireDate() != null) {
+            try {
+                builder.legalExpiredDate(LocalDate.parse(request.getLegalExpireDate()));
+            } catch (Exception e) {
+                log.warn("Failed to parse expired date: {}", request.getLegalExpireDate());
+            }
+        }
+
+        builder.legalMRZ1(request.getLegalMrz1())
+                .legalMRZ2(request.getLegalMrz2())
+                .legalMRZ3(request.getLegalMrz3());
+
+        // === CUSTOMER INFO ===
+        builder.title(request.getTitle())
+                .maritalStatus(request.getMaritalStatus())
+                .nationality(request.getNationality())
+                .companyName(request.getCompanyName())
+                .occupation(request.getOccupation())
+                .industry(request.getIndustry())
+                .sector(request.getSector())
+                .averageIncome(request.getAverageIncome())
+                .phoneNumber(request.getPhoneNumber())
+                .email(request.getEmail())
+                .customerType(request.getCustomerType());
+
+        // === CURRENT ADDRESS ===
+        builder.customerProvinceCode(request.getCustomerCurrentProvince())
+                .customerDistrictCode(request.getCustomerCurrentDistrict())
+                .customerCommuneCode(request.getCustomerCurrentCommune())
+                .customerVillageCode(request.getCustomerCurrentVillage());
+
+        // === PLACE OF BIRTH ===
+        builder.customerPobProvinceCode(request.getCustomerPobProvince())
+                .customerPobDistrictCode(request.getCustomerPobDistrict())
+                .customerPobCommuneCode(request.getCustomerPobCommune())
+                .customerPobVillageCode(request.getCustomerPobVillage());
+
+        // === BRANCH INFO ===
+        builder.branchCode(request.getBranchCode());
+
+        // === BANKING INFO ===
+        builder.productAccount(request.getProductAccount())
+                .categoryAccount(request.getCategoryAccount())
+                .customerRole(request.getCustomerRole())
+                .loanOfficer(request.getLoanOfficer())
+                .releasedBy(request.getReleasedBy());
+
+        // === IMAGES ===
+        builder.nidImageName(request.getNidImageName())
+                .selfieImageName(request.getSelfieImageName());
+
+        // === AML DETAILS ===
+        if (amlResult != null) {
+            builder.amlRiskLevel(amlResult.getRiskLevel())
+                    .amlActionTaken(amlResult.getActionTaken())
+                    .amlTotalRulesScore(amlResult.getTotalRulesScore())
+                    .amlTrxnId(amlResult.getTrxnID())
+                    .serviceName(amlResult.getServiceName());
+
+            if (amlResult.getRulesTriggered() != null && !amlResult.getRulesTriggered().isEmpty()) {
+                builder.amlRulesTriggered(amlResult.getRulesTriggered());
+            }
+        }
+
+        return builder.build();
     }
 }
