@@ -12,9 +12,7 @@ import java.util.Map;
 
 @EqualsAndHashCode(callSuper = true)
 @Entity
-@Table(name = "acc_online_pending_account_opening", uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"legalId", "status"}, name = "uk_legal_id_pending_status")
-})
+@Table(name = "acc_online_pending_account_opening")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
