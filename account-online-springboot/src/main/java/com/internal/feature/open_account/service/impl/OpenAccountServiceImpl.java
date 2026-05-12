@@ -8,6 +8,7 @@ import com.internal.exceptions.error.custom.NotFoundException;
 import com.internal.exceptions.error.openaccount.OpenAccountException;
 import com.internal.feature.aml.dto.response.AmlStatusDto;
 import com.internal.feature.open_account.dto.OpenAccountContext;
+import com.internal.feature.open_account.dto.response.AmlResultForPendingAccountDto;
 import com.internal.feature.open_account.dto.request.ApproveAccountOpeningRequestDto;
 import com.internal.feature.open_account.dto.request.CustomerCreationResult;
 import com.internal.feature.open_account.dto.request.CustomerRequest;
@@ -299,6 +300,15 @@ public class OpenAccountServiceImpl implements OpenAccountService {
             log.warn("Failed to parse customerInfo: {}", e.getMessage());
         }
 
+        AmlResultForPendingAccountDto amlResultData = null;
+        try {
+            if (entity.getAmlResultData() != null && !entity.getAmlResultData().isEmpty()) {
+                amlResultData = objectMapper.readValue(entity.getAmlResultData(), AmlResultForPendingAccountDto.class);
+            }
+        } catch (Exception e) {
+            log.warn("Failed to parse amlResultData: {}", e.getMessage());
+        }
+
         return PendingAccountOpeningRequestDto.builder()
                 .id(entity.getId())
                 .legalId(entity.getLegalId())
@@ -306,7 +316,7 @@ public class OpenAccountServiceImpl implements OpenAccountService {
                 .createdAt(createdAtIso)
                 .remark(entity.getRemark())
                 .amlStatus(entity.getAmlStatus())
-                .amlResultData(entity.getAmlResultData())
+                .amlResultData(amlResultData)
                 // Legal/NID info
                 .legalDocName(entity.getLegalDocName())
                 .legalHolderName(entity.getLegalHolderName())
@@ -474,6 +484,12 @@ public class OpenAccountServiceImpl implements OpenAccountService {
                     .format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
         }
 
+        String updatedAtIso = null;
+        if (request.getUpdatedAt() != null) {
+            updatedAtIso = request.getUpdatedAt()
+                    .format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+        }
+
         Object requestDataObj = null;
         try {
             if (request.getRequestData() != null) {
@@ -492,13 +508,23 @@ public class OpenAccountServiceImpl implements OpenAccountService {
             log.warn("Failed to parse customerInfo: {}", e.getMessage());
         }
 
+        AmlResultForPendingAccountDto amlResultData = null;
+        try {
+            if (request.getAmlResultData() != null && !request.getAmlResultData().isEmpty()) {
+                amlResultData = objectMapper.readValue(request.getAmlResultData(), AmlResultForPendingAccountDto.class);
+            }
+        } catch (Exception e) {
+            log.warn("Failed to parse amlResultData: {}", e.getMessage());
+        }
+
         return PendingAccountAdminReviewDto.builder()
                 .requestId(request.getId())
                 .legalId(request.getLegalId())
                 .status(request.getStatus())
                 .createdAt(createdAtIso)
+                .updatedAt(updatedAtIso)
                 .amlStatus(request.getAmlStatus())
-                .amlResultData(request.getAmlResultData())
+                .amlResultData(amlResultData)
                 .remark(request.getRemark())
                 // Legal/NID info
                 .legalDocName(request.getLegalDocName())
@@ -593,25 +619,27 @@ public class OpenAccountServiceImpl implements OpenAccountService {
     }
 
     private PendingAccountOpeningRequest mapRequestToPendingEntity(CustomerRequest request, Map<String, String> customerInfo, AmlStatusDto amlResult) throws JsonProcessingException {
-        // Enrich AML result with image data before serialization
+        // Enrich AML result with image data
         if (amlResult != null) {
             amlResult.setNidImageName(request.getNidImageName());
             amlResult.setSelfieImageName(request.getSelfieImageName());
         }
 
-        // Serialize with null exclusion (only AML screening fields, not customer data duplicates)
-        ObjectMapper nonNullMapper = new ObjectMapper()
-                .setSerializationInclusion(com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL);
-
-        // Filter out duplicate customer fields from amlResultData
-        amlResult = filterAmlResultData(amlResult);
+        // Convert to clean DTO (no duplicate customer data)
+        String amlResultDataJson = null;
+        if (amlResult != null) {
+            AmlResultForPendingAccountDto cleanAmlDto = mapToCleanAmlResultDto(amlResult);
+            ObjectMapper nonNullMapper = new ObjectMapper()
+                    .setSerializationInclusion(com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL);
+            amlResultDataJson = nonNullMapper.writeValueAsString(cleanAmlDto);
+        }
 
         PendingAccountOpeningRequest.PendingAccountOpeningRequestBuilder builder = PendingAccountOpeningRequest.builder()
                 .legalId(request.getLegalId())
                 .status(AccountOpeningRequestStatusEnum.PENDING)
                 .requestData(objectMapper.writeValueAsString(request))
                 .customerInfo(objectMapper.writeValueAsString(customerInfo))
-                .amlResultData(nonNullMapper.writeValueAsString(amlResult))
+                .amlResultData(amlResultDataJson)
                 .amlStatus(amlResult != null ? amlResult.getStatus() : null);
 
         // === LEGAL / NID INFO ===
@@ -705,5 +733,26 @@ public class OpenAccountServiceImpl implements OpenAccountService {
         }
 
         return builder.build();
+    }
+
+    private AmlResultForPendingAccountDto mapToCleanAmlResultDto(AmlStatusDto amlResult) {
+        return AmlResultForPendingAccountDto.builder()
+                .id(amlResult.getId())
+                .customerInfo(amlResult.getCustomerInfo())
+                .status(amlResult.getStatus())
+                .screeningResult(amlResult.getScreeningResult())
+                .riskLevel(amlResult.getRiskLevel())
+                .actionTaken(amlResult.getActionTaken())
+                .rulesTriggered(amlResult.getRulesTriggered())
+                .serviceName(amlResult.getServiceName())
+                .totalRulesScore(amlResult.getTotalRulesScore())
+                .trxnID(amlResult.getTrxnID())
+                .approvedBy(amlResult.getApprovedBy())
+                .rejectedBy(amlResult.getRejectedBy())
+                .createdAt(amlResult.getCreatedAt())
+                .updatedAt(amlResult.getUpdatedAt())
+                .nidImageName(amlResult.getNidImageName())
+                .selfieImageName(amlResult.getSelfieImageName())
+                .build();
     }
 }

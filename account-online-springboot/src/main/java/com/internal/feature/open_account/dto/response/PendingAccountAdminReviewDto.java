@@ -26,9 +26,8 @@ public class PendingAccountAdminReviewDto {
     private AmlStatusEnum amlStatus;
     private String remark;
 
-    // AML RESULT DATA (parsed JSON)
-    @JsonRawValue
-    private String amlResultData;
+    // AML RESULT DATA (clean AML screening data only, no duplicate customer fields)
+    private AmlResultForPendingAccountDto amlResultData;
 
     // === LEGAL / NID INFO ===
     private String legalDocName;
