@@ -668,7 +668,13 @@ public class OpenAccountServiceImpl implements OpenAccountService {
         Sort.Direction direction = "DESC".equalsIgnoreCase(request.getSortDirection()) ? Sort.Direction.DESC : Sort.Direction.ASC;
         PageRequest pageable = PageRequest.of(request.getPageNo() - 1, request.getPageSize(), Sort.by(direction, "createdAt"));
 
-        Page<PendingAccountOpeningRequestHistory> page = historyRepository.findAllByOrderByCreatedAtDesc(pageable);
+        Page<PendingAccountOpeningRequestHistory> page;
+        if (request.getStatus() != null && !request.getStatus().isEmpty() && !"ALL".equalsIgnoreCase(request.getStatus())) {
+            AccountOpeningRequestStatusEnum status = AccountOpeningRequestStatusEnum.valueOf(request.getStatus().toUpperCase());
+            page = historyRepository.findByStatusOrderByCreatedAtDesc(status, pageable);
+        } else {
+            page = historyRepository.findAllByOrderByCreatedAtDesc(pageable);
+        }
 
         List<PendingAccountOpeningRequestHistoryDto> content = page.getContent().stream()
                 .map(this::mapHistoryToDto)
