@@ -32,6 +32,7 @@ import com.internal.feature.open_account.repository.PendingAccountOpeningRequest
 import com.internal.feature.open_account.service.OpenAccountService;
 import com.internal.utils.SecurityUtils;
 import com.internal.utils.constants.AppConstants;
+import com.internal.utils.constants.ResponseMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -174,7 +175,7 @@ public class OpenAccountServiceImpl implements OpenAccountService {
         var existingPending = pendingRequestRepository.findByLegalIdAndStatus(
                 legalId, AccountOpeningRequestStatusEnum.PENDING);
         if (existingPending.isPresent()) {
-            throw new OpenAccountException("PENDING_REQUEST_EXISTS", AppConstants.PENDING_REQUEST_ALREADY_EXISTS);
+            throw new OpenAccountException("PENDING_REQUEST_EXISTS", ResponseMessage.PENDING_REQUEST_ALREADY_SUBMITTED);
         }
 
         try {

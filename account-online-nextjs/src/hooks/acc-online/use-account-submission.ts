@@ -319,10 +319,10 @@ export const useAccountSubmission = ({
         errorResponse?.message?.toLowerCase().includes("already");
 
       if (isPendingRequest) {
-        // Show success modal for pending request
+        // Show success modal for pending request - use message from backend
         setSuccessData({
           title: "សូមរង់ចាំ",
-          message: "លោកអ្នកបានដាក់ស្នើសុំបង្កើតគណនីរួចហើយ។ សូមរងចាំការឆ្លើយប្រតិកម្មពីផ្នែកលទ្ធផលគ្រប់គ្រង។ ប្រសិនបើលោកអ្នកមានសំណួរ សូមទំនាក់ទំនង 070 200 002 ឬ 1800 200 888 ដើម្បីទទួលបានជំនួយបន្ថែម។",
+          message: errorMessage,
           status: "PENDING",
         });
         setShowSuccessModal(true);
