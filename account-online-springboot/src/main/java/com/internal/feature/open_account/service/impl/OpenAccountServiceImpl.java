@@ -1,6 +1,7 @@
 package com.internal.feature.open_account.service.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.internal.enumation.AccountOpeningRequestStatusEnum;
 import com.internal.enumation.AmlStatusEnum;
@@ -452,6 +453,15 @@ public class OpenAccountServiceImpl implements OpenAccountService {
             legalDateOfBirth = entity.getLegalDateOfBirth().toString();
         }
 
+        JsonNode amlResultDataJson = null;
+        if (entity.getAmlResultData() != null && !entity.getAmlResultData().isEmpty()) {
+            try {
+                amlResultDataJson = objectMapper.readTree(entity.getAmlResultData());
+            } catch (Exception e) {
+                log.warn("Failed to parse AML result data for history record: {}", entity.getId(), e);
+            }
+        }
+
         return PendingAccountOpeningRequestHistoryDto.builder()
                 .id(entity.getId())
                 .requestId(entity.getRequestId())
@@ -460,6 +470,7 @@ public class OpenAccountServiceImpl implements OpenAccountService {
                 .actionUsername(entity.getActionUsername())
                 .remark(entity.getRemark())
                 .createdAt(createdAtIso)
+                .amlResultData(amlResultDataJson)
                 // Legal/NID info
                 .legalDocName(entity.getLegalDocName())
                 .legalHolderName(entity.getLegalHolderName())

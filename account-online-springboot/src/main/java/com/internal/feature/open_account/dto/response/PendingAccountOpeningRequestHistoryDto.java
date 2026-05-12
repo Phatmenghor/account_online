@@ -1,6 +1,7 @@
 package com.internal.feature.open_account.dto.response;
 
 import com.internal.enumation.AccountOpeningRequestStatusEnum;
+import com.fasterxml.jackson.databind.JsonNode;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -19,6 +20,9 @@ public class PendingAccountOpeningRequestHistoryDto {
     private String actionUsername;
     private String remark;
     private String createdAt;
+
+    // AML result data (stored as JSON)
+    private JsonNode amlResultData;
 
     // === LEGAL / NID INFO ===
     private String legalDocName;

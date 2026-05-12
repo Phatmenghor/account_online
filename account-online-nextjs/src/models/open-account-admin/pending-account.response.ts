@@ -226,6 +226,65 @@ export interface RequestHistoryRecord {
   actionUsername: string;
   remark?: string;
   createdAt: string;
+
+  // AML result data (stored as JSON object)
+  amlResultData?: AmlResultForPendingAccountDto;
+
+  // Legal/NID info
+  legalDocName?: string;
+  legalHolderName?: string;
+  legalFirstNameEn?: string;
+  legalLastNameEn?: string;
+  legalFirstNameKh?: string;
+  legalLastNameKh?: string;
+  legalDateOfBirth?: string;
+  legalGender?: string;
+  legalAddress?: string;
+  legalPlaceOfBirth?: string;
+  legalMRZ1?: string;
+  legalMRZ2?: string;
+  legalMRZ3?: string;
+
+  // Customer info
+  title?: string;
+  maritalStatus?: string;
+  nationality?: string;
+  companyName?: string;
+  occupation?: string;
+  industry?: string;
+  sector?: string;
+  averageIncome?: string;
+  phoneNumber?: string;
+  email?: string;
+
+  // Current address
+  customerProvince?: string;
+  customerDistrict?: string;
+  customerCommune?: string;
+  customerVillage?: string;
+
+  // Place of birth
+  customerPobProvince?: string;
+  customerPobDistrict?: string;
+  customerPobCommune?: string;
+  customerPobVillage?: string;
+
+  // Branch info
+  branchCode?: string;
+
+  // Banking info
+  productAccount?: string;
+  categoryAccount?: string;
+  customerRole?: string;
+  loanOfficer?: string;
+  releasedBy?: string;
+
+  // Images
+  nidImageName?: string;
+  selfieImageName?: string;
+
+  // AML status
+  amlStatus?: string;
 }
 
 // Review History Response - Audit Trail
