@@ -22,15 +22,12 @@ public class PendingAccountOpeningRequestDto {
     private String legalId;
     private AccountOpeningRequestStatusEnum status;
     private String createdAt;
-    private String message;
     private String remark;
     private AmlStatusEnum amlStatus;
 
-    // RAW JSON DATA (BACKUP)
+    // AML RESULT DATA (parsed JSON)
     @JsonRawValue
     private String amlResultData;
-    private Object requestData;
-    private Object customerInfo;
 
     // === LEGAL / NID INFO ===
     private String legalDocName;
@@ -60,31 +57,21 @@ public class PendingAccountOpeningRequestDto {
     private String averageIncome;
     private String phoneNumber;
     private String email;
-    private String customerType;
 
     // === CURRENT ADDRESS ===
-    private String customerProvinceCode;
     private String customerProvince;
-    private String customerDistrictCode;
     private String customerDistrict;
-    private String customerCommuneCode;
     private String customerCommune;
-    private String customerVillageCode;
     private String customerVillage;
 
     // === PLACE OF BIRTH ===
-    private String customerPobProvinceCode;
     private String customerPobProvince;
-    private String customerPobDistrictCode;
     private String customerPobDistrict;
-    private String customerPobCommuneCode;
     private String customerPobCommune;
-    private String customerPobVillageCode;
     private String customerPobVillage;
 
     // === BRANCH INFO ===
     private String branchCode;
-    private String branchNameKh;
 
     // === BANKING INFO ===
     private String productAccount;
@@ -96,12 +83,4 @@ public class PendingAccountOpeningRequestDto {
     // === IMAGES ===
     private String nidImageName;
     private String selfieImageName;
-
-    // === AML DETAILS ===
-    private String amlRiskLevel;
-    private String amlActionTaken;
-    private Integer amlTotalRulesScore;
-    private String amlTrxnId;
-    private String serviceName;
-    private String amlRulesTriggered;
 }

@@ -15,14 +15,11 @@ export interface PendingAccountOpeningRequestDto {
   legalId: string;
   status: string;
   createdAt: string;
-  message?: string;
   remark?: string;
   amlStatus?: string;
 
-  // Raw JSON data (backup)
+  // AML result data (parsed)
   amlResultData?: any;
-  requestData?: any;
-  customerInfo?: any;
 
   // Legal/NID info
   legalDocName?: string;
@@ -52,31 +49,21 @@ export interface PendingAccountOpeningRequestDto {
   averageIncome?: string;
   phoneNumber?: string;
   email?: string;
-  customerType?: string;
 
   // Current address
-  customerProvinceCode?: string;
   customerProvince?: string;
-  customerDistrictCode?: string;
   customerDistrict?: string;
-  customerCommuneCode?: string;
   customerCommune?: string;
-  customerVillageCode?: string;
   customerVillage?: string;
 
   // Place of birth
-  customerPobProvinceCode?: string;
   customerPobProvince?: string;
-  customerPobDistrictCode?: string;
   customerPobDistrict?: string;
-  customerPobCommuneCode?: string;
   customerPobCommune?: string;
-  customerPobVillageCode?: string;
   customerPobVillage?: string;
 
   // Branch info
   branchCode?: string;
-  branchNameKh?: string;
 
   // Banking info
   productAccount?: string;
@@ -88,14 +75,6 @@ export interface PendingAccountOpeningRequestDto {
   // Images
   nidImageName?: string;
   selfieImageName?: string;
-
-  // AML details
-  amlRiskLevel?: string;
-  amlActionTaken?: string;
-  amlTotalRulesScore?: number;
-  amlTrxnId?: string;
-  serviceName?: string;
-  amlRulesTriggered?: string;
 }
 
 // Main DTO for Pending Account Review
@@ -105,13 +84,12 @@ export interface PendingAccountAdminReviewDto {
   legalId: string;
   status: string;
   createdAt: string;
+  updatedAt?: string;
   amlStatus?: string;
   remark?: string;
 
-  // Raw JSON data (backup)
+  // AML result data (parsed)
   amlResultData?: any;
-  requestData?: any;
-  customerInfo?: any;
 
   // Legal/NID info
   legalDocName?: string;
@@ -141,31 +119,21 @@ export interface PendingAccountAdminReviewDto {
   averageIncome?: string;
   phoneNumber?: string;
   email?: string;
-  customerType?: string;
 
   // Current address
-  customerProvinceCode?: string;
   customerProvince?: string;
-  customerDistrictCode?: string;
   customerDistrict?: string;
-  customerCommuneCode?: string;
   customerCommune?: string;
-  customerVillageCode?: string;
   customerVillage?: string;
 
   // Place of birth
-  customerPobProvinceCode?: string;
   customerPobProvince?: string;
-  customerPobDistrictCode?: string;
   customerPobDistrict?: string;
-  customerPobCommuneCode?: string;
   customerPobCommune?: string;
-  customerPobVillageCode?: string;
   customerPobVillage?: string;
 
   // Branch info
   branchCode?: string;
-  branchNameKh?: string;
 
   // Banking info
   productAccount?: string;
@@ -177,14 +145,6 @@ export interface PendingAccountAdminReviewDto {
   // Images
   nidImageName?: string;
   selfieImageName?: string;
-
-  // AML details
-  amlRiskLevel?: string;
-  amlActionTaken?: string;
-  amlTotalRulesScore?: number;
-  amlTrxnId?: string;
-  serviceName?: string;
-  amlRulesTriggered?: string;
 }
 
 // Request for approving account
