@@ -320,6 +320,7 @@ export const useAccountSubmission = ({
       const isPendingRequest = errorMessage?.toLowerCase().includes("ដាក់ស្នើសុំបង្កើតគណនីរួចហើយ");
 
       // Check if account already exists (check for both English and Khmer keywords)
+      // Includes: account exists, mobile banking already exists, etc.
       const isAccountExists =
         errorMessage?.toLowerCase().includes("exist") ||
         errorMessage?.toLowerCase().includes("already") ||
@@ -328,7 +329,10 @@ export const useAccountSubmission = ({
         errorMessage?.includes("មានគណនី") ||
         errorResponse?.message?.toLowerCase().includes("exist") ||
         errorResponse?.message?.toLowerCase().includes("already") ||
-        errorResponse?.message?.includes("រួចហើយ");
+        errorResponse?.message?.includes("រួចហើយ") ||
+        // Mobile banking specific
+        errorMessage?.toLowerCase().includes("username") ||
+        errorMessage?.toLowerCase().includes("mobile banking");
 
       if (isPendingRequest) {
         // Show success modal for pending request - use message from backend
