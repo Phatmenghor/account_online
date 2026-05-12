@@ -60,14 +60,16 @@ export default function SubmitSuccessModal({
               </motion.h2>
 
               {/* Message */}
-              <motion.p
+              <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.15 }}
-                className="text-sm text-gray-600 leading-relaxed mb-6"
+                className="w-full bg-gray-50 rounded-2xl p-4 mb-6"
               >
-                {message}
-              </motion.p>
+                <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap text-left">
+                  {message}
+                </p>
+              </motion.div>
 
               {/* Status Section */}
               <motion.div
