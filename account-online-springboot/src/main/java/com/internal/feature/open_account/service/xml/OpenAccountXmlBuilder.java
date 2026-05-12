@@ -263,9 +263,10 @@ public class OpenAccountXmlBuilder {
 
             // Validate date is not in the future
             if (localDate.isAfter(LocalDate.now())) {
-                log.error("Invalid date: {} is in the future. T24 does not accept future dates.", date);
+                String currentDate = LocalDate.now().format(DATE_FORMATTER);
+                log.error("Invalid date: {} is in the future. Current date: {}. T24 does not accept future dates.", date, currentDate);
                 throw new OpenAccountException("INVALID_DATE",
-                    "The date " + date + " is in the future. Please provide a valid date.");
+                    "The date " + date + " is in the future (current date: " + currentDate + "). Please provide a valid date.");
             }
 
             return localDate.format(T24_DATE_FORMATTER);
