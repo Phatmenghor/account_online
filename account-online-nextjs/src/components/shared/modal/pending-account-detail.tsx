@@ -34,9 +34,9 @@ export default function PendingAccountDetailModal({
   const Field = ({ label, value }: { label: string; value?: any }) => {
     if (!value && value !== 0) return null;
     return (
-      <div className="bg-white p-3 rounded-lg border border-gray-200">
-        <p className="text-xs font-medium text-gray-500 mb-1">{label}</p>
-        <p className="text-sm font-semibold text-gray-900">{value}</p>
+      <div className="py-2 border-b border-gray-100 last:border-b-0">
+        <p className="text-xs text-gray-500 mb-0.5">{label}</p>
+        <p className="text-sm font-medium text-gray-900 truncate">{value}</p>
       </div>
     );
   };
@@ -122,7 +122,6 @@ export default function PendingAccountDetailModal({
                       <Field label="Request Status" value={account.status} />
                       <Field label="AML Status" value={account.amlStatus} />
                       <Field label="Submitted Date" value={new Date(account.createdAt).toLocaleString()} />
-                      {account.updatedAt && <Field label="Updated Date" value={new Date(account.updatedAt).toLocaleString()} />}
                     </div>
                   </div>
 
@@ -157,14 +156,16 @@ export default function PendingAccountDetailModal({
                   <div>
                     <h3 className="text-sm font-bold text-gray-900 mb-4">Employment & Banking</h3>
                     <div className="grid grid-cols-2 gap-4">
-                      <Field label="Company Name" value={account.companyName || "-"} />
+                      <Field label="Company Name" value={account.companyName} />
                       <Field label="Occupation" value={account.occupation} />
-                      <Field label="Industry" value={account.industry || "-"} />
-                      <Field label="Sector" value={account.sector || "-"} />
+                      <Field label="Industry" value={account.industry} />
+                      <Field label="Sector" value={account.sector} />
                       <Field label="Branch Code" value={account.branchCode} />
                       <Field label="Customer Role" value={account.customerRole} />
-                      <Field label="Product Account" value={account.productAccount || "-"} />
-                      <Field label="Account Category" value={account.categoryAccount || "-"} />
+                      <Field label="Product Account" value={account.productAccount} />
+                      <Field label="Account Category" value={account.categoryAccount} />
+                      <Field label="Loan Officer" value={account.loanOfficer} />
+                      <Field label="Released By" value={account.releasedBy} />
                     </div>
                   </div>
 
@@ -186,17 +187,11 @@ export default function PendingAccountDetailModal({
                   {account.amlResultData ? (
                     <>
                       {/* AML SCREENING RESULT */}
-                      <div className={`p-5 rounded-lg border-2 ${
-                        account.amlResultData.status === "APPROVE"
-                          ? "bg-green-50 border-green-300"
-                          : account.amlResultData.status === "REJECT"
-                          ? "bg-red-50 border-red-300"
-                          : "bg-yellow-50 border-yellow-300"
-                      }`}>
-                        <h3 className="text-sm font-bold mb-4">AML Screening Result</h3>
-                        <div className="grid grid-cols-2 gap-4">
-                          <div className="bg-white p-3 rounded-lg">
-                            <p className="text-xs font-medium text-gray-500 mb-1">Status</p>
+                      <div>
+                        <h3 className="text-sm font-bold text-gray-900 mb-4">AML Screening Result</h3>
+                        <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg">
+                          <div>
+                            <p className="text-xs text-gray-500 mb-1">Status</p>
                             <Badge className={
                               account.amlResultData.status === "APPROVE" ? "bg-green-600" :
                               account.amlResultData.status === "REJECT" ? "bg-red-600" :
@@ -205,21 +200,21 @@ export default function PendingAccountDetailModal({
                               {account.amlResultData.status}
                             </Badge>
                           </div>
-                          <div className="bg-white p-3 rounded-lg">
-                            <p className="text-xs font-medium text-gray-500 mb-1">Risk Level</p>
-                            <p className="text-sm font-semibold">{account.amlResultData.riskLevel}</p>
+                          <div>
+                            <p className="text-xs text-gray-500 mb-1">Risk Level</p>
+                            <p className="text-sm font-medium text-gray-900">{account.amlResultData.riskLevel}</p>
                           </div>
-                          <div className="bg-white p-3 rounded-lg">
-                            <p className="text-xs font-medium text-gray-500 mb-1">Service Name</p>
-                            <p className="text-sm font-semibold text-gray-900">{account.amlResultData.serviceName}</p>
+                          <div>
+                            <p className="text-xs text-gray-500 mb-1">Service Name</p>
+                            <p className="text-sm font-medium text-gray-900 truncate">{account.amlResultData.serviceName}</p>
                           </div>
-                          <div className="bg-white p-3 rounded-lg">
-                            <p className="text-xs font-medium text-gray-500 mb-1">Rules Score</p>
-                            <p className="text-sm font-semibold text-gray-900">{account.amlResultData.totalRulesScore}</p>
+                          <div>
+                            <p className="text-xs text-gray-500 mb-1">Rules Score</p>
+                            <p className="text-sm font-medium text-gray-900">{account.amlResultData.totalRulesScore}</p>
                           </div>
-                          <div className="bg-white p-3 rounded-lg col-span-2">
-                            <p className="text-xs font-medium text-gray-500 mb-1">Transaction ID</p>
-                            <p className="text-sm font-semibold text-gray-900">{account.amlResultData.trxnID}</p>
+                          <div className="col-span-2">
+                            <p className="text-xs text-gray-500 mb-1">Transaction ID</p>
+                            <p className="text-sm font-medium text-gray-900 truncate">{account.amlResultData.trxnID}</p>
                           </div>
                         </div>
                       </div>
@@ -238,34 +233,15 @@ export default function PendingAccountDetailModal({
                       {account.amlResultData.customerInfo && (
                         <div>
                           <h3 className="text-sm font-bold text-gray-900 mb-4">Verified Customer Data</h3>
-                          <div className="grid grid-cols-2 gap-4 bg-blue-50 border border-blue-200 p-4 rounded-lg">
-                            <div className="bg-white p-3 rounded-lg">
-                              <p className="text-xs font-medium text-gray-500 mb-1">Legal ID</p>
-                              <p className="text-sm font-semibold text-gray-900">{account.amlResultData.customerInfo.legalId}</p>
-                            </div>
-                            <div className="bg-white p-3 rounded-lg">
-                              <p className="text-xs font-medium text-gray-500 mb-1">Name</p>
-                              <p className="text-sm font-semibold text-gray-900">{`${account.amlResultData.customerInfo.givenName || ""} ${account.amlResultData.customerInfo.familyName || ""}`.trim()}</p>
-                            </div>
-                            <div className="bg-white p-3 rounded-lg">
-                              <p className="text-xs font-medium text-gray-500 mb-1">Date of Birth</p>
-                              <p className="text-sm font-semibold text-gray-900">{account.amlResultData.customerInfo.dateOfBirth}</p>
-                            </div>
-                            <div className="bg-white p-3 rounded-lg">
-                              <p className="text-xs font-medium text-gray-500 mb-1">Gender</p>
-                              <p className="text-sm font-semibold text-gray-900">{account.amlResultData.customerInfo.gender}</p>
-                            </div>
-                            <div className="bg-white p-3 rounded-lg">
-                              <p className="text-xs font-medium text-gray-500 mb-1">Nationality</p>
-                              <p className="text-sm font-semibold text-gray-900">{account.amlResultData.customerInfo.nationality}</p>
-                            </div>
-                            <div className="bg-white p-3 rounded-lg">
-                              <p className="text-xs font-medium text-gray-500 mb-1">Phone</p>
-                              <p className="text-sm font-semibold text-gray-900">{account.amlResultData.customerInfo.phoneNumber}</p>
-                            </div>
-                            <div className="bg-white p-3 rounded-lg col-span-2">
-                              <p className="text-xs font-medium text-gray-500 mb-1">Address</p>
-                              <p className="text-sm font-semibold text-gray-900">{account.amlResultData.customerInfo.legalAddress}</p>
+                          <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg">
+                            <Field label="Legal ID" value={account.amlResultData.customerInfo.legalId} />
+                            <Field label="Name" value={`${account.amlResultData.customerInfo.givenName || ""} ${account.amlResultData.customerInfo.familyName || ""}`.trim()} />
+                            <Field label="Date of Birth" value={account.amlResultData.customerInfo.dateOfBirth} />
+                            <Field label="Gender" value={account.amlResultData.customerInfo.gender} />
+                            <Field label="Nationality" value={account.amlResultData.customerInfo.nationality} />
+                            <Field label="Phone" value={account.amlResultData.customerInfo.phoneNumber} />
+                            <div className="col-span-2">
+                              <Field label="Address" value={account.amlResultData.customerInfo.legalAddress} />
                             </div>
                           </div>
                         </div>
