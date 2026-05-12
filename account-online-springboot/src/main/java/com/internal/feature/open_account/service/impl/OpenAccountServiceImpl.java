@@ -294,15 +294,12 @@ public class OpenAccountServiceImpl implements OpenAccountService {
             throw new OpenAccountException("INVALID_STATUS", AppConstants.INVALID_STATUS_ONLY_PENDING_CAN_REJECT);
         }
 
-        pendingRequest.setStatus(AccountOpeningRequestStatusEnum.REJECTED);
-        pendingRequest.setRemark(dto.getRemark());
+        // Save rejection to history table only (don't update main table)
+        saveHistory(pendingRequest, AccountOpeningRequestStatusEnum.REJECTED, dto.getRemark());
 
-        PendingAccountOpeningRequest saved = pendingRequestRepository.save(pendingRequest);
-        saveHistory(saved, AccountOpeningRequestStatusEnum.REJECTED, dto.getRemark());
+        log.info("✓ History saved | Request ID: {} | Status: REJECTED | Legal ID: {}", pendingRequest.getId(), pendingRequest.getLegalId());
 
-        log.info("✓ Request rejected | ID: {} | Legal ID: {}", saved.getId(), saved.getLegalId());
-
-        return mapToDto(saved);
+        return mapToDto(pendingRequest);
     }
 
     private PendingAccountOpeningRequestDto mapToDto(PendingAccountOpeningRequest entity) {
