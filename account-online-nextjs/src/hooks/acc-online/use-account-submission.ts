@@ -319,12 +319,16 @@ export const useAccountSubmission = ({
       // Check if this is a pending request already exists message
       const isPendingRequest = errorMessage?.toLowerCase().includes("ដាក់ស្នើសុំបង្កើតគណនីរួចហើយ");
 
-      // Check if account already exists
+      // Check if account already exists (check for both English and Khmer keywords)
       const isAccountExists =
         errorMessage?.toLowerCase().includes("exist") ||
         errorMessage?.toLowerCase().includes("already") ||
+        errorMessage?.includes("រួចហើយ") ||
+        errorMessage?.includes("គណនីមាន") ||
+        errorMessage?.includes("មានគណនី") ||
         errorResponse?.message?.toLowerCase().includes("exist") ||
-        errorResponse?.message?.toLowerCase().includes("already");
+        errorResponse?.message?.toLowerCase().includes("already") ||
+        errorResponse?.message?.includes("រួចហើយ");
 
       if (isPendingRequest) {
         // Show success modal for pending request - use message from backend
