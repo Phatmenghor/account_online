@@ -47,15 +47,33 @@ export default function PendingAccountDetailModal({
     return account.nationality || account.amlResultData?.customerInfo?.nationality;
   };
 
+  // Determine colors based on status
+  const getStatusColors = () => {
+    if (account.status === "REJECTED") {
+      return {
+        headerGradient: "bg-gradient-to-r from-red-600 to-red-700",
+        headerSubtext: "text-red-100",
+        tabActive: "data-[state=active]:text-red-600 data-[state=active]:border-red-600 data-[state=active]:bg-red-50",
+      };
+    }
+    return {
+      headerGradient: "bg-gradient-to-r from-green-600 to-green-700",
+      headerSubtext: "text-green-100",
+      tabActive: "data-[state=active]:text-green-600 data-[state=active]:border-green-600 data-[state=active]:bg-green-50",
+    };
+  };
+
+  const colors = getStatusColors();
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-6xl h-[95vh] flex flex-col p-0">
         {/* HEADER */}
-        <div className="flex-shrink-0 border-b bg-gradient-to-r from-green-600 to-green-700 px-6 py-4">
+        <div className={`flex-shrink-0 border-b ${colors.headerGradient} px-6 py-4`}>
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-xl font-bold text-white">{account.legalId}</h2>
-              <p className="text-xs text-green-100 mt-1">Request ID: {account.requestId}</p>
+              <p className={`text-xs ${colors.headerSubtext} mt-1`}>Request ID: {account.requestId}</p>
             </div>
             <div className="flex gap-2">
               <Badge
@@ -75,10 +93,10 @@ export default function PendingAccountDetailModal({
         <div className="flex-1 overflow-hidden flex flex-col">
           <Tabs defaultValue="overview" className="w-full flex flex-col h-full">
             <TabsList className="grid w-full grid-cols-2 flex-shrink-0 rounded-none border-b bg-white px-6 gap-0">
-              <TabsTrigger value="overview" className="text-sm font-semibold text-gray-600 hover:text-gray-900 data-[state=active]:text-green-600 data-[state=active]:border-b-3 data-[state=active]:border-green-600 data-[state=active]:bg-green-50 rounded-none py-3 px-4 transition-all duration-200">
+              <TabsTrigger value="overview" className={`text-sm font-semibold text-gray-600 hover:text-gray-900 ${colors.tabActive} data-[state=active]:border-b-3 rounded-none py-3 px-4 transition-all duration-200`}>
                 Overview
               </TabsTrigger>
-              <TabsTrigger value="aml" className="text-sm font-semibold text-gray-600 hover:text-gray-900 data-[state=active]:text-green-600 data-[state=active]:border-b-3 data-[state=active]:border-green-600 data-[state=active]:bg-green-50 rounded-none py-3 px-4 transition-all duration-200 flex items-center justify-center">
+              <TabsTrigger value="aml" className={`text-sm font-semibold text-gray-600 hover:text-gray-900 ${colors.tabActive} data-[state=active]:border-b-3 rounded-none py-3 px-4 transition-all duration-200 flex items-center justify-center`}>
                 <Shield className="w-4 h-4 mr-2" />
                 AML Screening
               </TabsTrigger>
