@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Clock } from "lucide-react";
+import { CheckCircle } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 
 interface SuccessModalProps {
@@ -45,9 +45,9 @@ export default function SubmitSuccessModal({
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 transition={{ type: "spring", damping: 15, stiffness: 150 }}
-                className="w-16 h-16 rounded-full bg-blue-500 flex items-center justify-center mb-6 shadow-lg"
+                className="w-16 h-16 rounded-full bg-green-500 flex items-center justify-center mb-6 shadow-lg"
               >
-                <Clock className="text-white" style={{ width: 28, height: 28 }} />
+                <CheckCircle className="text-white" style={{ width: 28, height: 28 }} />
               </motion.div>
 
               {/* Title */}
@@ -72,25 +72,18 @@ export default function SubmitSuccessModal({
                 </p>
               </motion.div>
 
-              {/* Buttons */}
+              {/* Button */}
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
-                className="w-full flex gap-3"
+                className="w-full"
               >
                 <Button
                   onClick={onClose}
-                  variant="outline"
-                  className="flex-1 border-gray-300 text-gray-600 hover:bg-gray-50 py-2 rounded-lg font-medium"
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-lg font-medium"
                 >
-                  ✕ ទេ
-                </Button>
-                <Button
-                  onClick={onClose}
-                  className="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-lg font-medium"
-                >
-                  ព្រងឹងលាងលាង
+                  យល់ព្រម
                 </Button>
               </motion.div>
             </div>

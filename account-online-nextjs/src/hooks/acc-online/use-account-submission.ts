@@ -319,13 +319,13 @@ export const useAccountSubmission = ({
         errorResponse?.message?.toLowerCase().includes("already");
 
       if (isPendingRequest) {
-        // Show as waiting message, not error
-        setSubmitErrorData({
+        // Show success modal for pending request
+        setSuccessData({
           title: "សូមរង់ចាំ",
-          message: errorMessage,
-          variant: "warning",
+          message: "លោកអ្នកបានដាក់ស្នើសុំបង្កើតគណនីរួចហើយ។ សូមរងចាំការឆ្លើយប្រតិកម្មពីផ្នែកលទ្ធផលគ្រប់គ្រង។ ប្រសិនបើលោកអ្នកមានសំណួរ សូមទំនាក់ទំនង 070 200 002 ឬ 1800 200 888 ដើម្បីទទួលបានជំនួយបន្ថែម។",
+          status: "PENDING",
         });
-        setShowSubmitErrorModal(true);
+        setShowSuccessModal(true);
       } else if (isAccountExists && errorResponse?.data) {
         // Show account exists modal with account details
         setAccountExistsData({
