@@ -338,12 +338,12 @@ export const useAccountSubmission = ({
           status: "PENDING",
         });
         setShowSuccessModal(true);
-      } else if (isAccountExists && errorResponse?.data) {
-        // Show account exists modal with account details
+      } else if (isAccountExists) {
+        // Show account exists modal with account details (if available)
         setAccountExistsData({
-          cif: errorResponse.data.cif,
-          accountNumber: errorResponse.data.accountNumber || errorResponse.data.khrAccount,
-          accountName: errorResponse.data.accountName || errorResponse.data.legalHolderName,
+          cif: errorResponse?.data?.cif,
+          accountNumber: errorResponse?.data?.accountNumber || errorResponse?.data?.khrAccount,
+          accountName: errorResponse?.data?.accountName || errorResponse?.data?.legalHolderName,
           message: errorMessage || "គណនីធនាគារលក់ដ៏ងរបស់អ្នកបានបង្កើតរួចរាល់។ អ្នកអាចបង្ហាញលេខគណនីរបស់អ្នក ឬបន្តប្រើប្រាស់វា។",
         });
         setShowAccountExistsModal(true);
