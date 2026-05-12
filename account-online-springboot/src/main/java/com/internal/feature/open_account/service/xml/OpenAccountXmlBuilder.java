@@ -344,16 +344,17 @@ public class OpenAccountXmlBuilder {
         // Keep original for comparison
         String original = input.trim();
 
-        // Remove control characters and dangerous symbols only
-        // But PRESERVE Khmer, Latin, numbers, spaces, and common punctuation
+        // T24 SWIFT format requires ASCII-only characters (A-Z, a-z, 0-9, space, and common punctuation)
+        // Remove all non-ASCII characters (including Khmer and other Unicode characters)
         String sanitized = original
-                .replaceAll("[\\x00-\\x1F\\x7F]", " ")  // Remove control characters
-                .replaceAll("[<>\"'&]", " ")              // Remove HTML-like characters
-                .replaceAll(" {2,}", " ")                 // Collapse multiple spaces
+                .replaceAll("[^\\p{ASCII}]", " ")       // Remove all non-ASCII characters (including Khmer)
+                .replaceAll("[\\x00-\\x1F\\x7F]", " ") // Remove control characters
+                .replaceAll("[<>\"'&]", " ")            // Remove HTML-like characters
+                .replaceAll(" {2,}", " ")               // Collapse multiple spaces
                 .trim();
 
         if (!sanitized.equals(original) && !original.isEmpty()) {
-            log.warn("Address sanitization applied. Original: [{}] → Sanitized: [{}]", original, sanitized);
+            log.warn("Address sanitization applied (SWIFT compliance). Original: [{}] → Sanitized: [{}]", original, sanitized);
         }
 
         return sanitized.isEmpty() ? original : sanitized;  // Return original if sanitization results in empty
