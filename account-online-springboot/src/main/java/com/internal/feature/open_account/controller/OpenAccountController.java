@@ -39,7 +39,7 @@ public class OpenAccountController {
             log.error("Failed to send Telegram alert for account creation: {}", e.getMessage());
         }
 
-        return ResponseEntity.ok(ApiResponse.success(ResponseMessage.ACCOUNT_OPENING_SUBMITTED, response));
+        return ResponseEntity.ok(ApiResponse.success(ResponseMessage.REQUEST_SUBMITTED, response));
 }
 
     @PostMapping("/approve")
