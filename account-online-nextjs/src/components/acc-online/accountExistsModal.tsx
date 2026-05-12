@@ -1,6 +1,6 @@
 "use client";
 
-import { Wallet, X, ArrowRight } from "lucide-react";
+import { Wallet, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTranslations } from "next-intl";
 import { motion, AnimatePresence } from "framer-motion";
@@ -24,11 +24,6 @@ const AccountExistsModal = ({
   onContinue,
 }: AccountExistsModalProps) => {
   const translate = useTranslations("common");
-
-  const handleContinue = () => {
-    onContinue?.();
-    onClose();
-  };
 
   return (
     <AnimatePresence>
@@ -82,20 +77,23 @@ const AccountExistsModal = ({
                 transition={{ delay: 0.1 }}
                 className="bg-primary/5 border border-primary/20 rounded-xl p-4"
               >
-                <p className="text-sm text-gray-700 leading-relaxed">
+                <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
                   {data?.message ||
                     "គណនីធនាគារលក់ដ៏ងរបស់អ្នកបានបង្កើតរួចរាល់។ អ្នកអាចបង្ហាញលេខគណនីរបស់អ្នក ឬបន្តប្រើប្រាស់វា។"}
                 </p>
               </motion.div>
 
               {/* Account Details Card */}
-              {(data?.cif || data?.accountNumber) && (
+              {(data?.cif || data?.accountNumber || data?.accountName) && (
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.2 }}
                   className="bg-primary/5 border border-primary/20 rounded-xl p-4 space-y-3"
                 >
+                  <h4 className="text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    ព័ត៌មានលម្អិតគណនី
+                  </h4>
                   <div className="space-y-2">
                     {data?.cif && (
                       <div>
@@ -131,52 +129,35 @@ const AccountExistsModal = ({
                 </motion.div>
               )}
 
-              {/* Benefits/Info */}
+              {/* Support Contact Info */}
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
-                className="space-y-2"
+                className="bg-blue-50 border border-blue-200 rounded-xl p-4 space-y-3"
               >
-                <p className="text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                  អ្វីដែលអ្នកអាចធ្វើ៖
-                </p>
+                <h4 className="text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                  ចាប់ផ្តើមបង្កើតគណនី
+                </h4>
                 <div className="space-y-2">
-                  <div className="flex items-start gap-3 bg-gray-50 rounded-lg p-3">
-                    <ArrowRight className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
-                    <span className="text-sm text-gray-700">
-                      ដាក់ប្រាក់ទៅក្នុងគណនីលក់របស់អ្នក
-                    </span>
-                  </div>
-                  <div className="flex items-start gap-3 bg-gray-50 rounded-lg p-3">
-                    <ArrowRight className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
-                    <span className="text-sm text-gray-700">
-                      ផ្ទេរប្រាក់ដោយលឿនរវាងគណនី
-                    </span>
-                  </div>
-                  <div className="flex items-start gap-3 bg-gray-50 rounded-lg p-3">
-                    <ArrowRight className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
-                    <span className="text-sm text-gray-700">
-                      ជ្រើសរើស ឬគ្រប់គ្រងលក្ខណៈពិសេសផ្សេងទៀត
-                    </span>
-                  </div>
+                  <p className="text-sm text-gray-700">
+                    📞 <span className="font-semibold">ទូរស័ព្ទ:</span> ០៧ ២០០ ០០២ ឬ ១៨០០ ២០០ ៨៨៨
+                  </p>
+                  <p className="text-sm text-gray-700">
+                    🕐 <span className="font-semibold">ម៉ោងបើកលើ:</span> ០៨:០០ - ១៨:០០ (ច័ន្ទ - សុក្រ)
+                  </p>
+                  <p className="text-sm text-gray-700">
+                    💬 <span className="font-semibold">អ៊ីមែល:</span> support@cpbank.com
+                  </p>
                 </div>
               </motion.div>
             </div>
 
             {/* Buttons */}
-            <div className="px-5 pb-5 space-y-2.5 flex-shrink-0 bg-white">
-              <Button
-                onClick={handleContinue}
-                className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-2.5 rounded-lg shadow-sm transition-all flex items-center justify-center gap-2"
-              >
-                <Wallet className="w-4 h-4" />
-                បន្តប្រើប្រាស់គណនី
-              </Button>
+            <div className="px-5 pb-5 flex-shrink-0 bg-white">
               <Button
                 onClick={onClose}
-                variant="outline"
-                className="w-full font-semibold py-2.5 rounded-lg border-gray-300 text-gray-700 hover:bg-gray-50"
+                className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-2.5 rounded-lg shadow-sm transition-all"
               >
                 បិទ
               </Button>
