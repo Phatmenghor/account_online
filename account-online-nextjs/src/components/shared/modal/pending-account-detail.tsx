@@ -89,11 +89,11 @@ export default function PendingAccountDetailModal({
         {/* BODY - TABS */}
         <div className="flex-1 overflow-hidden flex flex-col">
           <Tabs defaultValue="overview" className="w-full flex flex-col h-full">
-            <TabsList className="grid w-full grid-cols-2 flex-shrink-0 rounded-none border-b bg-gray-50 px-6">
-              <TabsTrigger value="overview" className="text-xs">
+            <TabsList className="grid w-full grid-cols-2 flex-shrink-0 rounded-none border-b bg-white px-6">
+              <TabsTrigger value="overview" className="text-xs data-[state=active]:bg-blue-50 data-[state=active]:text-blue-600 data-[state=active]:border-b-2 data-[state=active]:border-blue-600">
                 Overview
               </TabsTrigger>
-              <TabsTrigger value="aml" className="text-xs">
+              <TabsTrigger value="aml" className="text-xs data-[state=active]:bg-blue-50 data-[state=active]:text-blue-600 data-[state=active]:border-b-2 data-[state=active]:border-blue-600">
                 <Shield className="w-4 h-4 mr-1" />
                 AML
               </TabsTrigger>
