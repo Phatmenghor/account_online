@@ -343,13 +343,21 @@ public class OpenAccountTelegramAlertServiceImpl implements AlertsOpenAccOnlineS
             // Legal Address
             appendIfNotEmpty(bodyBuilder, "Legal Address", request.getLegalAddress());
 
-            // Current Address
+            // Current Address - use Khmer names for display
             String currentAddress = buildAddressString(
-                    request.getCustomerProvince(),
-                    request.getCustomerDistrict(),
-                    request.getCustomerCommune(),
-                    request.getCustomerVillage());
+                    request.getCustomerProvinceKh(),
+                    request.getCustomerDistrictKh(),
+                    request.getCustomerCommuneKh(),
+                    request.getCustomerVillageKh());
             appendIfNotEmpty(bodyBuilder, "Current Address", currentAddress);
+
+            // Place of Birth Address
+            String pobAddress = buildAddressString(
+                    request.getCustomerPobProvinceKh(),
+                    request.getCustomerPobDistrictKh(),
+                    request.getCustomerPobCommuneKh(),
+                    request.getCustomerPobVillageKh());
+            appendIfNotEmpty(bodyBuilder, "Place of Birth", pobAddress);
 
             String statusText = request.getStatus() != null ? request.getStatus().name() : "N/A";
 

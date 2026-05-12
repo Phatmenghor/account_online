@@ -62,12 +62,20 @@ public class PendingAccountOpeningRequestDto {
     private String customerDistrict;
     private String customerCommune;
     private String customerVillage;
+    private String customerProvinceKh;
+    private String customerDistrictKh;
+    private String customerCommuneKh;
+    private String customerVillageKh;
 
     // === PLACE OF BIRTH ===
     private String customerPobProvince;
     private String customerPobDistrict;
     private String customerPobCommune;
     private String customerPobVillage;
+    private String customerPobProvinceKh;
+    private String customerPobDistrictKh;
+    private String customerPobCommuneKh;
+    private String customerPobVillageKh;
 
     // === BRANCH INFO ===
     private String branchCode;

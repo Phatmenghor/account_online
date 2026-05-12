@@ -275,12 +275,20 @@ export const useAccountSubmission = ({
         customerCurrentDistrict: locationData.currentAddress.district?.districtCode || "",
         customerCurrentCommune: locationData.currentAddress.commune?.communeCode || "",
         customerCurrentVillage: locationData.currentAddress.village?.villageCode || "",
+        customerProvinceKh: locationData.currentAddress.province?.provinceKh || "",
+        customerDistrictKh: locationData.currentAddress.district?.districtKh || "",
+        customerCommuneKh: locationData.currentAddress.commune?.communeKh || "",
+        customerVillageKh: locationData.currentAddress.village?.villageKh || "",
 
         // Place of Birth Address - use empty string if not selected
         customerPobProvince: locationData.placeOfBirth.province?.provinceCode || "",
         customerPobDistrict: locationData.placeOfBirth.district?.districtCode || "",
         customerPobCommune: locationData.placeOfBirth.commune?.communeCode || "",
         customerPobVillage: locationData.placeOfBirth.village?.villageCode || "",
+        customerPobProvinceKh: locationData.placeOfBirth.province?.provinceKh || "",
+        customerPobDistrictKh: locationData.placeOfBirth.district?.districtKh || "",
+        customerPobCommuneKh: locationData.placeOfBirth.commune?.communeKh || "",
+        customerPobVillageKh: locationData.placeOfBirth.village?.villageKh || "",
 
         // Images
         nidImageName: nidFileName!,
