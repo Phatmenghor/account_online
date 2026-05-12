@@ -261,23 +261,25 @@ public class OpenAccountServiceImpl implements OpenAccountService {
             throw new OpenAccountException("ACCOUNT_CREATION_FAILED", errorMessage);
         }
 
-        pendingRequest.setStatus(AccountOpeningRequestStatusEnum.APPROVED);
-        pendingRequest.setRemark(dto.getRemark());
+        // Save to history with APPROVED status and account details
+        saveHistory(pendingRequest, AccountOpeningRequestStatusEnum.APPROVED, dto.getRemark());
 
-        // Store account details after successful creation
+        // Delete from main table (only PENDING records should be in main table)
+        pendingRequestRepository.deleteById(pendingRequest.getId());
+
+        log.info("✓ Request approved and removed from pending | ID: {} | Legal ID: {} | CIF: {}", pendingRequest.getId(), pendingRequest.getLegalId(), accountResponse != null ? accountResponse.getCif() : "N/A");
+
+        // Return response with APPROVED status and account details
+        PendingAccountOpeningRequestDto response = mapToDto(pendingRequest);
+        response.setStatus(AccountOpeningRequestStatusEnum.APPROVED);
+        response.setRemark(dto.getRemark());
         if (accountResponse != null) {
-            pendingRequest.setCif(accountResponse.getCif());
-            pendingRequest.setMnemonic(accountResponse.getMnemonic());
-            pendingRequest.setKhrAccount(accountResponse.getKhrAccount());
-            pendingRequest.setUsdAccount(accountResponse.getUsdAccount());
+            response.setCif(accountResponse.getCif());
+            response.setMnemonic(accountResponse.getMnemonic());
+            response.setKhrAccount(accountResponse.getKhrAccount());
+            response.setUsdAccount(accountResponse.getUsdAccount());
         }
-
-        PendingAccountOpeningRequest saved = pendingRequestRepository.save(pendingRequest);
-        saveHistory(saved, AccountOpeningRequestStatusEnum.APPROVED, dto.getRemark());
-
-        log.info("✓ Request approved and account created | ID: {} | Legal ID: {} | CIF: {}", saved.getId(), saved.getLegalId(), saved.getCif());
-
-        return mapToDto(saved);
+        return response;
     }
 
     @Override
@@ -294,10 +296,13 @@ public class OpenAccountServiceImpl implements OpenAccountService {
             throw new OpenAccountException("INVALID_STATUS", AppConstants.INVALID_STATUS_ONLY_PENDING_CAN_REJECT);
         }
 
-        // Save rejection to history table only (don't update main table)
-        PendingAccountOpeningRequestHistory historyRecord = saveHistory(pendingRequest, AccountOpeningRequestStatusEnum.REJECTED, dto.getRemark());
+        // Save rejection to history table
+        saveHistory(pendingRequest, AccountOpeningRequestStatusEnum.REJECTED, dto.getRemark());
 
-        log.info("✓ History saved | Request ID: {} | Status: REJECTED | Legal ID: {}", pendingRequest.getId(), pendingRequest.getLegalId());
+        // Delete from main table (only PENDING records should be in main table)
+        pendingRequestRepository.deleteById(pendingRequest.getId());
+
+        log.info("✓ Request rejected and removed from pending | Request ID: {} | Legal ID: {}", pendingRequest.getId(), pendingRequest.getLegalId());
 
         // Return response with REJECTED status and remark
         PendingAccountOpeningRequestDto response = mapToDto(pendingRequest);
