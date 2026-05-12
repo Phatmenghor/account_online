@@ -296,8 +296,8 @@ export const useAccountSubmission = ({
       uploadCache.current = { nidFileName: null, selfieFileName: null };
 
       setSuccessData({
-        title: "ស្នើសុំបានរីករាយ",
-        message: response?.message || "ស្នើសុំបង្កើតគណនីរបស់អ្នកត្រូវបានបញ្ជូនដោយជោគជ័យ។",
+        title: "សូមរង់ចាំ",
+        message: response?.message || "ស្នើសុំបង្កើតគណនីរបស់អ្នកត្រូវបានបញ្ជូនដោយជោគជ័យ។ សូមរង់ចាំក្នុងខណៈពេលដែលយើ្ងកំពុងដំណើរការស្នើសុំរបស់អ្នក។",
         status: "PENDING",
       });
       setShowSuccessModal(true);

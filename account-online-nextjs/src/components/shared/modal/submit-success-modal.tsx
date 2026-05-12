@@ -64,10 +64,25 @@ export default function SubmitSuccessModal({
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.15 }}
-                className="text-sm text-gray-600 leading-relaxed mb-8"
+                className="text-sm text-gray-600 leading-relaxed mb-6"
               >
                 {message}
               </motion.p>
+
+              {/* Status Section */}
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="w-full bg-amber-50 border border-amber-200 rounded-2xl p-4 mb-6"
+              >
+                <p className="text-xs font-semibold text-amber-600 uppercase tracking-wider mb-2">
+                  ស្ថានភាព
+                </p>
+                <p className="text-lg font-bold text-amber-600">
+                  {status === "PENDING" ? "ស្ថានភាពរង់ចាំ" : status}
+                </p>
+              </motion.div>
 
               {/* Buttons */}
               <motion.div
