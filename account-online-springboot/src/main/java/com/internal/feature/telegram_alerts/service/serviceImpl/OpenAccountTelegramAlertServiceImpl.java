@@ -352,10 +352,8 @@ public class OpenAccountTelegramAlertServiceImpl implements AlertsOpenAccOnlineS
             appendIfNotEmpty(bodyBuilder, "Current Address", currentAddress);
 
             String statusText = request.getStatus() != null ? request.getStatus().name() : "N/A";
-            String timeFormatted = request.getCreatedAt() != null ? request.getCreatedAt() : LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
 
-            String footer = "Status: " + escapeMarkdown(statusText) + "\n" +
-                    "Time: " + escapeMarkdown(timeFormatted);
+            String footer = "Status: " + escapeMarkdown(statusText);
 
             String message = header + "\n" + SEPARATOR + "\n" + bodyBuilder + SEPARATOR + "\n" + footer;
 
