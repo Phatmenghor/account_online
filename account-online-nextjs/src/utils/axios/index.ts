@@ -449,7 +449,7 @@ const createAxiosInstance = (requiresAuth = false): AxiosInstance => {
 
       if (err.response?.status === 401) {
         logoutToken();
-        window.location.href = "/admin/login";
+        window.location.href = "/login";
         return Promise.reject(error);
       }
 
