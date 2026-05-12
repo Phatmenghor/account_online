@@ -669,6 +669,27 @@ public class OpenAccountServiceImpl implements OpenAccountService {
                     .customerInfo(request.getCustomerInfo())
                     .amlResultData(request.getAmlResultData())
                     .remark(remark)
+                    // Copy all denormalized fields from main table
+                    .legalDocName(request.getLegalDocName())
+                    .legalHolderName(request.getLegalHolderName())
+                    .legalFirstNameEn(request.getLegalFirstNameEn())
+                    .legalLastNameEn(request.getLegalLastNameEn())
+                    .legalFirstNameKh(request.getLegalFirstNameKh())
+                    .legalLastNameKh(request.getLegalLastNameKh())
+                    .legalDateOfBirth(request.getLegalDateOfBirth())
+                    .legalGender(request.getLegalGender())
+                    .legalAddress(request.getLegalAddress())
+                    .legalPlaceOfBirth(request.getLegalPlaceOfBirth())
+                    .phoneNumber(request.getPhoneNumber())
+                    .branchCode(request.getBranchCode())
+                    .occupation(request.getOccupation())
+                    .companyName(request.getCompanyName())
+                    .email(request.getEmail())
+                    .maritalStatus(request.getMaritalStatus())
+                    .nationality(request.getNationality())
+                    .amlStatus(request.getAmlStatus() != null ? request.getAmlStatus().name() : null)
+                    .nidImageName(request.getNidImageName())
+                    .selfieImageName(request.getSelfieImageName())
                     .build();
             historyRepository.save(history);
             log.info("✓ History saved | Request ID: {} | Status: {} | By: {}", request.getId(), status, actionUsername);

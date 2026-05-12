@@ -10,6 +10,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 
 @EqualsAndHashCode(callSuper = true)
 @Entity
@@ -51,4 +52,66 @@ public class PendingAccountOpeningRequestHistory extends BaseEntity {
 
     @Column(name = "remark", columnDefinition = "TEXT")
     private String remark;
+
+    // === LEGAL / NID INFO (same as main table for audit trail) ===
+    @Column(name = "legal_doc_name")
+    private String legalDocName;
+
+    @Column(name = "legal_holder_name")
+    private String legalHolderName;
+
+    @Column(name = "legal_first_name_en")
+    private String legalFirstNameEn;
+
+    @Column(name = "legal_last_name_en")
+    private String legalLastNameEn;
+
+    @Column(name = "legal_first_name_kh")
+    private String legalFirstNameKh;
+
+    @Column(name = "legal_last_name_kh")
+    private String legalLastNameKh;
+
+    @Column(name = "legal_date_of_birth")
+    private LocalDate legalDateOfBirth;
+
+    @Column(name = "legal_gender")
+    private String legalGender;
+
+    @Column(name = "legal_address")
+    private String legalAddress;
+
+    @Column(name = "legal_place_of_birth")
+    private String legalPlaceOfBirth;
+
+    @Column(name = "phone_number")
+    private String phoneNumber;
+
+    @Column(name = "branch_code")
+    private String branchCode;
+
+    @Column(name = "occupation")
+    private String occupation;
+
+    @Column(name = "company_name")
+    private String companyName;
+
+    @Column(name = "email")
+    private String email;
+
+    @Column(name = "marital_status")
+    private String maritalStatus;
+
+    @Column(name = "nationality")
+    private String nationality;
+
+    @Column(name = "aml_status")
+    private String amlStatus;
+
+    // === IMAGE FILES ===
+    @Column(name = "nid_image_name")
+    private String nidImageName;
+
+    @Column(name = "selfie_image_name")
+    private String selfieImageName;
 }
