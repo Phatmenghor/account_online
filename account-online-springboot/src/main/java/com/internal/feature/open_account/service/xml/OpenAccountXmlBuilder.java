@@ -333,23 +333,30 @@ public class OpenAccountXmlBuilder {
     }
 
     /**
-     * Sanitizes a string to contain SWIFT-allowed characters while preserving Unicode (Khmer).
-     * SWIFT charset: A-Z a-z 0-9 / - ? : ( ) . , ' + space
-     * Unicode characters (including Khmer) are preserved as they are valid in XML UTF-8.
-     * Only control characters and certain symbols are removed.
-     * Used for fields like STREET that T24 validates against SWIFT rules.
+     * Sanitizes a string to handle both Latin and Unicode (Khmer) characters.
+     * Since XML UTF-8 supports Unicode, Khmer characters are preserved.
+     * Only removes dangerous control characters and HTML-like tags.
+     * T24 accepts Unicode characters in address fields.
      */
     private String toSwiftSafe(String input) {
         if (input == null) return "";
-        // T24 STREET field: ONLY accepts A-Z, 0-9, space, and dash
-        // All other characters (including Khmer, special symbols) are removed
-        String sanitized = input.replaceAll("[^A-Za-z0-9 \\-]", " ").trim();
-        // Collapse multiple spaces into one
-        sanitized = sanitized.replaceAll(" {2,}", " ");
-        if (!sanitized.equals(input.trim())) {
-            log.warn("SWIFT sanitization applied to address. Original: [{}] → Sanitized: [{}]", input, sanitized);
+
+        // Keep original for comparison
+        String original = input.trim();
+
+        // Remove control characters and dangerous symbols only
+        // But PRESERVE Khmer, Latin, numbers, spaces, and common punctuation
+        String sanitized = original
+                .replaceAll("[\\x00-\\x1F\\x7F]", " ")  // Remove control characters
+                .replaceAll("[<>\"'&]", " ")              // Remove HTML-like characters
+                .replaceAll(" {2,}", " ")                 // Collapse multiple spaces
+                .trim();
+
+        if (!sanitized.equals(original) && !original.isEmpty()) {
+            log.warn("Address sanitization applied. Original: [{}] → Sanitized: [{}]", original, sanitized);
         }
-        return sanitized;
+
+        return sanitized.isEmpty() ? original : sanitized;  // Return original if sanitization results in empty
     }
 
     /**
