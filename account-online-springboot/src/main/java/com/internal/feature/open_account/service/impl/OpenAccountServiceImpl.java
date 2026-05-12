@@ -759,13 +759,21 @@ public class OpenAccountServiceImpl implements OpenAccountService {
         builder.customerProvinceCode(request.getCustomerCurrentProvince())
                 .customerDistrictCode(request.getCustomerCurrentDistrict())
                 .customerCommuneCode(request.getCustomerCurrentCommune())
-                .customerVillageCode(request.getCustomerCurrentVillage());
+                .customerVillageCode(request.getCustomerCurrentVillage())
+                .customerProvince(request.getCustomerProvinceKh())
+                .customerDistrict(request.getCustomerDistrictKh())
+                .customerCommune(request.getCustomerCommuneKh())
+                .customerVillage(request.getCustomerVillageKh());
 
         // === PLACE OF BIRTH ===
         builder.customerPobProvinceCode(request.getCustomerPobProvince())
                 .customerPobDistrictCode(request.getCustomerPobDistrict())
                 .customerPobCommuneCode(request.getCustomerPobCommune())
-                .customerPobVillageCode(request.getCustomerPobVillage());
+                .customerPobVillageCode(request.getCustomerPobVillage())
+                .customerPobProvince(request.getCustomerPobProvinceKh())
+                .customerPobDistrict(request.getCustomerPobDistrictKh())
+                .customerPobCommune(request.getCustomerPobCommuneKh())
+                .customerPobVillage(request.getCustomerPobVillageKh());
 
         // === BRANCH INFO ===
         builder.branchCode(request.getBranchCode());

@@ -190,4 +190,30 @@ public class CustomerRequest {
     @JsonProperty("lastNameKh")
     @NotBlank(message = "Last name in Khmer is required")
     private String lastNameKh;
+
+    // === CURRENT ADDRESS NAMES (KHMER) ===
+    @JsonProperty("customer_province_kh")
+    private String customerProvinceKh;
+
+    @JsonProperty("customer_district_kh")
+    private String customerDistrictKh;
+
+    @JsonProperty("customer_commune_kh")
+    private String customerCommuneKh;
+
+    @JsonProperty("customer_village_kh")
+    private String customerVillageKh;
+
+    // === PLACE OF BIRTH NAMES (KHMER) ===
+    @JsonProperty("customer_pob_province_kh")
+    private String customerPobProvinceKh;
+
+    @JsonProperty("customer_pob_district_kh")
+    private String customerPobDistrictKh;
+
+    @JsonProperty("customer_pob_commune_kh")
+    private String customerPobCommuneKh;
+
+    @JsonProperty("customer_pob_village_kh")
+    private String customerPobVillageKh;
 }
