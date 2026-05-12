@@ -11,7 +11,7 @@ import { PendingAccountAdminReviewDto } from "@/models/open-account-admin/pendin
 import { Shield, CheckCircle, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ImageDisplayCard from "@/components/shared/card/image-display-card";
-import { toProperCase } from "@/utils/common/common";
+import { toProperCase, formatIsoDateTime } from "@/utils/common/common";
 
 interface PendingAccountDetailModalProps {
   account?: PendingAccountAdminReviewDto;
@@ -113,7 +113,7 @@ export default function PendingAccountDetailModal({
                     <div className="grid grid-cols-2 gap-4">
                       <Field label="Request Status" value={account.status} />
                       <Field label="AML Status" value={account.amlStatus} />
-                      <Field label="Submitted Date" value={new Date(account.createdAt).toLocaleString()} />
+                      <Field label="Submitted Date" value={formatIsoDateTime(account.createdAt)} />
                       <Field label="Name (English)" value={toProperCase(`${account.legalLastNameEn || ""} ${account.legalFirstNameEn || ""}`.trim())} />
                       <Field label="Name (Khmer)" value={`${account.legalLastNameKh || ""} ${account.legalFirstNameKh || ""}`.trim()} />
                       <Field label="Date of Birth" value={account.legalDateOfBirth} />
@@ -171,7 +171,7 @@ export default function PendingAccountDetailModal({
                       <h3 className="text-sm font-bold text-gray-900 mb-4">Action Details</h3>
                       <div className="grid grid-cols-2 gap-4">
                         <Field label="Action By" value={account.actionUsername} />
-                        <Field label="Action Date" value={account.createdAt ? new Date(account.createdAt).toLocaleString() : "---"} />
+                        <Field label="Action Date" value={formatIsoDateTime(account.createdAt)} />
                         {account.remark && (
                           <div className="col-span-2">
                             <div className="py-3 border-b border-blue-100 last:border-b-0">

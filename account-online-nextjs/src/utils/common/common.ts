@@ -54,3 +54,19 @@ export const toProperCase = (str: string | null | undefined): string => {
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(" ");
 };
+
+export const formatIsoDateTime = (isoString: string | null | undefined): string => {
+  if (!isoString) return "---";
+  try {
+    // Handle ISO format with fractional seconds: "2026-05-12T16:45:21.882926"
+    // Truncate fractional seconds to 3 digits for proper parsing
+    const cleanedIso = isoString.replace(/\.\d{6}$/, (match) => {
+      return match.substring(0, 4); // Keep only milliseconds (3 digits + dot)
+    });
+    const date = new Date(cleanedIso);
+    if (isNaN(date.getTime())) return "---";
+    return date.toLocaleString();
+  } catch {
+    return "---";
+  }
+};
