@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.internal.enumation.AccountOpeningRequestStatusEnum;
 import com.internal.enumation.AmlStatusEnum;
 import com.internal.exceptions.error.custom.NotFoundException;
+import com.internal.exceptions.error.openaccount.AccountExistsException;
 import com.internal.exceptions.error.openaccount.OpenAccountException;
 import com.internal.feature.aml.dto.response.AmlStatusDto;
 import com.internal.feature.open_account.dto.OpenAccountContext;
@@ -212,6 +213,9 @@ public class OpenAccountServiceImpl implements OpenAccountService {
 
             return mapToDto(saved);
 
+        } catch (AccountExistsException e) {
+            log.info("Account already exists | Legal ID: {} | Message: {}", legalId, e.getMessage());
+            throw e;
         } catch (OpenAccountException e) {
             log.warn("Request submission rejected | Legal ID: {} | Reason: {}", legalId, e.getMessage());
             throw e;
