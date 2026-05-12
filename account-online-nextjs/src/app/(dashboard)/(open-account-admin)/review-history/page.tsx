@@ -180,7 +180,7 @@ function ReviewHistory() {
                 columns={columnsWithEyeIcon}
                 loading={isLoading}
                 emptyMessage="No history records found"
-                getRowKey={(account) => account.id ?? crypto.randomUUID()}
+                getRowKey={(account) => account.requestId ?? crypto.randomUUID()}
               />
 
               <div className="border-t bg-background p-2 flex justify-end">
