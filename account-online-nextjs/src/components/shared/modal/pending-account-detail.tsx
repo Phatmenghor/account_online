@@ -11,8 +11,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PendingAccountAdminReviewDto } from "@/models/open-account-admin/pending-account.response";
-import { useState, useEffect } from "react";
-import { User, FileText, Image as ImageIcon, AlertCircle, DollarSign } from "lucide-react";
+import { User, FileText, Shield, Briefcase, AlertCircle, Image as ImageIcon } from "lucide-react";
 import ImageDisplayCard from "@/components/shared/card/image-display-card";
 
 interface PendingAccountDetailModalProps {
@@ -26,330 +25,295 @@ export default function PendingAccountDetailModal({
   account,
   isOpen,
   onClose,
-  isReadOnly = false,
 }: PendingAccountDetailModalProps) {
   if (!account) return null;
 
-  const displayField = (label: string, value: any) => {
-    if (!value) return null;
+  const Field = ({ label, value }: { label: string; value?: any }) => {
+    if (!value && value !== 0) return null;
     return (
-      <div key={label}>
-        <p className="text-xs font-medium text-muted-foreground mb-1">{label}</p>
-        <p className="text-sm text-foreground font-medium">{value}</p>
+      <div className="flex justify-between py-2 border-b border-gray-100 last:border-b-0">
+        <span className="text-xs font-medium text-gray-600">{label}</span>
+        <span className="text-sm font-medium text-gray-900">{value}</span>
       </div>
     );
   };
 
+  const Section = ({ title, children }: { title: string; children: React.ReactNode }) => (
+    <div className="space-y-2">
+      <h3 className="text-sm font-semibold text-gray-900 pb-2 border-b-2 border-blue-200">{title}</h3>
+      {children}
+    </div>
+  );
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-3 text-xl">
-            <User className="h-5 w-5" />
-            Account Opening Request - {account.legalId}
+      <DialogContent className="max-w-5xl max-h-[90vh] overflow-hidden flex flex-col">
+        {/* Header */}
+        <DialogHeader className="flex-shrink-0">
+          <DialogTitle className="flex items-center gap-2">
+            <User className="h-5 w-5 text-blue-600" />
+            <span>{account.legalId}</span>
           </DialogTitle>
-          <DialogDescription className="flex gap-4">
-            <Badge variant={account.status === "PENDING" ? "secondary" : account.status === "APPROVED" ? "default" : "destructive"}>
+          <DialogDescription className="flex flex-wrap gap-2 mt-2">
+            <Badge
+              variant={
+                account.status === "PENDING" ? "secondary" :
+                account.status === "APPROVED" ? "default" :
+                "destructive"
+              }
+            >
               {account.status}
             </Badge>
             <Badge variant="outline">{account.amlStatus}</Badge>
-            <span>Submitted: {account.createdAt}</span>
+            <span className="text-xs text-gray-500">
+              Submitted: {new Date(account.createdAt).toLocaleDateString()}
+            </span>
           </DialogDescription>
         </DialogHeader>
 
-        <Tabs defaultValue="personal" className="w-full">
-            <TabsList className="grid w-full grid-cols-6">
-              <TabsTrigger value="personal">
-                <User className="w-4 h-4 mr-2" />
+        {/* Tabs */}
+        <div className="flex-1 overflow-hidden flex flex-col">
+          <Tabs defaultValue="overview" className="w-full flex flex-col h-full">
+            <TabsList className="grid w-full grid-cols-5 flex-shrink-0">
+              <TabsTrigger value="overview" className="text-xs">
+                <AlertCircle className="w-4 h-4 mr-1" />
+                Overview
+              </TabsTrigger>
+              <TabsTrigger value="personal" className="text-xs">
+                <User className="w-4 h-4 mr-1" />
                 Personal
               </TabsTrigger>
-              <TabsTrigger value="address">
-                <FileText className="w-4 h-4 mr-2" />
+              <TabsTrigger value="address" className="text-xs">
+                <FileText className="w-4 h-4 mr-1" />
                 Address
               </TabsTrigger>
-              <TabsTrigger value="legal">
-                <AlertCircle className="w-4 h-4 mr-2" />
-                Legal
-              </TabsTrigger>
-              <TabsTrigger value="business">
-                <DollarSign className="w-4 h-4 mr-2" />
-                Business
-              </TabsTrigger>
-              <TabsTrigger value="aml">
-                <AlertCircle className="w-4 h-4 mr-2" />
+              <TabsTrigger value="aml" className="text-xs">
+                <Shield className="w-4 h-4 mr-1" />
                 AML
               </TabsTrigger>
-              <TabsTrigger value="images">
-                <ImageIcon className="w-4 h-4 mr-2" />
+              <TabsTrigger value="images" className="text-xs">
+                <ImageIcon className="w-4 h-4 mr-1" />
                 Images
               </TabsTrigger>
             </TabsList>
 
-            {/* PERSONAL TAB */}
-            <TabsContent value="personal" className="space-y-4 mt-4">
-              <ScrollArea className="h-[400px] pr-4">
-                <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    {displayField("Title", account.title)}
-                    {displayField("Given Name", account.legalFirstNameEn)}
-                    {displayField("Family Name", account.legalLastNameEn)}
-                    {displayField("First Name (Khmer)", account.legalFirstNameKh)}
-                    {displayField("Last Name (Khmer)", account.legalLastNameKh)}
-                    {displayField("Gender", account.legalGender)}
-                    {displayField("Date of Birth", account.legalDateOfBirth)}
-                    {displayField("Nationality", account.nationality)}
-                    {displayField("Marital Status", account.maritalStatus)}
-                    {displayField("Phone Number", account.phoneNumber)}
-                    {displayField("Email", account.email)}
-                  </div>
-                </div>
-              </ScrollArea>
-            </TabsContent>
+            {/* OVERVIEW TAB */}
+            <TabsContent value="overview" className="flex-1 overflow-hidden">
+              <ScrollArea className="h-full">
+                <div className="p-4 space-y-6">
+                  {/* Request Info */}
+                  <Section title="Request Information">
+                    <Field label="Request ID" value={account.requestId} />
+                    <Field label="Legal ID" value={account.legalId} />
+                    <Field label="Status" value={account.status} />
+                    <Field label="AML Status" value={account.amlStatus} />
+                    <Field label="Submitted" value={new Date(account.createdAt).toLocaleString()} />
+                    {account.updatedAt && <Field label="Updated" value={new Date(account.updatedAt).toLocaleString()} />}
+                  </Section>
 
-            {/* ADDRESS TAB */}
-            <TabsContent value="address" className="space-y-4 mt-4">
-              <ScrollArea className="h-[400px] pr-4">
-                <div className="space-y-6">
-                  <div>
-                    <h4 className="font-semibold text-sm mb-3">Current Address</h4>
-                    <div className="grid grid-cols-2 gap-4">
-                      {displayField("Province", account.customerProvince)}
-                      {displayField("District", account.customerDistrict)}
-                      {displayField("Commune", account.customerCommune)}
-                      {displayField("Village", account.customerVillage)}
-                    </div>
-                  </div>
+                  {/* Basic Customer Info */}
+                  <Section title="Customer Information">
+                    <Field label="Full Name" value={`${account.legalFirstNameEn || ""} ${account.legalLastNameEn || ""}`.trim()} />
+                    <Field label="Full Name (Khmer)" value={`${account.legalFirstNameKh || ""} ${account.legalLastNameKh || ""}`.trim()} />
+                    <Field label="Date of Birth" value={account.legalDateOfBirth} />
+                    <Field label="Gender" value={account.legalGender} />
+                    <Field label="Nationality" value={account.nationality} />
+                    <Field label="Marital Status" value={account.maritalStatus} />
+                    <Field label="Phone Number" value={account.phoneNumber} />
+                    <Field label="Email" value={account.email} />
+                  </Section>
 
-                  <div>
-                    <h4 className="font-semibold text-sm mb-3">Place of Birth</h4>
-                    <div className="grid grid-cols-2 gap-4">
-                      {displayField("Province", account.customerPobProvince)}
-                      {displayField("District", account.customerPobDistrict)}
-                      {displayField("Commune", account.customerPobCommune)}
-                      {displayField("Village", account.customerPobVillage)}
-                      {displayField("Place of Birth", account.legalPlaceOfBirth)}
-                    </div>
-                  </div>
-
-                  <div>
-                    <h4 className="font-semibold text-sm mb-3">Legal Address</h4>
-                    <p className="text-sm text-foreground">
-                      {account.legalAddress || "---"}
-                    </p>
-                  </div>
-                </div>
-              </ScrollArea>
-            </TabsContent>
-
-            {/* LEGAL TAB */}
-            <TabsContent value="legal" className="space-y-4 mt-4">
-              <ScrollArea className="h-[400px] pr-4">
-                <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    {displayField("Document Type", account.legalDocName)}
-                    {displayField("Holder Name", account.legalHolderName)}
-                    {displayField("Issue Date", account.legalIssuedDate)}
-                    {displayField("Expiration Date", account.legalExpiredDate)}
-                  </div>
-
-                  {account.legalMRZ1 && (
-                    <div className="mt-4 p-3 bg-muted rounded-md">
-                      <h4 className="font-semibold text-sm mb-2">Machine Readable Zone (MRZ)</h4>
-                      <div className="font-mono text-xs space-y-1">
-                        <p>{account.legalMRZ1}</p>
-                        <p>{account.legalMRZ2}</p>
-                        <p>{account.legalMRZ3}</p>
+                  {/* AML Summary */}
+                  {account.amlResultData && (
+                    <div className={`p-3 rounded-lg border-2 ${
+                      account.amlResultData.status === "APPROVE"
+                        ? "bg-green-50 border-green-300"
+                        : account.amlResultData.status === "REJECT"
+                        ? "bg-red-50 border-red-300"
+                        : "bg-yellow-50 border-yellow-300"
+                    }`}>
+                      <div className="flex items-center gap-2 mb-2">
+                        <Shield className="h-4 w-4" />
+                        <span className="font-semibold text-sm">AML Result: {account.amlResultData.status}</span>
+                      </div>
+                      <div className="text-xs space-y-1">
+                        <p>Risk Level: <span className="font-semibold">{account.amlResultData.riskLevel}</span></p>
+                        <p>Rules Score: <span className="font-semibold">{account.amlResultData.totalRulesScore}</span></p>
                       </div>
                     </div>
+                  )}
+
+                  {/* Remarks */}
+                  {account.remark && (
+                    <Section title="Admin Remarks">
+                      <div className="bg-amber-50 p-3 rounded text-sm text-amber-900 border border-amber-200">
+                        {account.remark}
+                      </div>
+                    </Section>
                   )}
                 </div>
               </ScrollArea>
             </TabsContent>
 
-            {/* BUSINESS TAB */}
-            <TabsContent value="business" className="space-y-4 mt-4">
-              <ScrollArea className="h-[400px] pr-4">
-                <div className="space-y-6">
-                  <div>
-                    <h4 className="font-semibold text-sm mb-3">Employment Information</h4>
-                    <div className="grid grid-cols-2 gap-4">
-                      {displayField("Customer Type", account.customerType)}
-                      {displayField("Company Name", account.companyName)}
-                      {displayField("Occupation", account.occupation)}
-                      {displayField("Industry", account.industry)}
-                      {displayField("Sector", account.sector)}
-                      {displayField("Average Income", account.averageIncome)}
-                    </div>
-                  </div>
+            {/* PERSONAL TAB */}
+            <TabsContent value="personal" className="flex-1 overflow-hidden">
+              <ScrollArea className="h-full">
+                <div className="p-4 space-y-6">
+                  <Section title="Personal Information">
+                    <Field label="Title" value={account.title} />
+                    <Field label="Given Name (EN)" value={account.legalFirstNameEn} />
+                    <Field label="Family Name (EN)" value={account.legalLastNameEn} />
+                    <Field label="Given Name (KH)" value={account.legalFirstNameKh} />
+                    <Field label="Family Name (KH)" value={account.legalLastNameKh} />
+                    <Field label="Gender" value={account.legalGender} />
+                    <Field label="Date of Birth" value={account.legalDateOfBirth} />
+                    <Field label="Place of Birth" value={account.legalPlaceOfBirth} />
+                  </Section>
 
-                  <div>
-                    <h4 className="font-semibold text-sm mb-3">Banking Information</h4>
-                    <div className="grid grid-cols-2 gap-4">
-                      {displayField("Branch Code", account.branchCode)}
-                      {displayField("Product Account", account.productAccount)}
-                      {displayField("Category Account", account.categoryAccount)}
-                      {displayField("Customer Role", account.customerRole)}
-                      {displayField("Loan Officer", account.loanOfficer)}
-                      {displayField("Released By", account.releasedBy)}
-                    </div>
-                  </div>
+                  <Section title="Contact Information">
+                    <Field label="Phone Number" value={account.phoneNumber} />
+                    <Field label="Email" value={account.email} />
+                    <Field label="Nationality" value={account.nationality} />
+                  </Section>
+
+                  <Section title="Demographic Information">
+                    <Field label="Marital Status" value={account.maritalStatus} />
+                    <Field label="Occupation" value={account.occupation} />
+                    <Field label="Company Name" value={account.companyName} />
+                    <Field label="Industry" value={account.industry} />
+                    <Field label="Sector" value={account.sector} />
+                    <Field label="Average Income" value={account.averageIncome} />
+                  </Section>
+                </div>
+              </ScrollArea>
+            </TabsContent>
+
+            {/* ADDRESS TAB */}
+            <TabsContent value="address" className="flex-1 overflow-hidden">
+              <ScrollArea className="h-full">
+                <div className="p-4 space-y-6">
+                  <Section title="Current Address">
+                    <Field label="Address" value={account.legalAddress} />
+                    <Field label="Province" value={account.customerProvince} />
+                    <Field label="District" value={account.customerDistrict} />
+                    <Field label="Commune" value={account.customerCommune} />
+                    <Field label="Village" value={account.customerVillage} />
+                  </Section>
+
+                  <Section title="Place of Birth">
+                    <Field label="Province" value={account.customerPobProvince} />
+                    <Field label="District" value={account.customerPobDistrict} />
+                    <Field label="Commune" value={account.customerPobCommune} />
+                    <Field label="Village" value={account.customerPobVillage} />
+                  </Section>
+
+                  <Section title="Banking Information">
+                    <Field label="Branch Code" value={account.branchCode} />
+                    <Field label="Product Account" value={account.productAccount} />
+                    <Field label="Category Account" value={account.categoryAccount} />
+                    <Field label="Customer Role" value={account.customerRole} />
+                    <Field label="Loan Officer" value={account.loanOfficer} />
+                    <Field label="Released By" value={account.releasedBy} />
+                  </Section>
                 </div>
               </ScrollArea>
             </TabsContent>
 
             {/* AML TAB */}
-            <TabsContent value="aml" className="space-y-4 mt-4">
-              <ScrollArea className="h-[400px] pr-4">
-                <div className="space-y-6">
+            <TabsContent value="aml" className="flex-1 overflow-hidden">
+              <ScrollArea className="h-full">
+                <div className="p-4 space-y-6">
                   {account.amlResultData ? (
                     <>
-                      {/* AML Screening Status */}
-                      <div>
-                        <h4 className="font-semibold text-sm mb-3">AML Screening Status</h4>
-                        <div className="grid grid-cols-2 gap-4">
-                          {displayField("Status", account.amlResultData.status)}
-                          {displayField("Risk Level", account.amlResultData.riskLevel)}
-                          {displayField("Service Name", account.amlResultData.serviceName)}
-                          {displayField("Total Rules Score", account.amlResultData.totalRulesScore)}
-                          {displayField("Transaction ID", account.amlResultData.trxnID)}
+                      {/* AML Status */}
+                      <Section title="AML Screening Result">
+                        <div className={`p-3 rounded-lg border-2 ${
+                          account.amlResultData.status === "APPROVE"
+                            ? "bg-green-50 border-green-300"
+                            : account.amlResultData.status === "REJECT"
+                            ? "bg-red-50 border-red-300"
+                            : "bg-yellow-50 border-yellow-300"
+                        }`}>
+                          <Field label="Status" value={account.amlResultData.status} />
+                          <Field label="Risk Level" value={account.amlResultData.riskLevel} />
+                          <Field label="Service" value={account.amlResultData.serviceName} />
+                          <Field label="Rules Score" value={account.amlResultData.totalRulesScore} />
+                          <Field label="Transaction ID" value={account.amlResultData.trxnID} />
+                          {account.amlResultData.rulesTriggered && (
+                            <Field label="Rules Triggered" value={account.amlResultData.rulesTriggered} />
+                          )}
+                          {account.amlResultData.actionTaken && (
+                            <Field label="Action Taken" value={account.amlResultData.actionTaken} />
+                          )}
                         </div>
-                      </div>
-
-                      {/* Rules Triggered */}
-                      {account.amlResultData.rulesTriggered && (
-                        <div>
-                          <h4 className="font-semibold text-sm mb-3">Rules Triggered</h4>
-                          <p className="text-sm text-foreground">{account.amlResultData.rulesTriggered || "None"}</p>
-                        </div>
-                      )}
-
-                      {/* Action Taken */}
-                      {account.amlResultData.actionTaken && (
-                        <div>
-                          <h4 className="font-semibold text-sm mb-3">Action Taken</h4>
-                          <p className="text-sm text-foreground">{account.amlResultData.actionTaken}</p>
-                        </div>
-                      )}
+                      </Section>
 
                       {/* Screening Result */}
                       {account.amlResultData.screeningResult && (
-                        <div>
-                          <h4 className="font-semibold text-sm mb-3">Screening Result</h4>
-                          <p className="text-sm text-foreground font-mono bg-muted p-3 rounded">{account.amlResultData.screeningResult}</p>
-                        </div>
+                        <Section title="Screening Details">
+                          <div className="bg-gray-100 p-3 rounded text-xs font-mono overflow-auto max-h-32">
+                            {account.amlResultData.screeningResult}
+                          </div>
+                        </Section>
                       )}
 
                       {/* Customer Info from AML */}
                       {account.amlResultData.customerInfo && (
-                        <div>
-                          <h4 className="font-semibold text-sm mb-3">Customer Information (from AML)</h4>
-                          <div className="grid grid-cols-2 gap-4">
-                            {displayField("Legal ID", account.amlResultData.customerInfo.legalId)}
-                            {displayField("Given Name", account.amlResultData.customerInfo.givenName)}
-                            {displayField("Family Name", account.amlResultData.customerInfo.familyName)}
-                            {displayField("First Name (Khmer)", account.amlResultData.customerInfo.firstNameKh)}
-                            {displayField("Last Name (Khmer)", account.amlResultData.customerInfo.lastNameKh)}
-                            {displayField("Gender", account.amlResultData.customerInfo.gender)}
-                            {displayField("Date of Birth", account.amlResultData.customerInfo.dateOfBirth)}
-                            {displayField("Nationality", account.amlResultData.customerInfo.nationality)}
-                            {displayField("Phone Number", account.amlResultData.customerInfo.phoneNumber)}
-                            {displayField("Legal Address", account.amlResultData.customerInfo.legalAddress)}
-                          </div>
-                        </div>
+                        <Section title="Verified Customer Data (from AML)">
+                          <Field label="Legal ID" value={account.amlResultData.customerInfo.legalId} />
+                          <Field label="Given Name" value={account.amlResultData.customerInfo.givenName} />
+                          <Field label="Family Name" value={account.amlResultData.customerInfo.familyName} />
+                          <Field label="Date of Birth" value={account.amlResultData.customerInfo.dateOfBirth} />
+                          <Field label="Gender" value={account.amlResultData.customerInfo.gender} />
+                          <Field label="Nationality" value={account.amlResultData.customerInfo.nationality} />
+                          <Field label="Phone Number" value={account.amlResultData.customerInfo.phoneNumber} />
+                          <Field label="Address" value={account.amlResultData.customerInfo.legalAddress} />
+                        </Section>
                       )}
 
                       {/* Audit Trail */}
-                      <div>
-                        <h4 className="font-semibold text-sm mb-3">Audit Trail</h4>
-                        <div className="grid grid-cols-2 gap-4">
-                          {displayField("Created At", account.amlResultData.createdAt)}
-                          {displayField("Updated At", account.amlResultData.updatedAt)}
-                          {displayField("Approved By", account.amlResultData.approvedBy?.fullName || "---")}
-                          {displayField("Rejected By", account.amlResultData.rejectedBy?.fullName || "---")}
-                        </div>
-                      </div>
+                      <Section title="Audit Trail">
+                        <Field label="Created At" value={account.amlResultData.createdAt} />
+                        <Field label="Updated At" value={account.amlResultData.updatedAt} />
+                        {account.amlResultData.approvedBy && (
+                          <Field label="Approved By" value={account.amlResultData.approvedBy.fullName} />
+                        )}
+                        {account.amlResultData.rejectedBy && (
+                          <Field label="Rejected By" value={account.amlResultData.rejectedBy.fullName} />
+                        )}
+                      </Section>
                     </>
                   ) : (
-                    <p className="text-sm text-muted-foreground">No AML data available</p>
+                    <div className="text-center py-8 text-gray-500">
+                      No AML data available
+                    </div>
                   )}
                 </div>
               </ScrollArea>
             </TabsContent>
 
             {/* IMAGES TAB */}
-            <TabsContent value="images" className="space-y-4 mt-4">
-              <ScrollArea className="h-[400px] pr-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <ImageDisplayCard
-                    title="National ID Document"
-                    imageName={account.nidImageName}
-                    imageType="nid"
-                    legalId={account.legalId}
-                  />
-                  <ImageDisplayCard
-                    title="Selfie Photo"
-                    imageName={account.selfieImageName}
-                    imageType="selfie"
-                    legalId={account.legalId}
-                  />
+            <TabsContent value="images" className="flex-1 overflow-hidden">
+              <ScrollArea className="h-full">
+                <div className="p-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <ImageDisplayCard
+                      title="National ID Document"
+                      imageName={account.nidImageName}
+                      imageType="nid"
+                      legalId={account.legalId}
+                    />
+                    <ImageDisplayCard
+                      title="Selfie Photo"
+                      imageName={account.selfieImageName}
+                      imageType="selfie"
+                      legalId={account.legalId}
+                    />
+                  </div>
                 </div>
               </ScrollArea>
             </TabsContent>
           </Tabs>
-
-        {/* FOOTER SECTION */}
-        <div className="mt-6 pt-4 border-t space-y-3">
-          {/* AML Status */}
-          {account.amlResultData && (
-            <div className={`p-3 border rounded-md ${
-              account.amlResultData.status === "APPROVE"
-                ? "bg-green-50 border-green-200"
-                : account.amlResultData.status === "REJECT"
-                ? "bg-red-50 border-red-200"
-                : "bg-yellow-50 border-yellow-200"
-            }`}>
-              <p className={`text-sm font-medium mb-2 ${
-                account.amlResultData.status === "APPROVE"
-                  ? "text-green-900"
-                  : account.amlResultData.status === "REJECT"
-                  ? "text-red-900"
-                  : "text-yellow-900"
-              }`}>
-                AML Screening Result: <Badge className="ml-2">{account.amlResultData.status}</Badge>
-              </p>
-              <div className={`text-sm space-y-1 ${
-                account.amlResultData.status === "APPROVE"
-                  ? "text-green-800"
-                  : account.amlResultData.status === "REJECT"
-                  ? "text-red-800"
-                  : "text-yellow-800"
-              }`}>
-                <p>• Risk Level: <span className="font-semibold">{account.amlResultData.riskLevel || "---"}</span></p>
-                <p>• Service: {account.amlResultData.serviceName || "---"}</p>
-                <p>• Rules Score: {account.amlResultData.totalRulesScore || 0}</p>
-                <p>• Transaction ID: <span className="font-mono text-xs">{account.amlResultData.trxnID || "---"}</span></p>
-              </div>
-            </div>
-          )}
-
-          {/* Remarks */}
-          {account.remark && (
-            <div className="p-3 bg-amber-50 border border-amber-200 rounded-md">
-              <p className="text-sm font-medium text-amber-900 mb-1">Admin Remarks:</p>
-              <p className="text-sm text-amber-800">{account.remark}</p>
-            </div>
-          )}
-
-          {/* Additional Info */}
-          <div className="p-3 bg-gray-50 border border-gray-200 rounded-md">
-            <p className="text-xs font-medium text-gray-600 mb-2">ADDITIONAL INFORMATION</p>
-            <div className="text-xs text-gray-700 space-y-1">
-              <p>• Legal ID: <span className="font-mono font-semibold">{account.legalId}</span></p>
-              <p>• Request ID: <span className="font-mono font-semibold">{account.requestId}</span></p>
-              <p>• Status: <Badge variant="outline" className="ml-2">{account.status}</Badge></p>
-              <p>• Submitted: {account.createdAt}</p>
-            </div>
-          </div>
         </div>
       </DialogContent>
     </Dialog>
