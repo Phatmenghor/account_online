@@ -309,27 +309,8 @@ public class OpenAccountXmlBuilder {
     }
 
     private String formatLegalIssueDateWithDefault(String date) {
-        if (date == null || date.isEmpty()) {
-            LocalDate oneYearAgo = LocalDate.now().minusYears(1);
-            String defaultDate = oneYearAgo.format(T24_DATE_FORMATTER);
-            log.info("No legal issue date provided, using default (1 year ago): {}", defaultDate);
-            return defaultDate;
-        }
-        try {
-            LocalDate localDate = null;
-
-            if (date.matches("\\d{8}")) {
-                localDate = LocalDate.parse(date, T24_DATE_FORMATTER);
-            } else {
-                localDate = LocalDate.parse(date, DATE_FORMATTER);
-            }
-
-            return localDate.format(T24_DATE_FORMATTER);
-        } catch (Exception e) {
-            log.warn("Could not format legal issue date {}, using default (1 year ago): {}", date, e.getMessage());
-            LocalDate oneYearAgo = LocalDate.now().minusYears(1);
-            return oneYearAgo.format(T24_DATE_FORMATTER);
-        }
+        LocalDate oneYearAgo = LocalDate.now().minusYears(1);
+        return oneYearAgo.format(T24_DATE_FORMATTER);
     }
 
     private String determineTitle(String gender) {
