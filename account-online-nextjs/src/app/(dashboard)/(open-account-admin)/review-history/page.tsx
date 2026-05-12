@@ -125,8 +125,9 @@ function ReviewHistory() {
     <Card className="h-full flex flex-col">
       <CardContent className="space-y-6 p-6 flex flex-col h-full">
         {/* HEADER */}
-        <div className="flex flex-wrap gap-4 items-end">
-          <div className="relative flex-1 min-w-[250px]">
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          {/* Search on left */}
+          <div className="relative w-full md:w-[350px]">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               aria-label="search-review-history"
@@ -134,34 +135,38 @@ function ReviewHistory() {
               placeholder="Search by Legal ID or Name"
               value={searchQuery}
               onChange={handleSearchChange}
-              className="pl-8 w-full text-xs h-9"
+              className="pl-8 w-full min-w-[200px] text-xs md:min-w-[300px] h-9"
             />
           </div>
 
-          <div className="w-[150px]">
-            <Select value={statusFilter} onValueChange={handleStatusChange}>
-              <SelectTrigger className="h-9 text-xs">
-                <SelectValue placeholder="Filter by Status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="ALL">All Status</SelectItem>
-                <SelectItem value="PENDING">Pending</SelectItem>
-                <SelectItem value="APPROVED">Approved</SelectItem>
-                <SelectItem value="REJECTED">Rejected</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+          {/* Filter and Reset on right */}
+          <div className="flex flex-wrap items-center justify-end gap-2">
+            <div className="w-[150px]">
+              <Select value={statusFilter} onValueChange={handleStatusChange}>
+                <SelectTrigger className="h-9 text-xs">
+                  <SelectValue placeholder="Filter by Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ALL">All Status</SelectItem>
+                  <SelectItem value="PENDING">Pending</SelectItem>
+                  <SelectItem value="APPROVED">Approved</SelectItem>
+                  <SelectItem value="REJECTED">Rejected</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
-          <Button
-            size="default"
-            variant="outline"
-            onClick={() => {
-              setSearchQuery("");
-              setStatusFilter("ALL");
-            }}
-          >
-            Reset
-          </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => {
+                setSearchQuery("");
+                setStatusFilter("ALL");
+              }}
+              className="h-9 text-xs"
+            >
+              Reset
+            </Button>
+          </div>
         </div>
 
         <Separator className="bg-gray-300" />
