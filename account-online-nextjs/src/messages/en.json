@@ -236,5 +236,14 @@
     "err_district": "District is required",
     "err_commune": "Commune is required",
     "err_village": "Village is required"
+  },
+  "adminReview": {
+    "approveSuccess": "Account Approved Successfully",
+    "approveSuccessDesc": "Account for {{customerName}} has been approved and is now pending activation.",
+    "rejectSuccess": "Account Rejected Successfully",
+    "rejectSuccessDesc": "Account for {{customerName}} has been rejected due to review findings.",
+    "pendingReview": "Pending Review",
+    "statusUpdated": "Account Status Updated",
+    "processedAt": "Processed At"
   }
 }

@@ -4,6 +4,7 @@ import { CheckCircle, XCircle, Clock, Loader2 } from "lucide-react";
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Textarea } from "@/components/ui/textarea";
+import { useTranslations } from "next-intl";
 import { PendingAccountAdminReviewDto } from "@/models/open-account-admin/pending-account.response";
 
 type ActionType = "APPROVE" | "REJECT";
@@ -37,6 +38,8 @@ export default function PendingAccountActionDialog({
   isLoading,
 }: PendingAccountActionDialogProps) {
   const [remark, setRemark] = useState("");
+  const tAdminReview = useTranslations("adminReview");
+  const tCommon = useTranslations("common");
 
   useEffect(() => {
     if (isOpen) {
@@ -52,9 +55,9 @@ export default function PendingAccountActionDialog({
           confirmLabel: "Approve",
           confirmButtonIcon: <CheckCircle className="h-4 w-4 mr-1" />,
           icon: <CheckCircle className="h-14 w-14 text-orange-500" />,
-          defaultTitle: "Approve Account Request",
+          defaultTitle: "ពិនិត្យលម្អិត & បង្ហាក់ពាក្យស្នើ",
           defaultDescription:
-            "You are about to approve this account request. This action cannot be undone.",
+            "អ្នកកំពុងបង្ហាក់ពាក្យស្នើគណនីនេះ។ សកម្មភាពនេះមិនអាចត្រឡប់វិញបានទេ។",
         };
       case "REJECT":
         return {
@@ -62,9 +65,9 @@ export default function PendingAccountActionDialog({
           confirmLabel: "Reject",
           confirmButtonIcon: <XCircle className="h-4 w-4 mr-1" />,
           icon: <XCircle className="h-14 w-14 text-red-500" />,
-          defaultTitle: "Reject Account Request",
+          defaultTitle: "បដិសេធពាក្យស្នើ",
           defaultDescription:
-            "You are about to reject this account request. This action cannot be undone.",
+            "អ្នកកំពុងបដិសេធពាក្យស្នើគណនីនេះ។ សកម្មភាពនេះមិនអាចត្រឡប់វិញបានទេ។",
         };
       default:
         return {
@@ -72,8 +75,8 @@ export default function PendingAccountActionDialog({
           confirmLabel: "Confirm",
           confirmButtonIcon: <Clock className="h-4 w-4 mr-1" />,
           icon: <Clock className="h-14 w-14 text-yellow-500" />,
-          defaultTitle: "Confirm Action",
-          defaultDescription: "Please confirm this action.",
+          defaultTitle: "បញ្ជាក់សកម្មភាព",
+          defaultDescription: "សូមបញ្ជាក់សកម្មភាពនេះ។",
         };
     }
   };
@@ -96,13 +99,13 @@ export default function PendingAccountActionDialog({
       case "APPROVE":
         return (
           <span className="bg-orange-100 text-orange-800 px-3 py-1 rounded-full text-sm font-medium">
-            Approving
+            កំពុងបង្ហាក់
           </span>
         );
       case "REJECT":
         return (
           <span className="bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm font-medium">
-            Rejecting
+            កំពុងបដិសេធ
           </span>
         );
       default:
@@ -146,15 +149,15 @@ export default function PendingAccountActionDialog({
             {account && (
               <div className="bg-gray-50 p-4 rounded-lg border border-gray-100 mb-6 space-y-2">
                 <DetailRow label="Legal ID" value={account.legalId} />
-                <DetailRow 
-                  label="Name" 
-                  value={`${account.givenName} ${account.familyName}`} 
+                <DetailRow
+                  label="Name"
+                  value={`${account.legalFirstNameEn || ""} ${account.legalLastNameEn || ""}`.trim()}
                 />
                 <DetailRow label="Email" value={account.email} />
                 <DetailRow label="Phone" value={account.phoneNumber} />
-                <DetailRow 
-                  label="AML Status" 
-                  value={account.amlInfo?.status || "---"} 
+                <DetailRow
+                  label="AML Status"
+                  value={account.amlStatus || "---"}
                 />
               </div>
             )}
@@ -162,13 +165,13 @@ export default function PendingAccountActionDialog({
             {/* Remark Section */}
             <div className="mb-6">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                {actionType === "REJECT" ? "Reason for Rejection (Required)" : "Remark (Optional)"}
+                {actionType === "REJECT" ? "ហេតុផលក្នុងការបដិសេធ (ទាមទារ)" : "ចម្លែក (ស្ម័គ្រចិត្ត)"}
               </label>
               <Textarea
                 placeholder={
                   actionType === "REJECT"
-                    ? "Please provide a reason for rejection..."
-                    : "Add a remark..."
+                    ? "សូមផ្តល់នូវហេតុផលក្នុងការបដិសេធ..."
+                    : "បន្ថែមចម្លែក..."
                 }
                 value={remark}
                 onChange={(e) => setRemark(e.target.value)}
@@ -178,7 +181,7 @@ export default function PendingAccountActionDialog({
               />
               {actionType === "REJECT" && remark.length === 0 && (
                 <p className="text-xs text-red-500 mt-1">
-                  Rejection reason is required
+                  ហេតុផលក្នុងការបដិសេធត្រូវបានទាមទារ
                 </p>
               )}
             </div>
@@ -192,7 +195,7 @@ export default function PendingAccountActionDialog({
                   isLoading && "opacity-50 cursor-not-allowed"
                 }`}
               >
-                Cancel
+                បោះបង់
               </button>
 
               <button
@@ -210,12 +213,12 @@ export default function PendingAccountActionDialog({
                 {isLoading ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin" />
-                    Processing...
+                    កំពុងដំណើរការ...
                   </>
                 ) : (
                   <>
                     {dialogProps.confirmButtonIcon}
-                    {dialogProps.confirmLabel}
+                    {actionType === "APPROVE" ? "បង្ហាក់" : "បដិសេធ"}
                   </>
                 )}
               </button>

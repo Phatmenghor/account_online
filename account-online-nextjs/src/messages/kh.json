@@ -236,5 +236,14 @@
     "err_district": "សូមជ្រើសរើសស្រុក/ខណ្ឌ",
     "err_commune": "សូមជ្រើសរើសឃុំ/សង្កាត់",
     "err_village": "សូមជ្រើសរើសភូមិ"
+  },
+  "adminReview": {
+    "approveSuccess": "បានឯកភាពគណនីដោយជោគជ័យ",
+    "approveSuccessDesc": "គណនីបង្ហាញឈ្មោះលោក/លោកស្រី {{customerName}} បានរับឯកភាពដោយជោគជ័យ។",
+    "rejectSuccess": "បានបដិសេធគណនីដោយជោគជ័យ",
+    "rejectSuccessDesc": "គណនីបង្ហាញឈ្មោះលោក/លោកស្រី {{customerName}} បានបដិសេធដោយជោគជ័យ។",
+    "pendingReview": "កំពុងពិនិត្យលម្អិត",
+    "statusUpdated": "ស្ថានភាពគណនីបានធ្វើបច្ចុប្បន្នភាព",
+    "processedAt": "បានដំណើរការលើ"
   }
 }

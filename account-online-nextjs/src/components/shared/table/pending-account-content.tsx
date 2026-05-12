@@ -169,7 +169,7 @@ export const createPendingAccountTableColumns = ({
                   <CheckCircle className="h-4 w-4" />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent>Approve</TooltipContent>
+              <TooltipContent>បង្ហាក់</TooltipContent>
             </Tooltip>
           </TooltipProvider>
 
@@ -186,7 +186,7 @@ export const createPendingAccountTableColumns = ({
                   <XCircle className="h-4 w-4" />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent>Reject</TooltipContent>
+              <TooltipContent>បដិសេធ</TooltipContent>
             </Tooltip>
           </TooltipProvider>
         </div>
