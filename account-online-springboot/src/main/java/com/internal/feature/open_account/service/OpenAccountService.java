@@ -6,6 +6,7 @@ import com.internal.feature.open_account.dto.request.CustomerRequest;
 import com.internal.feature.open_account.dto.request.RejectAccountOpeningRequestDto;
 import com.internal.feature.open_account.dto.response.PendingAccountAdminReviewDto;
 import com.internal.feature.open_account.dto.response.PendingAccountOpeningRequestDto;
+import com.internal.feature.open_account.dto.response.PendingAccountOpeningRequestHistoryDto;
 import com.internal.feature.open_account.dto.response.ReviewHistoryResponseDto;
 import com.internal.utils.pagination.PaginationResponse;
 
