@@ -87,23 +87,7 @@ public class OpenAccountServiceImpl implements OpenAccountService {
             currentStep = AppConstants.TEST_CONNECTION;
             bankingService.testConnection();
 
-            log.info("Step 2: Checking existing account | Legal ID: {}", legalId);
-            currentStep = "CHECK_EXISTING_COMPLETE_ACCOUNT";
-            var recoveryResult = bankingService.checkExistingCompleteAccountAndActivate(request);
-            if (recoveryResult.isPresent()) {
-                var existingAccount = bankingService.getExistingAccountDetails(legalId);
-                if (existingAccount.isPresent()) {
-                    log.info("✓ Account already exists (recovered) | CIF: {} | Mnemonic: {}",
-                            existingAccount.get().getCif(), existingAccount.get().getMnemonic());
-                    return complianceService.buildCustomerAccInfo(
-                            existingAccount.get().getCif(),
-                            existingAccount.get().getKhrAccount(),
-                            existingAccount.get().getUsdAccount(),
-                            existingAccount.get().getMnemonic());
-                }
-            }
-
-            log.info("Step 3: Retrieving customer info | Legal ID: {}", legalId);
+            log.info("Step 2: Retrieving customer info | Legal ID: {}", legalId);
             currentStep = AppConstants.GET_CUSTOMER_INFO;
             Map<String, String> customerInfo = bankingService.getCustomerInfo(legalId);
 
@@ -184,24 +168,18 @@ public class OpenAccountServiceImpl implements OpenAccountService {
             log.info("Step 1: Testing connection");
             bankingService.testConnection();
 
-            log.info("Step 2: Checking existing account");
-            var recoveryResult = bankingService.checkExistingCompleteAccountAndActivate(request);
-            if (recoveryResult.isPresent()) {
-                throw new OpenAccountException("ACCOUNT_ALREADY_EXISTS", AppConstants.ACCOUNT_ALREADY_EXISTS_FOR_LEGAL_ID);
-            }
-
-            log.info("Step 3: Retrieving customer info | Legal ID: {}", legalId);
+            log.info("Step 2: Retrieving customer info | Legal ID: {}", legalId);
             Map<String, String> customerInfo = bankingService.getCustomerInfo(legalId);
 
-            log.info("Step 4: Validating accounts | Legal ID: {}", legalId);
+            log.info("Step 3: Validating accounts | Legal ID: {}", legalId);
             bankingService.validateExistingAccounts(customerInfo);
 
-            log.info("Step 5: Processing AML | Legal ID: {}", legalId);
+            log.info("Step 4: Processing AML | Legal ID: {}", legalId);
             var amlResult = complianceService.processAml(request);
             String amlStatus = amlResult != null ? amlResult.getStatus().name() : "UNKNOWN";
             complianceService.sentMessageOnHighRisk(request, amlResult);
 
-            log.info("Step 6: Storing request for admin review | Legal ID: {}", legalId);
+            log.info("Step 5: Storing request for admin review | Legal ID: {}", legalId);
             PendingAccountOpeningRequest pendingRequest = mapRequestToPendingEntity(request, customerInfo, amlResult);
 
             PendingAccountOpeningRequest saved = pendingRequestRepository.save(pendingRequest);
