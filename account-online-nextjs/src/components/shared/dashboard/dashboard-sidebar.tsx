@@ -62,6 +62,15 @@ export function DashboardSidebar({ isOpen = true, onToggle }: DashboardSidebarPr
         // Map API response to UI structure
         const mappedMenus = menuResponse.map((item) => mapMenuItem(item));
         setMenuItems(mappedMenus);
+
+        // Auto-expand all items that have subItems
+        const autoExpandSubmenus: Record<string, boolean> = {};
+        mappedMenus.forEach((item) => {
+          if (item.subItems && item.subItems.length > 0) {
+            autoExpandSubmenus[item.title] = true;
+          }
+        });
+        setOpenSubmenus(autoExpandSubmenus);
       } catch (error) {
         console.error("Failed to load data", error);
       } finally {
