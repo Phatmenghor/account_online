@@ -582,12 +582,16 @@ public class OpenAccountServiceImpl implements OpenAccountService {
             amlResult.setSelfieImageName(request.getSelfieImageName());
         }
 
+        // Serialize with null exclusion
+        ObjectMapper nonNullMapper = new ObjectMapper()
+                .setSerializationInclusion(com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL);
+
         PendingAccountOpeningRequest.PendingAccountOpeningRequestBuilder builder = PendingAccountOpeningRequest.builder()
                 .legalId(request.getLegalId())
                 .status(AccountOpeningRequestStatusEnum.PENDING)
                 .requestData(objectMapper.writeValueAsString(request))
                 .customerInfo(objectMapper.writeValueAsString(customerInfo))
-                .amlResultData(objectMapper.writeValueAsString(amlResult))
+                .amlResultData(nonNullMapper.writeValueAsString(amlResult))
                 .amlStatus(amlResult != null ? amlResult.getStatus() : null);
 
         // === LEGAL / NID INFO ===
