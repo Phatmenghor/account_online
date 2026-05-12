@@ -28,14 +28,6 @@ export default function PendingAccountDetailModal({
   onClose,
   isReadOnly = false,
 }: PendingAccountDetailModalProps) {
-  const [customerData, setCustomerData] = useState<any>(null);
-
-  useEffect(() => {
-    if (account?.requestData && typeof account.requestData === "object") {
-      setCustomerData(account.requestData);
-    }
-  }, [account]);
-
   if (!account) return null;
 
   const displayField = (label: string, value: any) => {
@@ -65,8 +57,7 @@ export default function PendingAccountDetailModal({
           </DialogDescription>
         </DialogHeader>
 
-        {customerData ? (
-          <Tabs defaultValue="personal" className="w-full">
+        <Tabs defaultValue="personal" className="w-full">
             <TabsList className="grid w-full grid-cols-5">
               <TabsTrigger value="personal">
                 <User className="w-4 h-4 mr-2" />
@@ -95,17 +86,17 @@ export default function PendingAccountDetailModal({
               <ScrollArea className="h-[400px] pr-4">
                 <div className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
-                    {displayField("Title", customerData.title)}
-                    {displayField("Given Name", customerData.givenName || customerData.given_name)}
-                    {displayField("Family Name", customerData.familyName || customerData.family_name)}
-                    {displayField("First Name (Khmer)", customerData.firstNameKh)}
-                    {displayField("Last Name (Khmer)", customerData.lastNameKh)}
-                    {displayField("Gender", customerData.gender)}
-                    {displayField("Date of Birth", customerData.dateOfBirth || customerData.date_of_birth)}
-                    {displayField("Nationality", customerData.nationality)}
-                    {displayField("Marital Status", customerData.maritalStatus || customerData.marital_status)}
-                    {displayField("Phone Number", customerData.phoneNumber || customerData.sms)}
-                    {displayField("Email", customerData.email)}
+                    {displayField("Title", account.title)}
+                    {displayField("Given Name", account.legalFirstNameEn)}
+                    {displayField("Family Name", account.legalLastNameEn)}
+                    {displayField("First Name (Khmer)", account.legalFirstNameKh)}
+                    {displayField("Last Name (Khmer)", account.legalLastNameKh)}
+                    {displayField("Gender", account.legalGender)}
+                    {displayField("Date of Birth", account.legalDateOfBirth)}
+                    {displayField("Nationality", account.nationality)}
+                    {displayField("Marital Status", account.maritalStatus)}
+                    {displayField("Phone Number", account.phoneNumber)}
+                    {displayField("Email", account.email)}
                   </div>
                 </div>
               </ScrollArea>
@@ -118,28 +109,28 @@ export default function PendingAccountDetailModal({
                   <div>
                     <h4 className="font-semibold text-sm mb-3">Current Address</h4>
                     <div className="grid grid-cols-2 gap-4">
-                      {displayField("Province", customerData.customerCurrentProvince || customerData.cust_province)}
-                      {displayField("District", customerData.customerCurrentDistrict || customerData.cust_district)}
-                      {displayField("Commune", customerData.customerCurrentCommune || customerData.cust_commune)}
-                      {displayField("Village", customerData.customerCurrentVillage || customerData.cust_village)}
+                      {displayField("Province", account.customerProvince)}
+                      {displayField("District", account.customerDistrict)}
+                      {displayField("Commune", account.customerCommune)}
+                      {displayField("Village", account.customerVillage)}
                     </div>
                   </div>
 
                   <div>
                     <h4 className="font-semibold text-sm mb-3">Place of Birth</h4>
                     <div className="grid grid-cols-2 gap-4">
-                      {displayField("Province", customerData.customerPobProvince || customerData.cust_pob_province)}
-                      {displayField("District", customerData.customerPobDistrict || customerData.cust_pob_district)}
-                      {displayField("Commune", customerData.customerPobCommune || customerData.cust_pob_commune)}
-                      {displayField("Village", customerData.customerPobVillage || customerData.cust_pob_village)}
-                      {displayField("Place of Birth", customerData.placeOfBirth || customerData.place_of_birth)}
+                      {displayField("Province", account.customerPobProvince)}
+                      {displayField("District", account.customerPobDistrict)}
+                      {displayField("Commune", account.customerPobCommune)}
+                      {displayField("Village", account.customerPobVillage)}
+                      {displayField("Place of Birth", account.legalPlaceOfBirth)}
                     </div>
                   </div>
 
                   <div>
                     <h4 className="font-semibold text-sm mb-3">Legal Address</h4>
                     <p className="text-sm text-foreground">
-                      {customerData.legalAddress || customerData.address || "---"}
+                      {account.legalAddress || "---"}
                     </p>
                   </div>
                 </div>
@@ -151,20 +142,19 @@ export default function PendingAccountDetailModal({
               <ScrollArea className="h-[400px] pr-4">
                 <div className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
-                    {displayField("Document Type", customerData.legalDocType || customerData.legal_doc_name)}
-                    {displayField("Holder Name", customerData.legalHolderName || customerData.legal_holder_name)}
-                    {displayField("Issuing Authority", customerData.legalIssAuth || customerData.legal_iss_auth)}
-                    {displayField("Issue Date", customerData.legalIssueDate || customerData.legal_iss_date || customerData.issuedDate)}
-                    {displayField("Expiration Date", customerData.legalExpireDate || customerData.legal_exp_date || customerData.expiredDate)}
+                    {displayField("Document Type", account.legalDocName)}
+                    {displayField("Holder Name", account.legalHolderName)}
+                    {displayField("Issue Date", account.legalIssuedDate)}
+                    {displayField("Expiration Date", account.legalExpiredDate)}
                   </div>
 
-                  {customerData.legalMrz1 && (
+                  {account.legalMRZ1 && (
                     <div className="mt-4 p-3 bg-muted rounded-md">
                       <h4 className="font-semibold text-sm mb-2">Machine Readable Zone (MRZ)</h4>
                       <div className="font-mono text-xs space-y-1">
-                        <p>{customerData.legalMrz1 || customerData.legalMRZ1}</p>
-                        <p>{customerData.legalMrz2 || customerData.legalMRZ2}</p>
-                        <p>{customerData.legalMrz3 || customerData.legalMRZ3}</p>
+                        <p>{account.legalMRZ1}</p>
+                        <p>{account.legalMRZ2}</p>
+                        <p>{account.legalMRZ3}</p>
                       </div>
                     </div>
                   )}
@@ -179,24 +169,24 @@ export default function PendingAccountDetailModal({
                   <div>
                     <h4 className="font-semibold text-sm mb-3">Employment Information</h4>
                     <div className="grid grid-cols-2 gap-4">
-                      {displayField("Customer Type", customerData.customerType || customerData.customer_type)}
-                      {displayField("Company Name", customerData.companyName || customerData.company)}
-                      {displayField("Occupation", customerData.occupation)}
-                      {displayField("Industry", customerData.industry)}
-                      {displayField("Sector", customerData.sector)}
-                      {displayField("Average Income", customerData.averageIncome || customerData.average_income)}
+                      {displayField("Customer Type", account.customerType)}
+                      {displayField("Company Name", account.companyName)}
+                      {displayField("Occupation", account.occupation)}
+                      {displayField("Industry", account.industry)}
+                      {displayField("Sector", account.sector)}
+                      {displayField("Average Income", account.averageIncome)}
                     </div>
                   </div>
 
                   <div>
                     <h4 className="font-semibold text-sm mb-3">Banking Information</h4>
                     <div className="grid grid-cols-2 gap-4">
-                      {displayField("Branch Code", customerData.branchCode || customerData.branch_code)}
-                      {displayField("Product Account", customerData.productAccount || customerData.product_account)}
-                      {displayField("Category Account", customerData.categoryAccount || customerData.category_account)}
-                      {displayField("Customer Role", customerData.customerRole || customerData.customer_role)}
-                      {displayField("Loan Officer", customerData.loanOfficer || customerData.loan_officer)}
-                      {displayField("Released By", customerData.releasedBy || customerData.released_by)}
+                      {displayField("Branch Code", account.branchCode)}
+                      {displayField("Product Account", account.productAccount)}
+                      {displayField("Category Account", account.categoryAccount)}
+                      {displayField("Customer Role", account.customerRole)}
+                      {displayField("Loan Officer", account.loanOfficer)}
+                      {displayField("Released By", account.releasedBy)}
                     </div>
                   </div>
                 </div>
@@ -209,13 +199,13 @@ export default function PendingAccountDetailModal({
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <ImageDisplayCard
                     title="National ID Document"
-                    imageName={customerData.nidImageName || customerData.nid_image_name}
+                    imageName={account.nidImageName}
                     imageType="nid"
                     legalId={account.legalId}
                   />
                   <ImageDisplayCard
                     title="Selfie Photo"
-                    imageName={customerData.selfieImageName || customerData.selfie_image_name}
+                    imageName={account.selfieImageName}
                     imageType="selfie"
                     legalId={account.legalId}
                   />
@@ -223,11 +213,6 @@ export default function PendingAccountDetailModal({
               </ScrollArea>
             </TabsContent>
           </Tabs>
-        ) : (
-          <div className="text-center py-8 text-muted-foreground">
-            No customer data available
-          </div>
-        )}
 
         {/* FOOTER SECTION */}
         <div className="mt-6 pt-4 border-t space-y-3">
