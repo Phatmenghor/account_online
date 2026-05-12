@@ -488,18 +488,13 @@ public class OpenAccountServiceImpl implements OpenAccountService {
 
     @Override
     public PaginationResponse<PendingAccountAdminReviewDto> getAllPendingAccountsHistory(AllPendingAccountHistoryRequestDto request) throws Exception {
-        log.info("Fetching accounts history with search: {} | Status filter: {}", request.getSearch(), request.getStatus());
+        log.info("Fetching pending accounts from main table with search: {}", request.getSearch());
 
         Sort.Direction direction = "DESC".equalsIgnoreCase(request.getSortDirection()) ? Sort.Direction.DESC : Sort.Direction.ASC;
         PageRequest pageable = PageRequest.of(request.getPageNo() - 1, request.getPageSize(), Sort.by(direction, request.getSortBy()));
 
-        Page<PendingAccountOpeningRequest> page;
-        if (request.getStatus() != null && !request.getStatus().isEmpty() && !"ALL".equalsIgnoreCase(request.getStatus())) {
-            AccountOpeningRequestStatusEnum status = AccountOpeningRequestStatusEnum.valueOf(request.getStatus().toUpperCase());
-            page = pendingRequestRepository.findByStatus(status, pageable);
-        } else {
-            page = pendingRequestRepository.findAll(pageable);
-        }
+        // Get all records from main table (guaranteed to be PENDING since we delete on approval/rejection)
+        Page<PendingAccountOpeningRequest> page = pendingRequestRepository.findAll(pageable);
 
         List<PendingAccountAdminReviewDto> content = page.getContent().stream()
                 .map(entity -> {
@@ -515,7 +510,7 @@ public class OpenAccountServiceImpl implements OpenAccountService {
                 })
                 .collect(Collectors.toList());
 
-        log.info("Found {} account records", page.getTotalElements());
+        log.info("Found {} pending account records from main table", page.getTotalElements());
 
         return new PaginationResponse<>(content, page.getNumber() + 1, page.getSize(), page.getTotalElements());
     }
