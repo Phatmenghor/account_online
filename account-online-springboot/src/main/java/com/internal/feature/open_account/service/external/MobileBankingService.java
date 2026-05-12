@@ -250,19 +250,7 @@ public class MobileBankingService {
         if (phone == null || phone.isEmpty())
             return phone;
 
-        phone = phone.replaceAll("[^0-9+]", "").trim();
-
-        if (phone.startsWith("+855")) {
-            return phone.replace("+", "");
-        }
-        if (phone.startsWith("855")) {
-            return phone;
-        }
-        if (phone.startsWith("0")) {
-            return "855" + phone.substring(1);
-        }
-
-        return "855" + phone;
+        return phone.replaceAll("[^0-9]", "").trim();
     }
 
     private String formatDateOfBirth(String dob) {
