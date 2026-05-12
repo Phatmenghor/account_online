@@ -50,19 +50,19 @@ const AccountExistsModal = ({
             className="relative bg-white w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden z-10 max-h-[90vh] flex flex-col"
           >
             {/* Top accent bar - Primary color */}
-            <div className="h-1.5 w-full bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 flex-shrink-0" />
+            <div className="h-1.5 w-full bg-primary flex-shrink-0" />
 
             {/* Header */}
             <div className="flex items-center justify-between px-5 pt-5 pb-3 flex-shrink-0">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-blue-600 rounded-lg flex items-center justify-center shadow-sm flex-shrink-0">
-                  <Wallet style={{ width: 20, height: 20 }} className="text-white" />
+                <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center shadow-sm flex-shrink-0">
+                  <Wallet style={{ width: 20, height: 20 }} className="text-primary-foreground" />
                 </div>
                 <div>
                   <h2 className="text-base sm:text-lg font-bold text-gray-800">
                     គណនីរបស់អ្នកមាន
                   </h2>
-                  <p className="text-xs text-blue-600 font-medium">Account Exists</p>
+                  <p className="text-xs text-primary font-medium">Account Exists</p>
                 </div>
               </div>
               <button
@@ -80,7 +80,7 @@ const AccountExistsModal = ({
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
-                className="bg-blue-50 border border-blue-200 rounded-xl p-4"
+                className="bg-primary/5 border border-primary/20 rounded-xl p-4"
               >
                 <p className="text-sm text-gray-700 leading-relaxed">
                   {data?.message ||
@@ -94,7 +94,7 @@ const AccountExistsModal = ({
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.2 }}
-                  className="bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-300 rounded-xl p-4 space-y-3"
+                  className="bg-primary/5 border border-primary/20 rounded-xl p-4 space-y-3"
                 >
                   <div className="space-y-2">
                     {data?.cif && (
@@ -102,7 +102,7 @@ const AccountExistsModal = ({
                         <label className="text-xs font-semibold text-gray-600 uppercase tracking-wider">
                           លេខក្រុមហ៊ុន (CIF)
                         </label>
-                        <p className="text-sm font-bold text-blue-700 mt-1 bg-white rounded px-3 py-2">
+                        <p className="text-sm font-bold text-primary mt-1 bg-white rounded px-3 py-2">
                           {data.cif}
                         </p>
                       </div>
@@ -112,7 +112,7 @@ const AccountExistsModal = ({
                         <label className="text-xs font-semibold text-gray-600 uppercase tracking-wider">
                           លេខគណនី
                         </label>
-                        <p className="text-sm font-bold text-blue-700 mt-1 bg-white rounded px-3 py-2">
+                        <p className="text-sm font-bold text-primary mt-1 bg-white rounded px-3 py-2">
                           {data.accountNumber}
                         </p>
                       </div>
@@ -143,19 +143,19 @@ const AccountExistsModal = ({
                 </p>
                 <div className="space-y-2">
                   <div className="flex items-start gap-3 bg-gray-50 rounded-lg p-3">
-                    <ArrowRight className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
+                    <ArrowRight className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
                     <span className="text-sm text-gray-700">
                       ដាក់ប្រាក់ទៅក្នុងគណនីលក់របស់អ្នក
                     </span>
                   </div>
                   <div className="flex items-start gap-3 bg-gray-50 rounded-lg p-3">
-                    <ArrowRight className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
+                    <ArrowRight className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
                     <span className="text-sm text-gray-700">
                       ផ្ទេរប្រាក់ដោយលឿនរវាងគណនី
                     </span>
                   </div>
                   <div className="flex items-start gap-3 bg-gray-50 rounded-lg p-3">
-                    <ArrowRight className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
+                    <ArrowRight className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
                     <span className="text-sm text-gray-700">
                       ជ្រើសរើស ឬគ្រប់គ្រងលក្ខណៈពិសេសផ្សេងទៀត
                     </span>
@@ -168,7 +168,7 @@ const AccountExistsModal = ({
             <div className="px-5 pb-5 space-y-2.5 flex-shrink-0 bg-white">
               <Button
                 onClick={handleContinue}
-                className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold py-2.5 rounded-lg shadow-sm transition-all flex items-center justify-center gap-2"
+                className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-2.5 rounded-lg shadow-sm transition-all flex items-center justify-center gap-2"
               >
                 <Wallet className="w-4 h-4" />
                 បន្តប្រើប្រាស់គណនី
