@@ -72,6 +72,7 @@ public final class ResponseMessage {
     public static final String PENDING_ACCOUNTS_RETRIEVED = "គណនីដែលរង់ចាំឆ្លើយប្រតិកម្មត្រូវបានទាញយកដោយជោគជ័យ";
     public static final String PENDING_ACCOUNT_RETRIEVED = "Pending account retrieved successfully";
     public static final String PENDING_ACCOUNT_HISTORY_RETRIEVED = "ប្រវត្តិគណនីដែលរង់ចាំឆ្លើយប្រតិកម្មត្រូវបានទាញយកដោយជោគជ័យ";
+    public static final String ACCOUNT_OPENING_SUBMITTED = "ស្នើសុំបង្កើតគណនីរបស់អ្នកត្រូវបានបញ្ជូនដោយជោគជ័យ។\n\nយើ្ងកំពុងដំណើរការស្នើសុំរបស់អ្នក ដែលរួមបញ្ចូល៖\n• ពិនិត្យលម្អិតព័ត៌មាន\n• ផ្ទៀងផ្ទាត់ឯកសារ\n• វាយតម្លៃហានិភัយ\n\nសូមរង់ចាំក្នុងរយៈពេល ១-៣ ថ្ងៃធ្វើការ។\n\nប្រសិនបើអ្នកមានសំណួរ សូមទាក់ទងយើ្ង៖\n📞 ទូរស័ព្ទ: ០៧ ២០០ ០០២ ឬ ១៨០០ ២០០ ៨៨៨\n🕐 ម៉ោងបើកលើ: ០៨:០០ - ១៨:០០ (ច័ន្ទ - សុក្រ)\n💬 អ៊ីមែល: support@cpbank.com";
     public static final String ACCOUNT_APPROVED = "ស្នើសុំបង្កើតគណនីត្រូវបានផ្ល័ងផ្សាយដោយជោគជ័យ។ គណនីនឹងត្រូវបានបង្កើតក្នុងរយៈពេលដែលមាន។";
     public static final String ACCOUNT_REJECTED = "ស្នើសុំបង្កើតគណនីត្រូវបានច្រានចោលដោយជោគជ័យ។";
 

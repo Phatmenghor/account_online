@@ -7,7 +7,6 @@ import com.internal.feature.open_account.dto.request.RejectAccountOpeningRequest
 import com.internal.feature.open_account.dto.response.PendingAccountOpeningRequestDto;
 import com.internal.feature.open_account.service.OpenAccountService;
 import com.internal.feature.telegram_alerts.service.AlertsOpenAccOnlineService;
-import com.internal.utils.constants.AppConstants;
 import com.internal.utils.constants.ResponseMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -40,7 +39,7 @@ public class OpenAccountController {
             log.error("Failed to send Telegram alert for account creation: {}", e.getMessage());
         }
 
-        return ResponseEntity.ok(ApiResponse.success(AppConstants.ACCOUNT_OPENING_SUBMITTED, response));
+        return ResponseEntity.ok(ApiResponse.success(ResponseMessage.ACCOUNT_OPENING_SUBMITTED, response));
 }
 
     @PostMapping("/approve")
@@ -59,7 +58,7 @@ public class OpenAccountController {
             log.error("Failed to send Telegram alert for account approval: {}", e.getMessage());
         }
 
-        return ResponseEntity.ok(ApiResponse.success(AppConstants.ACCOUNT_OPENING_APPROVED, response));
+        return ResponseEntity.ok(ApiResponse.success(ResponseMessage.ACCOUNT_APPROVED, response));
     }
 
     @PostMapping("/reject")
@@ -71,6 +70,6 @@ public class OpenAccountController {
 
         log.info("✓ Request rejected | Legal ID: {}", response.getLegalId());
 
-        return ResponseEntity.ok(ApiResponse.success(AppConstants.ACCOUNT_OPENING_REJECTED, response));
+        return ResponseEntity.ok(ApiResponse.success(ResponseMessage.ACCOUNT_REJECTED, response));
     }
 }
