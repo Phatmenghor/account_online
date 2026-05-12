@@ -8,6 +8,50 @@ export interface PaginationResponse<T> {
   last: boolean;
 }
 
+// Customer AML Info (nested inside amlResultData)
+export interface CustomerAmlInfo {
+  legalId?: string;
+  familyName?: string;
+  givenName?: string;
+  firstNameKh?: string;
+  lastNameKh?: string;
+  dateOfBirth?: string;
+  gender?: string;
+  nationality?: string;
+  legalAddress?: string;
+  phoneNumber?: string;
+  issuedDate?: string;
+  expiredDate?: string;
+}
+
+// User Info (for approvedBy/rejectedBy)
+export interface UserInfo {
+  id?: string;
+  username?: string;
+  email?: string;
+  fullName?: string;
+}
+
+// AML Result for Pending Account (clean AML screening data only)
+export interface AmlResultForPendingAccountDto {
+  id?: string;
+  customerInfo?: CustomerAmlInfo;
+  status?: string; // AML status (APPROVE, PENDING, REJECT)
+  screeningResult?: string;
+  riskLevel?: string;
+  actionTaken?: string;
+  rulesTriggered?: string;
+  serviceName?: string;
+  totalRulesScore?: number;
+  trxnID?: string;
+  approvedBy?: UserInfo;
+  rejectedBy?: UserInfo;
+  createdAt?: string;
+  updatedAt?: string;
+  nidImageName?: string;
+  selfieImageName?: string;
+}
+
 // Pending Account Opening Request DTO
 export interface PendingAccountOpeningRequestDto {
   // Request metadata
@@ -18,8 +62,8 @@ export interface PendingAccountOpeningRequestDto {
   remark?: string;
   amlStatus?: string;
 
-  // AML result data (parsed)
-  amlResultData?: any;
+  // AML result data (clean AML screening data only)
+  amlResultData?: AmlResultForPendingAccountDto;
 
   // Legal/NID info
   legalDocName?: string;
@@ -88,8 +132,8 @@ export interface PendingAccountAdminReviewDto {
   amlStatus?: string;
   remark?: string;
 
-  // AML result data (parsed)
-  amlResultData?: any;
+  // AML result data (clean AML screening data only)
+  amlResultData?: AmlResultForPendingAccountDto;
 
   // Legal/NID info
   legalDocName?: string;
