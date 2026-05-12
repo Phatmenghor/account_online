@@ -49,6 +49,13 @@ export default function PendingAccountDetailModal({
 
   // Determine colors based on status
   const getStatusColors = () => {
+    if (account.status === "PENDING") {
+      return {
+        headerGradient: "bg-gradient-to-r from-blue-600 to-blue-700",
+        headerSubtext: "text-blue-100",
+        tabActive: "data-[state=active]:text-blue-600 data-[state=active]:border-blue-600 data-[state=active]:bg-blue-50",
+      };
+    }
     if (account.status === "REJECTED") {
       return {
         headerGradient: "bg-gradient-to-r from-red-600 to-red-700",
@@ -57,9 +64,9 @@ export default function PendingAccountDetailModal({
       };
     }
     return {
-      headerGradient: "bg-gradient-to-r from-green-600 to-green-700",
-      headerSubtext: "text-green-100",
-      tabActive: "data-[state=active]:text-green-600 data-[state=active]:border-green-600 data-[state=active]:bg-green-50",
+      headerGradient: "bg-gradient-to-r from-orange-600 to-orange-700",
+      headerSubtext: "text-orange-100",
+      tabActive: "data-[state=active]:text-orange-600 data-[state=active]:border-orange-600 data-[state=active]:bg-orange-50",
     };
   };
 
