@@ -65,6 +65,14 @@ public class OpenAccountServiceImpl implements OpenAccountService {
 
     @Transactional
     public CustomerResponse openAccount(CustomerRequest request) throws Exception {
+        return openAccountInternal(request, true);
+    }
+
+    public CustomerResponse openAccountWithoutAml(CustomerRequest request) throws Exception {
+        return openAccountInternal(request, false);
+    }
+
+    private CustomerResponse openAccountInternal(CustomerRequest request, boolean processAml) throws Exception {
         String legalId = request.getLegalId();
         log.info("Opening account | Legal ID: {}", legalId);
 
@@ -100,10 +108,14 @@ public class OpenAccountServiceImpl implements OpenAccountService {
             currentStep = AppConstants.VALIDATE_EXISTING_ACCOUNT;
             bankingService.validateExistingAccounts(customerInfo);
 
-            log.info("Step 5: Processing AML | Legal ID: {}", legalId);
-            currentStep = AppConstants.PROCESS_AML;
-            var amlResult = complianceService.processAml(request);
-            complianceService.sentMessageOnHighRisk(request, amlResult);
+            if (processAml) {
+                log.info("Step 5: Processing AML | Legal ID: {}", legalId);
+                currentStep = AppConstants.PROCESS_AML;
+                var amlResult = complianceService.processAml(request);
+                complianceService.sentMessageOnHighRisk(request, amlResult);
+            } else {
+                log.info("Step 5: Skipping AML (already processed during submission) | Legal ID: {}", legalId);
+            }
 
             log.info("Step 6: Creating customer | Legal ID: {}", legalId);
             currentStep = AppConstants.CREATE_CUSTOMER;
@@ -230,7 +242,7 @@ public class OpenAccountServiceImpl implements OpenAccountService {
 
         log.info("Creating account for approved request | Legal ID: {}", pendingRequest.getLegalId());
         try {
-            CustomerResponse accountResponse = openAccount(customerRequest);
+            CustomerResponse accountResponse = openAccountWithoutAml(customerRequest);
             log.info("✓ Account created successfully | CIF: {}", accountResponse.getCif());
         } catch (Exception e) {
             log.error("Failed to create account for approved request: {} | Error: {}", requestId, e.getMessage(), e);
