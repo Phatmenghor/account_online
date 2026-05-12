@@ -310,8 +310,6 @@ export const useAccountSubmission = ({
       });
       setShowSuccessModal(true);
     } catch (error: any) {
-      console.error("Submission error:", error);
-
       // Extract actual error message from backend
       const errorMessage = error?.errorMessage || error?.message;
       const errorResponse = error?.rawError;
