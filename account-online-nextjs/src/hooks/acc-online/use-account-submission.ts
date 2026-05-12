@@ -106,8 +106,45 @@ export const useAccountSubmission = ({
     uploadCache.current = { nidFileName: null, selfieFileName: null };
   };
 
+  // ── Validate dates are not in the future ──
+  const validateDates = (): boolean => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // Validate legal issue date (issuedDate from NID)
+    if (formData.issuedDate) {
+      const issuedDate = new Date(formData.issuedDate);
+      if (issuedDate > today) {
+        showError({
+          title: "កាលបរិច្ឆេទមិនត្រឹមត្រូវ",
+          message: `កាលបរិច្ឆេទចេញលិខិត (${formData.issuedDate}) មិនអាចជាកាលបរិច្ឆេទពេលអនាគតបានទេ។ សូមពិនិត្យឡើងវិញ និងព្យាយាមម្ដងទៀត។`,
+        });
+        return false;
+      }
+    }
+
+    // Validate date of birth (not too far in future)
+    if (formData.dob) {
+      const dob = new Date(formData.dob);
+      if (dob > today) {
+        showError({
+          title: "កាលបរិច្ឆេទមិនត្រឹមត្រូវ",
+          message: `កាលបរិច្ឆេទកំណើត (${formData.dob}) មិនអាចជាកាលបរិច្ឆេទពេលអនាគតបានទេ។ សូមពិនិត្យឡើងវិញ និងព្យាយាមម្ដងទៀត។`,
+        });
+        return false;
+      }
+    }
+
+    return true;
+  };
+
   const handleSubmitAccount = async () => {
-    // ── 1. Guard: validate images exist ──
+    // ── 1. Guard: validate dates are not in future ──
+    if (!validateDates()) {
+      return;
+    }
+
+    // ── 2. Guard: validate images exist ──
     const nidBase64Full: string = uploadedImage?.idImage ?? "";
     const selfieBase64Full: string = selfieImage ?? "";
 
@@ -134,7 +171,7 @@ export const useAccountSubmission = ({
     });
 
     try {
-      // ── 2. Upload only if not already uploaded this session ──
+      // ── 3. Upload only if not already uploaded this session ──
       if (
         !uploadCache.current.nidFileName ||
         !uploadCache.current.selfieFileName
@@ -164,13 +201,13 @@ export const useAccountSubmission = ({
 
       const { nidFileName, selfieFileName } = uploadCache.current;
 
-      // ── 3. Update loading message ──
+      // ── 4. Update loading message ──
       setLoadingState((prev) => ({
         ...prev,
         message: "កំពុងដាក់ស្នើសុំបង្កើតគណនីសម្រាប់ឆ្លើយប្រតិកម្ម...",
       }));
 
-      // ── 4. Submit account ── Submit ALL available form data directly
+      // ── 5. Submit account ── Submit ALL available form data directly
       const accountData = {
         // NID Data - from form
         legalId: formData.idNumber,
@@ -234,7 +271,7 @@ export const useAccountSubmission = ({
 
       const response = await createOpenAccountService(accountData);
 
-      // ── 5. Clear cache on success ──
+      // ── 6. Clear cache on success ──
       uploadCache.current = { nidFileName: null, selfieFileName: null };
 
       setSuccessData({
