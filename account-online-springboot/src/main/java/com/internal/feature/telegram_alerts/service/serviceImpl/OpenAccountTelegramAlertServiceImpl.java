@@ -361,6 +361,11 @@ public class OpenAccountTelegramAlertServiceImpl implements AlertsOpenAccOnlineS
 
             String statusText = request.getStatus() != null ? request.getStatus().name() : "N/A";
 
+            // Add remark for REJECTED status
+            if ("REJECTED".equalsIgnoreCase(eventType) && request.getRemark() != null && !request.getRemark().isEmpty()) {
+                appendIfNotEmpty(bodyBuilder, "Remark", request.getRemark());
+            }
+
             String footer = "Status: " + escapeMarkdown(statusText);
 
             String message = header + "\n" + SEPARATOR + "\n" + bodyBuilder + SEPARATOR + "\n" + footer;

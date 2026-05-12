@@ -70,6 +70,13 @@ public class OpenAccountController {
 
         log.info("✓ Request rejected | Legal ID: {}", response.getLegalId());
 
+        // Send rejection alert to Telegram
+        try {
+            alertsOpenAccOnlineService.sendAccountOpeningAlert(response, "REJECTED");
+        } catch (Exception e) {
+            log.error("Failed to send rejection alert to Telegram", e);
+        }
+
         return ResponseEntity.ok(ApiResponse.success(ResponseMessage.ACCOUNT_REJECTED, response));
     }
 }
