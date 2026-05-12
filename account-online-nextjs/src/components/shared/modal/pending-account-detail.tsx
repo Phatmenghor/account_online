@@ -50,7 +50,7 @@ export default function PendingAccountDetailModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-5xl max-h-[95vh] overflow-hidden flex flex-col p-0">
+      <DialogContent className="max-w-5xl h-[95vh] flex flex-col p-0">
         {/* HEADER */}
         <div className="flex-shrink-0 border-b bg-white px-6 py-4">
           <div className="flex items-center justify-between">
@@ -73,29 +73,22 @@ export default function PendingAccountDetailModal({
           </div>
         </div>
 
-        {/* BODY */}
+        {/* BODY - TABS */}
         <div className="flex-1 overflow-hidden flex flex-col">
           <Tabs defaultValue="overview" className="w-full flex flex-col h-full">
-            <TabsList className="grid w-full grid-cols-4 flex-shrink-0 rounded-none border-b bg-gray-50 px-6">
+            <TabsList className="grid w-full grid-cols-2 flex-shrink-0 rounded-none border-b bg-gray-50 px-6">
               <TabsTrigger value="overview" className="text-xs">
                 Overview
-              </TabsTrigger>
-              <TabsTrigger value="details" className="text-xs">
-                Details
               </TabsTrigger>
               <TabsTrigger value="aml" className="text-xs">
                 <Shield className="w-4 h-4 mr-1" />
                 AML
               </TabsTrigger>
-              <TabsTrigger value="images" className="text-xs">
-                <ImageIcon className="w-4 h-4 mr-1" />
-                Images
-              </TabsTrigger>
             </TabsList>
 
-            {/* OVERVIEW TAB */}
-            <TabsContent value="overview" className="flex-1 overflow-hidden">
-              <ScrollArea className="h-full">
+            {/* OVERVIEW TAB - All Fields + Images */}
+            <TabsContent value="overview" className="flex-1 overflow-hidden m-0">
+              <ScrollArea className="h-full w-full">
                 <div className="p-6 space-y-4">
                   {/* Request Info */}
                   <Section title="Request Information">
@@ -128,31 +121,6 @@ export default function PendingAccountDetailModal({
                     </div>
                   )}
 
-                  {/* Customer Quick View */}
-                  <Section title="Customer Information">
-                    <Field label="Full Name (EN)" value={`${account.legalFirstNameEn || ""} ${account.legalLastNameEn || ""}`.trim()} />
-                    <Field label="Full Name (KH)" value={`${account.legalFirstNameKh || ""} ${account.legalLastNameKh || ""}`.trim()} />
-                    <Field label="Date of Birth" value={account.legalDateOfBirth} />
-                    <Field label="Phone Number" value={account.phoneNumber} />
-                    <Field label="Email" value={account.email} />
-                  </Section>
-
-                  {/* Remarks */}
-                  {account.remark && (
-                    <Section title="Admin Remarks">
-                      <div className="bg-amber-50 p-3 rounded text-sm text-amber-900 border border-amber-200">
-                        {account.remark}
-                      </div>
-                    </Section>
-                  )}
-                </div>
-              </ScrollArea>
-            </TabsContent>
-
-            {/* DETAILS TAB */}
-            <TabsContent value="details" className="flex-1 overflow-hidden">
-              <ScrollArea className="h-full">
-                <div className="p-6 space-y-4">
                   {/* Personal Information */}
                   <Section title="Personal Information">
                     <Field label="Given Name (EN)" value={account.legalFirstNameEn} />
@@ -225,13 +193,40 @@ export default function PendingAccountDetailModal({
                     <Field label="Loan Officer" value={account.loanOfficer} />
                     <Field label="Released By" value={account.releasedBy} />
                   </Section>
+
+                  {/* Images */}
+                  <Section title="Identity Documents">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+                      <ImageDisplayCard
+                        title="National ID Document"
+                        imageName={account.nidImageName}
+                        imageType="nid"
+                        legalId={account.legalId}
+                      />
+                      <ImageDisplayCard
+                        title="Selfie Photo"
+                        imageName={account.selfieImageName}
+                        imageType="selfie"
+                        legalId={account.legalId}
+                      />
+                    </div>
+                  </Section>
+
+                  {/* Remarks */}
+                  {account.remark && (
+                    <Section title="Admin Remarks">
+                      <div className="bg-amber-50 p-3 rounded text-sm text-amber-900 border border-amber-200">
+                        {account.remark}
+                      </div>
+                    </Section>
+                  )}
                 </div>
               </ScrollArea>
             </TabsContent>
 
             {/* AML TAB */}
-            <TabsContent value="aml" className="flex-1 overflow-hidden">
-              <ScrollArea className="h-full">
+            <TabsContent value="aml" className="flex-1 overflow-hidden m-0">
+              <ScrollArea className="h-full w-full">
                 <div className="p-6 space-y-4">
                   {account.amlResultData ? (
                     <>
@@ -298,28 +293,6 @@ export default function PendingAccountDetailModal({
                       No AML data available
                     </div>
                   )}
-                </div>
-              </ScrollArea>
-            </TabsContent>
-
-            {/* IMAGES TAB */}
-            <TabsContent value="images" className="flex-1 overflow-hidden">
-              <ScrollArea className="h-full">
-                <div className="p-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <ImageDisplayCard
-                      title="National ID Document"
-                      imageName={account.nidImageName}
-                      imageType="nid"
-                      legalId={account.legalId}
-                    />
-                    <ImageDisplayCard
-                      title="Selfie Photo"
-                      imageName={account.selfieImageName}
-                      imageType="selfie"
-                      legalId={account.legalId}
-                    />
-                  </div>
                 </div>
               </ScrollArea>
             </TabsContent>
