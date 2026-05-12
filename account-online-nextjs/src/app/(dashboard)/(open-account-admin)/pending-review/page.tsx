@@ -53,7 +53,6 @@ function PendingReview() {
 
   const searchParams = useSearchParams();
   const t = useTranslations();
-  const tAdminReview = useTranslations("adminReview");
   const router = useRouter();
 
   const debouncedSearchQuery = useDebounce(searchQuery, 400);
@@ -148,8 +147,8 @@ function PendingReview() {
         startTransition(() => {
           AppToast({
             type: "success",
-            message: tAdminReview("approveSuccess"),
-            description: tAdminReview("approveSuccessDesc").replace("{{customerName}}", customerName),
+            message: "Account Approved Successfully",
+            description: `Request ${selectedAccountForAction.requestId} - ${customerName} approved`,
           });
         });
       } else if (selectedAction === "REJECT") {
@@ -175,8 +174,8 @@ function PendingReview() {
         startTransition(() => {
           AppToast({
             type: "success",
-            message: tAdminReview("rejectSuccess"),
-            description: tAdminReview("rejectSuccessDesc").replace("{{customerName}}", customerName),
+            message: "Account Rejected Successfully",
+            description: `Request ${selectedAccountForAction.requestId} - ${customerName} rejected`,
           });
         });
       }
