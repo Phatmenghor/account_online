@@ -367,18 +367,18 @@ public class OpenAccountTelegramAlertServiceImpl implements AlertsOpenAccOnlineS
 
     private String buildAddressString(String province, String district, String commune, String village) {
         StringBuilder address = new StringBuilder();
-        if (village != null && !village.isEmpty()) {
+        if (village != null && !village.isEmpty() && !village.equals("null")) {
             address.append(village);
         }
-        if (commune != null && !commune.isEmpty()) {
+        if (commune != null && !commune.isEmpty() && !commune.equals("null")) {
             if (address.length() > 0) address.append(", ");
             address.append(commune);
         }
-        if (district != null && !district.isEmpty()) {
+        if (district != null && !district.isEmpty() && !district.equals("null")) {
             if (address.length() > 0) address.append(", ");
             address.append(district);
         }
-        if (province != null && !province.isEmpty()) {
+        if (province != null && !province.isEmpty() && !province.equals("null")) {
             if (address.length() > 0) address.append(", ");
             address.append(province);
         }
