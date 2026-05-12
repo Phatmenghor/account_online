@@ -634,18 +634,25 @@ public class OpenAccountServiceImpl implements OpenAccountService {
 
     private void saveHistory(PendingAccountOpeningRequest request, AccountOpeningRequestStatusEnum status, String remark) {
         try {
+            String actionUsername = "System";
+            try {
+                actionUsername = securityUtils.getCurrentUser().getUsername();
+            } catch (Exception e) {
+                log.debug("No authenticated user found, using System for history");
+            }
+
             PendingAccountOpeningRequestHistory history = PendingAccountOpeningRequestHistory.builder()
                     .requestId(request.getId())
                     .legalId(request.getLegalId())
                     .status(status)
-                    .actionUsername(securityUtils.getCurrentUser().getUsername())
+                    .actionUsername(actionUsername)
                     .requestData(request.getRequestData())
                     .customerInfo(request.getCustomerInfo())
                     .amlResultData(request.getAmlResultData())
                     .remark(remark)
                     .build();
             historyRepository.save(history);
-            log.info("✓ History saved | Request ID: {} | Status: {}", request.getId(), status);
+            log.info("✓ History saved | Request ID: {} | Status: {} | By: {}", request.getId(), status, actionUsername);
         } catch (Exception e) {
             log.error("Failed to save history for request: {}", request.getId(), e);
         }
