@@ -28,6 +28,26 @@ import java.util.stream.Collectors;
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class OpenAccountExceptionHandler {
 
+    @ExceptionHandler(OpenAccountException.class)
+    public ResponseEntity<ErrorResponse> handleOpenAccountException(OpenAccountException ex) {
+        log.warn("Open account error [{}]: {}", ex.getErrorCode(), ex.getMessage());
+
+        Map<String, Object> details = new HashMap<>();
+        details.put("errorCode", ex.getErrorCode());
+        if (ex.getData() != null) {
+            details.putAll(ex.getData());
+        }
+
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .timestamp(LocalDateTime.now())
+                .status(HttpStatus.BAD_REQUEST.value())
+                .message(ex.getMessage())
+                .details(details)
+                .build();
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
+
     @ExceptionHandler(DatabaseConnectionException.class)
     public ResponseEntity<ErrorResponse> handleDatabaseConnectionException(DatabaseConnectionException ex) {
         log.error("Database connection error: {}", ex.getMessage());
