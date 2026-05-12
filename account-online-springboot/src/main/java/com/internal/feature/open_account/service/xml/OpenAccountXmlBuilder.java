@@ -52,7 +52,6 @@ public class OpenAccountXmlBuilder {
 
         // Format dates to T24 format (YYYYMMDD)
         String dateOfBirth = formatDateForT24(request.getDateOfBirth());
-        String legalIssueDate = formatDateForT24(request.getLegalIssueDate());
         String legalExpDate = formatDateForT24NoFutureCheck(request.getLegalExpireDate());
 
         // Determine title from gender (use request title if provided)
@@ -109,7 +108,7 @@ public class OpenAccountXmlBuilder {
                 + "<cus:LegalHolderName>" + defaultProperties.getLegalHolderName() + "</cus:LegalHolderName>"
                 + "<cus:LegalIssAuth>" + getOrDefault(request.getLegalIssAuth(), request.getGivenName())
                 + "</cus:LegalIssAuth>"
-                + "<cus:LegalIssDate>" + legalIssueDate + "</cus:LegalIssDate>"
+                + "<cus:LegalIssDate></cus:LegalIssDate>"
                 + "<cus:LegalExpDate>" + legalExpDate + "</cus:LegalExpDate>"
                 + "</cus:mLEGALID></cus:gLEGALID>"
 
