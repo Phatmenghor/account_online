@@ -248,9 +248,14 @@ public class OpenAccountServiceImpl implements OpenAccountService {
         try {
             accountResponse = openAccountWithoutAml(customerRequest);
             log.info("✓ Account created successfully | CIF: {}", accountResponse.getCif());
+        } catch (OpenAccountException e) {
+            // Date validation or other account opening errors - pass message to admin
+            log.warn("Date/Validation error caught in approval: [{}] {}", e.getErrorCode(), e.getMessage());
+            throw e;
         } catch (Exception e) {
-            log.error("Failed to create account for approved request: {} | Error: {}", requestId, e.getMessage(), e);
-            // Pass the actual error message to admin (e.g., date validation errors)
+            log.error("Failed to create account for approved request: {} | Error type: {} | Message: {}",
+                requestId, e.getClass().getSimpleName(), e.getMessage(), e);
+            // Pass the actual error message to admin (e.g., date validation errors, T24 errors)
             String errorMessage = e.getMessage() != null ? e.getMessage() : AppConstants.FAILED_CREATE_ACCOUNT;
             throw new OpenAccountException("ACCOUNT_CREATION_FAILED", errorMessage);
         }
