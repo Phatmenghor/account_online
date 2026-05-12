@@ -22,4 +22,6 @@ public interface OpenAccountService {
     PendingAccountAdminReviewDto getPendingAccountHistoryById(Long requestId) throws Exception;
 
     ReviewHistoryResponseDto getReviewHistory(Long requestId) throws Exception;
+
+    PaginationResponse<PendingAccountOpeningRequestHistoryDto> getAllOpeningRequestHistory(AllPendingAccountHistoryRequestDto request) throws Exception;
 }

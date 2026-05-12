@@ -611,6 +611,31 @@ public class OpenAccountServiceImpl implements OpenAccountService {
                 .build();
     }
 
+    @Override
+    public PaginationResponse<PendingAccountOpeningRequestHistoryDto> getAllOpeningRequestHistory(AllPendingAccountHistoryRequestDto request) throws Exception {
+        log.info("Fetching all opening request history with search: {} | Status filter: {}", request.getSearch(), request.getStatus());
+
+        Sort.Direction direction = "DESC".equalsIgnoreCase(request.getSortDirection()) ? Sort.Direction.DESC : Sort.Direction.ASC;
+        PageRequest pageable = PageRequest.of(request.getPageNo() - 1, request.getPageSize(), Sort.by(direction, "createdAt"));
+
+        Page<PendingAccountOpeningRequestHistory> page = historyRepository.findAllByOrderByCreatedAtDesc(pageable);
+
+        List<PendingAccountOpeningRequestHistoryDto> content = page.getContent().stream()
+                .map(this::mapHistoryToDto)
+                .collect(Collectors.toList());
+
+        log.info("✓ Found {} history records | Total: {} | Page: {}", content.size(), page.getTotalElements(), request.getPageNo());
+
+        return PaginationResponse.<PendingAccountOpeningRequestHistoryDto>builder()
+                .content(content)
+                .pageNo(request.getPageNo())
+                .pageSize(request.getPageSize())
+                .totalElements(page.getTotalElements())
+                .totalPages(page.getTotalPages())
+                .last(page.isLast())
+                .build();
+    }
+
     private void saveHistory(PendingAccountOpeningRequest request, AccountOpeningRequestStatusEnum status, String remark) {
         try {
             PendingAccountOpeningRequestHistory history = PendingAccountOpeningRequestHistory.builder()

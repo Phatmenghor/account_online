@@ -3,6 +3,7 @@ package com.internal.feature.open_account.controller;
 import com.internal.exceptions.response.ApiResponse;
 import com.internal.feature.open_account.dto.request.AllPendingAccountHistoryRequestDto;
 import com.internal.feature.open_account.dto.response.PendingAccountAdminReviewDto;
+import com.internal.feature.open_account.dto.response.PendingAccountOpeningRequestHistoryDto;
 import com.internal.feature.open_account.dto.response.ReviewHistoryResponseDto;
 import com.internal.feature.open_account.service.OpenAccountService;
 import com.internal.utils.constants.AppConstants;
@@ -53,5 +54,17 @@ public class AdminOpenAccountController {
         log.info("✓ Review history retrieved | Request ID: {} | Total records: {}", requestId, response.getHistory().size());
 
         return ResponseEntity.ok(ApiResponse.success(AppConstants.PENDING_ACCOUNT_DETAIL_RETRIEVED, response));
+    }
+
+    @PostMapping("/opening-request-history")
+    public ResponseEntity<ApiResponse<PaginationResponse<PendingAccountOpeningRequestHistoryDto>>> getAllOpeningRequestHistory(
+            @Valid @RequestBody AllPendingAccountHistoryRequestDto request) throws Exception {
+        log.info("Fetching all opening request history with pagination");
+
+        PaginationResponse<PendingAccountOpeningRequestHistoryDto> response = openAccountService.getAllOpeningRequestHistory(request);
+
+        log.info("✓ Found {} opening request history records | Total: {}", response.getContent().size(), response.getTotalElements());
+
+        return ResponseEntity.ok(ApiResponse.success("Opening request history retrieved", response));
     }
 }

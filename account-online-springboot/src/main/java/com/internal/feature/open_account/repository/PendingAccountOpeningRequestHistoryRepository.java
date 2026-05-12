@@ -16,4 +16,6 @@ public interface PendingAccountOpeningRequestHistoryRepository extends JpaReposi
     Page<PendingAccountOpeningRequestHistory> findByRequestIdOrderByCreatedAtDesc(Long requestId, Pageable pageable);
 
     List<PendingAccountOpeningRequestHistory> findByLegalIdOrderByCreatedAtDesc(String legalId);
+
+    Page<PendingAccountOpeningRequestHistory> findAllByOrderByCreatedAtDesc(Pageable pageable);
 }
