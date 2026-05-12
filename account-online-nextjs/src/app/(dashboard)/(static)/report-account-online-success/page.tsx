@@ -283,25 +283,22 @@ function SuccessAccountExcelPageContent() {
 
     return (
         <Card className="h-full flex flex-col">
-            <CardContent className="space-y-4 p-6 flex flex-col h-full max-w-full">
-                {/* Header Section */}
-                <div className="space-y-3 max-w-7xl">
-                    {/* Search Bar */}
-                    <div className="relative flex-1 min-w-[250px] md:min-w-[400px]">
-                        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input
-                            aria-label="search-success-account"
-                            autoComplete="off"
-                            type="search"
-                            placeholder="Search by CIF, Legal ID, Account Number..."
-                            value={searchQuery}
-                            onChange={handleSearchChange}
-                            className="pl-8 w-full text-sm h-10"
-                        />
-                    </div>
+            <CardContent className="space-y-6 p-6 flex flex-col h-full">
+                {/* Header */}
+                <div className="flex justify-between">
+                    <div className="flex flex-wrap items-center justify-start gap-3 w-full">
+                        <div className="relative w-full md:w-[350px]">
+                            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                            <Input
+                                aria-label="search-success-account"
+                                type="search"
+                                placeholder="Search by Legal ID or Name"
+                                value={searchQuery}
+                                onChange={handleSearchChange}
+                                className="pl-8 w-full min-w-[200px] text-xs md:min-w-[300px] h-9"
+                            />
+                        </div>
 
-                    {/* Filters Row - Single Line, No Labels */}
-                    <div className="flex flex-wrap items-center gap-2">
                         {/* From Date */}
                         <CustomDatePicker
                             value={fromDate}
@@ -333,7 +330,7 @@ function SuccessAccountExcelPageContent() {
                         <Button
                             onClick={exportToExcel}
                             disabled={isExportingExcel || (accounts?.countAll ?? 0) === 0}
-                            className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold h-9 px-3 flex items-center gap-1.5 text-sm ml-auto"
+                            className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold h-9 px-3 flex items-center gap-1.5 text-xs"
                         >
                             {isExportingExcel ? (
                                 <>
@@ -346,25 +343,17 @@ function SuccessAccountExcelPageContent() {
                                 <>
                                     <FileSpreadsheet className="h-3.5 w-3.5" />
                                     <span>Export</span>
-                                    <Download className="h-3 w-3" />
                                 </>
                             )}
                         </Button>
-
-                        {/* Stats */}
-                        <div className="text-xs text-gray-600 font-medium">
-                            <span className="text-blue-600 font-bold">{accounts?.countAll ?? 0}</span>
-                            <span className="text-gray-400 mx-1">•</span>
-                            <span className="text-gray-700">{accounts?.content?.length ?? 0} showing</span>
-                        </div>
                     </div>
                 </div>
 
-                <Separator className="bg-gray-200" />
+                <Separator className="bg-gray-300" />
 
                 {/* Table Section */}
                 <div className="flex-1 flex flex-col min-h-0">
-                    <div className="flex-1 rounded-md border border-gray-200 overflow-hidden flex flex-col bg-white">
+                    <div className="flex-1 rounded-md border overflow-hidden flex flex-col">
                         <div className="flex-1 overflow-x-auto">
                             <DataTable
                                 data={accounts?.content || []}
