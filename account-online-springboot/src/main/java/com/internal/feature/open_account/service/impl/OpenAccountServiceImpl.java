@@ -438,6 +438,11 @@ public class OpenAccountServiceImpl implements OpenAccountService {
                     .format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
         }
 
+        String legalDateOfBirth = null;
+        if (entity.getLegalDateOfBirth() != null) {
+            legalDateOfBirth = entity.getLegalDateOfBirth().toString();
+        }
+
         return PendingAccountOpeningRequestHistoryDto.builder()
                 .id(entity.getId())
                 .requestId(entity.getRequestId())
@@ -446,6 +451,29 @@ public class OpenAccountServiceImpl implements OpenAccountService {
                 .actionUsername(entity.getActionUsername())
                 .remark(entity.getRemark())
                 .createdAt(createdAtIso)
+                // Legal/NID info
+                .legalDocName(entity.getLegalDocName())
+                .legalHolderName(entity.getLegalHolderName())
+                .legalFirstNameEn(entity.getLegalFirstNameEn())
+                .legalLastNameEn(entity.getLegalLastNameEn())
+                .legalFirstNameKh(entity.getLegalFirstNameKh())
+                .legalLastNameKh(entity.getLegalLastNameKh())
+                .legalDateOfBirth(legalDateOfBirth)
+                .legalGender(entity.getLegalGender())
+                .legalAddress(entity.getLegalAddress())
+                .legalPlaceOfBirth(entity.getLegalPlaceOfBirth())
+                // Customer info
+                .phoneNumber(entity.getPhoneNumber())
+                .branchCode(entity.getBranchCode())
+                .occupation(entity.getOccupation())
+                .companyName(entity.getCompanyName())
+                .email(entity.getEmail())
+                .maritalStatus(entity.getMaritalStatus())
+                .nationality(entity.getNationality())
+                .amlStatus(entity.getAmlStatus())
+                // Images
+                .nidImageName(entity.getNidImageName())
+                .selfieImageName(entity.getSelfieImageName())
                 .build();
     }
 
