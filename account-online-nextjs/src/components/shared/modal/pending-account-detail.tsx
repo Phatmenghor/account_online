@@ -8,7 +8,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PendingAccountAdminReviewDto } from "@/models/open-account-admin/pending-account.response";
-import { Shield, ImageIcon, CheckCircle, XCircle } from "lucide-react";
+import { Shield, CheckCircle, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ImageDisplayCard from "@/components/shared/card/image-display-card";
 
@@ -34,19 +34,32 @@ export default function PendingAccountDetailModal({
   const Field = ({ label, value }: { label: string; value?: any }) => {
     if (!value && value !== 0) return null;
     return (
-      <div className="flex justify-between py-2 border-b border-gray-100 last:border-b-0">
-        <span className="text-xs font-medium text-gray-600">{label}</span>
-        <span className="text-sm font-medium text-gray-900">{value}</span>
+      <div className="flex justify-between items-start py-2 gap-4">
+        <span className="text-xs font-medium text-gray-600 min-w-fit">{label}</span>
+        <span className="text-sm text-gray-900 text-right flex-1">{value}</span>
       </div>
     );
   };
 
-  const Section = ({ title, children }: { title: string; children: React.ReactNode }) => (
-    <div className="space-y-2">
-      <h3 className="text-sm font-semibold text-gray-900 pb-2 border-b-2 border-blue-200">{title}</h3>
-      {children}
-    </div>
-  );
+  const buildFullAddress = () => {
+    const parts = [
+      account.customerVillage,
+      account.customerCommune,
+      account.customerDistrict,
+      account.customerProvince
+    ].filter(p => p && p !== "");
+    return parts.reverse().join(", ");
+  };
+
+  const buildPlaceOfBirth = () => {
+    const parts = [
+      account.customerPobVillage,
+      account.customerPobCommune,
+      account.customerPobDistrict,
+      account.customerPobProvince
+    ].filter(p => p && p !== "");
+    return parts.reverse().join(", ");
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -86,117 +99,13 @@ export default function PendingAccountDetailModal({
               </TabsTrigger>
             </TabsList>
 
-            {/* OVERVIEW TAB - All Fields + Images */}
+            {/* OVERVIEW TAB */}
             <TabsContent value="overview" className="flex-1 overflow-hidden m-0">
               <ScrollArea className="h-full w-full">
-                <div className="p-6 space-y-4">
-                  {/* Request Info */}
-                  <Section title="Request Information">
-                    <Field label="Status" value={account.status} />
-                    <Field label="AML Status" value={account.amlStatus} />
-                    <Field label="Submitted" value={new Date(account.createdAt).toLocaleString()} />
-                    {account.updatedAt && <Field label="Updated" value={new Date(account.updatedAt).toLocaleString()} />}
-                  </Section>
-
-                  {/* AML Summary */}
-                  {account.amlResultData && (
-                    <div className={`p-4 rounded-lg border-2 ${
-                      account.amlResultData.status === "APPROVE"
-                        ? "bg-green-50 border-green-300"
-                        : account.amlResultData.status === "REJECT"
-                        ? "bg-red-50 border-red-300"
-                        : "bg-yellow-50 border-yellow-300"
-                    }`}>
-                      <div className="flex items-center gap-2 mb-3">
-                        <Shield className="h-5 w-5" />
-                        <span className="font-semibold">AML: {account.amlResultData.status}</span>
-                      </div>
-                      <div className="text-sm space-y-1">
-                        <p>Risk Level: <span className="font-semibold">{account.amlResultData.riskLevel}</span></p>
-                        <p>Rules Score: <span className="font-semibold">{account.amlResultData.totalRulesScore}</span></p>
-                        {account.amlResultData.serviceName && (
-                          <p>Service: <span className="font-semibold">{account.amlResultData.serviceName}</span></p>
-                        )}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Personal Information */}
-                  <Section title="Personal Information">
-                    <Field label="Given Name (EN)" value={account.legalFirstNameEn} />
-                    <Field label="Family Name (EN)" value={account.legalLastNameEn} />
-                    <Field label="Given Name (KH)" value={account.legalFirstNameKh} />
-                    <Field label="Family Name (KH)" value={account.legalLastNameKh} />
-                    <Field label="Date of Birth" value={account.legalDateOfBirth} />
-                    <Field label="Gender" value={account.legalGender} />
-                    <Field label="Nationality" value={account.nationality} />
-                    <Field label="Marital Status" value={account.maritalStatus} />
-                    <Field label="Title" value={account.title} />
-                  </Section>
-
-                  {/* Contact Information */}
-                  <Section title="Contact Information">
-                    <Field label="Phone Number" value={account.phoneNumber} />
-                    <Field label="Email" value={account.email} />
-                  </Section>
-
-                  {/* Legal/Document Information */}
-                  <Section title="Legal Document">
-                    <Field label="Document Type" value={account.legalDocName} />
-                    <Field label="Issued Date" value={account.legalIssuedDate} />
-                    <Field label="Expiration Date" value={account.legalExpiredDate} />
-                    <Field label="Place of Birth" value={account.legalPlaceOfBirth} />
-                    <Field label="Address" value={account.legalAddress} />
-                    {account.legalMRZ1 && (
-                      <div className="mt-3 p-3 bg-gray-100 rounded">
-                        <p className="text-xs font-semibold mb-2">Machine Readable Zone (MRZ)</p>
-                        <div className="font-mono text-xs space-y-1 text-gray-700">
-                          <p>{account.legalMRZ1}</p>
-                          <p>{account.legalMRZ2}</p>
-                          <p>{account.legalMRZ3}</p>
-                        </div>
-                      </div>
-                    )}
-                  </Section>
-
-                  {/* Current Address */}
-                  <Section title="Current Address">
-                    <Field label="Province" value={account.customerProvince} />
-                    <Field label="District" value={account.customerDistrict} />
-                    <Field label="Commune" value={account.customerCommune} />
-                    <Field label="Village" value={account.customerVillage} />
-                  </Section>
-
-                  {/* Place of Birth */}
-                  <Section title="Place of Birth">
-                    <Field label="Province" value={account.customerPobProvince} />
-                    <Field label="District" value={account.customerPobDistrict} />
-                    <Field label="Commune" value={account.customerPobCommune} />
-                    <Field label="Village" value={account.customerPobVillage} />
-                  </Section>
-
-                  {/* Business/Employment Information */}
-                  <Section title="Employment Information">
-                    <Field label="Company Name" value={account.companyName} />
-                    <Field label="Occupation" value={account.occupation} />
-                    <Field label="Industry" value={account.industry} />
-                    <Field label="Sector" value={account.sector} />
-                    <Field label="Average Income" value={account.averageIncome} />
-                  </Section>
-
-                  {/* Banking Information */}
-                  <Section title="Banking Information">
-                    <Field label="Branch Code" value={account.branchCode} />
-                    <Field label="Product Account" value={account.productAccount} />
-                    <Field label="Category Account" value={account.categoryAccount} />
-                    <Field label="Customer Role" value={account.customerRole} />
-                    <Field label="Loan Officer" value={account.loanOfficer} />
-                    <Field label="Released By" value={account.releasedBy} />
-                  </Section>
-
-                  {/* Images */}
-                  <Section title="Identity Documents">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+                <div className="p-6 space-y-6">
+                  {/* IMAGES FIRST */}
+                  <div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <ImageDisplayCard
                         title="National ID Document"
                         imageName={account.nidImageName}
@@ -210,15 +119,75 @@ export default function PendingAccountDetailModal({
                         legalId={account.legalId}
                       />
                     </div>
-                  </Section>
+                  </div>
 
-                  {/* Remarks */}
-                  {account.remark && (
-                    <Section title="Admin Remarks">
-                      <div className="bg-amber-50 p-3 rounded text-sm text-amber-900 border border-amber-200">
-                        {account.remark}
+                  {/* REQUEST INFO */}
+                  <div className="space-y-1">
+                    <Field label="Request Status" value={account.status} />
+                    <Field label="AML Status" value={account.amlStatus} />
+                    <Field label="Submitted Date" value={new Date(account.createdAt).toLocaleString()} />
+                    {account.updatedAt && <Field label="Updated Date" value={new Date(account.updatedAt).toLocaleString()} />}
+                  </div>
+
+                  {/* PERSONAL INFO */}
+                  <div className="space-y-1">
+                    <Field label="Name (EN)" value={`${account.legalFirstNameEn || ""} ${account.legalLastNameEn || ""}`.trim()} />
+                    <Field label="Name (KH)" value={`${account.legalFirstNameKh || ""} ${account.legalLastNameKh || ""}`.trim()} />
+                    <Field label="Date of Birth" value={account.legalDateOfBirth} />
+                    <Field label="Gender" value={account.legalGender} />
+                    <Field label="Nationality" value={account.nationality} />
+                    <Field label="Marital Status" value={account.maritalStatus} />
+                    <Field label="Phone" value={account.phoneNumber} />
+                    <Field label="Email" value={account.email} />
+                  </div>
+
+                  {/* LEGAL DOCUMENT */}
+                  <div className="space-y-1">
+                    <Field label="Document Type" value={account.legalDocName} />
+                    <Field label="Issued Date" value={account.legalIssuedDate} />
+                    <Field label="Expiration Date" value={account.legalExpiredDate} />
+                    <Field label="Legal Address" value={account.legalAddress} />
+                    <Field label="Place of Birth" value={account.legalPlaceOfBirth} />
+                    {account.legalMRZ1 && (
+                      <div className="mt-2 p-2 bg-gray-100 rounded text-xs">
+                        <p className="font-mono">{account.legalMRZ1}</p>
+                        <p className="font-mono">{account.legalMRZ2}</p>
+                        <p className="font-mono">{account.legalMRZ3}</p>
                       </div>
-                    </Section>
+                    )}
+                  </div>
+
+                  {/* CURRENT ADDRESS - Full */}
+                  <div className="space-y-1">
+                    <Field label="Current Address" value={buildFullAddress()} />
+                  </div>
+
+                  {/* PLACE OF BIRTH - Full */}
+                  <div className="space-y-1">
+                    <Field label="Place of Birth Address" value={buildPlaceOfBirth()} />
+                  </div>
+
+                  {/* EMPLOYMENT & BANKING */}
+                  <div className="space-y-1">
+                    <Field label="Company Name" value={account.companyName} />
+                    <Field label="Occupation" value={account.occupation} />
+                    <Field label="Industry" value={account.industry} />
+                    <Field label="Sector" value={account.sector} />
+                    <Field label="Average Income" value={account.averageIncome} />
+                    <Field label="Branch Code" value={account.branchCode} />
+                    <Field label="Product Account" value={account.productAccount} />
+                    <Field label="Account Category" value={account.categoryAccount} />
+                    <Field label="Customer Role" value={account.customerRole} />
+                    <Field label="Loan Officer" value={account.loanOfficer} />
+                    <Field label="Released By" value={account.releasedBy} />
+                  </div>
+
+                  {/* REMARKS */}
+                  {account.remark && (
+                    <div className="bg-amber-50 p-3 rounded border border-amber-200">
+                      <p className="text-xs font-semibold text-amber-900 mb-1">Admin Remarks</p>
+                      <p className="text-sm text-amber-900">{account.remark}</p>
+                    </div>
                   )}
                 </div>
               </ScrollArea>
@@ -230,54 +199,54 @@ export default function PendingAccountDetailModal({
                 <div className="p-6 space-y-4">
                   {account.amlResultData ? (
                     <>
-                      {/* AML Status */}
-                      <Section title="AML Screening Result">
-                        <div className={`p-4 rounded-lg border-2 ${
-                          account.amlResultData.status === "APPROVE"
-                            ? "bg-green-50 border-green-300"
-                            : account.amlResultData.status === "REJECT"
-                            ? "bg-red-50 border-red-300"
-                            : "bg-yellow-50 border-yellow-300"
-                        }`}>
-                          <Field label="Status" value={account.amlResultData.status} />
-                          <Field label="Risk Level" value={account.amlResultData.riskLevel} />
-                          <Field label="Service" value={account.amlResultData.serviceName} />
-                          <Field label="Rules Score" value={account.amlResultData.totalRulesScore} />
-                          <Field label="Transaction ID" value={account.amlResultData.trxnID} />
-                          {account.amlResultData.rulesTriggered && (
-                            <Field label="Rules Triggered" value={account.amlResultData.rulesTriggered} />
-                          )}
-                          {account.amlResultData.actionTaken && (
-                            <Field label="Action Taken" value={account.amlResultData.actionTaken} />
-                          )}
-                        </div>
-                      </Section>
+                      {/* AML SCREENING RESULT */}
+                      <div className={`p-4 rounded-lg border-2 space-y-1 ${
+                        account.amlResultData.status === "APPROVE"
+                          ? "bg-green-50 border-green-300"
+                          : account.amlResultData.status === "REJECT"
+                          ? "bg-red-50 border-red-300"
+                          : "bg-yellow-50 border-yellow-300"
+                      }`}>
+                        <Field label="AML Status" value={account.amlResultData.status} />
+                        <Field label="Risk Level" value={account.amlResultData.riskLevel} />
+                        <Field label="Service Name" value={account.amlResultData.serviceName} />
+                        <Field label="Rules Score" value={account.amlResultData.totalRulesScore} />
+                        <Field label="Transaction ID" value={account.amlResultData.trxnID} />
+                        {account.amlResultData.rulesTriggered && (
+                          <Field label="Rules Triggered" value={account.amlResultData.rulesTriggered} />
+                        )}
+                        {account.amlResultData.actionTaken && (
+                          <Field label="Action Taken" value={account.amlResultData.actionTaken} />
+                        )}
+                      </div>
 
-                      {/* Screening Result */}
+                      {/* SCREENING DETAILS */}
                       {account.amlResultData.screeningResult && (
-                        <Section title="Screening Details">
-                          <div className="bg-gray-100 p-3 rounded text-xs font-mono overflow-auto max-h-32 text-gray-700">
+                        <div>
+                          <p className="text-xs font-semibold text-gray-600 mb-2">Screening Result</p>
+                          <div className="bg-gray-100 p-3 rounded text-xs font-mono overflow-auto max-h-40 text-gray-700">
                             {account.amlResultData.screeningResult}
                           </div>
-                        </Section>
+                        </div>
                       )}
 
-                      {/* Verified Customer Data from AML */}
+                      {/* VERIFIED CUSTOMER DATA */}
                       {account.amlResultData.customerInfo && (
-                        <Section title="Verified Customer Data (from AML)">
+                        <div className="space-y-1 bg-blue-50 p-3 rounded border border-blue-200">
+                          <p className="text-xs font-semibold text-blue-900 mb-2">Verified Customer Data (from AML)</p>
                           <Field label="Legal ID" value={account.amlResultData.customerInfo.legalId} />
-                          <Field label="Given Name" value={account.amlResultData.customerInfo.givenName} />
-                          <Field label="Family Name" value={account.amlResultData.customerInfo.familyName} />
+                          <Field label="Name (EN)" value={`${account.amlResultData.customerInfo.givenName || ""} ${account.amlResultData.customerInfo.familyName || ""}`.trim()} />
                           <Field label="Date of Birth" value={account.amlResultData.customerInfo.dateOfBirth} />
                           <Field label="Gender" value={account.amlResultData.customerInfo.gender} />
                           <Field label="Nationality" value={account.amlResultData.customerInfo.nationality} />
-                          <Field label="Phone Number" value={account.amlResultData.customerInfo.phoneNumber} />
+                          <Field label="Phone" value={account.amlResultData.customerInfo.phoneNumber} />
                           <Field label="Address" value={account.amlResultData.customerInfo.legalAddress} />
-                        </Section>
+                        </div>
                       )}
 
-                      {/* Audit Trail */}
-                      <Section title="Audit Trail">
+                      {/* AUDIT TRAIL */}
+                      <div className="space-y-1 border-t pt-4">
+                        <p className="text-xs font-semibold text-gray-600 mb-2">Audit Trail</p>
                         <Field label="Created At" value={account.amlResultData.createdAt} />
                         <Field label="Updated At" value={account.amlResultData.updatedAt} />
                         {account.amlResultData.approvedBy && (
@@ -286,7 +255,7 @@ export default function PendingAccountDetailModal({
                         {account.amlResultData.rejectedBy && (
                           <Field label="Rejected By" value={account.amlResultData.rejectedBy.fullName} />
                         )}
-                      </Section>
+                      </div>
                     </>
                   ) : (
                     <div className="text-center py-8 text-gray-500">
