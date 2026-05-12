@@ -34,11 +34,6 @@ public class AuthController {
         return ResponseEntity.ok(ApiResponse.success(ResponseMessage.LOGIN_SUCCESS, authResponse));
     }
 
-    @PostMapping("/refresh-token")
-    public ResponseEntity<ApiResponse<com.internal.feature.auth.dto.response.TokenRefreshResponseDto>> refreshToken(@Valid @RequestBody com.internal.feature.auth.dto.request.TokenRefreshRequestDto requestDto) {
-        return ResponseEntity.ok(ApiResponse.success(ResponseMessage.TOKEN_REFRESHED, authService.refreshToken(requestDto)));
-    }
-
     @PostMapping("/logout")
     public ResponseEntity<ApiResponse<String>> logout() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();

@@ -5,21 +5,17 @@ import com.internal.enumation.StatusData;
 import com.internal.exceptions.error.custom.*;
 import com.internal.feature.auth.dto.request.LoginRequestDto;
 import com.internal.feature.auth.dto.request.RegisterRequestDto;
-import com.internal.feature.auth.dto.request.TokenRefreshRequestDto;
 import com.internal.feature.auth.dto.request.UpdateUserRequestDto;
 import com.internal.feature.auth.dto.response.AuthResponseDTO;
-import com.internal.feature.auth.dto.response.TokenRefreshResponseDto;
 import com.internal.feature.auth.dto.response.UserResponseDto;
 import com.internal.feature.auth.mapper.AuthMapper;
 import com.internal.feature.auth.mapper.UserMapper;
-import com.internal.feature.auth.models.RefreshToken;
 import com.internal.feature.auth.models.Role;
 import com.internal.feature.auth.models.UserEntity;
 import com.internal.feature.auth.repository.RoleRepository;
 import com.internal.feature.auth.repository.UserRepository;
 import com.internal.feature.auth.security.JWTGenerator;
 import com.internal.feature.auth.service.AuthService;
-import com.internal.feature.auth.service.RefreshTokenService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -50,7 +46,6 @@ public class AuthServiceImpl implements AuthService {
     private final JWTGenerator jwtGenerator;
     private final AuthMapper authMapper;
     private final UserMapper userMapper;
-    private final RefreshTokenService refreshTokenService;
 
     @Override
     public AuthResponseDTO login(LoginRequestDto loginDto) {
@@ -79,28 +74,11 @@ public class AuthServiceImpl implements AuthService {
         userEntity.setLastLogin(LocalDateTime.now(ZoneId.of("UTC")));
         userRepository.save(userEntity);
 
-        RefreshToken refreshToken = refreshTokenService.createRefreshToken(loginDto.getUsername());
-
         UserResponseDto userDto = authMapper.userToUserResponseDto(userEntity);
         userDto.setLastLogin(userEntity.getLastLogin());
-        log.info("User {} logged in successfully", loginDto.getUsername());
-        
-        return new AuthResponseDTO(token, refreshToken.getToken(), userDto);
-    }
+        log.info("User {} logged in successfully (access token valid for 1 year)", loginDto.getUsername());
 
-    @Override
-    public TokenRefreshResponseDto refreshToken(TokenRefreshRequestDto requestDto) {
-        String requestRefreshToken = requestDto.getRefreshToken();
-
-        return refreshTokenService.findByToken(requestRefreshToken)
-                .map(refreshTokenService::verifyExpiration)
-                .map(RefreshToken::getUser)
-                .map(user -> {
-                    String token = jwtGenerator.generateToken(createAuthentication(user));
-                    return new TokenRefreshResponseDto(token, requestRefreshToken);
-                })
-                .orElseThrow(() -> new TokenRefreshException(requestRefreshToken,
-                        "Refresh token is not in database!"));
+        return new AuthResponseDTO(token, userDto);
     }
 
     private Authentication createAuthentication(UserEntity user) {
