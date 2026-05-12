@@ -52,6 +52,7 @@ public class OpenAccountXmlBuilder {
 
         // Format dates to T24 format (YYYYMMDD)
         String dateOfBirth = formatDateForT24(request.getDateOfBirth());
+        String legalIssueDate = formatLegalIssueDateWithDefault(request.getLegalIssueDate());
         String legalExpDate = formatDateForT24NoFutureCheck(request.getLegalExpireDate());
 
         // Determine title from gender (use request title if provided)
@@ -108,7 +109,7 @@ public class OpenAccountXmlBuilder {
                 + "<cus:LegalHolderName>" + defaultProperties.getLegalHolderName() + "</cus:LegalHolderName>"
                 + "<cus:LegalIssAuth>" + getOrDefault(request.getLegalIssAuth(), request.getGivenName())
                 + "</cus:LegalIssAuth>"
-                + "<cus:LegalIssDate></cus:LegalIssDate>"
+                + "<cus:LegalIssDate>" + legalIssueDate + "</cus:LegalIssDate>"
                 + "<cus:LegalExpDate>" + legalExpDate + "</cus:LegalExpDate>"
                 + "</cus:mLEGALID></cus:gLEGALID>"
 
@@ -304,6 +305,30 @@ public class OpenAccountXmlBuilder {
         } catch (Exception e) {
             log.warn("Could not format expiration date {}, using as-is: {}", date, e.getMessage());
             return date;
+        }
+    }
+
+    private String formatLegalIssueDateWithDefault(String date) {
+        if (date == null || date.isEmpty()) {
+            LocalDate oneYearAgo = LocalDate.now().minusYears(1);
+            String defaultDate = oneYearAgo.format(T24_DATE_FORMATTER);
+            log.info("No legal issue date provided, using default (1 year ago): {}", defaultDate);
+            return defaultDate;
+        }
+        try {
+            LocalDate localDate = null;
+
+            if (date.matches("\\d{8}")) {
+                localDate = LocalDate.parse(date, T24_DATE_FORMATTER);
+            } else {
+                localDate = LocalDate.parse(date, DATE_FORMATTER);
+            }
+
+            return localDate.format(T24_DATE_FORMATTER);
+        } catch (Exception e) {
+            log.warn("Could not format legal issue date {}, using default (1 year ago): {}", date, e.getMessage());
+            LocalDate oneYearAgo = LocalDate.now().minusYears(1);
+            return oneYearAgo.format(T24_DATE_FORMATTER);
         }
     }
 
