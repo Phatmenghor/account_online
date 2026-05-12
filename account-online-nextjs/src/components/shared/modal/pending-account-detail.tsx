@@ -106,20 +106,13 @@ export default function PendingAccountDetailModal({
                     </div>
                   </div>
 
-                  {/* REQUEST INFO */}
-                  <div className="bg-gray-50 p-4 rounded-lg border border-gray-100">
-                    <h3 className="text-sm font-bold text-gray-900 mb-4">Request Information</h3>
+                  {/* REQUEST & PERSONAL INFO */}
+                  <div className="bg-white p-4 rounded-lg border border-gray-100">
+                    <h3 className="text-sm font-bold text-gray-900 mb-4">Request & Personal Information</h3>
                     <div className="grid grid-cols-2 gap-4">
                       <Field label="Request Status" value={account.status} />
                       <Field label="AML Status" value={account.amlStatus} />
                       <Field label="Submitted Date" value={new Date(account.createdAt).toLocaleString()} />
-                    </div>
-                  </div>
-
-                  {/* PERSONAL INFO */}
-                  <div className="bg-white p-4 rounded-lg border border-gray-100">
-                    <h3 className="text-sm font-bold text-gray-900 mb-4">Personal Information</h3>
-                    <div className="grid grid-cols-2 gap-4">
                       <Field label="Name (English)" value={`${account.legalLastNameEn || ""} ${account.legalFirstNameEn || ""}`.trim()} />
                       <Field label="Name (Khmer)" value={`${account.legalLastNameKh || ""} ${account.legalFirstNameKh || ""}`.trim()} />
                       <Field label="Date of Birth" value={account.legalDateOfBirth} />
