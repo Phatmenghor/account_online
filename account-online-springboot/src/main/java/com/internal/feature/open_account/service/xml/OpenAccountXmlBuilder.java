@@ -343,6 +343,7 @@ public class OpenAccountXmlBuilder {
 
         // Keep original for comparison
         String original = input.trim();
+        if (original.isEmpty()) return "";
 
         // T24 SWIFT format requires ASCII-only characters (A-Z, a-z, 0-9, space, and common punctuation)
         // Remove all non-ASCII characters (including Khmer and other Unicode characters)
@@ -357,7 +358,8 @@ public class OpenAccountXmlBuilder {
             log.warn("Address sanitization applied (SWIFT compliance). Original: [{}] → Sanitized: [{}]", original, sanitized);
         }
 
-        return sanitized.isEmpty() ? original : sanitized;  // Return original if sanitization results in empty
+        // Return sanitized if it has content, otherwise return safe default (not original non-ASCII)
+        return sanitized.isEmpty() ? "Address" : sanitized;
     }
 
     /**
