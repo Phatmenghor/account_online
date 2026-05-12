@@ -96,18 +96,6 @@ export const createPendingAccountTableColumns = ({
       ),
     },
 
-    // Email
-    {
-      key: "email",
-      label: "Email",
-      truncate: true,
-      maxWidth: "180px",
-      minWidth: "140px",
-      render: (account) => (
-        <span className="font-medium">{account.email || "---"}</span>
-      ),
-    },
-
     // AML Status
     {
       key: "amlStatus",

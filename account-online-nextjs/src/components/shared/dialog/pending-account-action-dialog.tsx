@@ -150,7 +150,6 @@ export default function PendingAccountActionDialog({
                   label="Name"
                   value={`${account.legalFirstNameEn || ""} ${account.legalLastNameEn || ""}`.trim()}
                 />
-                <DetailRow label="Email" value={account.email} />
                 <DetailRow label="Phone" value={account.phoneNumber} />
                 <DetailRow
                   label="AML Status"
