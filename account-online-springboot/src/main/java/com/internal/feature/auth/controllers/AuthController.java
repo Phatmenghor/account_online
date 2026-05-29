@@ -2,9 +2,11 @@ package com.internal.feature.auth.controllers;
 
 import com.internal.exceptions.response.ApiResponse;
 import com.internal.feature.auth.dto.request.LoginRequestDto;
+import com.internal.feature.auth.dto.request.TokenRefreshRequestDto;
 import com.internal.feature.auth.dto.request.UpdateUserRequestDto;
 import com.internal.feature.auth.dto.request.VerifyEmailRequestDto;
 import com.internal.feature.auth.dto.response.AuthResponseDTO;
+import com.internal.feature.auth.dto.response.TokenRefreshResponseDto;
 import com.internal.feature.auth.dto.response.UserResponseDto;
 import com.internal.feature.auth.service.AuthService;
 import com.internal.utils.constants.ResponseMessage;
@@ -35,6 +37,11 @@ public class AuthController {
         return ResponseEntity.ok(ApiResponse.success(ResponseMessage.LOGIN_SUCCESS, authResponse));
     }
 
+    @PostMapping("/refresh-token")
+    public ResponseEntity<ApiResponse<TokenRefreshResponseDto>> refreshToken(@Valid @RequestBody TokenRefreshRequestDto requestDto) {
+        return ResponseEntity.ok(ApiResponse.success(ResponseMessage.TOKEN_REFRESHED, authService.refreshToken(requestDto)));
+    }
+
     @PostMapping("/logout")
     public ResponseEntity<ApiResponse<String>> logout() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -60,6 +67,7 @@ public class AuthController {
     public ResponseEntity<ApiResponse<List<Map<String, Object>>>> getAvailableRoles() {
         log.debug("Fetching available roles");
         List<Map<String, Object>> roles = authService.getAvailableRoles();
+        log.debug("Retrieved {} available roles", roles.size());
         return ResponseEntity.ok(ApiResponse.success(ResponseMessage.ROLES_RETRIEVED, roles));
     }
 
@@ -74,9 +82,10 @@ public class AuthController {
 
     @PostMapping("/token/update-profile")
     public ResponseEntity<ApiResponse<UserResponseDto>> updateUserProfile(@Valid @RequestBody UpdateUserRequestDto registerDto) {
-        log.info("Update profile request for: {}", registerDto.getUsername());
+        log.info("Admin update profile request for: {}", registerDto.getUsername());
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         UserResponseDto userResponse = authService.updateUserProfile(registerDto, authentication.getName());
+        log.info("Admin update profile successful for: {}", registerDto.getUsername());
         return ResponseEntity.ok(ApiResponse.success(ResponseMessage.PROFILE_UPDATED, userResponse));
     }
 }

@@ -5,9 +5,11 @@ import com.internal.enumation.StatusData;
 import com.internal.exceptions.error.custom.*;
 import com.internal.feature.auth.dto.request.LoginRequestDto;
 import com.internal.feature.auth.dto.request.RegisterRequestDto;
+import com.internal.feature.auth.dto.request.TokenRefreshRequestDto;
 import com.internal.feature.auth.dto.request.UpdateUserRequestDto;
 import com.internal.feature.auth.dto.request.VerifyEmailRequestDto;
 import com.internal.feature.auth.dto.response.AuthResponseDTO;
+import com.internal.feature.auth.dto.response.TokenRefreshResponseDto;
 import com.internal.feature.auth.dto.response.UserResponseDto;
 import com.internal.feature.auth.mapper.AuthMapper;
 import com.internal.feature.auth.mapper.UserMapper;
@@ -90,6 +92,35 @@ public class AuthServiceImpl implements AuthService {
         log.info("User {} logged in successfully", loginDto.getUsername());
 
         return new AuthResponseDTO(token, userDto);
+    }
+
+    @Override
+    public TokenRefreshResponseDto refreshToken(TokenRefreshRequestDto requestDto) {
+        String token = requestDto.getRefreshToken();
+        log.info("Refresh token request received");
+
+        if (!jwtGenerator.validateToken(token)) {
+            throw new com.internal.exceptions.error.custom.UnauthorizedException("Invalid or expired refresh token");
+        }
+
+        String username = jwtGenerator.getUsernameFromJWT(token);
+        UserEntity user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new NotFoundException("User not found"));
+
+        if (user.getStatus() != StatusData.ACTIVE || !user.isEmailVerified()) {
+            throw new com.internal.exceptions.error.custom.UnauthorizedException("Account is not active");
+        }
+
+        List<GrantedAuthority> authorities = user.getRoles().stream()
+                .map(role -> new SimpleGrantedAuthority(role.getName().name()))
+                .collect(Collectors.toList());
+
+        Authentication auth = new UsernamePasswordAuthenticationToken(
+                new User(username, user.getPassword(), authorities), null, authorities);
+
+        String newAccessToken = jwtGenerator.generateToken(auth);
+        log.info("Token refreshed for user: {}", username);
+        return new TokenRefreshResponseDto(newAccessToken, token);
     }
 
     @Override
