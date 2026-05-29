@@ -41,10 +41,6 @@ public class UserEntity extends BaseEntity {
     @Column(nullable = false, columnDefinition = "boolean default false")
     private boolean emailVerified = false;
 
-    private String verificationCode;
-
-    private LocalDateTime verificationCodeExpiry;
-
     @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.MERGE})
     @JoinTable(name = "acc_online_user_roles",
             joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),

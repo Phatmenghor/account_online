@@ -11,8 +11,10 @@ import com.internal.feature.auth.dto.response.AuthResponseDTO;
 import com.internal.feature.auth.dto.response.UserResponseDto;
 import com.internal.feature.auth.mapper.AuthMapper;
 import com.internal.feature.auth.mapper.UserMapper;
+import com.internal.feature.auth.models.PendingRegistration;
 import com.internal.feature.auth.models.Role;
 import com.internal.feature.auth.models.UserEntity;
+import com.internal.feature.auth.repository.PendingRegistrationRepository;
 import com.internal.feature.auth.repository.RoleRepository;
 import com.internal.feature.auth.repository.UserRepository;
 import com.internal.feature.auth.security.JWTGenerator;
@@ -24,13 +26,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
@@ -49,6 +49,7 @@ public class AuthServiceImpl implements AuthService {
     private final AuthenticationManager authenticationManager;
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
+    private final PendingRegistrationRepository pendingRepository;
     private final PasswordEncoder passwordEncoder;
     private final JWTGenerator jwtGenerator;
     private final AuthMapper authMapper;
@@ -99,67 +100,88 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    @Transactional
     public UserResponseDto register(RegisterRequestDto registerDto) {
         log.info("Processing registration request for email: {}", registerDto.getUsername());
 
-        Optional<UserEntity> existingOpt = userRepository.findByUsername(registerDto.getUsername());
-        if (existingOpt.isPresent()) {
-            UserEntity existing = existingOpt.get();
-            if (existing.isEmailVerified()) {
-                log.warn("Registration failed: Email already verified and in use: {}", registerDto.getUsername());
-                throw new DuplicateNameException("Email is already in use, please choose another one.");
-            }
-            // Unverified — refresh OTP and update fields
-            String newCode = emailVerificationEnabled ? generateVerificationCode() : "123456";
-            LocalDateTime newExpiry = LocalDateTime.now(ZoneId.of("UTC")).plusMinutes(1);
-            existing.setFullName(registerDto.getFullName());
-            existing.setPosition(registerDto.getPosition());
-            existing.setStaffId(registerDto.getStaffId());
-            existing.setPhoneNumber(registerDto.getPhoneNumber());
-            existing.setBranch(registerDto.getBranch());
-            existing.setPassword(passwordEncoder.encode(registerDto.getPassword()));
-            existing.setVerificationCode(newCode);
-            existing.setVerificationCodeExpiry(newExpiry);
-            userRepository.save(existing);
-            if (emailVerificationEnabled) {
-                emailService.sendVerificationEmail(registerDto.getUsername(), newCode);
-            } else {
-                log.info("Email verification disabled — refreshed fixed OTP '123456' for: {}", registerDto.getUsername());
-            }
-            log.info("Re-registration: refreshed OTP for unverified email: {}", registerDto.getUsername());
-            return authMapper.userToUserResponseDto(existing);
+        // Block if a verified user already exists with this email
+        if (userRepository.existsByUsername(registerDto.getUsername())) {
+            log.warn("Registration failed: Email already in use: {}", registerDto.getUsername());
+            throw new DuplicateNameException("Email is already in use, please choose another one.");
         }
 
-        // Self-registration always receives STAFF role
+        String code = emailVerificationEnabled ? generateVerificationCode() : "123456";
+        LocalDateTime expiry = LocalDateTime.now(ZoneId.of("UTC")).plusMinutes(1);
+
+        // Upsert pending registration — create or refresh
+        PendingRegistration pending = pendingRepository.findByUsername(registerDto.getUsername())
+                .orElse(new PendingRegistration());
+
+        pending.setUsername(registerDto.getUsername());
+        pending.setPassword(passwordEncoder.encode(registerDto.getPassword()));
+        pending.setFullName(registerDto.getFullName());
+        pending.setPosition(registerDto.getPosition());
+        pending.setStaffId(registerDto.getStaffId());
+        pending.setPhoneNumber(registerDto.getPhoneNumber());
+        pending.setBranch(registerDto.getBranch());
+        pending.setVerificationCode(code);
+        pending.setVerificationCodeExpiry(expiry);
+        pendingRepository.save(pending);
+
+        if (emailVerificationEnabled) {
+            emailService.sendVerificationEmail(registerDto.getUsername(), code);
+        } else {
+            log.info("Email verification disabled — OTP '123456' stored in pending for: {}", registerDto.getUsername());
+        }
+
+        log.info("Pending registration saved for: {}. OTP issued.", registerDto.getUsername());
+
+        // Return a lightweight response — user not yet created
+        UserResponseDto dto = new UserResponseDto();
+        dto.setIdCard(registerDto.getUsername());
+        dto.setFullName(registerDto.getFullName());
+        dto.setEmailVerified(false);
+        return dto;
+    }
+
+    @Override
+    @Transactional
+    public void verifyEmail(VerifyEmailRequestDto request) {
+        log.info("Processing email verification for: {}", request.getUsername());
+
+        PendingRegistration pending = pendingRepository.findByUsername(request.getUsername())
+                .orElseThrow(() -> new NotFoundException("No pending registration found for this email."));
+
+        if (pending.getVerificationCode() == null || !pending.getVerificationCode().equals(request.getCode())) {
+            log.warn("Invalid verification code for: {}", request.getUsername());
+            throw new BadRequestException("Invalid verification code.");
+        }
+
+        if (pending.getVerificationCodeExpiry() == null ||
+                LocalDateTime.now(ZoneId.of("UTC")).isAfter(pending.getVerificationCodeExpiry())) {
+            log.warn("Expired verification code for: {}", request.getUsername());
+            throw new BadRequestException("Verification code has expired. Please request a new one.");
+        }
+
         Role role = roleRepository.findByName(RoleEnum.STAFF)
                 .orElseThrow(() -> new BadRequestException("STAFF role not found. Please contact an administrator."));
 
-        String verificationCode = emailVerificationEnabled ? generateVerificationCode() : "123456";
-        LocalDateTime expiry = LocalDateTime.now(ZoneId.of("UTC")).plusMinutes(1);
-
         UserEntity user = new UserEntity();
-        user.setUsername(registerDto.getUsername());
-        user.setFullName(registerDto.getFullName());
-        user.setPosition(registerDto.getPosition());
-        user.setStaffId(registerDto.getStaffId());
-        user.setPhoneNumber(registerDto.getPhoneNumber());
-        user.setBranch(registerDto.getBranch());
-        user.setPassword(passwordEncoder.encode(registerDto.getPassword()));
+        user.setUsername(pending.getUsername());
+        user.setPassword(pending.getPassword());
+        user.setFullName(pending.getFullName());
+        user.setPosition(pending.getPosition());
+        user.setStaffId(pending.getStaffId());
+        user.setPhoneNumber(pending.getPhoneNumber());
+        user.setBranch(pending.getBranch());
         user.setStatus(StatusData.ACTIVE);
-        user.setEmailVerified(false);
-        user.setVerificationCode(verificationCode);
-        user.setVerificationCodeExpiry(expiry);
+        user.setEmailVerified(true);
         user.setRoles(Collections.singletonList(role));
-
         userRepository.save(user);
-        if (emailVerificationEnabled) {
-            emailService.sendVerificationEmail(registerDto.getUsername(), verificationCode);
-        } else {
-            log.info("Email verification disabled — fixed OTP '123456' assigned to: {}", registerDto.getUsername());
-        }
 
-        log.info("Registration successful for email: {}. Verification email sent.", registerDto.getUsername());
-        return authMapper.userToUserResponseDto(user);
+        pendingRepository.delete(pending);
+
+        log.info("Email verified — user account created for: {}", request.getUsername());
     }
 
     @Override
@@ -192,37 +214,6 @@ public class AuthServiceImpl implements AuthService {
         UserEntity savedUser = userRepository.save(user);
         log.info("Admin creation successful for email: {}", registerDto.getUsername());
         return authMapper.userToUserResponseDto(savedUser);
-    }
-
-    @Override
-    public void verifyEmail(VerifyEmailRequestDto request) {
-        log.info("Processing email verification for: {}", request.getUsername());
-
-        UserEntity user = userRepository.findByUsername(request.getUsername())
-                .orElseThrow(() -> new NotFoundException("User not found"));
-
-        if (user.isEmailVerified()) {
-            log.info("Email already verified for: {}", request.getUsername());
-            return;
-        }
-
-        if (user.getVerificationCode() == null || !user.getVerificationCode().equals(request.getCode())) {
-            log.warn("Invalid verification code for user: {}", request.getUsername());
-            throw new BadRequestException("Invalid verification code.");
-        }
-
-        if (user.getVerificationCodeExpiry() == null ||
-                LocalDateTime.now(ZoneId.of("UTC")).isAfter(user.getVerificationCodeExpiry())) {
-            log.warn("Expired verification code for user: {}", request.getUsername());
-            throw new BadRequestException("Verification code has expired. Please request a new one.");
-        }
-
-        user.setEmailVerified(true);
-        user.setVerificationCode(null);
-        user.setVerificationCodeExpiry(null);
-        userRepository.save(user);
-
-        log.info("Email verified successfully for: {}", request.getUsername());
     }
 
     @Override
