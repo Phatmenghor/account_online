@@ -24,7 +24,7 @@ public class RegisterRequestDto {
 
     private String phoneNumber;
 
-    private Long branchId;
+    private String branch;
 
     private String position;
 

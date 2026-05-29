@@ -38,7 +38,7 @@ const registerSchema = z
     staffId: z.string().min(1, "Please enter your staff ID"),
     phoneNumber: z.string().min(1, "Please enter your phone number"),
     position: z.string().min(1, "Please enter your position"),
-    branchId: z.number({ required_error: "Please select your branch" }).min(1, "Please select your branch"),
+    branch: z.string().min(1, "Please select your branch"),
   })
   .refine((d) => d.password === d.confirmPassword, {
     message: "Passwords do not match",
@@ -83,7 +83,7 @@ export default function RegisterPage() {
     resolver: zodResolver(registerSchema),
     defaultValues: {
       username: "", password: "", confirmPassword: "",
-      fullName: "", staffId: "", phoneNumber: "", position: "",
+      fullName: "", staffId: "", phoneNumber: "", position: "", branch: "",
     },
   });
 
@@ -97,7 +97,7 @@ export default function RegisterPage() {
         staffId: values.staffId,
         phoneNumber: values.phoneNumber,
         position: values.position,
-        branchId: values.branchId,
+        branch: values.branch,
       });
       setRegisteredEmail(values.username);
       setStep("otp");
@@ -155,7 +155,7 @@ export default function RegisterPage() {
       const v = form.getValues();
       await registerService({
         username: registeredEmail, password: v.password, fullName: v.fullName,
-        staffId: v.staffId, phoneNumber: v.phoneNumber, position: v.position, branchId: v.branchId,
+        staffId: v.staffId, phoneNumber: v.phoneNumber, position: v.position, branch: v.branch,
       });
       setOtp(Array(6).fill(""));
       startCountdown();
@@ -353,7 +353,7 @@ export default function RegisterPage() {
 
                         {/* Branch — combobox */}
                         <FormField
-                          control={form.control} name="branchId"
+                          control={form.control} name="branch"
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel>Branch <span className="text-destructive">*</span></FormLabel>
@@ -364,7 +364,7 @@ export default function RegisterPage() {
                                     disabled={isSubmitting}
                                     onChangeSelected={(item) => {
                                       setSelectedBranch(item);
-                                      field.onChange(Number(item.branchID));
+                                      field.onChange(item.branchkh);
                                     }}
                                   />
                                 </div>

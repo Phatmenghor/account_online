@@ -2,7 +2,6 @@ package com.internal.feature.auth.models;
 
 import com.internal.config.entity.BaseEntity;
 import com.internal.enumation.StatusData;
-import com.internal.feature.master_data.models.Branch;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -34,9 +33,7 @@ public class UserEntity extends BaseEntity {
 
     private String phoneNumber;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "branch_id")
-    private Branch branch;
+    private String branch;
 
     @Enumerated(EnumType.STRING)
     private StatusData status;
