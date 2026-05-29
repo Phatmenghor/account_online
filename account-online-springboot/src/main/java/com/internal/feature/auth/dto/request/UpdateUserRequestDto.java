@@ -12,5 +12,5 @@ public class UpdateUserRequestDto {
     private String position;
     private String staffId;
     private String phoneNumber;
-    private String branch;
+    private Long branchId;
 }

@@ -35,10 +35,10 @@ const registerSchema = z
     password: z.string().min(6, "Password must be at least 6 characters"),
     confirmPassword: z.string().min(6, "Please confirm your password"),
     fullName: z.string().min(1, "Please enter your full name"),
-    staffId: z.string().optional(),
-    phoneNumber: z.string().optional(),
-    position: z.string().optional(),
-    branch: z.string().optional(),
+    staffId: z.string().min(1, "Please enter your staff ID"),
+    phoneNumber: z.string().min(1, "Please enter your phone number"),
+    position: z.string().min(1, "Please enter your position"),
+    branchId: z.number({ required_error: "Please select your branch" }).min(1, "Please select your branch"),
   })
   .refine((d) => d.password === d.confirmPassword, {
     message: "Passwords do not match",
@@ -83,7 +83,7 @@ export default function RegisterPage() {
     resolver: zodResolver(registerSchema),
     defaultValues: {
       username: "", password: "", confirmPassword: "",
-      fullName: "", staffId: "", phoneNumber: "", position: "", branch: "",
+      fullName: "", staffId: "", phoneNumber: "", position: "",
     },
   });
 
@@ -97,7 +97,7 @@ export default function RegisterPage() {
         staffId: values.staffId,
         phoneNumber: values.phoneNumber,
         position: values.position,
-        branch: values.branch,
+        branchId: values.branchId,
       });
       setRegisteredEmail(values.username);
       setStep("otp");
@@ -155,7 +155,7 @@ export default function RegisterPage() {
       const v = form.getValues();
       await registerService({
         username: registeredEmail, password: v.password, fullName: v.fullName,
-        staffId: v.staffId, phoneNumber: v.phoneNumber, position: v.position, branch: v.branch,
+        staffId: v.staffId, phoneNumber: v.phoneNumber, position: v.position, branchId: v.branchId,
       });
       setOtp(Array(6).fill(""));
       startCountdown();
@@ -328,7 +328,7 @@ export default function RegisterPage() {
                           control={form.control} name="staffId"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Staff ID</FormLabel>
+                              <FormLabel>Staff ID <span className="text-destructive">*</span></FormLabel>
                               <FormControl>
                                 <Input {...field} autoComplete="off" placeholder="Please enter your staff ID" disabled={isSubmitting} className="h-11" />
                               </FormControl>
@@ -342,7 +342,7 @@ export default function RegisterPage() {
                           control={form.control} name="phoneNumber"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Phone Number</FormLabel>
+                              <FormLabel>Phone Number <span className="text-destructive">*</span></FormLabel>
                               <FormControl>
                                 <Input {...field} autoComplete="off" placeholder="Please enter your phone number" disabled={isSubmitting} className="h-11" />
                               </FormControl>
@@ -353,19 +353,21 @@ export default function RegisterPage() {
 
                         {/* Branch — combobox */}
                         <FormField
-                          control={form.control} name="branch"
+                          control={form.control} name="branchId"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Branch</FormLabel>
+                              <FormLabel>Branch <span className="text-destructive">*</span></FormLabel>
                               <FormControl>
-                                <ComboboxSelectBranch
-                                  dataSelect={selectedBranch}
-                                  disabled={isSubmitting}
-                                  onChangeSelected={(item) => {
-                                    setSelectedBranch(item);
-                                    field.onChange(item.branchkh);
-                                  }}
-                                />
+                                <div className="[&>button]:h-11">
+                                  <ComboboxSelectBranch
+                                    dataSelect={selectedBranch}
+                                    disabled={isSubmitting}
+                                    onChangeSelected={(item) => {
+                                      setSelectedBranch(item);
+                                      field.onChange(Number(item.branchID));
+                                    }}
+                                  />
+                                </div>
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -377,7 +379,7 @@ export default function RegisterPage() {
                           control={form.control} name="position"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Position</FormLabel>
+                              <FormLabel>Position <span className="text-destructive">*</span></FormLabel>
                               <FormControl>
                                 <Input {...field} autoComplete="off" placeholder="Please enter your position" disabled={isSubmitting} className="h-11" />
                               </FormControl>

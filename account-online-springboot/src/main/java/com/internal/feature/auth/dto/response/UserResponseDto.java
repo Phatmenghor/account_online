@@ -21,9 +21,18 @@ public class UserResponseDto {
     private String profileUrl;
     private String staffId;
     private String phoneNumber;
-    private String branch;
+    private BranchInfo branch;
     private boolean emailVerified;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private LocalDateTime lastLogin;
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class BranchInfo {
+        private Long id;
+        private String branchCode;
+        private String branchKh;
+    }
 }

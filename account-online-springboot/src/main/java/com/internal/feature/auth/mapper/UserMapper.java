@@ -6,6 +6,7 @@ import com.internal.feature.auth.dto.response.AllUserResponseDto;
 import com.internal.feature.auth.dto.response.UserResponseDto;
 import com.internal.feature.auth.models.Role;
 import com.internal.feature.auth.models.UserEntity;
+import com.internal.feature.master_data.models.Branch;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
@@ -22,6 +23,7 @@ public interface UserMapper {
     @Mapping(source = "username", target = "idCard")
     @Mapping(source = "status", target = "userStatus", qualifiedByName = "statusToString")
     @Mapping(source = "roles", target = "userRole", qualifiedByName = "rolesToString")
+    @Mapping(source = "branch", target = "branch", qualifiedByName = "mapBranchInfo")
     @Mapping(source = "createdAt", target = "createdAt")
     @Mapping(source = "updatedAt", target = "updatedAt")
     UserResponseDto mapToDto(UserEntity user);
@@ -30,6 +32,7 @@ public interface UserMapper {
     @Mapping(source = "idCard", target = "username")
     @Mapping(source = "userStatus", target = "status", qualifiedByName = "stringToStatus")
     @Mapping(source = "userRole", target = "roles", qualifiedByName = "stringToRoles")
+    @Mapping(target = "branch", ignore = true)
     @Mapping(source = "createdAt", target = "createdAt")
     @Mapping(source = "updatedAt", target = "updatedAt")
     UserEntity mapToEntity(UserResponseDto user);
@@ -44,6 +47,12 @@ public interface UserMapper {
         userResponse.setTotalPages(user.getTotalPages());
         userResponse.setLast(user.isLast());
         return userResponse;
+    }
+
+    @Named("mapBranchInfo")
+    default UserResponseDto.BranchInfo mapBranchInfo(Branch branch) {
+        if (branch == null) return null;
+        return new UserResponseDto.BranchInfo(branch.getId(), branch.getBranchCode(), branch.getBranchKh());
     }
 
     @Named("statusToString")

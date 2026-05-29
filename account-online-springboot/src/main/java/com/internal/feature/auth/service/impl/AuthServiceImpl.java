@@ -15,6 +15,8 @@ import com.internal.feature.auth.models.Role;
 import com.internal.feature.auth.models.UserEntity;
 import com.internal.feature.auth.repository.RoleRepository;
 import com.internal.feature.auth.repository.UserRepository;
+import com.internal.feature.master_data.models.Branch;
+import com.internal.feature.master_data.repository.BranchRepository;
 import com.internal.feature.auth.security.JWTGenerator;
 import com.internal.feature.auth.service.AuthService;
 import com.internal.feature.auth.service.EmailService;
@@ -45,6 +47,7 @@ public class AuthServiceImpl implements AuthService {
     private final AuthenticationManager authenticationManager;
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
+    private final BranchRepository branchRepository;
     private final PasswordEncoder passwordEncoder;
     private final JWTGenerator jwtGenerator;
     private final AuthMapper authMapper;
@@ -111,12 +114,16 @@ public class AuthServiceImpl implements AuthService {
         LocalDateTime expiry = LocalDateTime.now(ZoneId.of("UTC")).plusMinutes(1);
 
         UserEntity user = new UserEntity();
+        Branch branch = registerDto.getBranchId() != null
+                ? branchRepository.findById(registerDto.getBranchId()).orElse(null)
+                : null;
+
         user.setUsername(registerDto.getUsername());
         user.setFullName(registerDto.getFullName());
         user.setPosition(registerDto.getPosition());
         user.setStaffId(registerDto.getStaffId());
         user.setPhoneNumber(registerDto.getPhoneNumber());
-        user.setBranch(registerDto.getBranch());
+        user.setBranch(branch);
         user.setPassword(passwordEncoder.encode(registerDto.getPassword()));
         user.setStatus(StatusData.ACTIVE);
         user.setEmailVerified(false);
@@ -146,13 +153,17 @@ public class AuthServiceImpl implements AuthService {
                     return new BadRequestException("Invalid role provided: " + registerDto.getRole());
                 });
 
+        Branch adminBranch = registerDto.getBranchId() != null
+                ? branchRepository.findById(registerDto.getBranchId()).orElse(null)
+                : null;
+
         UserEntity user = new UserEntity();
         user.setUsername(registerDto.getUsername());
         user.setFullName(registerDto.getFullName());
         user.setPosition(registerDto.getPosition());
         user.setStaffId(registerDto.getStaffId());
         user.setPhoneNumber(registerDto.getPhoneNumber());
-        user.setBranch(registerDto.getBranch());
+        user.setBranch(adminBranch);
         user.setPassword(passwordEncoder.encode(registerDto.getPassword()));
         user.setStatus(StatusData.ACTIVE);
         user.setEmailVerified(true);
@@ -211,7 +222,11 @@ public class AuthServiceImpl implements AuthService {
         if (requestDto.getPosition() != null) user.setPosition(requestDto.getPosition());
         if (requestDto.getStaffId() != null) user.setStaffId(requestDto.getStaffId());
         if (requestDto.getPhoneNumber() != null) user.setPhoneNumber(requestDto.getPhoneNumber());
-        if (requestDto.getBranch() != null) user.setBranch(requestDto.getBranch());
+        if (requestDto.getBranchId() != null) {
+            Branch updateBranch = branchRepository.findById(requestDto.getBranchId())
+                    .orElseThrow(() -> new BadRequestException("Branch not found with id: " + requestDto.getBranchId()));
+            user.setBranch(updateBranch);
+        }
 
         UserEntity updatedUser = userRepository.save(user);
         return userMapper.mapToDto(updatedUser);

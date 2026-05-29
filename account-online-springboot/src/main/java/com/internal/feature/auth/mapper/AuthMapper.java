@@ -3,6 +3,7 @@ package com.internal.feature.auth.mapper;
 import com.internal.enumation.StatusData;
 import com.internal.feature.auth.dto.response.UserResponseDto;
 import com.internal.feature.auth.models.UserEntity;
+import com.internal.feature.master_data.models.Branch;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
@@ -16,11 +17,18 @@ public interface AuthMapper {
     @Mapping(source = "username", target = "idCard")
     @Mapping(source = "status", target = "userStatus", qualifiedByName = "mapStatus")
     @Mapping(source = "roles", target = "userRole", qualifiedByName = "rolesToRoleString")
+    @Mapping(source = "branch", target = "branch", qualifiedByName = "mapBranch")
     UserResponseDto userToUserResponseDto(UserEntity user);
 
     @Named("mapStatus")
     default String mapStatus(StatusData status) {
         return status != null ? status.name() : null;
+    }
+
+    @Named("mapBranch")
+    default UserResponseDto.BranchInfo mapBranch(Branch branch) {
+        if (branch == null) return null;
+        return new UserResponseDto.BranchInfo(branch.getId(), branch.getBranchCode(), branch.getBranchKh());
     }
 
     @Named("rolesToRoleString")
