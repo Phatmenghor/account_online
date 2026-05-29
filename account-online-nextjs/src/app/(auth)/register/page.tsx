@@ -113,11 +113,11 @@ export default function RegisterPage() {
       setRegisteredEmail(values.username);
       setStep("otp");
       startCountdown();
-      AppToast({ type: "success", message: "Verification code sent to your email." });
+      AppToast({ type: "success", message: "Registration submitted. A verification code has been sent to your email." });
     } catch (err: any) {
       AppToast({
         type: "error",
-        message: err?.response?.data?.message || err?.message || "Registration failed.",
+        message: err?.response?.data?.message || err?.message || "Registration failed. Please check your details and try again.",
       });
     } finally {
       setIsSubmitting(false);
@@ -147,15 +147,15 @@ export default function RegisterPage() {
 
   async function onVerify() {
     const code = otp.join("");
-    if (code.length < 6) { AppToast({ type: "warning", message: "Please enter the 6-digit code." }); return; }
-    if (remaining === 0) { AppToast({ type: "error", message: "Code expired. Please resend." }); return; }
+    if (code.length < 6) { AppToast({ type: "warning", message: "Please enter the complete 6-digit verification code." }); return; }
+    if (remaining === 0) { AppToast({ type: "error", message: "The verification code has expired. Please request a new one." }); return; }
     setIsVerifying(true);
     try {
       await verifyEmailService({ username: registeredEmail, code });
-      AppToast({ type: "success", message: "Email verified! You can now log in." });
+      AppToast({ type: "success", message: "Email verified successfully. You can now sign in to your account." });
       router.push(ROUTES.AUTH.LOGIN);
     } catch (err: any) {
-      AppToast({ type: "error", message: err?.response?.data?.message || "Invalid or expired code." });
+      AppToast({ type: "error", message: err?.response?.data?.message || "Invalid or expired verification code. Please try again." });
     } finally { setIsVerifying(false); }
   }
 
@@ -170,9 +170,9 @@ export default function RegisterPage() {
       });
       setOtp(Array(6).fill(""));
       startCountdown();
-      AppToast({ type: "info", message: "New code sent to your email." });
+      AppToast({ type: "info", message: "A new verification code has been sent to your email." });
     } catch (err: any) {
-      AppToast({ type: "error", message: err?.response?.data?.message || "Failed to resend code." });
+      AppToast({ type: "error", message: err?.response?.data?.message || "Failed to resend code. Please try again." });
     } finally { setIsSubmitting(false); }
   }
 
@@ -209,7 +209,7 @@ export default function RegisterPage() {
               Account Opening System
             </p>
             <h2 className="text-3xl font-bold text-white leading-snug mb-3">
-              Create your<br />account today
+              Staff Account<br />Registration
             </h2>
             <p className="text-sm text-white/60 leading-relaxed max-w-xs">
               Secure access to the Cambodia Post Bank account opening and review platform.
@@ -249,15 +249,19 @@ export default function RegisterPage() {
               <>
                 {/* page heading */}
                 <div className="mb-6">
-                  <h1 className="text-2xl font-bold text-foreground">Create your account</h1>
+                  <h1 className="text-2xl font-bold text-foreground">Staff Registration</h1>
                   <p className="text-sm text-muted-foreground mt-1">
-                    Complete the form below — a verification code will be sent to your email.
+                    Register your staff account to access the account opening and review system.
                   </p>
                 </div>
 
                 <Form {...form}>
-                  <form onSubmit={form.handleSubmit(onRegister)} className="space-y-5">
-                    <div className="border border-border rounded-xl bg-background overflow-hidden">
+                  <form onSubmit={form.handleSubmit(onRegister)} autoComplete="off" className="space-y-5">
+                    {/* hidden field tricks browser autofill away */}
+                    <input type="text" name="prevent_autofill" className="hidden" readOnly />
+                    <input type="password" name="prevent_autofill_pw" className="hidden" readOnly />
+
+                    <div className="border border-primary/40 rounded-xl bg-background overflow-hidden">
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-5 p-6">
 
                         {/* Email — full width */}
@@ -268,7 +272,7 @@ export default function RegisterPage() {
                               <FormItem>
                                 <FormLabel>Email <span className="text-destructive">*</span></FormLabel>
                                 <FormControl>
-                                  <Input {...field} type="email" placeholder="Please enter your email" disabled={isSubmitting} className="h-11" />
+                                  <Input {...field} type="email" autoComplete="off" placeholder="Please enter your email" disabled={isSubmitting} className="h-11" />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
@@ -284,7 +288,7 @@ export default function RegisterPage() {
                               <FormLabel>Password <span className="text-destructive">*</span></FormLabel>
                               <FormControl>
                                 <div className="relative">
-                                  <Input {...field} type={showPassword ? "text" : "password"} placeholder="Please enter your password" disabled={isSubmitting} className="h-11 pr-10" />
+                                  <Input {...field} type={showPassword ? "text" : "password"} autoComplete="new-password" placeholder="Please enter your password" disabled={isSubmitting} className="h-11 pr-10" />
                                   <button type="button" onClick={() => setShowPassword(v => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors">
                                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                                   </button>
@@ -303,7 +307,7 @@ export default function RegisterPage() {
                               <FormLabel>Confirm Password <span className="text-destructive">*</span></FormLabel>
                               <FormControl>
                                 <div className="relative">
-                                  <Input {...field} type={showConfirm ? "text" : "password"} placeholder="Please confirm your password" disabled={isSubmitting} className="h-11 pr-10" />
+                                  <Input {...field} type={showConfirm ? "text" : "password"} autoComplete="new-password" placeholder="Please confirm your password" disabled={isSubmitting} className="h-11 pr-10" />
                                   <button type="button" onClick={() => setShowConfirm(v => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors">
                                     {showConfirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                                   </button>
@@ -322,7 +326,7 @@ export default function RegisterPage() {
                               <FormItem>
                                 <FormLabel>Full Name <span className="text-destructive">*</span></FormLabel>
                                 <FormControl>
-                                  <Input {...field} placeholder="Please enter your full name" disabled={isSubmitting} className="h-11" />
+                                  <Input {...field} autoComplete="off" placeholder="Please enter your full name" disabled={isSubmitting} className="h-11" />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
@@ -337,7 +341,7 @@ export default function RegisterPage() {
                             <FormItem>
                               <FormLabel>Staff ID</FormLabel>
                               <FormControl>
-                                <Input {...field} placeholder="Please enter your staff ID" disabled={isSubmitting} className="h-11" />
+                                <Input {...field} autoComplete="off" placeholder="Please enter your staff ID" disabled={isSubmitting} className="h-11" />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -351,7 +355,7 @@ export default function RegisterPage() {
                             <FormItem>
                               <FormLabel>Phone Number</FormLabel>
                               <FormControl>
-                                <Input {...field} placeholder="Please enter your phone number" disabled={isSubmitting} className="h-11" />
+                                <Input {...field} autoComplete="off" placeholder="Please enter your phone number" disabled={isSubmitting} className="h-11" />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -388,7 +392,7 @@ export default function RegisterPage() {
                             <FormItem>
                               <FormLabel>Position</FormLabel>
                               <FormControl>
-                                <Input {...field} placeholder="Please enter your position" disabled={isSubmitting} className="h-11" />
+                                <Input {...field} autoComplete="off" placeholder="Please enter your position" disabled={isSubmitting} className="h-11" />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -400,8 +404,8 @@ export default function RegisterPage() {
 
                     <Button type="submit" className="w-full h-11 font-semibold" disabled={isSubmitting}>
                       {isSubmitting
-                        ? <><Spinner size={4} color="text-white" /><span className="ml-2">Creating account…</span></>
-                        : "Create Account & Send Verification Code"}
+                        ? <><Spinner size={4} color="text-white" /><span className="ml-2">Submitting registration…</span></>
+                        : "Register & Send Verification Code"}
                     </Button>
 
                     <p className="text-center text-sm text-muted-foreground lg:hidden">
@@ -425,13 +429,13 @@ export default function RegisterPage() {
                   </div>
                   <h1 className="text-2xl font-bold text-foreground">Verify your email</h1>
                   <p className="text-sm text-muted-foreground mt-2">
-                    We sent a 6-digit code to
+                    A 6-digit verification code has been sent to
                   </p>
                   <p className="text-sm font-semibold text-foreground mt-0.5">{registeredEmail}</p>
                 </div>
 
                 {/* OTP card */}
-                <div className="border border-border rounded-xl overflow-hidden bg-background">
+                <div className="border border-primary/40 rounded-xl overflow-hidden bg-background">
                   <div className="bg-muted/50 px-5 py-3 border-b border-border">
                     <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Enter Verification Code</p>
                   </div>
