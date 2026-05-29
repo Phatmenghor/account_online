@@ -3,6 +3,7 @@ package com.internal.feature.auth.service;
 import com.internal.feature.auth.dto.request.LoginRequestDto;
 import com.internal.feature.auth.dto.request.RegisterRequestDto;
 import com.internal.feature.auth.dto.request.UpdateUserRequestDto;
+import com.internal.feature.auth.dto.request.VerifyEmailRequestDto;
 import com.internal.feature.auth.dto.response.AuthResponseDTO;
 import com.internal.feature.auth.dto.response.UserResponseDto;
 
@@ -14,8 +15,11 @@ public interface AuthService {
 
     void logout(String username);
 
-
     UserResponseDto register(RegisterRequestDto registerDto);
+
+    void verifyEmail(VerifyEmailRequestDto requestDto);
+
+    void resendVerificationCode(String email);
 
     UserResponseDto createUserByAdmin(RegisterRequestDto registerDto);
 

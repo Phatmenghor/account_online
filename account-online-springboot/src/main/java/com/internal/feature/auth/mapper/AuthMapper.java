@@ -13,8 +13,6 @@ import java.util.stream.Collectors;
 @Mapper(componentModel = "spring")
 public interface AuthMapper {
 
-    @Mapping(source = "username", target = "idCard")
-    @Mapping(source = "email", target = "email")
     @Mapping(source = "status", target = "userStatus", qualifiedByName = "mapStatus")
     @Mapping(source = "roles", target = "userRole", qualifiedByName = "rolesToRoleString")
     UserResponseDto userToUserResponseDto(UserEntity user);
@@ -33,7 +31,6 @@ public interface AuthMapper {
                 .map(role -> role.getName().name())
                 .collect(Collectors.joining(", "));
     }
-
 
     default List<UserResponseDto> usersToUserResponseDtos(List<UserEntity> users) {
         if (users == null) {

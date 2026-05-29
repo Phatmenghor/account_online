@@ -2,12 +2,12 @@ package com.internal.feature.auth.models;
 
 import com.internal.config.entity.BaseEntity;
 import com.internal.enumation.StatusData;
-import com.internal.enumation.UserPermission;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,14 +18,17 @@ import java.util.List;
 @NoArgsConstructor
 public class UserEntity extends BaseEntity {
 
+    /** username stores the email address and is used as login identifier */
     @Column(nullable = false, unique = true)
     private String username;
-
-    private String email;
 
     private String password;
 
     private String fullName;
+
+    private String staffId;
+
+    private String phoneNumber;
 
     private String position;
 
@@ -34,8 +37,11 @@ public class UserEntity extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private StatusData status;
 
-    @Enumerated(EnumType.STRING)
-    private UserPermission userPermission;
+    private boolean emailVerified = false;
+
+    private String verificationCode;
+
+    private LocalDateTime verificationCodeExpiry;
 
     @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.MERGE})
     @JoinTable(name = "acc_online_user_roles",
@@ -43,6 +49,5 @@ public class UserEntity extends BaseEntity {
             inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id"))
     private List<Role> roles = new ArrayList<>();
 
-    private java.time.LocalDateTime lastLogin;
-
+    private LocalDateTime lastLogin;
 }

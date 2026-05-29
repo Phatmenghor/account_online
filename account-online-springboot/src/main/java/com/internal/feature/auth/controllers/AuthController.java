@@ -3,6 +3,7 @@ package com.internal.feature.auth.controllers;
 import com.internal.exceptions.response.ApiResponse;
 import com.internal.feature.auth.dto.request.LoginRequestDto;
 import com.internal.feature.auth.dto.request.UpdateUserRequestDto;
+import com.internal.feature.auth.dto.request.VerifyEmailRequestDto;
 import com.internal.feature.auth.dto.response.AuthResponseDTO;
 import com.internal.feature.auth.dto.response.UserResponseDto;
 import com.internal.feature.auth.service.AuthService;
@@ -37,16 +38,28 @@ public class AuthController {
     @PostMapping("/logout")
     public ResponseEntity<ApiResponse<String>> logout() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String username = auth.getName();
-        authService.logout(username); 
+        authService.logout(auth.getName());
         return ResponseEntity.ok(ApiResponse.success(ResponseMessage.LOGOUT_SUCCESS, null));
+    }
+
+    @PostMapping("/verify-email")
+    public ResponseEntity<ApiResponse<String>> verifyEmail(@Valid @RequestBody VerifyEmailRequestDto requestDto) {
+        log.info("Email verification attempt for: {}", requestDto.getEmail());
+        authService.verifyEmail(requestDto);
+        return ResponseEntity.ok(ApiResponse.success("Email verified successfully", null));
+    }
+
+    @PostMapping("/resend-verification")
+    public ResponseEntity<ApiResponse<String>> resendVerification(@RequestParam String email) {
+        log.info("Resend verification code request for: {}", email);
+        authService.resendVerificationCode(email);
+        return ResponseEntity.ok(ApiResponse.success("Verification code resent to " + email, null));
     }
 
     @PostMapping("/roles")
     public ResponseEntity<ApiResponse<List<Map<String, Object>>>> getAvailableRoles() {
         log.debug("Fetching available roles");
         List<Map<String, Object>> roles = authService.getAvailableRoles();
-        log.debug("Retrieved {} available roles", roles.size());
         return ResponseEntity.ok(ApiResponse.success(ResponseMessage.ROLES_RETRIEVED, roles));
     }
 
@@ -61,10 +74,9 @@ public class AuthController {
 
     @PostMapping("/token/update-profile")
     public ResponseEntity<ApiResponse<UserResponseDto>> updateUserProfile(@Valid @RequestBody UpdateUserRequestDto registerDto) {
-        log.info("Admin update profile request for ID card: {}", registerDto.getUsername());
+        log.info("Update profile request for: {}", registerDto.getUsername());
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         UserResponseDto userResponse = authService.updateUserProfile(registerDto, authentication.getName());
-        log.info("Admin update profile successful for: {}", registerDto.getUsername());
         return ResponseEntity.ok(ApiResponse.success(ResponseMessage.PROFILE_UPDATED, userResponse));
     }
 }
