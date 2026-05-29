@@ -63,8 +63,8 @@ cpb:
     password: aml123!@#
   t24:
     url: http://192.168.127.31:7003
-    username: L.HOURNG
-    password: HOurng@2323
+    username: LEANGHOURNG.PHOEUNG
+    password: SHIwo@123
   mb:
     otpUrl: http://192.168.103.11:15004/CPBBank/services/CPBMobile?wsdl
     registerCodeUrl: http://192.168.103.13:8090/API/RegisterCustomerMB/
