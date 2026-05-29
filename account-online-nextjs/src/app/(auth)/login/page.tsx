@@ -68,7 +68,12 @@ export default function LoginPage() {
         error?.response?.data?.message ||
         error?.message ||
         "Invalid email or password";
-      AppToast({ type: "error", message: errorMsg });
+      if (errorMsg.toLowerCase().includes("not verified")) {
+        AppToast({ type: "warning", message: "Your email is not verified. Please enter the verification code." });
+        router.push(`${ROUTES.AUTH.VERIFY_EMAIL}?email=${encodeURIComponent(values.username)}`);
+      } else {
+        AppToast({ type: "error", message: errorMsg });
+      }
     } finally {
       setIsLoading(false);
     }

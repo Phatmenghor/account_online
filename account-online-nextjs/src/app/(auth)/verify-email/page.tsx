@@ -126,7 +126,7 @@ export default function VerifyEmailPage() {
               ) : (
                 "your email"
               )}
-              . The code expires in 10 minutes.
+              . The code expires in 1 minute.
             </p>
           </div>
 

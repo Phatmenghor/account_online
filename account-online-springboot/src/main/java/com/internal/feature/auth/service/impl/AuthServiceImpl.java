@@ -102,9 +102,32 @@ public class AuthServiceImpl implements AuthService {
     public UserResponseDto register(RegisterRequestDto registerDto) {
         log.info("Processing registration request for email: {}", registerDto.getUsername());
 
-        if (userRepository.existsByUsername(registerDto.getUsername())) {
-            log.warn("Registration failed: Email already in use: {}", registerDto.getUsername());
-            throw new DuplicateNameException("Email is already in use, please choose another one.");
+        Optional<UserEntity> existingOpt = userRepository.findByUsername(registerDto.getUsername());
+        if (existingOpt.isPresent()) {
+            UserEntity existing = existingOpt.get();
+            if (existing.isEmailVerified()) {
+                log.warn("Registration failed: Email already verified and in use: {}", registerDto.getUsername());
+                throw new DuplicateNameException("Email is already in use, please choose another one.");
+            }
+            // Unverified — refresh OTP and update fields
+            String newCode = emailVerificationEnabled ? generateVerificationCode() : "123456";
+            LocalDateTime newExpiry = LocalDateTime.now(ZoneId.of("UTC")).plusMinutes(1);
+            existing.setFullName(registerDto.getFullName());
+            existing.setPosition(registerDto.getPosition());
+            existing.setStaffId(registerDto.getStaffId());
+            existing.setPhoneNumber(registerDto.getPhoneNumber());
+            existing.setBranch(registerDto.getBranch());
+            existing.setPassword(passwordEncoder.encode(registerDto.getPassword()));
+            existing.setVerificationCode(newCode);
+            existing.setVerificationCodeExpiry(newExpiry);
+            userRepository.save(existing);
+            if (emailVerificationEnabled) {
+                emailService.sendVerificationEmail(registerDto.getUsername(), newCode);
+            } else {
+                log.info("Email verification disabled — refreshed fixed OTP '123456' for: {}", registerDto.getUsername());
+            }
+            log.info("Re-registration: refreshed OTP for unverified email: {}", registerDto.getUsername());
+            return authMapper.userToUserResponseDto(existing);
         }
 
         // Self-registration always receives STAFF role
