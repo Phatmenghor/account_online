@@ -41,6 +41,7 @@ public class UserEntity extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private StatusData status;
 
+    @Column(nullable = false, columnDefinition = "boolean default false")
     private boolean emailVerified = false;
 
     private String verificationCode;
