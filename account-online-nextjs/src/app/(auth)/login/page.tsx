@@ -93,7 +93,7 @@ export default function LoginPage() {
           </p>
           <h2 className="text-3xl font-bold leading-snug">Admin Control Panel</h2>
           <p className="text-sm text-white/50 mt-2 max-w-xs leading-relaxed">
-            Secure access to manage your business operations and team.
+            Secure access to the Cambodia Post Bank account opening and review platform.
           </p>
         </div>
       </div>

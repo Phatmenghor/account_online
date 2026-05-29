@@ -206,13 +206,13 @@ export default function RegisterPage() {
           {/* bottom text */}
           <div>
             <p className="text-xs font-semibold uppercase tracking-widest text-white/50 mb-3">
-              Management System
+              Account Opening System
             </p>
             <h2 className="text-3xl font-bold text-white leading-snug mb-3">
               Create your<br />account today
             </h2>
             <p className="text-sm text-white/60 leading-relaxed max-w-xs">
-              Secure access to manage your business operations with role-based control.
+              Secure access to the Cambodia Post Bank account opening and review platform.
             </p>
           </div>
         </div>
