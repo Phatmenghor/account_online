@@ -20,6 +20,7 @@ import com.internal.feature.auth.service.AuthService;
 import com.internal.feature.auth.service.EmailService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -41,6 +42,9 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Slf4j
 public class AuthServiceImpl implements AuthService {
+
+    @Value("${email.verification.enabled:false}")
+    private boolean emailVerificationEnabled;
 
     private final AuthenticationManager authenticationManager;
     private final UserRepository userRepository;
@@ -107,7 +111,7 @@ public class AuthServiceImpl implements AuthService {
         Role role = roleRepository.findByName(RoleEnum.STAFF)
                 .orElseThrow(() -> new BadRequestException("STAFF role not found. Please contact an administrator."));
 
-        String verificationCode = generateVerificationCode();
+        String verificationCode = emailVerificationEnabled ? generateVerificationCode() : "123456";
         LocalDateTime expiry = LocalDateTime.now(ZoneId.of("UTC")).plusMinutes(1);
 
         UserEntity user = new UserEntity();
@@ -125,7 +129,11 @@ public class AuthServiceImpl implements AuthService {
         user.setRoles(Collections.singletonList(role));
 
         userRepository.save(user);
-        emailService.sendVerificationEmail(registerDto.getUsername(), verificationCode);
+        if (emailVerificationEnabled) {
+            emailService.sendVerificationEmail(registerDto.getUsername(), verificationCode);
+        } else {
+            log.info("Email verification disabled — fixed OTP '123456' assigned to: {}", registerDto.getUsername());
+        }
 
         log.info("Registration successful for email: {}. Verification email sent.", registerDto.getUsername());
         return authMapper.userToUserResponseDto(user);
