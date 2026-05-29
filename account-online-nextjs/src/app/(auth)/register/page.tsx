@@ -18,8 +18,6 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { ComboboxSelectBranch } from "@/components/shared/combo-box/combobox-branch";
-import { BranchModel } from "@/models/branch/branch.response";
 import { ROUTES } from "@/constants/AppRoutes/routes";
 import { AppToast } from "@/components/shared/toast/app-toast";
 import {
@@ -75,7 +73,6 @@ export default function RegisterPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [otp, setOtp] = useState<string[]>(Array(6).fill(""));
   const [isVerifying, setIsVerifying] = useState(false);
-  const [selectedBranch, setSelectedBranch] = useState<BranchModel | null>(null);
   const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
   const { remaining, start: startCountdown } = useCountdown(60);
 
@@ -358,16 +355,7 @@ export default function RegisterPage() {
                             <FormItem>
                               <FormLabel>Branch <span className="text-destructive">*</span></FormLabel>
                               <FormControl>
-                                <div className="[&>button]:h-11">
-                                  <ComboboxSelectBranch
-                                    dataSelect={selectedBranch}
-                                    disabled={isSubmitting}
-                                    onChangeSelected={(item) => {
-                                      setSelectedBranch(item);
-                                      field.onChange(item.branchkh);
-                                    }}
-                                  />
-                                </div>
+                                <Input {...field} autoComplete="off" placeholder="Please enter your branch" disabled={isSubmitting} className="h-11" />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
