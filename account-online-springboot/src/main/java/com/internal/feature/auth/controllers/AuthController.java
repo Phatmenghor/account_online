@@ -4,7 +4,6 @@ import com.internal.exceptions.response.ApiResponse;
 import com.internal.feature.auth.dto.request.LoginRequestDto;
 import com.internal.feature.auth.dto.request.RegisterRequestDto;
 import com.internal.feature.auth.dto.request.UpdateUserRequestDto;
-import com.internal.feature.auth.dto.request.VerifyEmailRequestDto;
 import com.internal.feature.auth.dto.response.AuthResponseDTO;
 import com.internal.feature.auth.dto.response.UserResponseDto;
 import com.internal.feature.auth.service.AuthService;
@@ -40,14 +39,7 @@ public class AuthController {
     public ResponseEntity<ApiResponse<UserResponseDto>> register(@Valid @RequestBody RegisterRequestDto registerDto) {
         log.info("Registration attempt for email: {}", registerDto.getUsername());
         UserResponseDto userResponse = authService.register(registerDto);
-        return ResponseEntity.ok(ApiResponse.success("Registration successful. Please check your email for a verification code.", userResponse));
-    }
-
-    @PostMapping("/verify-email")
-    public ResponseEntity<ApiResponse<String>> verifyEmail(@Valid @RequestBody VerifyEmailRequestDto request) {
-        log.info("Email verification attempt for: {}", request.getUsername());
-        authService.verifyEmail(request);
-        return ResponseEntity.ok(ApiResponse.success("Email verified successfully. You can now log in.", null));
+        return ResponseEntity.ok(ApiResponse.success("Registration successful.", userResponse));
     }
 
     @PostMapping("/logout")

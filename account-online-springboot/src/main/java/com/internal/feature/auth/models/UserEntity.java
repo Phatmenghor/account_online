@@ -38,9 +38,6 @@ public class UserEntity extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private StatusData status;
 
-    @Column(nullable = false, columnDefinition = "boolean default false")
-    private boolean emailVerified = false;
-
     @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.MERGE})
     @JoinTable(name = "acc_online_user_roles",
             joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),

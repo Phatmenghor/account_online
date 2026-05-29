@@ -6,23 +6,18 @@ import com.internal.exceptions.error.custom.*;
 import com.internal.feature.auth.dto.request.LoginRequestDto;
 import com.internal.feature.auth.dto.request.RegisterRequestDto;
 import com.internal.feature.auth.dto.request.UpdateUserRequestDto;
-import com.internal.feature.auth.dto.request.VerifyEmailRequestDto;
 import com.internal.feature.auth.dto.response.AuthResponseDTO;
 import com.internal.feature.auth.dto.response.UserResponseDto;
 import com.internal.feature.auth.mapper.AuthMapper;
 import com.internal.feature.auth.mapper.UserMapper;
-import com.internal.feature.auth.models.PendingRegistration;
 import com.internal.feature.auth.models.Role;
 import com.internal.feature.auth.models.UserEntity;
-import com.internal.feature.auth.repository.PendingRegistrationRepository;
 import com.internal.feature.auth.repository.RoleRepository;
 import com.internal.feature.auth.repository.UserRepository;
 import com.internal.feature.auth.security.JWTGenerator;
 import com.internal.feature.auth.service.AuthService;
-import com.internal.feature.auth.service.EmailService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -30,9 +25,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
@@ -43,18 +36,13 @@ import java.util.stream.Collectors;
 @Slf4j
 public class AuthServiceImpl implements AuthService {
 
-    @Value("${email.verification.enabled:false}")
-    private boolean emailVerificationEnabled;
-
     private final AuthenticationManager authenticationManager;
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
-    private final PendingRegistrationRepository pendingRepository;
     private final PasswordEncoder passwordEncoder;
     private final JWTGenerator jwtGenerator;
     private final AuthMapper authMapper;
     private final UserMapper userMapper;
-    private final EmailService emailService;
 
     @Override
     public AuthResponseDTO login(LoginRequestDto loginDto) {
@@ -69,11 +57,6 @@ public class AuthServiceImpl implements AuthService {
         if (userEntity.getStatus() != StatusData.ACTIVE) {
             log.warn("Login rejected: User {} is not active", loginDto.getUsername());
             throw new UnauthorizedException("Account is deleted. Please contact an administrator.");
-        }
-
-        if (!userEntity.isEmailVerified()) {
-            log.warn("Login rejected: Email not verified for user {}", loginDto.getUsername());
-            throw new UnauthorizedException("Email is not verified. Please verify your email before logging in.");
         }
 
         Authentication authentication = authenticationManager.authenticate(
@@ -100,88 +83,31 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    @Transactional
     public UserResponseDto register(RegisterRequestDto registerDto) {
         log.info("Processing registration request for email: {}", registerDto.getUsername());
 
-        // Block if a verified user already exists with this email
         if (userRepository.existsByUsername(registerDto.getUsername())) {
             log.warn("Registration failed: Email already in use: {}", registerDto.getUsername());
             throw new DuplicateNameException("Email is already in use, please choose another one.");
-        }
-
-        String code = emailVerificationEnabled ? generateVerificationCode() : "123456";
-        LocalDateTime expiry = LocalDateTime.now(ZoneId.of("UTC")).plusMinutes(1);
-
-        // Upsert pending registration — create or refresh
-        PendingRegistration pending = pendingRepository.findByUsername(registerDto.getUsername())
-                .orElse(new PendingRegistration());
-
-        pending.setUsername(registerDto.getUsername());
-        pending.setPassword(passwordEncoder.encode(registerDto.getPassword()));
-        pending.setFullName(registerDto.getFullName());
-        pending.setPosition(registerDto.getPosition());
-        pending.setStaffId(registerDto.getStaffId());
-        pending.setPhoneNumber(registerDto.getPhoneNumber());
-        pending.setBranch(registerDto.getBranch());
-        pending.setVerificationCode(code);
-        pending.setVerificationCodeExpiry(expiry);
-        pendingRepository.save(pending);
-
-        if (emailVerificationEnabled) {
-            emailService.sendVerificationEmail(registerDto.getUsername(), code);
-        } else {
-            log.info("Email verification disabled — OTP '123456' stored in pending for: {}", registerDto.getUsername());
-        }
-
-        log.info("Pending registration saved for: {}. OTP issued.", registerDto.getUsername());
-
-        // Return a lightweight response — user not yet created
-        UserResponseDto dto = new UserResponseDto();
-        dto.setIdCard(registerDto.getUsername());
-        dto.setFullName(registerDto.getFullName());
-        dto.setEmailVerified(false);
-        return dto;
-    }
-
-    @Override
-    @Transactional
-    public void verifyEmail(VerifyEmailRequestDto request) {
-        log.info("Processing email verification for: {}", request.getUsername());
-
-        PendingRegistration pending = pendingRepository.findByUsername(request.getUsername())
-                .orElseThrow(() -> new NotFoundException("No pending registration found for this email."));
-
-        if (pending.getVerificationCode() == null || !pending.getVerificationCode().equals(request.getCode())) {
-            log.warn("Invalid verification code for: {}", request.getUsername());
-            throw new BadRequestException("Invalid verification code.");
-        }
-
-        if (pending.getVerificationCodeExpiry() == null ||
-                LocalDateTime.now(ZoneId.of("UTC")).isAfter(pending.getVerificationCodeExpiry())) {
-            log.warn("Expired verification code for: {}", request.getUsername());
-            throw new BadRequestException("Verification code has expired. Please request a new one.");
         }
 
         Role role = roleRepository.findByName(RoleEnum.STAFF)
                 .orElseThrow(() -> new BadRequestException("STAFF role not found. Please contact an administrator."));
 
         UserEntity user = new UserEntity();
-        user.setUsername(pending.getUsername());
-        user.setPassword(pending.getPassword());
-        user.setFullName(pending.getFullName());
-        user.setPosition(pending.getPosition());
-        user.setStaffId(pending.getStaffId());
-        user.setPhoneNumber(pending.getPhoneNumber());
-        user.setBranch(pending.getBranch());
+        user.setUsername(registerDto.getUsername());
+        user.setFullName(registerDto.getFullName());
+        user.setPosition(registerDto.getPosition());
+        user.setStaffId(registerDto.getStaffId());
+        user.setPhoneNumber(registerDto.getPhoneNumber());
+        user.setBranch(registerDto.getBranch());
+        user.setPassword(passwordEncoder.encode(registerDto.getPassword()));
         user.setStatus(StatusData.ACTIVE);
-        user.setEmailVerified(true);
         user.setRoles(Collections.singletonList(role));
-        userRepository.save(user);
 
-        pendingRepository.delete(pending);
-
-        log.info("Email verified — user account created for: {}", request.getUsername());
+        UserEntity savedUser = userRepository.save(user);
+        log.info("Registration successful for email: {}", registerDto.getUsername());
+        return authMapper.userToUserResponseDto(savedUser);
     }
 
     @Override
@@ -208,7 +134,6 @@ public class AuthServiceImpl implements AuthService {
         user.setBranch(registerDto.getBranch());
         user.setPassword(passwordEncoder.encode(registerDto.getPassword()));
         user.setStatus(StatusData.ACTIVE);
-        user.setEmailVerified(true);
         user.setRoles(Collections.singletonList(role));
 
         UserEntity savedUser = userRepository.save(user);
@@ -269,12 +194,6 @@ public class AuthServiceImpl implements AuthService {
             return false;
         }
         return true;
-    }
-
-    private String generateVerificationCode() {
-        SecureRandom random = new SecureRandom();
-        int code = 100000 + random.nextInt(900000);
-        return String.valueOf(code);
     }
 
     private String formatDisplayName(String roleName) {

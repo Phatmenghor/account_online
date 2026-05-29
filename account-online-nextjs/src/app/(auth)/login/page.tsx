@@ -68,12 +68,7 @@ export default function LoginPage() {
         error?.response?.data?.message ||
         error?.message ||
         "Invalid email or password";
-      if (errorMsg.toLowerCase().includes("not verified")) {
-        AppToast({ type: "warning", message: "Your email is not verified. Please enter the verification code." });
-        router.push(`${ROUTES.AUTH.VERIFY_EMAIL}?email=${encodeURIComponent(values.username)}`);
-      } else {
-        AppToast({ type: "error", message: errorMsg });
-      }
+      AppToast({ type: "error", message: errorMsg });
     } finally {
       setIsLoading(false);
     }
@@ -203,15 +198,6 @@ export default function LoginPage() {
               </form>
             </Form>
 
-            <p className="text-center text-sm text-muted-foreground mt-6">
-              Don&apos;t have an account?{" "}
-              <Link
-                href={ROUTES.AUTH.REGISTER}
-                className="text-primary font-medium hover:underline"
-              >
-                Register
-              </Link>
-            </p>
           </CardContent>
         </Card>
       </div>
