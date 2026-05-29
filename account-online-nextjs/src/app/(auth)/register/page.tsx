@@ -2,11 +2,12 @@
 
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { Eye, EyeOff, CheckCircle2 } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 import {
   Form,
   FormControl,
@@ -35,14 +36,14 @@ import Spinner from "@/components/shared/common/modern-spinner";
 /* ─── schema ─── */
 const registerSchema = z
   .object({
-    username: z.string().email("Enter a valid email address"),
+    username: z.string().email("Please enter a valid email address"),
     password: z.string().min(6, "Password must be at least 6 characters"),
     confirmPassword: z.string().min(6, "Please confirm your password"),
-    fullName: z.string().min(1, "Full name is required"),
+    fullName: z.string().min(1, "Please enter your full name"),
     staffId: z.string().optional(),
     phoneNumber: z.string().optional(),
     position: z.string().optional(),
-    role: z.string().min(1, "Role is required"),
+    role: z.string().min(1, "Please select a role"),
   })
   .refine((d) => d.password === d.confirmPassword, {
     message: "Passwords do not match",
@@ -74,6 +75,18 @@ function useCountdown(seconds: number) {
   }
   useEffect(() => () => { if (ref.current) clearInterval(ref.current); }, []);
   return { remaining, start };
+}
+
+/* ─── section wrapper ─── */
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div className="border border-border rounded-xl overflow-hidden">
+      <div className="bg-muted/50 px-5 py-3 border-b border-border">
+        <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{title}</p>
+      </div>
+      <div className="p-5 space-y-4">{children}</div>
+    </div>
+  );
 }
 
 export default function RegisterPage() {
@@ -145,7 +158,7 @@ export default function RegisterPage() {
 
   async function onVerify() {
     const code = otp.join("");
-    if (code.length < 6) { AppToast({ type: "warning", message: "Enter the 6-digit code." }); return; }
+    if (code.length < 6) { AppToast({ type: "warning", message: "Please enter the 6-digit code." }); return; }
     if (remaining === 0) { AppToast({ type: "error", message: "Code expired. Please resend." }); return; }
     setIsVerifying(true);
     try {
@@ -176,303 +189,321 @@ export default function RegisterPage() {
 
   /* ─────────────── render ─────────────── */
   return (
-    <div className="flex h-screen w-screen overflow-hidden bg-background">
+    <div className="flex h-screen w-screen overflow-hidden">
 
-      {/* ── Left brand panel ── */}
-      <div className="hidden lg:flex w-[420px] flex-shrink-0 flex-col justify-between bg-primary px-10 py-12">
-        {/* top */}
-        <div>
-          <div className="flex items-center gap-3 mb-12">
-            <div className="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center">
+      {/* ── Left: CP Bank hero image ── */}
+      <div className="hidden lg:flex w-[420px] flex-shrink-0 relative overflow-hidden">
+        <Image
+          src="/assets/cpbank.png"
+          alt="CP Bank"
+          fill
+          sizes="420px"
+          className="object-cover"
+          priority
+        />
+        {/* gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/10" />
+
+        {/* branding */}
+        <div className="absolute inset-0 flex flex-col justify-between p-10">
+          {/* top logo */}
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
               <span className="text-white font-black text-base">A</span>
             </div>
-            <span className="text-white font-semibold text-sm tracking-wide">Account Online</span>
+            <span className="text-white/90 font-semibold text-sm tracking-wide">Account Online</span>
           </div>
 
-          <h2 className="text-white text-3xl font-bold leading-snug mb-4">
-            Join our<br />admin platform
-          </h2>
-          <p className="text-white/70 text-sm leading-relaxed max-w-xs">
-            Create your account to access the management system and collaborate with your team.
-          </p>
+          {/* bottom text */}
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-widest text-white/50 mb-3">
+              Management System
+            </p>
+            <h2 className="text-3xl font-bold text-white leading-snug mb-3">
+              Create your<br />account today
+            </h2>
+            <p className="text-sm text-white/60 leading-relaxed max-w-xs">
+              Secure access to manage your business operations with role-based control.
+            </p>
+          </div>
         </div>
-
-        {/* feature list */}
-        <div className="space-y-4">
-          {[
-            "Secure email verification",
-            "Role-based access control",
-            "Real-time account management",
-          ].map((item) => (
-            <div key={item} className="flex items-center gap-3">
-              <CheckCircle2 className="h-4 w-4 text-white/60 flex-shrink-0" />
-              <span className="text-white/80 text-sm">{item}</span>
-            </div>
-          ))}
-        </div>
-
-        {/* bottom */}
-        <p className="text-white/40 text-xs">© 2025 Cambodia Post Bank</p>
       </div>
 
-      {/* ── Right form panel ── */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      {/* ── Right: form panel ── */}
+      <div className="flex-1 flex flex-col overflow-hidden bg-muted/30">
 
         {/* top bar */}
-        <div className="flex items-center justify-between px-8 py-5 border-b border-border flex-shrink-0">
+        <div className="flex-shrink-0 flex items-center justify-between px-8 py-4 bg-background border-b border-border">
+          {/* mobile logo */}
           <div className="flex items-center gap-2 lg:hidden">
             <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center">
               <span className="text-primary-foreground font-black text-xs">A</span>
             </div>
-            <span className="font-semibold text-sm text-foreground">Account Online</span>
+            <span className="font-semibold text-sm">Account Online</span>
           </div>
           <div className="hidden lg:block" />
+
           <p className="text-sm text-muted-foreground">
             Already have an account?{" "}
-            <Link href={ROUTES.AUTH.LOGIN} className="text-primary font-medium hover:underline">
+            <Link href={ROUTES.AUTH.LOGIN} className="text-primary font-semibold hover:underline">
               Sign in
             </Link>
           </p>
         </div>
 
-        {/* scrollable content */}
+        {/* scrollable body */}
         <div className="flex-1 overflow-y-auto">
-          <div className="max-w-2xl mx-auto px-8 py-10 w-full">
+          <div className="max-w-2xl mx-auto w-full px-6 py-8">
 
-            {/* ── STEP 1: registration form ── */}
+            {/* ── STEP 1: register form ── */}
             {step === "form" && (
               <>
-                <div className="mb-8">
+                {/* page heading */}
+                <div className="mb-6">
                   <h1 className="text-2xl font-bold text-foreground">Create your account</h1>
                   <p className="text-sm text-muted-foreground mt-1">
-                    Fill in the details below to get started
+                    Complete the form below — a verification code will be sent to your email.
                   </p>
                 </div>
 
                 <Form {...form}>
-                  <form onSubmit={form.handleSubmit(onRegister)} className="space-y-5">
+                  <form onSubmit={form.handleSubmit(onRegister)} className="space-y-4">
 
-                    {/* Email */}
-                    <FormField
-                      control={form.control} name="username"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Email <span className="text-destructive">*</span></FormLabel>
-                          <FormControl>
-                            <Input {...field} type="email" placeholder="name@example.com" disabled={isSubmitting} className="h-11" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    {/* Full Name */}
-                    <FormField
-                      control={form.control} name="fullName"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Full Name <span className="text-destructive">*</span></FormLabel>
-                          <FormControl>
-                            <Input {...field} placeholder="John Doe" disabled={isSubmitting} className="h-11" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    {/* Staff ID + Phone */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    {/* Account Information */}
+                    <Section title="Account Information">
                       <FormField
-                        control={form.control} name="staffId"
+                        control={form.control} name="username"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Staff ID</FormLabel>
+                            <FormLabel>Email <span className="text-destructive">*</span></FormLabel>
                             <FormControl>
-                              <Input {...field} placeholder="e.g. STF001" disabled={isSubmitting} className="h-11" />
+                              <Input {...field} type="email" placeholder="Please enter your email" disabled={isSubmitting} className="h-11 bg-background" />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
                         )}
                       />
-                      <FormField
-                        control={form.control} name="phoneNumber"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Phone Number</FormLabel>
-                            <FormControl>
-                              <Input {...field} placeholder="012 345 678" disabled={isSubmitting} className="h-11" />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-
-                    {/* Position + Role */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                      <FormField
-                        control={form.control} name="position"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Position</FormLabel>
-                            <FormControl>
-                              <Input {...field} placeholder="e.g. Manager" disabled={isSubmitting} className="h-11" />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control} name="role"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Role <span className="text-destructive">*</span></FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isSubmitting}>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <FormField
+                          control={form.control} name="password"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Password <span className="text-destructive">*</span></FormLabel>
                               <FormControl>
-                                <SelectTrigger className="h-11">
-                                  <SelectValue placeholder="Select role" />
-                                </SelectTrigger>
+                                <div className="relative">
+                                  <Input {...field} type={showPassword ? "text" : "password"} placeholder="Please enter your password" disabled={isSubmitting} className="h-11 pr-10 bg-background" />
+                                  <button type="button" onClick={() => setShowPassword(v => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors">
+                                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                  </button>
+                                </div>
                               </FormControl>
-                              <SelectContent>
-                                {ROLES.map((r) => (
-                                  <SelectItem key={r.value} value={r.value}>{r.label}</SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control} name="confirmPassword"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Confirm Password <span className="text-destructive">*</span></FormLabel>
+                              <FormControl>
+                                <div className="relative">
+                                  <Input {...field} type={showConfirm ? "text" : "password"} placeholder="Please confirm your password" disabled={isSubmitting} className="h-11 pr-10 bg-background" />
+                                  <button type="button" onClick={() => setShowConfirm(v => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors">
+                                    {showConfirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                  </button>
+                                </div>
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                    </Section>
 
-                    {/* Password + Confirm */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    {/* Personal Information */}
+                    <Section title="Personal Information">
                       <FormField
-                        control={form.control} name="password"
+                        control={form.control} name="fullName"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Password <span className="text-destructive">*</span></FormLabel>
+                            <FormLabel>Full Name <span className="text-destructive">*</span></FormLabel>
                             <FormControl>
-                              <div className="relative">
-                                <Input {...field} type={showPassword ? "text" : "password"} placeholder="Min 6 characters" disabled={isSubmitting} className="h-11 pr-10" />
-                                <button type="button" className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground" onClick={() => setShowPassword(v => !v)}>
-                                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                                </button>
-                              </div>
+                              <Input {...field} placeholder="Please enter your full name" disabled={isSubmitting} className="h-11 bg-background" />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
                         )}
                       />
-                      <FormField
-                        control={form.control} name="confirmPassword"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Confirm Password <span className="text-destructive">*</span></FormLabel>
-                            <FormControl>
-                              <div className="relative">
-                                <Input {...field} type={showConfirm ? "text" : "password"} placeholder="Repeat password" disabled={isSubmitting} className="h-11 pr-10" />
-                                <button type="button" className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground" onClick={() => setShowConfirm(v => !v)}>
-                                  {showConfirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                                </button>
-                              </div>
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <FormField
+                          control={form.control} name="staffId"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Staff ID</FormLabel>
+                              <FormControl>
+                                <Input {...field} placeholder="Please enter your staff ID" disabled={isSubmitting} className="h-11 bg-background" />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control} name="phoneNumber"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Phone Number</FormLabel>
+                              <FormControl>
+                                <Input {...field} placeholder="Please enter your phone number" disabled={isSubmitting} className="h-11 bg-background" />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                    </Section>
+
+                    {/* Role & Position */}
+                    <Section title="Role & Position">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <FormField
+                          control={form.control} name="role"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Role <span className="text-destructive">*</span></FormLabel>
+                              <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isSubmitting}>
+                                <FormControl>
+                                  <SelectTrigger className="h-11 bg-background">
+                                    <SelectValue placeholder="Please select a role" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  {ROLES.map((r) => (
+                                    <SelectItem key={r.value} value={r.value}>{r.label}</SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control} name="position"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Position</FormLabel>
+                              <FormControl>
+                                <Input {...field} placeholder="Please enter your position" disabled={isSubmitting} className="h-11 bg-background" />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                    </Section>
 
                     <Button type="submit" className="w-full h-11 font-semibold" disabled={isSubmitting}>
                       {isSubmitting
                         ? <><Spinner size={4} color="text-white" /><span className="ml-2">Creating account…</span></>
-                        : "Create Account"}
+                        : "Create Account & Send Verification Code"}
                     </Button>
 
+                    {/* mobile sign-in link */}
                     <p className="text-center text-sm text-muted-foreground lg:hidden">
                       Already have an account?{" "}
-                      <Link href={ROUTES.AUTH.LOGIN} className="text-primary font-medium hover:underline">Sign in</Link>
+                      <Link href={ROUTES.AUTH.LOGIN} className="text-primary font-semibold hover:underline">Sign in</Link>
                     </p>
                   </form>
                 </Form>
               </>
             )}
 
-            {/* ── STEP 2: OTP verification ── */}
+            {/* ── STEP 2: OTP ── */}
             {step === "otp" && (
-              <div className="max-w-md mx-auto text-center py-8">
-                {/* icon */}
-                <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 mb-6">
-                  <svg className="w-8 h-8 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25H4.5a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5H4.5a2.25 2.25 0 0 0-2.25 2.25m19.5 0-9.75 6.75L2.25 6.75" />
-                  </svg>
+              <div className="max-w-md mx-auto">
+                {/* heading */}
+                <div className="mb-8 text-center">
+                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 border border-primary/20 mb-5">
+                    <svg className="w-7 h-7 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25H4.5a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5H4.5a2.25 2.25 0 0 0-2.25 2.25m19.5 0-9.75 6.75L2.25 6.75" />
+                    </svg>
+                  </div>
+                  <h1 className="text-2xl font-bold text-foreground">Verify your email</h1>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    We sent a 6-digit code to
+                  </p>
+                  <p className="text-sm font-semibold text-foreground mt-0.5">{registeredEmail}</p>
                 </div>
 
-                <h1 className="text-2xl font-bold text-foreground mb-2">Check your inbox</h1>
-                <p className="text-sm text-muted-foreground mb-1">
-                  We sent a 6-digit code to
-                </p>
-                <p className="text-sm font-semibold text-foreground mb-8">{registeredEmail}</p>
+                {/* OTP card */}
+                <div className="border border-border rounded-xl overflow-hidden bg-background">
+                  <div className="bg-muted/50 px-5 py-3 border-b border-border">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Enter Verification Code</p>
+                  </div>
+                  <div className="p-6 space-y-5">
+                    {/* boxes */}
+                    <div className="flex justify-center gap-3" onPaste={handleOtpPaste}>
+                      {otp.map((digit, i) => (
+                        <Input
+                          key={i}
+                          ref={(el) => { otpRefs.current[i] = el; }}
+                          type="text"
+                          inputMode="numeric"
+                          maxLength={1}
+                          value={digit}
+                          onChange={(e) => handleOtpChange(i, e.target.value)}
+                          onKeyDown={(e) => handleOtpKeyDown(i, e)}
+                          disabled={isVerifying}
+                          className="w-12 h-14 text-center text-xl font-bold border-2 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all bg-background"
+                        />
+                      ))}
+                    </div>
 
-                {/* OTP input */}
-                <div className="flex justify-center gap-3 mb-4" onPaste={handleOtpPaste}>
-                  {otp.map((digit, i) => (
-                    <Input
-                      key={i}
-                      ref={(el) => { otpRefs.current[i] = el; }}
-                      type="text"
-                      inputMode="numeric"
-                      maxLength={1}
-                      value={digit}
-                      onChange={(e) => handleOtpChange(i, e.target.value)}
-                      onKeyDown={(e) => handleOtpKeyDown(i, e)}
-                      disabled={isVerifying}
-                      className="w-12 h-14 text-center text-xl font-bold border-2 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
-                    />
-                  ))}
+                    {/* timer */}
+                    <div className="text-center h-5">
+                      {remaining > 0 ? (
+                        <p className="text-sm text-muted-foreground">
+                          Code expires in{" "}
+                          <span className="font-semibold text-primary tabular-nums">
+                            0:{String(remaining).padStart(2, "0")}
+                          </span>
+                        </p>
+                      ) : (
+                        <p className="text-sm text-destructive font-medium">Code has expired</p>
+                      )}
+                    </div>
+
+                    <Button
+                      className="w-full h-11 font-semibold"
+                      disabled={isVerifying || otp.join("").length < 6 || remaining === 0}
+                      onClick={onVerify}
+                    >
+                      {isVerifying
+                        ? <><Spinner size={4} color="text-white" /><span className="ml-2">Verifying…</span></>
+                        : "Verify Email"}
+                    </Button>
+                  </div>
                 </div>
 
-                {/* timer */}
-                <div className="mb-6 h-5">
-                  {remaining > 0 ? (
-                    <p className="text-sm text-muted-foreground">
-                      Code expires in{" "}
-                      <span className="font-semibold text-primary tabular-nums">
-                        0:{String(remaining).padStart(2, "0")}
-                      </span>
-                    </p>
-                  ) : (
-                    <p className="text-sm text-destructive font-medium">Code expired</p>
-                  )}
-                </div>
-
-                <Button
-                  className="w-full h-11 font-semibold mb-4"
-                  disabled={isVerifying || otp.join("").length < 6 || remaining === 0}
-                  onClick={onVerify}
-                >
-                  {isVerifying
-                    ? <><Spinner size={4} color="text-white" /><span className="ml-2">Verifying…</span></>
-                    : "Verify Email"}
-                </Button>
-
-                <p className="text-sm text-muted-foreground">
-                  Didn&apos;t receive it?{" "}
+                {/* resend + back */}
+                <div className="mt-5 text-center space-y-2">
+                  <p className="text-sm text-muted-foreground">
+                    Didn&apos;t receive it?{" "}
+                    <button
+                      onClick={onResend}
+                      disabled={remaining > 0 || isSubmitting}
+                      className="text-primary font-semibold hover:underline disabled:opacity-40 disabled:cursor-not-allowed"
+                    >
+                      {isSubmitting ? "Sending…" : "Resend code"}
+                    </button>
+                  </p>
                   <button
-                    onClick={onResend}
-                    disabled={remaining > 0 || isSubmitting}
-                    className="text-primary font-medium hover:underline disabled:opacity-40 disabled:cursor-not-allowed"
+                    onClick={() => { setStep("form"); setOtp(Array(6).fill("")); }}
+                    className="text-sm text-muted-foreground hover:text-foreground hover:underline transition-colors"
                   >
-                    {isSubmitting ? "Sending…" : "Resend code"}
+                    ← Back to registration
                   </button>
-                </p>
-
-                <button
-                  onClick={() => { setStep("form"); setOtp(Array(6).fill("")); }}
-                  className="mt-3 text-sm text-muted-foreground hover:text-foreground hover:underline transition-colors"
-                >
-                  ← Back to registration
-                </button>
+                </div>
               </div>
             )}
 
