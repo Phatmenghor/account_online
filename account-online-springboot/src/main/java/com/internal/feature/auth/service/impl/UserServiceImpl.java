@@ -180,10 +180,6 @@ public class UserServiceImpl implements UserService {
             user.setStatus(request.getStatus());
         }
 
-        if(request.getEmail() != null){
-            user.setEmail(request.getEmail());
-        }
-
         if (request.getFullName() != null) {
             user.setFullName(request.getFullName());
         }
@@ -192,8 +188,16 @@ public class UserServiceImpl implements UserService {
             user.setProfileUrl(request.getProfileUrl());
         }
 
-        if(request.getPosition() != null){
+        if (request.getPosition() != null) {
             user.setPosition(request.getPosition());
+        }
+
+        if (request.getStaffId() != null) {
+            user.setStaffId(request.getStaffId());
+        }
+
+        if (request.getPhoneNumber() != null) {
+            user.setPhoneNumber(request.getPhoneNumber());
         }
     }
 

@@ -1,6 +1,5 @@
 package com.internal.feature.auth.dto.response;
 
-import com.internal.enumation.UserPermission;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,14 +13,15 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class UserResponseDto {
     private Long id;
-    private String idCard;
-    private String email;
+    private String idCard; // the email used as username
     private String userRole;
     private String userStatus;
     private String fullName;
     private String position;
     private String profileUrl;
-    private UserPermission userPermission;
+    private String staffId;
+    private String phoneNumber;
+    private boolean emailVerified;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private LocalDateTime lastLogin;

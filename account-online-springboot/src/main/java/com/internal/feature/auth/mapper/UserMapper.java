@@ -19,9 +19,7 @@ import java.util.stream.Collectors;
 public interface UserMapper {
 
     @Mapping(source = "id", target = "id")
-    @Mapping(source = "email", target = "email")
     @Mapping(source = "username", target = "idCard")
-    @Mapping(source = "userPermission", target = "userPermission")
     @Mapping(source = "status", target = "userStatus", qualifiedByName = "statusToString")
     @Mapping(source = "roles", target = "userRole", qualifiedByName = "rolesToString")
     @Mapping(source = "createdAt", target = "createdAt")
@@ -29,7 +27,6 @@ public interface UserMapper {
     UserResponseDto mapToDto(UserEntity user);
 
     @Mapping(source = "id", target = "id")
-    @Mapping(source = "email", target = "email")
     @Mapping(source = "idCard", target = "username")
     @Mapping(source = "userStatus", target = "status", qualifiedByName = "stringToStatus")
     @Mapping(source = "userRole", target = "roles", qualifiedByName = "stringToRoles")
@@ -49,13 +46,11 @@ public interface UserMapper {
         return userResponse;
     }
 
-    // StatusData â†’ String
     @Named("statusToString")
     default String statusToString(StatusData status) {
         return status != null ? status.name() : null;
     }
 
-    // String â†’ StatusData
     @Named("stringToStatus")
     default StatusData stringToStatus(String status) {
         if (status == null || status.isEmpty()) {
@@ -68,7 +63,6 @@ public interface UserMapper {
         }
     }
 
-    // List<Role> â†’ String
     @Named("rolesToString")
     default String rolesToString(List<Role> roles) {
         if (roles == null || roles.isEmpty()) {
@@ -79,18 +73,16 @@ public interface UserMapper {
                 .collect(Collectors.joining(", "));
     }
 
-    // String â†’ List<Role>
     @Named("stringToRoles")
     default List<Role> stringToRoles(String rolesString) {
         if (rolesString == null || rolesString.isEmpty()) {
             return null;
         }
-        // If you need full Role objects with IDs, you might need to inject RoleRepository
         return Arrays.stream(rolesString.split(","))
                 .map(String::trim)
                 .map(roleName -> {
                     Role role = new Role();
-                     role.setName(RoleEnum.valueOf(roleName));
+                    role.setName(RoleEnum.valueOf(roleName));
                     return role;
                 })
                 .collect(Collectors.toList());

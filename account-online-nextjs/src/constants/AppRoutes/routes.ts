@@ -3,6 +3,8 @@ import { Calendar, Code, Dock, User2 } from "lucide-react";
 export const ROUTES = {
   AUTH: {
     LOGIN: "/login",
+    REGISTER: "/register",
+    VERIFY_EMAIL: "/verify-email",
   },
   DASHBOARD: {
     INDEX: "/dashboard",

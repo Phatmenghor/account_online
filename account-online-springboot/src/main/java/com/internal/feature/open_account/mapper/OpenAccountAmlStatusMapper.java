@@ -84,13 +84,11 @@ public class OpenAccountAmlStatusMapper {
                 return UserResponseDto.builder()
                                 .id(user.getId())
                                 .idCard(user.getUsername())
-                                .email(user.getEmail())
                                 .userRole(user.getPosition())
                                 .userStatus(String.valueOf(user.getStatus()))
                                 .fullName(user.getFullName())
                                 .position(user.getPosition())
                                 .profileUrl(user.getProfileUrl())
-                                .userPermission(user.getUserPermission())
                                 .createdAt(user.getCreatedAt())
                                 .updatedAt(user.getUpdatedAt())
                                 .build();

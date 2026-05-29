@@ -29,7 +29,6 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
             "WHERE u.status IN :statuses " +
             "AND (" +
             "  LOWER(u.username) LIKE LOWER(CONCAT('%', :searchText, '%')) " +
-            "  OR LOWER(u.email)    LIKE LOWER(CONCAT('%', :searchText, '%')) " +
             "  OR LOWER(u.fullName) LIKE LOWER(CONCAT('%', :searchText, '%')) " +
             ")")
     Page<UserEntity> searchByMultipleFieldsAndStatuses(
@@ -43,7 +42,6 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
             "WHERE u.status = :status " +
             "AND (" +
             "  LOWER(u.username) LIKE LOWER(CONCAT('%', :searchText, '%')) " +
-            "  OR LOWER(u.email)    LIKE LOWER(CONCAT('%', :searchText, '%')) " +
             "  OR LOWER(u.fullName) LIKE LOWER(CONCAT('%', :searchText, '%')) " +
             ")")
     Page<UserEntity> searchByMultipleFieldsAndStatus(
@@ -55,7 +53,6 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
             "WHERE u.status IN :statuses " +
             "AND (:searchText IS NULL OR :searchText = '' OR " +
             "  LOWER(u.username) LIKE LOWER(CONCAT('%', :searchText, '%')) " +
-            "  OR LOWER(u.email)    LIKE LOWER(CONCAT('%', :searchText, '%')) " +
             "  OR LOWER(u.fullName) LIKE LOWER(CONCAT('%', :searchText, '%')) " +
             ") " +
             "AND r.name IN :roleNames")
