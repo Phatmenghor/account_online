@@ -110,7 +110,7 @@ public class AuthServiceImpl implements AuthService {
                 });
 
         String verificationCode = generateVerificationCode();
-        LocalDateTime expiry = LocalDateTime.now(ZoneId.of("UTC")).plusMinutes(10);
+        LocalDateTime expiry = LocalDateTime.now(ZoneId.of("UTC")).plusMinutes(1);
 
         UserEntity user = new UserEntity();
         user.setUsername(registerDto.getUsername());
