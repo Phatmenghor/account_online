@@ -77,17 +77,6 @@ function useCountdown(seconds: number) {
   return { remaining, start };
 }
 
-/* ─── section wrapper ─── */
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <div className="border border-border rounded-xl overflow-hidden">
-      <div className="bg-muted/50 px-5 py-3 border-b border-border">
-        <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{title}</p>
-      </div>
-      <div className="p-5 space-y-4">{children}</div>
-    </div>
-  );
-}
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -253,7 +242,7 @@ export default function RegisterPage() {
 
         {/* scrollable body */}
         <div className="flex-1 overflow-y-auto">
-          <div className="max-w-2xl mx-auto w-full px-6 py-8">
+          <div className="max-w-4xl mx-auto w-full px-8 py-8">
 
             {/* ── STEP 1: register form ── */}
             {step === "form" && (
@@ -267,23 +256,27 @@ export default function RegisterPage() {
                 </div>
 
                 <Form {...form}>
-                  <form onSubmit={form.handleSubmit(onRegister)} className="space-y-4">
+                  <form onSubmit={form.handleSubmit(onRegister)} className="space-y-5">
+                    <div className="border border-border rounded-xl bg-background overflow-hidden">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-5 p-6">
 
-                    {/* Account Information */}
-                    <Section title="Account Information">
-                      <FormField
-                        control={form.control} name="username"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Email <span className="text-destructive">*</span></FormLabel>
-                            <FormControl>
-                              <Input {...field} type="email" placeholder="Please enter your email" disabled={isSubmitting} className="h-11 bg-background" />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {/* Email — full width */}
+                        <div className="sm:col-span-2">
+                          <FormField
+                            control={form.control} name="username"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Email <span className="text-destructive">*</span></FormLabel>
+                                <FormControl>
+                                  <Input {...field} type="email" placeholder="Please enter your email" disabled={isSubmitting} className="h-11" />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+
+                        {/* Password */}
                         <FormField
                           control={form.control} name="password"
                           render={({ field }) => (
@@ -291,7 +284,7 @@ export default function RegisterPage() {
                               <FormLabel>Password <span className="text-destructive">*</span></FormLabel>
                               <FormControl>
                                 <div className="relative">
-                                  <Input {...field} type={showPassword ? "text" : "password"} placeholder="Please enter your password" disabled={isSubmitting} className="h-11 pr-10 bg-background" />
+                                  <Input {...field} type={showPassword ? "text" : "password"} placeholder="Please enter your password" disabled={isSubmitting} className="h-11 pr-10" />
                                   <button type="button" onClick={() => setShowPassword(v => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors">
                                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                                   </button>
@@ -301,6 +294,8 @@ export default function RegisterPage() {
                             </FormItem>
                           )}
                         />
+
+                        {/* Confirm Password */}
                         <FormField
                           control={form.control} name="confirmPassword"
                           render={({ field }) => (
@@ -308,7 +303,7 @@ export default function RegisterPage() {
                               <FormLabel>Confirm Password <span className="text-destructive">*</span></FormLabel>
                               <FormControl>
                                 <div className="relative">
-                                  <Input {...field} type={showConfirm ? "text" : "password"} placeholder="Please confirm your password" disabled={isSubmitting} className="h-11 pr-10 bg-background" />
+                                  <Input {...field} type={showConfirm ? "text" : "password"} placeholder="Please confirm your password" disabled={isSubmitting} className="h-11 pr-10" />
                                   <button type="button" onClick={() => setShowConfirm(v => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors">
                                     {showConfirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                                   </button>
@@ -318,54 +313,52 @@ export default function RegisterPage() {
                             </FormItem>
                           )}
                         />
-                      </div>
-                    </Section>
 
-                    {/* Personal Information */}
-                    <Section title="Personal Information">
-                      <FormField
-                        control={form.control} name="fullName"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Full Name <span className="text-destructive">*</span></FormLabel>
-                            <FormControl>
-                              <Input {...field} placeholder="Please enter your full name" disabled={isSubmitting} className="h-11 bg-background" />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {/* Full Name — full width */}
+                        <div className="sm:col-span-2">
+                          <FormField
+                            control={form.control} name="fullName"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Full Name <span className="text-destructive">*</span></FormLabel>
+                                <FormControl>
+                                  <Input {...field} placeholder="Please enter your full name" disabled={isSubmitting} className="h-11" />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+
+                        {/* Staff ID */}
                         <FormField
                           control={form.control} name="staffId"
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel>Staff ID</FormLabel>
                               <FormControl>
-                                <Input {...field} placeholder="Please enter your staff ID" disabled={isSubmitting} className="h-11 bg-background" />
+                                <Input {...field} placeholder="Please enter your staff ID" disabled={isSubmitting} className="h-11" />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
                           )}
                         />
+
+                        {/* Phone */}
                         <FormField
                           control={form.control} name="phoneNumber"
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel>Phone Number</FormLabel>
                               <FormControl>
-                                <Input {...field} placeholder="Please enter your phone number" disabled={isSubmitting} className="h-11 bg-background" />
+                                <Input {...field} placeholder="Please enter your phone number" disabled={isSubmitting} className="h-11" />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
                           )}
                         />
-                      </div>
-                    </Section>
 
-                    {/* Role & Position */}
-                    <Section title="Role & Position">
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {/* Role */}
                         <FormField
                           control={form.control} name="role"
                           render={({ field }) => (
@@ -373,7 +366,7 @@ export default function RegisterPage() {
                               <FormLabel>Role <span className="text-destructive">*</span></FormLabel>
                               <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isSubmitting}>
                                 <FormControl>
-                                  <SelectTrigger className="h-11 bg-background">
+                                  <SelectTrigger className="h-11">
                                     <SelectValue placeholder="Please select a role" />
                                   </SelectTrigger>
                                 </FormControl>
@@ -387,20 +380,23 @@ export default function RegisterPage() {
                             </FormItem>
                           )}
                         />
+
+                        {/* Position */}
                         <FormField
                           control={form.control} name="position"
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel>Position</FormLabel>
                               <FormControl>
-                                <Input {...field} placeholder="Please enter your position" disabled={isSubmitting} className="h-11 bg-background" />
+                                <Input {...field} placeholder="Please enter your position" disabled={isSubmitting} className="h-11" />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
                           )}
                         />
+
                       </div>
-                    </Section>
+                    </div>
 
                     <Button type="submit" className="w-full h-11 font-semibold" disabled={isSubmitting}>
                       {isSubmitting
@@ -408,7 +404,6 @@ export default function RegisterPage() {
                         : "Create Account & Send Verification Code"}
                     </Button>
 
-                    {/* mobile sign-in link */}
                     <p className="text-center text-sm text-muted-foreground lg:hidden">
                       Already have an account?{" "}
                       <Link href={ROUTES.AUTH.LOGIN} className="text-primary font-semibold hover:underline">Sign in</Link>
