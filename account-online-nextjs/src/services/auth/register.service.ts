@@ -7,7 +7,7 @@ export interface RegisterRequest {
   staffId?: string;
   phoneNumber?: string;
   position?: string;
-  role: string;
+  branch?: string;
 }
 
 export interface VerifyEmailRequest {

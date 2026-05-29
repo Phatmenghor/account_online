@@ -24,6 +24,10 @@ public class RegisterRequestDto {
 
     private String phoneNumber;
 
-    private RoleEnum role;
+    private String branch;
+
     private String position;
+
+    /* Only used by admin creation — register endpoint auto-assigns STAFF */
+    private RoleEnum role;
 }

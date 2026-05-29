@@ -21,6 +21,7 @@ public class UserResponseDto {
     private String profileUrl;
     private String staffId;
     private String phoneNumber;
+    private String branch;
     private boolean emailVerified;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

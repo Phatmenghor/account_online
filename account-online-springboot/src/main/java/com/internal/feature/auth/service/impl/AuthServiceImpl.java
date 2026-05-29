@@ -103,11 +103,9 @@ public class AuthServiceImpl implements AuthService {
             throw new DuplicateNameException("Email is already in use, please choose another one.");
         }
 
-        Role role = roleRepository.findByName(registerDto.getRole())
-                .orElseThrow(() -> {
-                    log.warn("Registration failed: Invalid role provided: {}", registerDto.getRole());
-                    return new BadRequestException("Invalid role provided: " + registerDto.getRole());
-                });
+        // Self-registration always receives STAFF role
+        Role role = roleRepository.findByName(RoleEnum.STAFF)
+                .orElseThrow(() -> new BadRequestException("STAFF role not found. Please contact an administrator."));
 
         String verificationCode = generateVerificationCode();
         LocalDateTime expiry = LocalDateTime.now(ZoneId.of("UTC")).plusMinutes(1);
@@ -118,6 +116,7 @@ public class AuthServiceImpl implements AuthService {
         user.setPosition(registerDto.getPosition());
         user.setStaffId(registerDto.getStaffId());
         user.setPhoneNumber(registerDto.getPhoneNumber());
+        user.setBranch(registerDto.getBranch());
         user.setPassword(passwordEncoder.encode(registerDto.getPassword()));
         user.setStatus(StatusData.ACTIVE);
         user.setEmailVerified(false);
@@ -153,6 +152,7 @@ public class AuthServiceImpl implements AuthService {
         user.setPosition(registerDto.getPosition());
         user.setStaffId(registerDto.getStaffId());
         user.setPhoneNumber(registerDto.getPhoneNumber());
+        user.setBranch(registerDto.getBranch());
         user.setPassword(passwordEncoder.encode(registerDto.getPassword()));
         user.setStatus(StatusData.ACTIVE);
         user.setEmailVerified(true);
@@ -211,6 +211,7 @@ public class AuthServiceImpl implements AuthService {
         if (requestDto.getPosition() != null) user.setPosition(requestDto.getPosition());
         if (requestDto.getStaffId() != null) user.setStaffId(requestDto.getStaffId());
         if (requestDto.getPhoneNumber() != null) user.setPhoneNumber(requestDto.getPhoneNumber());
+        if (requestDto.getBranch() != null) user.setBranch(requestDto.getBranch());
 
         UserEntity updatedUser = userRepository.save(user);
         return userMapper.mapToDto(updatedUser);

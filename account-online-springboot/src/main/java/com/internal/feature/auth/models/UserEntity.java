@@ -33,6 +33,8 @@ public class UserEntity extends BaseEntity {
 
     private String phoneNumber;
 
+    private String branch;
+
     @Enumerated(EnumType.STRING)
     private StatusData status;
 
