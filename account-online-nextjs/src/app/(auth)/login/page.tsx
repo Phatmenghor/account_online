@@ -75,7 +75,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex h-screen w-full overflow-hidden">
+    <div className="flex h-screen w-screen overflow-hidden">
       {/* Left hero image */}
       <div className="hidden lg:flex flex-1 relative overflow-hidden">
         <Image
