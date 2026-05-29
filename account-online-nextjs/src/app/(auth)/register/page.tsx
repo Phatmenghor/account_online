@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { Eye, EyeOff, ChevronsUpDown, Check } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 import {
   Form,
   FormControl,
@@ -18,20 +18,8 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
-import { cn } from "@/lib/utils";
+import { ComboboxSelectBranch } from "@/components/shared/combo-box/combobox-branch";
+import { BranchModel } from "@/models/branch/branch.response";
 import { ROUTES } from "@/constants/AppRoutes/routes";
 import { AppToast } from "@/components/shared/toast/app-toast";
 import {
@@ -39,25 +27,6 @@ import {
   verifyEmailService,
 } from "@/services/auth/register.service";
 import Spinner from "@/components/shared/common/modern-spinner";
-
-/* ─── branches ─── */
-const BRANCHES = [
-  { value: "Head Office", label: "Head Office" },
-  { value: "Phnom Penh Branch", label: "Phnom Penh Branch" },
-  { value: "Siem Reap Branch", label: "Siem Reap Branch" },
-  { value: "Battambang Branch", label: "Battambang Branch" },
-  { value: "Sihanoukville Branch", label: "Sihanoukville Branch" },
-  { value: "Kampong Cham Branch", label: "Kampong Cham Branch" },
-  { value: "Kampong Speu Branch", label: "Kampong Speu Branch" },
-  { value: "Kampot Branch", label: "Kampot Branch" },
-  { value: "Kandal Branch", label: "Kandal Branch" },
-  { value: "Prey Veng Branch", label: "Prey Veng Branch" },
-  { value: "Takeo Branch", label: "Takeo Branch" },
-  { value: "Svay Rieng Branch", label: "Svay Rieng Branch" },
-  { value: "Pursat Branch", label: "Pursat Branch" },
-  { value: "Kratie Branch", label: "Kratie Branch" },
-  { value: "Banteay Meanchey Branch", label: "Banteay Meanchey Branch" },
-];
 
 /* ─── schema ─── */
 const registerSchema = z
@@ -106,7 +75,7 @@ export default function RegisterPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [otp, setOtp] = useState<string[]>(Array(6).fill(""));
   const [isVerifying, setIsVerifying] = useState(false);
-  const [branchOpen, setBranchOpen] = useState(false);
+  const [selectedBranch, setSelectedBranch] = useState<BranchModel | null>(null);
   const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
   const { remaining, start: startCountdown } = useCountdown(60);
 
@@ -388,49 +357,16 @@ export default function RegisterPage() {
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel>Branch</FormLabel>
-                              <Popover open={branchOpen} onOpenChange={setBranchOpen}>
-                                <PopoverTrigger asChild>
-                                  <FormControl>
-                                    <Button
-                                      variant="outline"
-                                      role="combobox"
-                                      disabled={isSubmitting}
-                                      className={cn(
-                                        "h-11 w-full justify-between font-normal",
-                                        !field.value && "text-muted-foreground"
-                                      )}
-                                    >
-                                      {field.value
-                                        ? BRANCHES.find((b) => b.value === field.value)?.label
-                                        : "Please select your branch"}
-                                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                                    </Button>
-                                  </FormControl>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
-                                  <Command>
-                                    <CommandInput placeholder="Search branch…" />
-                                    <CommandList>
-                                      <CommandEmpty>No branch found.</CommandEmpty>
-                                      <CommandGroup>
-                                        {BRANCHES.map((b) => (
-                                          <CommandItem
-                                            key={b.value}
-                                            value={b.value}
-                                            onSelect={(val) => {
-                                              field.onChange(val === field.value ? "" : val);
-                                              setBranchOpen(false);
-                                            }}
-                                          >
-                                            <Check className={cn("mr-2 h-4 w-4", field.value === b.value ? "opacity-100" : "opacity-0")} />
-                                            {b.label}
-                                          </CommandItem>
-                                        ))}
-                                      </CommandGroup>
-                                    </CommandList>
-                                  </Command>
-                                </PopoverContent>
-                              </Popover>
+                              <FormControl>
+                                <ComboboxSelectBranch
+                                  dataSelect={selectedBranch}
+                                  disabled={isSubmitting}
+                                  onChangeSelected={(item) => {
+                                    setSelectedBranch(item);
+                                    field.onChange(item.branchkh);
+                                  }}
+                                />
+                              </FormControl>
                               <FormMessage />
                             </FormItem>
                           )}
