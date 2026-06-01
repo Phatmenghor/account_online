@@ -47,7 +47,10 @@ export function CustomDateTimePicker({
   id,
 }: DateTimePickerProps) {
   const [isOpen, setIsOpen] = useState(false);
+  // confirmed date (from value prop)
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  // pending date — highlighted but not yet applied
+  const [pendingDate, setPendingDate] = useState<Date | null>(null);
   const [viewDate, setViewDate] = useState<Date>(new Date());
   const [selectedHour, setSelectedHour] = useState<string>("12");
   const [selectedMinute, setSelectedMinute] = useState<string>("00");
@@ -60,11 +63,11 @@ export function CustomDateTimePicker({
         setSelectedDate(date);
         setViewDate(date);
         if (mode === "datetime") {
-          const hours = date.getHours();
-          const minutes = date.getMinutes();
-          setSelectedPeriod(hours >= 12 ? "PM" : "AM");
-          setSelectedHour(String(hours % 12 || 12).padStart(2, "0"));
-          setSelectedMinute(String(minutes).padStart(2, "0"));
+          const h = date.getHours();
+          const m = date.getMinutes();
+          setSelectedPeriod(h >= 12 ? "PM" : "AM");
+          setSelectedHour(String(h % 12 || 12).padStart(2, "0"));
+          setSelectedMinute(String(m).padStart(2, "0"));
         }
       }
     } else {
@@ -73,6 +76,15 @@ export function CustomDateTimePicker({
     }
   }, [value, mode]);
 
+  // When popover opens, restore pending from confirmed
+  const handleOpenChange = (open: boolean) => {
+    if (open) {
+      setPendingDate(selectedDate);
+      if (selectedDate) setViewDate(selectedDate);
+    }
+    setIsOpen(open);
+  };
+
   const formatDate = (date: Date): string => {
     const dateStr = date.toLocaleDateString("en-US", {
       year: "numeric",
@@ -80,55 +92,64 @@ export function CustomDateTimePicker({
       day: "numeric",
     });
     if (mode === "datetime") {
-      const hours = date.getHours();
-      const minutes = date.getMinutes();
-      const period = hours >= 12 ? "PM" : "AM";
-      const displayHour = hours % 12 || 12;
-      return `${dateStr}, ${displayHour}:${String(minutes).padStart(2, "0")} ${period}`;
+      const h = date.getHours();
+      const m = date.getMinutes();
+      const period = h >= 12 ? "PM" : "AM";
+      const displayHour = h % 12 || 12;
+      return `${dateStr}, ${displayHour}:${String(m).padStart(2, "0")} ${period}`;
     }
     return dateStr;
   };
 
   const formatDateForForm = (date: Date): string => {
-    if (mode === "datetime") {
-      return date.toISOString();
-    }
+    if (mode === "datetime") return date.toISOString();
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, "0");
     const day = String(date.getDate()).padStart(2, "0");
     return `${year}-${month}-${day}`;
   };
 
+  // Clicking a day sets pending only — does NOT fire onChange or close
   const handleDateSelect = (day: number) => {
     const newDate = new Date(viewDate.getFullYear(), viewDate.getMonth(), day);
-    if (mode === "datetime" && selectedDate) {
-      newDate.setHours(selectedDate.getHours());
-      newDate.setMinutes(selectedDate.getMinutes());
+    if (mode === "datetime" && pendingDate) {
+      newDate.setHours(pendingDate.getHours());
+      newDate.setMinutes(pendingDate.getMinutes());
     }
-    setSelectedDate(newDate);
-    if (mode === "date") {
-      onChange(formatDateForForm(newDate));
-      setIsOpen(false);
-    }
+    setPendingDate(newDate);
   };
 
-  const handleTimeChange = () => {
-    if (!selectedDate) return;
-    const newDate = new Date(selectedDate);
-    let hours = parseInt(selectedHour);
-    if (selectedPeriod === "PM" && hours !== 12) hours += 12;
-    else if (selectedPeriod === "AM" && hours === 12) hours = 0;
-    newDate.setHours(hours);
-    newDate.setMinutes(parseInt(selectedMinute));
-    setSelectedDate(newDate);
-    onChange(formatDateForForm(newDate));
+  // Build datetime from pending + time selectors and apply
+  const handleApply = () => {
+    if (!pendingDate) return;
+    const confirmed = new Date(pendingDate);
+    if (mode === "datetime") {
+      let h = parseInt(selectedHour);
+      if (selectedPeriod === "PM" && h !== 12) h += 12;
+      else if (selectedPeriod === "AM" && h === 12) h = 0;
+      confirmed.setHours(h);
+      confirmed.setMinutes(parseInt(selectedMinute));
+    }
+    setSelectedDate(confirmed);
+    onChange(formatDateForForm(confirmed));
+    setIsOpen(false);
   };
 
-  const applyDateTime = () => {
-    if (selectedDate && mode === "datetime") {
-      handleTimeChange();
-      setIsOpen(false);
+  // Today / Now applies immediately
+  const handleNow = () => {
+    const today = new Date();
+    setSelectedDate(today);
+    setPendingDate(today);
+    setViewDate(today);
+    if (mode === "datetime") {
+      const h = today.getHours();
+      const m = today.getMinutes();
+      setSelectedPeriod(h >= 12 ? "PM" : "AM");
+      setSelectedHour(String(h % 12 || 12).padStart(2, "0"));
+      setSelectedMinute(String(m).padStart(2, "0"));
     }
+    onChange(formatDateForForm(today));
+    setIsOpen(false);
   };
 
   const handleMonthChange = (month: string) => {
@@ -149,23 +170,22 @@ export function CustomDateTimePicker({
   const generateCalendarDays = () => {
     const year = viewDate.getFullYear();
     const month = viewDate.getMonth();
-    const firstDayOfMonth = new Date(year, month, 1);
-    const startDate = new Date(firstDayOfMonth);
-    startDate.setDate(startDate.getDate() - firstDayOfMonth.getDay());
+    const firstDay = new Date(year, month, 1);
+    const start = new Date(firstDay);
+    start.setDate(start.getDate() - firstDay.getDay());
 
     const days = [];
-    const currentDate = new Date(startDate);
+    const cur = new Date(start);
     for (let i = 0; i < DATE_RANGE_CALENDAR_DAYS; i++) {
       days.push({
-        date: new Date(currentDate),
-        day: currentDate.getDate(),
-        isCurrentMonth: currentDate.getMonth() === month,
-        isSelected: selectedDate
-          ? currentDate.toDateString() === selectedDate.toDateString()
-          : false,
-        isToday: currentDate.toDateString() === new Date().toDateString(),
+        date: new Date(cur),
+        day: cur.getDate(),
+        isCurrentMonth: cur.getMonth() === month,
+        isPending: pendingDate ? cur.toDateString() === pendingDate.toDateString() : false,
+        isConfirmed: selectedDate ? cur.toDateString() === selectedDate.toDateString() : false,
+        isToday: cur.toDateString() === new Date().toDateString(),
       });
-      currentDate.setDate(currentDate.getDate() + 1);
+      cur.setDate(cur.getDate() + 1);
     }
     return days;
   };
@@ -179,21 +199,22 @@ export function CustomDateTimePicker({
     return years;
   };
 
-  const hours = Array.from({ length: 12 }, (_, i) => String(i + 1).padStart(2, "0"));
-  const minutes = Array.from({ length: 60 }, (_, i) => String(i).padStart(2, "0"));
-
   const clearSelection = (e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
     setSelectedDate(null);
+    setPendingDate(null);
     onChange("");
   };
+
+  const hours = Array.from({ length: 12 }, (_, i) => String(i + 1).padStart(2, "0"));
+  const minutes = Array.from({ length: 60 }, (_, i) => String(i).padStart(2, "0"));
 
   const calendarDays = generateCalendarDays();
   const yearOptions = generateYearOptions();
 
   return (
-    <Popover open={isOpen} onOpenChange={setIsOpen}>
+    <Popover open={isOpen} onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild>
         <Button
           id={id}
@@ -312,8 +333,11 @@ export function CustomDateTimePicker({
                   "h-8 w-8 p-0 text-xs font-normal transition-all hover:bg-primary/10 hover:text-primary",
                   !dayObj.isCurrentMonth &&
                     "text-muted-foreground/30 hover:text-muted-foreground/30 hover:bg-transparent cursor-not-allowed",
-                  dayObj.isSelected && "bg-primary/20 text-primary font-medium hover:bg-primary/20",
-                  dayObj.isToday && !dayObj.isSelected &&
+                  dayObj.isPending &&
+                    "bg-primary text-primary-foreground hover:bg-primary/90 font-medium ring-2 ring-primary/40",
+                  dayObj.isConfirmed && !dayObj.isPending &&
+                    "ring-1 ring-primary/50 text-primary font-medium",
+                  dayObj.isToday && !dayObj.isPending &&
                     "bg-primary/10 text-primary font-semibold ring-1 ring-primary/20"
                 )}
               >
@@ -370,35 +394,20 @@ export function CustomDateTimePicker({
           <Button
             variant="outline"
             size="sm"
-            onClick={() => {
-              const today = new Date();
-              setSelectedDate(today);
-              setViewDate(today);
-              if (mode === "datetime") {
-                const h = today.getHours();
-                const m = today.getMinutes();
-                setSelectedPeriod(h >= 12 ? "PM" : "AM");
-                setSelectedHour(String(h % 12 || 12).padStart(2, "0"));
-                setSelectedMinute(String(m).padStart(2, "0"));
-              }
-              onChange(formatDateForForm(today));
-              setIsOpen(false);
-            }}
+            onClick={handleNow}
             className="flex-1 h-8 text-xs hover:bg-primary/10 hover:border-primary hover:text-primary transition-colors"
           >
-            Now
+            {mode === "datetime" ? "Now" : "Today"}
           </Button>
-          {mode === "datetime" && (
-            <Button
-              variant="default"
-              size="sm"
-              onClick={applyDateTime}
-              disabled={!selectedDate}
-              className="flex-1 h-8 text-xs bg-primary hover:bg-primary/90"
-            >
-              Apply
-            </Button>
-          )}
+          <Button
+            variant="default"
+            size="sm"
+            onClick={handleApply}
+            disabled={!pendingDate}
+            className="flex-1 h-8 text-xs bg-primary hover:bg-primary/90"
+          >
+            Apply
+          </Button>
         </div>
       </PopoverContent>
     </Popover>
