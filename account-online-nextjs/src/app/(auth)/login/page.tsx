@@ -95,7 +95,7 @@ export default function LoginPage() {
 
           <CardContent className="px-8 py-7">
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4" autoComplete="off">
                 <FormField
                   control={form.control}
                   name="username"
@@ -105,7 +105,7 @@ export default function LoginPage() {
                       <FormControl>
                         <div className="relative">
                           <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                          <Input {...field} type="text" placeholder="Please enter your username" disabled={isLoading} className="pl-10 h-11" />
+                          <Input {...field} type="text" placeholder="Please enter your username" disabled={isLoading} autoComplete="off" className="pl-10 h-11" />
                         </div>
                       </FormControl>
                       <FormMessage />
@@ -127,6 +127,7 @@ export default function LoginPage() {
                             type={showPassword ? "text" : "password"}
                             placeholder="Please enter your password"
                             disabled={isLoading}
+                            autoComplete="new-password"
                             className="pl-10 pr-10 h-11"
                           />
                           <button

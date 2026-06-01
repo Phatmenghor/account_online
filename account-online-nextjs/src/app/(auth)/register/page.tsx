@@ -153,7 +153,7 @@ export default function RegisterPage() {
             {/* ── Step 1 ── */}
             {step === 1 && (
               <Form {...form1}>
-                <form onSubmit={form1.handleSubmit(onStep1Submit)} className="space-y-5">
+                <form onSubmit={form1.handleSubmit(onStep1Submit)} className="space-y-5" autoComplete="off">
 
                   <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 space-y-4">
 
@@ -164,7 +164,7 @@ export default function RegisterPage() {
                           Email <span className="text-destructive">*</span>
                         </FormLabel>
                         <FormControl>
-                          <Input {...field} type="email" placeholder="Please enter your email" disabled={isLoading} className="h-11 bg-gray-50 border-gray-200 focus:bg-white transition-colors" />
+                          <Input {...field} type="email" placeholder="Please enter your email" disabled={isLoading} autoComplete="off" className="h-11 bg-gray-50 border-gray-200 focus:bg-white transition-colors" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -179,7 +179,7 @@ export default function RegisterPage() {
                           </FormLabel>
                           <FormControl>
                             <div className="relative">
-                              <Input {...field} type={showPassword ? "text" : "password"} placeholder="Please enter password" disabled={isLoading} className="h-11 pr-10 bg-gray-50 border-gray-200 focus:bg-white transition-colors" />
+                              <Input {...field} type={showPassword ? "text" : "password"} placeholder="Please enter password" disabled={isLoading} autoComplete="new-password" className="h-11 pr-10 bg-gray-50 border-gray-200 focus:bg-white transition-colors" />
                               <button type="button" onClick={() => setShowPassword(v => !v)} tabIndex={-1} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
                                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                               </button>
@@ -196,7 +196,7 @@ export default function RegisterPage() {
                           </FormLabel>
                           <FormControl>
                             <div className="relative">
-                              <Input {...field} type={showConfirm ? "text" : "password"} placeholder="Please confirm password" disabled={isLoading} className="h-11 pr-10 bg-gray-50 border-gray-200 focus:bg-white transition-colors" />
+                              <Input {...field} type={showConfirm ? "text" : "password"} placeholder="Please confirm password" disabled={isLoading} autoComplete="new-password" className="h-11 pr-10 bg-gray-50 border-gray-200 focus:bg-white transition-colors" />
                               <button type="button" onClick={() => setShowConfirm(v => !v)} tabIndex={-1} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
                                 {showConfirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                               </button>
