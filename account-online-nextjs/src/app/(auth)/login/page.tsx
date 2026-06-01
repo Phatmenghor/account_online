@@ -6,7 +6,7 @@ import z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginService } from "@/services/auth/login.service";
 import { useForm } from "react-hook-form";
-import { Eye, EyeOff, Lock, Mail, ShieldCheck } from "lucide-react";
+import { Eye, EyeOff, Lock, Mail, ShieldCheck, Loader2 } from "lucide-react";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -14,7 +14,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ROUTES } from "@/constants/AppRoutes/routes";
 import { AppToast } from "@/components/shared/toast/app-toast";
-import Spinner from "@/components/shared/common/modern-spinner";
 
 const schema = z.object({
   username: z.string().min(1, "Please enter your username"),
@@ -144,10 +143,10 @@ export default function LoginPage() {
                   )}
                 />
 
-                <Button type="submit" className="w-full h-11 font-semibold mt-2" disabled={isLoading}>
-                  {isLoading
-                    ? <><Spinner size={4} color="text-white" /><span className="ml-2">Signing in...</span></>
-                    : "Sign In"}
+                <Button type="submit" className="w-full h-11 font-semibold mt-6" disabled={isLoading}>
+                  {isLoading ? (
+                    <><Loader2 className="h-4 w-4 animate-spin" /><span className="ml-2">Logging in...</span></>
+                  ) : "Login"}
                 </Button>
               </form>
             </Form>
