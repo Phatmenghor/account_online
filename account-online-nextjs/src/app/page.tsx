@@ -351,7 +351,7 @@ function OpenAccountContent() {
         <PageHeader />
 
         <main className="flex-1 pt-16 sm:pt-[60px]">
-          <div className="w-full px-3 sm:px-5 lg:px-8 py-4 sm:py-6 lg:py-8">
+          <div className="max-w-5xl mx-auto w-full px-3 sm:px-5 lg:px-8 py-4 sm:py-6 lg:py-8">
 
             {/* Page title */}
             <HeaderSection
@@ -364,7 +364,7 @@ function OpenAccountContent() {
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100">
 
               {/* ── Document Upload ── */}
-              <div className="p-4 sm:p-6 lg:p-8">
+              <div className="p-4 sm:p-5 lg:p-6">
                 <SectionLabel label="Document Upload" />
                 <AccountImages
                   uploadedImage={uploadedImage}

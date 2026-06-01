@@ -49,7 +49,7 @@ export const AccountImages: React.FC<AccountImagesProps> = ({
       <label
         htmlFor={id}
         className={[
-          "group relative flex flex-col items-center justify-center aspect-[16/10]",
+          "group relative flex flex-col items-center justify-center aspect-[16/7]",
           "rounded-2xl border-2 border-dashed cursor-pointer overflow-hidden",
           "transition-all duration-200 select-none",
           hasError
@@ -108,7 +108,7 @@ export const AccountImages: React.FC<AccountImagesProps> = ({
   );
 
   return (
-    <div className="mb-8">
+    <div className="mb-0">
       <p className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-4">
         Document Upload
       </p>
