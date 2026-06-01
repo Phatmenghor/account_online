@@ -25,6 +25,7 @@ export const AccountImages: React.FC<AccountImagesProps> = ({
     hint,
     Icon,
     preview,
+    placeholder,
     hasError,
     onChange,
   }: {
@@ -33,6 +34,7 @@ export const AccountImages: React.FC<AccountImagesProps> = ({
     hint: string;
     Icon: React.ElementType;
     preview?: string | null;
+    placeholder?: string;
     hasError?: boolean;
     onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   }) => (
@@ -68,15 +70,21 @@ export const AccountImages: React.FC<AccountImagesProps> = ({
               </div>
             </div>
           </>
+        ) : placeholder ? (
+          <>
+            <img src={placeholder} alt={label} className="w-full h-full object-contain p-3 opacity-70" />
+            <div className="absolute inset-0 flex items-end justify-center pb-3">
+              <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center gap-1.5 bg-black/50 text-white px-3 py-1.5 rounded-full text-xs font-medium">
+                <ImagePlus className="w-3.5 h-3.5" />{hint}
+              </span>
+            </div>
+          </>
         ) : (
           <div className="flex flex-col items-center gap-3 px-4 py-6 text-center pointer-events-none">
             <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-colors ${hasError ? "bg-red-100" : "bg-gray-100 group-hover:bg-primary/10"}`}>
               <Icon className={`w-7 h-7 transition-colors ${hasError ? "text-red-400" : "text-gray-300 group-hover:text-primary/60"}`} />
             </div>
-            <div>
-              <p className={`text-sm font-medium ${hasError ? "text-red-500" : "text-gray-400"}`}>{hint}</p>
-              <p className="text-xs text-gray-400 mt-0.5">JPG, PNG, HEIC</p>
-            </div>
+            <p className={`text-sm font-medium ${hasError ? "text-red-500" : "text-gray-400"}`}>{hint}</p>
           </div>
         )}
         <Input
@@ -111,6 +119,7 @@ export const AccountImages: React.FC<AccountImagesProps> = ({
           hint="Tap to upload ID card"
           Icon={CreditCard}
           preview={uploadedImage?.idImage || null}
+          placeholder="/app/identity-card-4k.png"
           hasError={!!validationErrors.idImage}
           onChange={handleImageUpload}
         />
@@ -120,6 +129,7 @@ export const AccountImages: React.FC<AccountImagesProps> = ({
           hint="Tap to upload selfie photo"
           Icon={Camera}
           preview={selfiePreview}
+          placeholder="/app/image_selfie_4K.png"
           hasError={!!validationErrors.selfieImage}
           onChange={handleSelfieUpload}
         />
