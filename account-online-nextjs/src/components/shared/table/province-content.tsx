@@ -45,18 +45,8 @@ export const createProvinceTableColumns = ({
       ),
     },
     {
-      key: "provinceCode",
-      label: "Province Code",
-      truncate: true,
-      maxWidth: "300px",
-      minWidth: "150px",
-      render: (province) => (
-        <span className="font-medium">{province.provinceCode || "---"}</span>
-      ),
-    },
-    {
       key: "provinceEn",
-      label: "Province En",
+      label: "Province (EN)",
       truncate: true,
       maxWidth: "300px",
       minWidth: "150px",
@@ -66,12 +56,22 @@ export const createProvinceTableColumns = ({
     },
     {
       key: "provinceKh",
-      label: "Province Kh",
+      label: "Province (KH)",
       truncate: true,
-      maxWidth: "150px",
-      minWidth: "100px",
+      maxWidth: "200px",
+      minWidth: "120px",
       render: (province) => (
         <span className="font-medium">{province.provinceKh || "---"}</span>
+      ),
+    },
+    {
+      key: "provinceCode",
+      label: "Province Code",
+      truncate: true,
+      maxWidth: "180px",
+      minWidth: "120px",
+      render: (province) => (
+        <span className="font-medium">{province.provinceCode || "---"}</span>
       ),
     },
     {
