@@ -339,121 +339,144 @@ function OpenAccountContent() {
   // ========================================
   return (
     <FormStateProvider value={formStateContextValue}>
-      <div className="flex flex-col h-screen">
+      <div className="min-h-screen flex flex-col bg-gray-50/60">
         <PageHeader />
-        <div className="flex-1 pt-16 md:pt-20 pb-0">
-          <div className="px-3 sm:px-4 md:px-6 lg:px-16 py-4 sm:py-6 md:py-8">
-            <Card className="p-4 sm:p-6 md:p-8 mb-4 sm:mb-6 shadow-lg rounded-2xl border-0">
-              <div className="mx-auto">
-                <HeaderSection
-                  title={translate("header_acc")}
-                  onClear={() => setShowClearConfirm(true)}
-                  translate={translate}
-                />
-                <AccountImages
-                  uploadedImage={uploadedImage}
-                  selfiePreview={selfiePreview}
-                  handleImageUpload={handleImageUpload}
-                  handleSelfieUpload={handleSelfieUpload}
-                />
-                <PersonalDetailsFields
-                  formData={formData}
-                  handleInputChange={handleInputChangeWrapper}
-                  datePickerKey={datePickerKey}
-                  legalTypes={legalTypes}
-                  selectedLegalType={selectedLegalType}
-                  setSelectedLegalType={(val) =>
-                    handleMasterDataChange(setSelectedLegalType, val)
-                  }
-                  isLegalTypeLoading={isLegalTypeLoading}
-                  getLegalTypeName={getLegalTypeName}
-                  isVerified={isVerified}
-                  isNidExtracted={!!uploadedImage}
-                />
-                <MasterDataFields
-                  maritalStatuses={maritalStatuses}
-                  selectedMaritalStatus={selectedMaritalStatus}
-                  setSelectedMaritalStatus={(val) =>
-                    handleMasterDataChange(setSelectedMaritalStatus, val)
-                  }
-                  isLoadingMarital={isLoadingMarital}
-                  getMaritalName={getMaritalName}
-                  occupations={occupations}
-                  selectedOccupation={selectedOccupation}
-                  setSelectedOccupation={(val) =>
-                    handleMasterDataChange(setSelectedOccupation, val)
-                  }
-                  isLoadingOccupations={isLoadingOccupations}
-                  getOccupationName={getOccupationName}
-                  referenceBanks={referenceBanks}
-                  selectedReferenceBank={selectedReferenceBank}
-                  setSelectedReferenceBank={(val) =>
-                    handleMasterDataChange(setSelectedReferenceBank, val)
-                  }
-                  isLoadingReferenceBanks={isLoadingReferenceBanks}
-                  getReferenceName={getReferenceName}
-                  selectedBranch={selectedBranch}
-                  onBranchChange={(val) => {
-                    onBranchChange(val);
-                    setIsVerified(false);
-                  }}
-                  staffCode={staffCode}
-                  setStaffCode={(val) =>
-                    handleMasterDataChange(setStaffCode, val)
-                  }
-                  isVerified={isVerified}
-                />
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mt-4 sm:mt-6">
-                  <OTPInput
-                    phoneNumber={phoneNumber}
-                    onPhoneChange={handlePhoneChange}
-                    onVerificationSuccess={handleVerificationSuccess}
-                    disabled={isBusy}
-                    validationErrors={validationErrors}
-                    onValidationChange={handleValidationChange}
-                    reset={resetOtp}
-                  />
-                </div>
 
-                {/* Action Buttons */}
-                <div className="flex flex-col sm:flex-row justify-end gap-3 mt-6 sm:mt-8 pt-4 sm:pt-6 border-t border-gray-100">
-                  {/* Verify button — disabled while any operation is running or already verified */}
-                  <Button
-                    className="w-full sm:w-auto order-2 sm:order-1 px-6 py-3 bg-gradient-to-r from-orange-400 to-orange-500 hover:from-orange-500 hover:to-orange-600 text-white font-semibold rounded-2xl shadow-md shadow-orange-200 flex items-center justify-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                    onClick={handleVerificationClick}
-                    disabled={isBusy || isVerified} // FIX: added loadingState.isLoading via isBusy
-                  >
-                    {isValidating ? (
-                      <>
-                        {translate("processing")}
-                        <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin flex-shrink-0"></span>
-                      </>
-                    ) : (
-                      translate("verification")
-                    )}
-                  </Button>
+        {/* Main content */}
+        <main className="flex-1 pt-16 sm:pt-[60px]">
+          <div className="max-w-5xl mx-auto px-3 sm:px-5 lg:px-8 py-4 sm:py-6 lg:py-8">
 
-                  {/* Submit button — disabled while any operation is running or not yet verified */}
-                  <Button
-                    className="w-full sm:w-auto order-1 sm:order-2 px-6 py-3 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-semibold rounded-2xl shadow-md shadow-orange-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                    onClick={handleSubmitAccount}
-                    disabled={isBusy || !isVerified}
-                  >
-                    {loadingState.isLoading ? (
-                      <>
-                        {translate("submitting") || "Submitting"}
-                        <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin flex-shrink-0 ml-2"></span>
-                      </>
-                    ) : (
-                      translate("submit")
-                    )}
-                  </Button>
-                </div>
+            {/* Page header */}
+            <HeaderSection
+              title={translate("header_acc")}
+              onClear={() => setShowClearConfirm(true)}
+              translate={translate}
+            />
+
+            {/* Upload section */}
+            <section className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6 mb-4">
+              <AccountImages
+                uploadedImage={uploadedImage}
+                selfiePreview={selfiePreview}
+                handleImageUpload={handleImageUpload}
+                handleSelfieUpload={handleSelfieUpload}
+              />
+            </section>
+
+            {/* Personal details section */}
+            <section className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6 mb-4">
+              <div className="flex items-center gap-2 mb-5">
+                <div className="w-1 h-5 rounded-full bg-primary" />
+                <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">
+                  {translate("personal_details_label") || "Personal Details"}
+                </p>
               </div>
-            </Card>
+              <PersonalDetailsFields
+                formData={formData}
+                handleInputChange={handleInputChangeWrapper}
+                datePickerKey={datePickerKey}
+                legalTypes={legalTypes}
+                selectedLegalType={selectedLegalType}
+                setSelectedLegalType={(val) => handleMasterDataChange(setSelectedLegalType, val)}
+                isLegalTypeLoading={isLegalTypeLoading}
+                getLegalTypeName={getLegalTypeName}
+                isVerified={isVerified}
+                isNidExtracted={!!uploadedImage}
+              />
+            </section>
+
+            {/* Master data + branch section */}
+            <section className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6 mb-4">
+              <div className="flex items-center gap-2 mb-5">
+                <div className="w-1 h-5 rounded-full bg-primary" />
+                <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">
+                  {translate("additional_info_label") || "Additional Information"}
+                </p>
+              </div>
+              <MasterDataFields
+                maritalStatuses={maritalStatuses}
+                selectedMaritalStatus={selectedMaritalStatus}
+                setSelectedMaritalStatus={(val) => handleMasterDataChange(setSelectedMaritalStatus, val)}
+                isLoadingMarital={isLoadingMarital}
+                getMaritalName={getMaritalName}
+                occupations={occupations}
+                selectedOccupation={selectedOccupation}
+                setSelectedOccupation={(val) => handleMasterDataChange(setSelectedOccupation, val)}
+                isLoadingOccupations={isLoadingOccupations}
+                getOccupationName={getOccupationName}
+                referenceBanks={referenceBanks}
+                selectedReferenceBank={selectedReferenceBank}
+                setSelectedReferenceBank={(val) => handleMasterDataChange(setSelectedReferenceBank, val)}
+                isLoadingReferenceBanks={isLoadingReferenceBanks}
+                getReferenceName={getReferenceName}
+                selectedBranch={selectedBranch}
+                onBranchChange={(val) => { onBranchChange(val); setIsVerified(false); }}
+                staffCode={staffCode}
+                setStaffCode={(val) => handleMasterDataChange(setStaffCode, val)}
+                isVerified={isVerified}
+              />
+            </section>
+
+            {/* OTP section */}
+            <section className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6 mb-4">
+              <div className="flex items-center gap-2 mb-5">
+                <div className="w-1 h-5 rounded-full bg-primary" />
+                <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">
+                  {translate("phone_verification_label") || "Phone Verification"}
+                </p>
+              </div>
+              <div className="max-w-sm">
+                <OTPInput
+                  phoneNumber={phoneNumber}
+                  onPhoneChange={handlePhoneChange}
+                  onVerificationSuccess={handleVerificationSuccess}
+                  disabled={isBusy}
+                  validationErrors={validationErrors}
+                  onValidationChange={handleValidationChange}
+                  reset={resetOtp}
+                />
+              </div>
+            </section>
+
+            {/* Action buttons — sticky on mobile */}
+            <div className="sticky bottom-0 sm:relative bg-white sm:bg-transparent border-t sm:border-0 border-gray-100 px-4 sm:px-0 py-3 sm:py-0 -mx-3 sm:mx-0 sm:mt-2 mb-4 shadow-[0_-4px_16px_rgba(0,0,0,0.06)] sm:shadow-none z-30">
+              <div className="flex gap-3 max-w-5xl mx-auto">
+                <Button
+                  className="flex-1 sm:flex-none sm:min-w-[160px] h-11 sm:h-12 font-semibold rounded-xl sm:rounded-2xl text-sm flex items-center justify-center gap-2 transition-all
+                    bg-white border-2 border-primary text-primary hover:bg-primary/5
+                    disabled:opacity-40 disabled:cursor-not-allowed"
+                  onClick={handleVerificationClick}
+                  disabled={isBusy || isVerified}
+                  variant="outline"
+                >
+                  {isValidating ? (
+                    <>
+                      <span className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin flex-shrink-0" />
+                      {translate("processing")}
+                    </>
+                  ) : translate("verification")}
+                </Button>
+
+                <Button
+                  className="flex-1 sm:flex-none sm:min-w-[160px] h-11 sm:h-12 font-semibold rounded-xl sm:rounded-2xl text-sm flex items-center justify-center gap-2 transition-all
+                    bg-primary hover:bg-primary/90 text-primary-foreground shadow-md shadow-primary/20
+                    disabled:opacity-40 disabled:cursor-not-allowed"
+                  onClick={handleSubmitAccount}
+                  disabled={isBusy || !isVerified}
+                >
+                  {loadingState.isLoading ? (
+                    <>
+                      <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin flex-shrink-0" />
+                      {translate("submitting") || "Submitting"}
+                    </>
+                  ) : translate("submit")}
+                </Button>
+              </div>
+            </div>
           </div>
+
           <Footer />
-        </div>
+        </main>
 
         {/* Clear Confirmation Modal */}
         <ConfirmClearModal
