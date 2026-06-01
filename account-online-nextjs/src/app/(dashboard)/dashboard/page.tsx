@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { format } from "date-fns";
 import { DailyCountItem, TopUserOpenAccount, TopAmlActionUser } from "@/models/dashboard/dashboard.model";
 import {
   getAccountOpeningChartService,
@@ -9,7 +8,6 @@ import {
   getTopUsersOpenAccountService,
   getTopAmlActionUsersService,
 } from "@/services/dashboard/report/report.service";
-import { DashboardHeader } from "./_components/dashboard-header";
 import { AccountOpeningChartCard } from "./_components/account-opening-chart-card";
 import { AmlHitsChartCard } from "./_components/aml-hits-chart-card";
 import { TopUsersOpenAccountCard } from "./_components/top-users-open-account-card";
@@ -61,12 +59,8 @@ export default function Dashboard() {
 
   useEffect(() => { fetchAll(); }, [fetchAll]);
 
-  const todayLabel = format(new Date(), "EEEE, MMM d yyyy");
-
   return (
     <div className="flex flex-col gap-6 p-6">
-      <DashboardHeader today={todayLabel} onRefresh={fetchAll} />
-
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <AccountOpeningChartCard data={accountChart} loading={loadingAccountChart} />
         <AmlHitsChartCard data={amlChart} loading={loadingAmlChart} />
