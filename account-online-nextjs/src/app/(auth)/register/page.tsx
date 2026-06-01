@@ -110,8 +110,8 @@ export default function RegisterPage() {
     <div className="flex h-screen w-screen overflow-hidden">
 
       {/* Left image — 30% */}
-      <div className="hidden lg:block relative overflow-hidden flex-shrink-0" style={{ width: "30%" }}>
-        <Image src="/assets/cpbank.png" alt="CP Bank" fill sizes="30vw" className="object-cover" priority />
+      <div className="hidden lg:block relative overflow-hidden flex-shrink-0" style={{ width: "35%" }}>
+        <Image src="/assets/cpbank.png" alt="CP Bank" fill sizes="35vw" className="object-cover" priority />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
         <div className="absolute bottom-10 left-8 right-8 text-white">
           <p className="text-[11px] font-semibold uppercase tracking-widest text-white/50 mb-2">Cambodia Post Bank</p>
