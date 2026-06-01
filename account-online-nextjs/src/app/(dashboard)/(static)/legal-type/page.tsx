@@ -183,7 +183,6 @@ function LegalTypePageContent() {
       setSelectedLegalType(null);
       loadLegalTypes();
     } catch (err: any) {
-      toast.error(err?.errorMessage || "Failed to save legal type");
       AppToast({
         type: "error",
         message: "Failed to save legal type",

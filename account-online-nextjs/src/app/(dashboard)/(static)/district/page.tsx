@@ -172,7 +172,6 @@ function DistrictPageContent() {
       setSelectedDistrict(null);
       loadDistricts();
     } catch (err: any) {
-      toast.error(err?.errorMessage || "Failed to save district");
       AppToast({
         type: "error",
         message: "Failed to save district",

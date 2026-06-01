@@ -162,7 +162,6 @@ function CommunePageContent() {
       setSelectedCommune(null);
       loadCommunes();
     } catch (err: any) {
-      toast.error(err?.errorMessage || "Failed to save commune");
       AppToast({
         type: "error",
         message: "Failed to save commune",

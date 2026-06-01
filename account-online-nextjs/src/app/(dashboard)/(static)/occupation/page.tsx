@@ -186,7 +186,6 @@ function OccupationPageContent() {
       setSelectedOccupation(null);
       loadOccupations();
     } catch (err: any) {
-      toast.error(err?.errorMessage || "Failed to save occupation");
       AppToast({
         type: "error",
         message: "Failed to save occupation",

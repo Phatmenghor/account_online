@@ -19,7 +19,7 @@ import {
 import { getSuccessAccountOnlineExcelService } from "@/services/get-account/acc-online-success.service";
 import { Button } from "@/components/ui/button";
 import { CustomDatePicker } from "@/components/shared/common/custom-date-picker";
-import { toast } from "sonner";
+import { AppToast } from "@/components/shared/toast/app-toast";
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 import { format } from "date-fns";
@@ -138,7 +138,7 @@ function SuccessAccountExcelPageContent() {
             const rows: SuccessAccountOnlineExcelModel[] = allData?.content || [];
 
             if (rows.length === 0) {
-                toast.warning("No data available to export.");
+                AppToast({ type: "warning", message: "No data available to export." });
                 return;
             }
 
@@ -271,11 +271,11 @@ function SuccessAccountExcelPageContent() {
                 type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             });
             saveAs(blob, `success_accounts_${format(new Date(), "dd-MM-yyyy")}.xlsx`);
-            toast.success(`Excel exported successfully! Total records: ${rows.length}`);
+            AppToast({ type: "success", message: `Excel exported successfully! Total records: ${rows.length}` });
 
         } catch (error) {
             console.error("Error exporting to Excel:", error);
-            toast.error("Error exporting to Excel. Please try again.");
+            AppToast({ type: "error", message: "Error exporting to Excel. Please try again." });
         } finally {
             setIsExportingExcel(false);
         }

@@ -173,7 +173,6 @@ function ProvincePageContent() {
       setSelectedProvince(null);
       loadReferences();
     } catch (err: any) {
-      toast.error(err?.errorMessage || "Failed to save province");
       AppToast({
         type: "error",
         message: "Failed to save province",

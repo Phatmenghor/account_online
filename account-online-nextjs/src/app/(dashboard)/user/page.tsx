@@ -238,7 +238,6 @@ function UserPageContent() {
       setSelectedUser(null);
       loadUsers();
     } catch (err: any) {
-      toast.error(err?.errorMessage || "Failed to save user");
       AppToast({
         type: "error",
         message: "Failed to save user",

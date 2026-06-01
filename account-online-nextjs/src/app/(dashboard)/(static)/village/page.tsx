@@ -173,7 +173,6 @@ function VillagePageContent() {
       setSelectedVillage(null);
       loadVillages();
     } catch (err: any) {
-      toast.error(err?.errorMessage || "Failed to save village");
       AppToast({
         type: "error",
         message: "Failed to save village",

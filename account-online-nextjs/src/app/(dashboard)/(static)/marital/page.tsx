@@ -165,7 +165,6 @@ function MaritalPageContent() {
       setSelectedMarital(null);
       loadMaritals();
     } catch (err: any) {
-      toast.error(err?.errorMessage || "Failed to save marital status");
       AppToast({
         type: "error",
         message: "Failed to save marital status",

@@ -181,7 +181,6 @@ function ReferencePageContent() {
       setSelectedReference(null);
       loadReferences();
     } catch (err: any) {
-      toast.error(err?.errorMessage || "Failed to save bank");
       AppToast({
         type: "error",
         message: "Failed to save bank",

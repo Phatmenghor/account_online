@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useDebounce } from "@/utils/debounce/debounce";
 import { Search } from "lucide-react";
 import { useState, useCallback, Suspense } from "react";
-import { toast } from "sonner";
+import { AppToast } from "@/components/shared/toast/app-toast";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -36,14 +36,14 @@ function AccountPageContent() {
         legalId: searchLegalId,
       });
       if (response) {
-        toast.success(response?.message);
+        AppToast({ type: "success", message: response?.message });
         setAccount(response);
       } else {
-        toast.error("No data found.");
+        AppToast({ type: "error", message: "No data found." });
       }
     } catch (error: any) {
       console.error("Failed to fetch account : ", error);
-      toast.error(error.errorMessage || "Failed to fetch account.");
+      AppToast({ type: "error", message: error.errorMessage || "Failed to fetch account." });
     } finally {
       setIsLoading(false);
     }
