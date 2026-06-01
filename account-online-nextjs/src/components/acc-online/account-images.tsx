@@ -72,9 +72,9 @@ export const AccountImages: React.FC<AccountImagesProps> = ({
           </>
         ) : placeholder ? (
           <>
-            <img src={placeholder} alt={label} className="w-full h-full object-contain p-3 opacity-70" />
-            <div className="absolute inset-0 flex items-end justify-center pb-3">
-              <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center gap-1.5 bg-black/50 text-white px-3 py-1.5 rounded-full text-xs font-medium">
+            <img src={placeholder} alt={label} className="w-full h-full object-contain p-2" />
+            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all duration-200 flex items-center justify-center rounded-2xl">
+              <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center gap-1.5 bg-black/60 text-white px-3 py-1.5 rounded-full text-xs font-medium">
                 <ImagePlus className="w-3.5 h-3.5" />{hint}
               </span>
             </div>
@@ -119,7 +119,7 @@ export const AccountImages: React.FC<AccountImagesProps> = ({
           hint="Tap to upload ID card"
           Icon={CreditCard}
           preview={uploadedImage?.idImage || null}
-          placeholder="/app/placeholder-id-card.svg"
+          placeholder="/app/identity-card-4k.png"
           hasError={!!validationErrors.idImage}
           onChange={handleImageUpload}
         />
@@ -129,7 +129,7 @@ export const AccountImages: React.FC<AccountImagesProps> = ({
           hint="Tap to upload selfie photo"
           Icon={Camera}
           preview={selfiePreview}
-          placeholder="/app/placeholder-selfie.svg"
+          placeholder="/app/image_selfie_4K.png"
           hasError={!!validationErrors.selfieImage}
           onChange={handleSelfieUpload}
         />
