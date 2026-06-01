@@ -22,9 +22,6 @@ public class TelegramService {
     @Value("${telegram.bot.uat-acl-chat-id}")
     private String chatId_acl_internal;
 
-    @Value("${telegram.bot.uat-monitor-chat-id}")
-    private String chatId_uat_monitor;
-
     @Value("${telegram.bot.uat-dev-team-chat-id:}")
     private String chatId_dev_team;
 
@@ -37,10 +34,6 @@ public class TelegramService {
 
     public void sendMarkdownAclInternalMessage(String message) {
         taskExecutor.execute(() -> sendMarkdownToChat(chatId_acl_internal, message));
-    }
-
-    public void sendMarkdownAccountOnlineMonitorMessage(String message) {
-        taskExecutor.execute(() -> sendMarkdownToChat(chatId_uat_monitor, message));
     }
 
     public void sendDetailedErrorToDevTeam(String message) {

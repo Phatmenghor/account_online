@@ -97,7 +97,6 @@ telegram:
   bot:
     token: "8227113200:AAGq1I7Hs0CjkSW99M9rgrIdlHpgM8r6NMY"
     uat-acl-chat-id: "-1002740302492"
-    uat-monitor-chat-id: "-1002740302492"
     uat-dev-team-chat-id: "-1002740302492"
     compliance-mention: "@PHAT_MENGHOR"
     enabled: true

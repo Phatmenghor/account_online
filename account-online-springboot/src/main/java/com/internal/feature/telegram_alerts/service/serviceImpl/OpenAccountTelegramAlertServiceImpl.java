@@ -15,8 +15,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 
-import com.internal.feature.logs_report.service.CustomerImageService;
-import org.springframework.core.io.Resource;
 
 @Service
 @RequiredArgsConstructor
@@ -24,12 +22,8 @@ import org.springframework.core.io.Resource;
 public class OpenAccountTelegramAlertServiceImpl implements AlertsOpenAccOnlineService {
 
     private final TelegramService telegramService;
-    private final CustomerImageService customerImageService;
     @Value("${telegram.bot.uat-acl-chat-id}")
     private String chatId_acl_internal;
-
-    @Value("${telegram.bot.uat-monitor-chat-id}")
-    private String chatId_uat_monitor;
 
     @Value("${telegram.bot.uat-dev-team-chat-id:}")
     private String chatId_dev_team;
@@ -114,33 +108,8 @@ public class OpenAccountTelegramAlertServiceImpl implements AlertsOpenAccOnlineS
 
         String message = header + "\n" + SEPARATOR + "\n" + bodyBuilder + SEPARATOR + "\n" + footer;
 
-        // Logic for High Risk to attach images
-        if ("HIGH".equalsIgnoreCase(amlDto.getRiskLevel())) {
-
-            // Send main message to Monitor Channel as requested
-            telegramService.sendMarkdownAccountOnlineMonitorMessage(message);
-
-            // Send images to Monitor Channel as requested
-            try {
-                String customerId = amlDto.getCustomerInfo().getLegalId();
-                if (customerId != null) {
-                    Resource nidResource = customerImageService.getNidImageResourceForEmail(customerId);
-                    if (nidResource != null && nidResource.exists()) {
-                        telegramService.sendPhoto(chatId_uat_monitor, "NID - " + customerId, nidResource);
-                    }
-
-                    Resource selfieResource = customerImageService.getSelfieImageResourceForEmail(customerId);
-                    if (selfieResource != null && selfieResource.exists()) {
-                        telegramService.sendPhoto(chatId_uat_monitor, "Selfie - " + customerId, selfieResource);
-                    }
-                }
-            } catch (Exception e) {
-                log.error("Failed to attach images for High Risk AML alert: {}", e.getMessage());
-            }
-
-        } else {
-            telegramService.sendMarkdownAccountOnlineMonitorMessage(message);
-        }
+        // Send to ACL internal channel for all AML statuses
+        telegramService.sendMarkdownAclInternalMessage(message);
 
         // Send detailed alert to Dev Team for HIGH RISK cases
         if ("HIGH".equalsIgnoreCase(amlDto.getRiskLevel())) {
