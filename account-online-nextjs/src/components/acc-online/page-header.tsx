@@ -41,7 +41,7 @@ export const PageHeader = () => {
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-sm">
-      <div className="w-full px-4 sm:px-6 lg:px-8 py-2.5 sm:py-3 flex items-center justify-between gap-3">
+      <div className="max-w-5xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-2.5 sm:py-3 flex items-center justify-between gap-3">
         {/* Logo */}
         <div className="flex items-center flex-shrink-0">
           <img src="/app/CP-bank-Logo.png" alt="CP Bank" className="h-9 sm:h-11 w-auto object-contain" />
