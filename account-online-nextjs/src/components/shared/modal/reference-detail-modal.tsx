@@ -93,6 +93,7 @@ export default function ReferenceViewModal({
                 <InfoRow label="Name (KH)" value={reference.nameKh} />
                 <InfoRow label="Status" value={<StatusBadge status={reference.status} />} />
                 <InfoRow label="Created At" value={DateTimeFormat(reference.createdAt)} />
+                <InfoRow label="Updated At" value={DateTimeFormat(reference.updatedAt)} />
               </div>
             </div>
           ) : (

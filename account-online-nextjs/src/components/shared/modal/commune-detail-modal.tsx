@@ -94,6 +94,7 @@ export default function CommuneViewModal({
                 <InfoRow label="District" value={commune.district?.districtEn} />
                 <InfoRow label="Province" value={commune.district?.province?.provinceEn} />
                 <InfoRow label="Created At" value={DateTimeFormat(commune.createdAt)} />
+                <InfoRow label="Updated At" value={DateTimeFormat(commune.updatedAt)} />
               </div>
             </div>
           ) : (

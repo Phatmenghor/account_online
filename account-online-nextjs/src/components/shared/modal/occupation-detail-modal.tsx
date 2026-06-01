@@ -94,6 +94,7 @@ export default function OccupationViewModal({
                 <InfoRow label="Occupation Code" value={occupation.occupationCode} />
                 <InfoRow label="Status" value={<StatusBadge status={occupation.status} />} />
                 <InfoRow label="Created At" value={DateTimeFormat(occupation.createdAt)} />
+                <InfoRow label="Updated At" value={DateTimeFormat(occupation.updatedAt)} />
               </div>
             </div>
           ) : (

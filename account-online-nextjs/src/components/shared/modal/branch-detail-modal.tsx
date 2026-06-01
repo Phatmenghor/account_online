@@ -91,6 +91,7 @@ export default function BranchViewModal({
                 <InfoRow label="Branch Code" value={branch.branchCode} />
                 <InfoRow label="Branch Name KH" value={branch.branchKh} />
                 <InfoRow label="Created At" value={DateTimeFormat(branch.createdAt)} />
+                <InfoRow label="Updated At" value={DateTimeFormat(branch.updatedAt)} />
               </div>
             </div>
           ) : (

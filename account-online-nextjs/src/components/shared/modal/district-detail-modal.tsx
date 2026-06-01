@@ -93,6 +93,7 @@ export default function DistrictViewModal({
                 <InfoRow label="Name (KH)" value={district.districtKh} />
                 <InfoRow label="Province" value={district.province?.provinceEn} />
                 <InfoRow label="Created At" value={DateTimeFormat(district.createdAt)} />
+                <InfoRow label="Updated At" value={DateTimeFormat(district.updatedAt)} />
               </div>
             </div>
           ) : (

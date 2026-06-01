@@ -92,6 +92,7 @@ export default function ProvinceViewModal({
                 <InfoRow label="Name (EN)" value={province.provinceEn} />
                 <InfoRow label="Name (KH)" value={province.provinceKh} />
                 <InfoRow label="Created At" value={DateTimeFormat(province.createdAt)} />
+                <InfoRow label="Updated At" value={DateTimeFormat(province.updatedAt)} />
               </div>
             </div>
           ) : (
