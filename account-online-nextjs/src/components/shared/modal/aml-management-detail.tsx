@@ -97,10 +97,8 @@ export default function AmlViewDetailModal({
             </div>
             <div className="flex-1">
               <DialogTitle className="text-xl font-semibold">AML Alert Details</DialogTitle>
-              <DialogDescription className="text-base text-muted-foreground">
-                AML screening result details
-              </DialogDescription>
-              {alert && <div className="mt-2"><AmlStatusBadge status={alert.status} /></div>}
+              <DialogDescription className="sr-only">AML Alert Details</DialogDescription>
+              {alert && <div className="mt-1"><AmlStatusBadge status={alert.status} /></div>}
             </div>
           </div>
         </DialogHeader>

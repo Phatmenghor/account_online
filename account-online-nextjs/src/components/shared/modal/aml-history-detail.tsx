@@ -97,10 +97,8 @@ export default function AmlHistoryDetailModal({
             </div>
             <div className="flex-1">
               <DialogTitle className="text-xl font-semibold">AML History Details</DialogTitle>
-              <DialogDescription className="text-base text-muted-foreground">
-                AML screening result details
-              </DialogDescription>
-              {history && <div className="mt-2"><AmlStatusBadge status={history.status} /></div>}
+              <DialogDescription className="sr-only">AML History Details</DialogDescription>
+              {history && <div className="mt-1"><AmlStatusBadge status={history.status} /></div>}
             </div>
           </div>
         </DialogHeader>
