@@ -217,11 +217,13 @@ public class AuthServiceImpl implements AuthService {
 
         UserEntity user = new UserEntity();
         user.setUsername(registerDto.getUsername());
+        user.setEmail(registerDto.getEmail());
         user.setFullName(registerDto.getFullName());
         user.setPosition(registerDto.getPosition());
         user.setStaffId(registerDto.getStaffId());
         user.setPhoneNumber(registerDto.getPhoneNumber());
         user.setBranch(registerDto.getBranch());
+        user.setDepartment(registerDto.getDepartment());
         user.setPassword(passwordEncoder.encode(registerDto.getPassword()));
         user.setStatus(StatusData.ACTIVE);
         user.setRoles(Collections.singletonList(role));

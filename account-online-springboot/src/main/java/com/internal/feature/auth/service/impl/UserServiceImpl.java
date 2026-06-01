@@ -1,13 +1,13 @@
 package com.internal.feature.auth.service.impl;
 
 import com.internal.enumation.StatusData;
-import com.internal.exceptions.error.custom.BadRequestException;
-import com.internal.exceptions.error.custom.DuplicateNameException;
 import com.internal.exceptions.error.custom.NotFoundException;
 import com.internal.feature.auth.dto.request.ChangePasswordByAdminRequestDto;
 import com.internal.feature.auth.dto.request.ChangePasswordRequestDto;
 import com.internal.feature.auth.dto.request.GetAllUserRequestDto;
 import com.internal.feature.auth.dto.request.UpdateUserRequestDto;
+import com.internal.feature.auth.models.Role;
+import com.internal.feature.auth.repository.RoleRepository;
 import com.internal.feature.auth.dto.response.AllUserResponseDto;
 import com.internal.feature.auth.dto.response.UserResponseDto;
 import com.internal.feature.auth.mapper.UserMapper;
@@ -39,6 +39,7 @@ import com.internal.enumation.RoleEnum;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
     private final SecurityUtils securityUtils;
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
@@ -171,39 +172,19 @@ public class UserServiceImpl implements UserService {
     }
 
     private void updateUserFields(UserEntity user, UpdateUserRequestDto request) {
-        if (request.getUsername() != null) {
-            validateUniqueIdCard(user, request.getUsername());
-            user.setUsername(request.getUsername());
-        }
-        
-        if (request.getStatus() != null) {
-            user.setStatus(request.getStatus());
-        }
-
-        if (request.getFullName() != null) {
-            user.setFullName(request.getFullName());
-        }
-
-        if (request.getProfileUrl() != null) {
-            user.setProfileUrl(request.getProfileUrl());
-        }
-
-        if (request.getPosition() != null) {
-            user.setPosition(request.getPosition());
-        }
-
-        if (request.getStaffId() != null) {
-            user.setStaffId(request.getStaffId());
-        }
-
-        if (request.getPhoneNumber() != null) {
-            user.setPhoneNumber(request.getPhoneNumber());
-        }
-    }
-
-    private void validateUniqueIdCard(UserEntity user, String newIdCard) {
-        if (!user.getUsername().equals(newIdCard) && userRepository.existsByUsername(newIdCard)) {
-            throw new DuplicateNameException("Id card is already in use, please choose another one.");
+        if (request.getEmail() != null) user.setEmail(request.getEmail());
+        if (request.getStatus() != null) user.setStatus(request.getStatus());
+        if (request.getFullName() != null) user.setFullName(request.getFullName());
+        if (request.getProfileUrl() != null) user.setProfileUrl(request.getProfileUrl());
+        if (request.getPosition() != null) user.setPosition(request.getPosition());
+        if (request.getStaffId() != null) user.setStaffId(request.getStaffId());
+        if (request.getPhoneNumber() != null) user.setPhoneNumber(request.getPhoneNumber());
+        if (request.getBranch() != null) user.setBranch(request.getBranch());
+        if (request.getDepartment() != null) user.setDepartment(request.getDepartment());
+        if (request.getUserRole() != null) {
+            Role role = roleRepository.findByName(request.getUserRole())
+                    .orElseThrow(() -> new com.internal.exceptions.error.custom.BadRequestException("Invalid role: " + request.getUserRole()));
+            user.setRoles(Collections.singletonList(role));
         }
     }
 

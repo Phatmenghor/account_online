@@ -7,7 +7,6 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
-  DialogFooter,
 } from "@/components/ui/dialog";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -397,7 +396,7 @@ export default function ModalUser({
         </ScrollArea>
 
         {/* Footer */}
-        <DialogFooter className="px-6 py-4 border-t bg-muted/30 flex-shrink-0 flex items-center justify-between">
+        <div className="px-6 py-4 border-t bg-muted/30 flex-shrink-0 flex items-center justify-between">
           <div className="text-sm text-muted-foreground flex items-center gap-2">
             {isSubmitting ? (
               <><Loader2 className="h-3 w-3 animate-spin" />{isCreate ? "Creating..." : "Updating..."}</>
@@ -417,7 +416,7 @@ export default function ModalUser({
                 : isCreate ? "Create User" : "Update User"}
             </Button>
           </div>
-        </DialogFooter>
+        </div>
       </DialogContent>
     </Dialog>
   );

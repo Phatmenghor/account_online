@@ -10,9 +10,10 @@ import javax.validation.constraints.Size;
 @Data
 public class RegisterRequestDto {
 
-    @NotBlank(message = "Email is required")
-    @Email(message = "Email should be valid")
-    private String username; // used as email
+    @NotBlank(message = "Username is required")
+    private String username;
+
+    private String email;
 
     @NotBlank(message = "Password is required")
     @Size(min = 6, message = "Password must have at least 6 characters")
@@ -26,8 +27,9 @@ public class RegisterRequestDto {
 
     private String branch;
 
+    private String department;
+
     private String position;
 
-    /* Only used by admin creation — register endpoint auto-assigns STAFF */
     private RoleEnum role;
 }

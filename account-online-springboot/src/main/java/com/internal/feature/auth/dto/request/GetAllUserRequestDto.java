@@ -24,5 +24,12 @@ public class GetAllUserRequestDto {
     private String search;
     @Builder.Default
     private StatusData status = StatusData.ACTIVE;
+    private String role;
     private java.util.List<String> roles;
+
+    public java.util.List<String> getRoles() {
+        if (roles != null && !roles.isEmpty()) return roles;
+        if (role != null && !role.isBlank()) return java.util.Collections.singletonList(role);
+        return null;
+    }
 }
