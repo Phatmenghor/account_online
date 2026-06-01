@@ -1,6 +1,5 @@
 package com.internal.feature.logs_report.dto.response;
 
-import com.internal.enumation.AmlStatusEnum;
 import com.internal.feature.auth.dto.response.UserResponseDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -77,22 +76,6 @@ public class AccountOnlineFinalResponseDto {
 
     // === CONTACT INFO ===
     private String phoneNumber;
-
-    // === AML FINAL STATUS ===
-    private AmlStatusEnum amlStatus;           // Enum -> String recommended for reporting
-    private Long amlActionBy;
-    private String amlActionName;
-    private String amlActionRole;
-    private String amlRemarks;
-    private String amlScreeningResult;
-
-    // === AML extracted fields ===
-    private String amlRiskLevel;
-    private String amlActionTaken;
-    private Integer amlTotalRulesScore;
-    private String amlTrxnId;
-    private String serviceName;
-    private String amlRulesTriggered;
 
     // === IMAGES ===
     private String nidImageName;
