@@ -132,22 +132,12 @@ const AccountExistsModal = ({
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
-                className="bg-blue-50 border border-blue-200 rounded-xl p-4 space-y-3"
+                className="bg-blue-50 border border-blue-200 rounded-xl p-4 space-y-2"
               >
-                <h4 className="text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  ចាប់ផ្តើមបង្កើតគណនី
-                </h4>
-                <div className="space-y-2">
-                  <p className="text-sm text-gray-700">
-                    📞 <span className="font-semibold">ទូរស័ព្ទ:</span> ០៧ ២០០ ០០២ ឬ ១៨០០ ២០០ ៨៨៨
-                  </p>
-                  <p className="text-sm text-gray-700">
-                    🕐 <span className="font-semibold">ម៉ោងបើកលើ:</span> ០៨:០០ - ១៨:០០ (ច័ន្ទ - សុក្រ)
-                  </p>
-                  <p className="text-sm text-gray-700">
-                    💬 <span className="font-semibold">អ៊ីមែល:</span> support@cpbank.com
-                  </p>
-                </div>
+                <p className="text-sm font-semibold text-gray-700">
+                  070 200 002&nbsp;&nbsp;|&nbsp;&nbsp;1800 200 888 <span className="font-normal text-gray-500">(ឥតគិតថ្លៃ)</span>
+                </p>
+                <p className="text-sm text-gray-600">info@cambodiapostbank.com.kh</p>
               </motion.div>
             </div>
 
