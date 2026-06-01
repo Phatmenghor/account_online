@@ -3,6 +3,10 @@
 # Active when: spring.profiles.active=prod
 # ==============================================================
 
+email:
+  sender:
+    enabled: true     # prod: real email OTP sent to user
+
 ad:
   login:
     url: http://192.168.101.5:5050/api/v1/auth/login

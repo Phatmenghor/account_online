@@ -3,6 +3,10 @@
 # Active when: spring.profiles.active=local
 # ==============================================================
 
+email:
+  sender:
+    enabled: false    # local: OTP is always 123456, no need to send email
+
 ad:
   login:
     url: http://localhost:8080/api/v1/auth/login

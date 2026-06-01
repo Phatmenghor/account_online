@@ -88,6 +88,7 @@ spring:
 email:
   sender:
     address: ithelpdesk@cambodiapostbank.com.kh
+    enabled: true
 
 file:
   upload:

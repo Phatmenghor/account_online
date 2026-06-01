@@ -116,11 +116,15 @@ public class AuthServiceImpl implements AuthService {
                 .build();
         otpRepository.save(otpSms);
 
-        // Send email OTP (non-blocking on failure)
-        try {
-            emailService.sendOtpEmail(dto.getEmail(), otpCode);
-        } catch (Exception e) {
-            log.error("Failed to send OTP email to {}: {}", dto.getEmail(), e.getMessage());
+        // Skip email for default dev OTP (same pattern as SMS OTP)
+        if (AppConstants.DEFAULT_DEV_OTP.equals(otpCode)) {
+            log.info("Dev environment: skipping email send, OTP is default code for: {}", dto.getEmail());
+        } else {
+            try {
+                emailService.sendOtpEmail(dto.getEmail(), otpCode);
+            } catch (Exception e) {
+                log.error("Failed to send OTP email to {}: {}", dto.getEmail(), e.getMessage());
+            }
         }
 
         log.info("Registration OTP sent to email: {}", dto.getEmail());
