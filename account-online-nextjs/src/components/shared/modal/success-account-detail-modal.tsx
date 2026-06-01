@@ -92,7 +92,7 @@ export default function SuccessAccountViewModal({
               {account ? (
                 <div className="space-y-6">
                   {/* Images Section */}
-                  {(account.nidImage || account.selfieImage) && (
+                  {(account.nidImageName || account.selfieImageName) && (
                     <>
                       <div className="space-y-4">
                         <SectionHeader
@@ -100,25 +100,25 @@ export default function SuccessAccountViewModal({
                           title="Document Images"
                         />
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                          {account.nidImage && (
+                          {account.nidImageName && (
                             <div className="flex flex-col gap-2">
                               <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                                 NID / ID Card
                               </p>
                               <ImagePreviewCell
-                                imageId={account.nidImage}
+                                imageId={account.nidImageName}
                                 label="NID / ID Card"
                                 size="w-full h-48"
                               />
                             </div>
                           )}
-                          {account.selfieImage && (
+                          {account.selfieImageName && (
                             <div className="flex flex-col gap-2">
                               <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                                 Selfie Photo
                               </p>
                               <ImagePreviewCell
-                                imageId={account.selfieImage}
+                                imageId={account.selfieImageName}
                                 label="Selfie Photo"
                                 size="w-full h-48"
                               />
@@ -421,19 +421,34 @@ export default function SuccessAccountViewModal({
                         label="Created At"
                         value={DateTimeFormat(account.createdAt)}
                       />
-                      <InfoRow
-                        label="Updated At"
-                        value={DateTimeFormat(account.updatedAt)}
-                      />
-                      <InfoRow
-                        label="Created By"
-                        value={account.createdBy}
-                      />
-                      <InfoRow
-                        label="Updated By"
-                        value={account.updatedBy}
-                      />
                     </div>
+
+                    {/* Submitted By User details */}
+                    {account.submittedByUser && (
+                      <div className="rounded-md border bg-muted/30 p-4 space-y-3">
+                        <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                          Submitted By User
+                        </p>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                          <InfoRow
+                            label="Full Name"
+                            value={account.submittedByUser.fullName}
+                          />
+                          <InfoRow
+                            label="Email"
+                            value={account.submittedByUser.email}
+                          />
+                          <InfoRow
+                            label="Role"
+                            value={account.submittedByUser.userRole}
+                          />
+                          <InfoRow
+                            label="Position"
+                            value={account.submittedByUser.position}
+                          />
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               ) : (

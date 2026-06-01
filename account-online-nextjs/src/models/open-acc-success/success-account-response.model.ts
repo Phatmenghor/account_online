@@ -27,6 +27,24 @@ export interface SuccessAccountOnlineExcelModel {
   updatedAt: string;
 }
 
+export interface SubmittedByUser {
+  id: number;
+  idCard: string;
+  email: string;
+  userRole: string;
+  userStatus: string | null;
+  fullName: string;
+  position: string;
+  profileUrl: string;
+  staffId: string | null;
+  phoneNumber: string | null;
+  branch: string | null;
+  department: string | null;
+  createdAt: string | null;
+  updatedAt: string | null;
+  lastLogin: string | null;
+}
+
 export interface SuccessAccountOnlineModel {
   id: string;
   cif: string;
@@ -75,6 +93,12 @@ export interface SuccessAccountOnlineModel {
   customerPobVillageCode: string;
   customerPobVillage: string;
   phoneNumber: string;
+  nidImageName: string;
+  selfieImageName: string;
+  mbActivationCode: string;
+  mbAppDownloadLink: string;
+  submittedBy: string;
+  submittedByUser: SubmittedByUser | null;
   amlStatus: string;
   amlActionBy: number;
   amlActionName: string;
@@ -87,11 +111,6 @@ export interface SuccessAccountOnlineModel {
   amlTrxnId: string;
   serviceName: string;
   amlRulesTriggered: string;
-  nidImage: string;
-  selfieImage: string;
-  mbActivationCode: string;
-  mbAppDownloadLink: string;
-  submittedBy: string;
   createdAt: string;
   updatedAt: string;
   createdBy: string;
