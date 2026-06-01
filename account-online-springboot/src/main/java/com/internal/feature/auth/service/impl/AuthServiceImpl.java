@@ -94,11 +94,15 @@ public class AuthServiceImpl implements AuthService {
             throw new BadRequestException("Passwords do not match.");
         }
 
-        if (userRepository.existsByUsername(dto.getEmail())) {
+        if (userRepository.existsByUsername(dto.getUsername())) {
+            throw new DuplicateNameException("This username is already taken. Please choose another.");
+        }
+
+        if (userRepository.existsByEmail(dto.getEmail())) {
             throw new DuplicateNameException("This email is already registered. Please login instead.");
         }
 
-        // Store pending registration data
+        // Store pending registration data keyed by email (used for OTP)
         pendingRegistrationStore.put(dto.getEmail(), dto);
 
         // Expire existing OTPs and generate a new one
@@ -169,10 +173,10 @@ public class AuthServiceImpl implements AuthService {
         RegisterInitiateDto pendingData = pendingRegistrationStore.get(dto.getEmail())
                 .orElseThrow(() -> new BadRequestException("Registration session expired. Please start over."));
 
-        // Re-check username hasn't been taken while waiting
-        if (userRepository.existsByUsername(dto.getEmail())) {
+        // Re-check in case taken while waiting for OTP
+        if (userRepository.existsByUsername(pendingData.getUsername())) {
             pendingRegistrationStore.remove(dto.getEmail());
-            throw new DuplicateNameException("This email was registered by someone else. Please try a different email.");
+            throw new DuplicateNameException("This username was just taken. Please register again with a different username.");
         }
 
         // Create user with STAFF role
@@ -180,7 +184,7 @@ public class AuthServiceImpl implements AuthService {
                 .orElseThrow(() -> new BadRequestException("STAFF role not found."));
 
         UserEntity user = new UserEntity();
-        user.setUsername(pendingData.getEmail());
+        user.setUsername(pendingData.getUsername());
         user.setEmail(pendingData.getEmail());
         user.setFullName(pendingData.getFullName());
         user.setPosition(pendingData.getPosition());

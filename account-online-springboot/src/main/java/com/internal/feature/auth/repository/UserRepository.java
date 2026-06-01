@@ -20,6 +20,8 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
 
     Boolean existsByUsername(String username);
 
+    Boolean existsByEmail(String email);
+
     Page<UserEntity> findByStatus(StatusData status, Pageable pageable);
 
     Page<UserEntity> findByStatusIn(List<StatusData> statuses, Pageable pageable);

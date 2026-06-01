@@ -5,6 +5,7 @@ import { storeUserInfo } from "@/utils/local-storage/userInfo";
 import { storePermission } from "@/utils/local-storage/permission";
 
 export interface RegisterInitiateData {
+  username: string;
   email: string;
   password: string;
   confirmPassword: string;
