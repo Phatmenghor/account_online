@@ -157,10 +157,28 @@ public class AuthServiceImpl implements AuthService {
             throw new UnauthorizedException("Your Active Directory account does not have an email address configured. Please contact your administrator.");
         }
 
+        // Re-check by the AD email — the original login attempt used a short username
+        UserEntity user = userRepository.findByUsername(username).orElse(null);
+        if (user != null) {
+            log.info("AD login: user {} already exists (found by AD email), updating password", username);
+            user.setPassword(passwordEncoder.encode(loginDto.getPassword()));
+            user.setLastLogin(LocalDateTime.now(ZoneId.of("UTC")));
+            userRepository.save(user);
+
+            List<String> existingRoles = user.getRoles().stream()
+                    .map(r -> r.getName().name())
+                    .collect(Collectors.toList());
+            String existingToken = jwtGenerator.generateTokenForUser(username, existingRoles);
+            UserResponseDto existingDto = authMapper.userToUserResponseDto(user);
+            existingDto.setLastLogin(user.getLastLogin());
+            log.info("AD login successful for existing user: {}", username);
+            return new AuthResponseDTO(existingToken, existingDto);
+        }
+
         Role role = roleRepository.findByName(RoleEnum.STAFF)
                 .orElseThrow(() -> new BadRequestException("STAFF role not found."));
 
-        UserEntity user = new UserEntity();
+        user = new UserEntity();
         user.setUsername(username);
         user.setFullName(displayName);
         user.setPosition(title);
