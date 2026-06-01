@@ -113,9 +113,9 @@ export default function RegisterPage() {
 
   return (
     <div className="flex h-screen w-screen overflow-hidden">
-      {/* Left hero */}
-      <div className="hidden lg:flex flex-1 relative overflow-hidden">
-        <Image src="/assets/cpbank.png" alt="CP Bank" fill sizes="50vw" className="object-cover" priority />
+      {/* Left hero — 30% */}
+      <div className="hidden lg:flex relative overflow-hidden" style={{ width: "30%" }}>
+        <Image src="/assets/cpbank.png" alt="CP Bank" fill sizes="30vw" className="object-cover" priority />
         <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/30 to-black/10" />
         <div className="absolute bottom-10 left-10 right-10 text-white">
           <p className="text-xs font-semibold uppercase tracking-widest text-white/50 mb-3">Cambodia Post Bank</p>
@@ -126,9 +126,9 @@ export default function RegisterPage() {
         </div>
       </div>
 
-      {/* Right form */}
+      {/* Right form — 70% */}
       <div className="flex flex-1 items-center justify-center bg-muted/40 p-6 overflow-y-auto">
-        <Card className="w-full max-w-lg shadow-2xl border border-border/60 rounded-2xl overflow-hidden my-4">
+        <Card className="w-full max-w-2xl shadow-2xl border border-border/60 rounded-2xl overflow-hidden my-4">
           {/* Header */}
           <div className="bg-primary/5 border-b border-border/50 px-8 pt-8 pb-6">
             <div className="flex items-center gap-3 mb-5">
