@@ -22,21 +22,12 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { ChartSkeleton } from "./chart-skeleton";
-import { AmlStatisticsModel } from "@/models/aml/chart/aml-chart.response";
+import { DailyCountItem } from "@/models/dashboard/dashboard.model";
 
-ChartJS.register(
-  LineController,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Tooltip,
-  Legend,
-  Filler
-);
+ChartJS.register(LineController, CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Legend, Filler);
 
 interface AmlHitsChartCardProps {
-  data: AmlStatisticsModel[];
+  data: DailyCountItem[];
   loading: boolean;
 }
 
@@ -44,43 +35,34 @@ export function AmlHitsChartCard({ data, loading }: AmlHitsChartCardProps) {
   const chartRef = useRef<HTMLCanvasElement | null>(null);
   const chartInstanceRef = useRef<Chart | null>(null);
 
-  const total = data.reduce((acc, d) => acc + d.amlCount, 0);
+  const total = data.reduce((acc, d) => acc + d.count, 0);
 
   useEffect(() => {
     if (!chartRef.current || loading) return;
-
-    if (chartInstanceRef.current) {
-      chartInstanceRef.current.destroy();
-    }
+    chartInstanceRef.current?.destroy();
 
     const ctx = chartRef.current.getContext("2d");
     if (!ctx) return;
 
     const labels = data.map((d) => {
-      try {
-        return format(new Date(d.date), "MMM d");
-      } catch {
-        return d.date;
-      }
+      try { return format(new Date(d.date), "MMM d"); } catch { return d.date; }
     });
 
     chartInstanceRef.current = new Chart(ctx, {
       type: "line",
       data: {
         labels,
-        datasets: [
-          {
-            label: "AML Hits",
-            data: data.map((d) => d.amlCount),
-            borderColor: "hsl(346 77% 49%)",
-            backgroundColor: "hsla(346, 77%, 49%, 0.08)",
-            fill: true,
-            pointRadius: 3,
-            pointHoverRadius: 5,
-            tension: 0.4,
-            borderWidth: 2.5,
-          },
-        ],
+        datasets: [{
+          label: "AML Hits",
+          data: data.map((d) => d.count),
+          borderColor: "#ef4444",
+          backgroundColor: "rgba(239,68,68,0.08)",
+          fill: true,
+          pointRadius: 3,
+          pointHoverRadius: 5,
+          tension: 0.4,
+          borderWidth: 2.5,
+        }],
       },
       options: {
         responsive: true,
@@ -89,45 +71,34 @@ export function AmlHitsChartCard({ data, loading }: AmlHitsChartCardProps) {
         plugins: {
           legend: { display: false },
           tooltip: {
-            backgroundColor: "hsl(var(--popover))",
-            titleColor: "hsl(var(--foreground))",
-            bodyColor: "hsl(var(--muted-foreground))",
-            borderColor: "hsl(var(--border))",
+            backgroundColor: "#1f2937",
+            titleColor: "#f9fafb",
+            bodyColor: "#d1d5db",
+            borderColor: "#374151",
             borderWidth: 1,
             padding: 10,
             callbacks: {
-              title: (items) => items[0]?.label ?? "",
-              label: (item) => `AML Hits: ${item.raw}`,
+              label: (item) => ` AML Hits: ${item.raw}`,
             },
           },
         },
         scales: {
           x: {
             grid: { display: false },
-            ticks: {
-              color: "hsl(var(--muted-foreground))",
-              font: { size: 11 },
-              maxTicksLimit: 10,
-            },
+            ticks: { color: "#6b7280", font: { size: 11 }, maxTicksLimit: 10 },
             border: { display: false },
           },
           y: {
             beginAtZero: true,
-            grid: { color: "hsl(var(--border))", lineWidth: 0.8 },
-            ticks: {
-              color: "hsl(var(--muted-foreground))",
-              font: { size: 11 },
-              precision: 0,
-            },
+            grid: { color: "#e5e7eb", lineWidth: 0.8 },
+            ticks: { color: "#6b7280", font: { size: 11 }, precision: 0 },
             border: { display: false },
           },
         },
       },
     });
 
-    return () => {
-      chartInstanceRef.current?.destroy();
-    };
+    return () => { chartInstanceRef.current?.destroy(); };
   }, [data, loading]);
 
   return (

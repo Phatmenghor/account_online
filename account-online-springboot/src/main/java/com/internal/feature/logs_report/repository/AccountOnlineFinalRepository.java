@@ -40,6 +40,25 @@ public interface AccountOnlineFinalRepository extends JpaRepository<AccountOnlin
                         @Param("toDate") LocalDateTime toDate,
                         Pageable pageable);
 
+        @Query(value = "SELECT TO_CHAR(a.created_at, 'YYYY-MM-DD') AS date, COUNT(*) AS count " +
+                        "FROM acc_online_open_final a " +
+                        "WHERE a.created_at >= :fromDate AND a.created_at < :toDate " +
+                        "GROUP BY TO_CHAR(a.created_at, 'YYYY-MM-DD') " +
+                        "ORDER BY TO_CHAR(a.created_at, 'YYYY-MM-DD')",
+                        nativeQuery = true)
+        List<Object[]> countByDateRange(
+                        @Param("fromDate") LocalDateTime fromDate,
+                        @Param("toDate") LocalDateTime toDate);
+
+        @Query(value = "SELECT u.id, u.full_name, u.position, u.profile_url, u.branch, COUNT(a.id) AS cnt " +
+                        "FROM acc_online_open_final a " +
+                        "JOIN acc_online_users u ON u.id = a.submitted_by_user_id " +
+                        "GROUP BY u.id, u.full_name, u.position, u.profile_url, u.branch " +
+                        "ORDER BY cnt DESC " +
+                        "LIMIT 10",
+                        nativeQuery = true)
+        List<Object[]> findTopUsersByAccountCount();
+
         // Excel
         @Query("SELECT a FROM AccountOnlineFinal a WHERE " +
                 "(:search IS NULL OR :search = '' OR " +

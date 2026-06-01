@@ -1,33 +1,55 @@
 import { axiosClientWithAuth } from "@/utils/axios";
 import axios from "axios";
-import { TopUserOpenAccount, TopAmlActionUser } from "@/models/dashboard/dashboard.model";
+import { DailyCountItem, TopUserOpenAccount, TopAmlActionUser } from "@/models/dashboard/dashboard.model";
+
+export async function getAccountOpeningChartService(fromDate: string, toDate: string): Promise<DailyCountItem[]> {
+  try {
+    const response = await axiosClientWithAuth.get("/api/v1/dashboard/account-opening-chart", {
+      params: { fromDate, toDate },
+    });
+    return response.data.data ?? [];
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      throw { errorMessage: error.response?.data?.message || "Failed to fetch chart data." };
+    }
+    throw { errorMessage: "An unexpected error occurred." };
+  }
+}
+
+export async function getAmlHitsChartService(fromDate: string, toDate: string): Promise<DailyCountItem[]> {
+  try {
+    const response = await axiosClientWithAuth.get("/api/v1/dashboard/aml-hits-chart", {
+      params: { fromDate, toDate },
+    });
+    return response.data.data ?? [];
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      throw { errorMessage: error.response?.data?.message || "Failed to fetch AML chart data." };
+    }
+    throw { errorMessage: "An unexpected error occurred." };
+  }
+}
 
 export async function getTopUsersOpenAccountService(): Promise<TopUserOpenAccount[]> {
   try {
-    const response = await axiosClientWithAuth.post(
-      "/api/v1/report/top-users-open-account"
-    );
-    return response.data.data;
+    const response = await axiosClientWithAuth.get("/api/v1/dashboard/top-users-open-account");
+    return response.data.data ?? [];
   } catch (error) {
     if (axios.isAxiosError(error)) {
-      const raw = error.response?.data;
-      throw { errorMessage: raw?.message || "Failed to fetch top users.", rawError: raw };
+      throw { errorMessage: error.response?.data?.message || "Failed to fetch top users." };
     }
-    throw { errorMessage: "An unexpected error occurred.", rawError: error };
+    throw { errorMessage: "An unexpected error occurred." };
   }
 }
 
 export async function getTopAmlActionUsersService(): Promise<TopAmlActionUser[]> {
   try {
-    const response = await axiosClientWithAuth.post(
-      "/api/v1/report/top-aml-action-users"
-    );
-    return response.data.data;
+    const response = await axiosClientWithAuth.get("/api/v1/dashboard/top-aml-action-users");
+    return response.data.data ?? [];
   } catch (error) {
     if (axios.isAxiosError(error)) {
-      const raw = error.response?.data;
-      throw { errorMessage: raw?.message || "Failed to fetch top AML users.", rawError: raw };
+      throw { errorMessage: error.response?.data?.message || "Failed to fetch top AML users." };
     }
-    throw { errorMessage: "An unexpected error occurred.", rawError: error };
+    throw { errorMessage: "An unexpected error occurred." };
   }
 }

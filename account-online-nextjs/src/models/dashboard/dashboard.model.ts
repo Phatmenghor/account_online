@@ -1,3 +1,8 @@
+export interface DailyCountItem {
+  date: string;
+  count: number;
+}
+
 export interface TopUserOpenAccount {
   userId: number;
   fullName: string;
