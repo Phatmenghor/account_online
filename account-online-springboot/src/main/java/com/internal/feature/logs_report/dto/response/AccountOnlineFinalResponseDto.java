@@ -98,13 +98,14 @@ public class AccountOnlineFinalResponseDto {
     private String nidImageName;
     private String selfieImageName;
 
+    // === MOBILE BANKING ===
+    private String mbActivationCode;
+    private String mbAppDownloadLink;
+
     // === SUBMITTED BY ===
     private String submittedBy;
     private UserResponseDto submittedByUser;
 
-    // === TRACE FIELDS FROM BaseNoIdEntity ===
+    // === TRACE FIELDS ===
     private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
-    private String createdBy;
-    private String updatedBy;
 }
