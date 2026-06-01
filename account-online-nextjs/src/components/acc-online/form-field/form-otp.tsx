@@ -281,12 +281,6 @@ export default function OTPInput({
       <div>
         <label className="text-sm sm:text-base font-medium text-gray-700 block mb-1">
           {translate("contactNumber")}
-          {isOtpVerified && (
-            <span className="float-right text-green-600 text-sm flex items-center gap-1">
-              <CheckCircle className="h-4 w-4" />
-              {translate("otp_verified_label")}
-            </span>
-          )}
         </label>
         <div className="relative">
           <Input
@@ -317,11 +311,11 @@ export default function OTPInput({
           <button
             type="button"
             onClick={handleSendOtp}
-            disabled={countdown > 0 || disabled || isSendingOtp}
-            className={`float-right text-sm font-semibold px-3 py-0.5 rounded-lg border transition-all duration-200 ${
-              countdown > 0 || disabled || isSendingOtp
-                ? "text-gray-400 border-gray-200 bg-gray-50 cursor-not-allowed"
-                : "text-primary border-primary bg-primary/5 hover:bg-primary hover:text-white cursor-pointer"
+            disabled={countdown > 0 || disabled || isSendingOtp || isOtpVerified}
+            className={`float-right text-sm font-semibold bg-transparent border-none p-0 transition-colors duration-200 ${
+              countdown > 0 || disabled || isSendingOtp || isOtpVerified
+                ? "text-gray-400 cursor-not-allowed"
+                : "text-primary hover:text-primary/70 cursor-pointer"
             }`}
           >
             {isSendingOtp ? (

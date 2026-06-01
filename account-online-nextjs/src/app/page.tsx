@@ -395,7 +395,7 @@ function OpenAccountContent() {
 
               {/* ── Document Upload ── */}
               <div className="p-4 sm:p-5 lg:p-6">
-                <SectionLabel label="Document Upload" />
+                <SectionLabel label={translate("section_document_upload")} />
                 <AccountImages
                   uploadedImage={uploadedImage}
                   selfiePreview={selfiePreview}
@@ -406,9 +406,9 @@ function OpenAccountContent() {
 
               <Divider />
 
-              {/* ── Personal Details ── */}
+              {/* ── Personal Details + Additional Information ── */}
               <div className="p-4 sm:p-6 lg:p-8">
-                <SectionLabel label="Personal Details" />
+                <SectionLabel label={translate("section_personal_details")} />
                 <PersonalDetailsFields
                   formData={formData}
                   handleInputChange={handleInputChangeWrapper}
@@ -421,13 +421,6 @@ function OpenAccountContent() {
                   isVerified={isVerified}
                   isNidExtracted={!!uploadedImage}
                 />
-              </div>
-
-              <Divider />
-
-              {/* ── Additional Information ── */}
-              <div className="p-4 sm:p-6 lg:p-8">
-                <SectionLabel label="Additional Information" />
                 <MasterDataFields
                   maritalStatuses={maritalStatuses}
                   selectedMaritalStatus={selectedMaritalStatus}
@@ -456,7 +449,7 @@ function OpenAccountContent() {
 
               {/* ── Phone Verification ── */}
               <div className="p-4 sm:p-6 lg:p-8">
-                <SectionLabel label="Phone Verification" />
+                <SectionLabel label={translate("section_phone_verification")} />
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                   <OTPInput
                     phoneNumber={phoneNumber}
