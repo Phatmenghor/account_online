@@ -144,23 +144,29 @@ public class AuthServiceImpl implements AuthService {
 
         Map<?, ?> adUser = verifyWithAD(loginDto);
 
+        String loginUsername = loginDto.getUsername();
         String email = (String) adUser.get("mail");
         String displayName = (String) adUser.get("displayName");
         String title = (String) adUser.get("title");
         String department = (String) adUser.get("department");
         String phone = (String) adUser.get("telephoneNumber");
         String mobile = (String) adUser.get("mobile");
+        String company = (String) adUser.get("company");
         String samAccount = (String) adUser.get("samaccountName");
 
-        String username = (email != null && !email.isEmpty()) ? email : samAccount;
-        if (username == null || username.isEmpty()) {
-            throw new UnauthorizedException("Your Active Directory account does not have an email address configured. Please contact your administrator.");
-        }
-
-        // Re-check by the AD email — the original login attempt used a short username
-        UserEntity user = userRepository.findByUsername(username).orElse(null);
+        // Use the submitted login username as the stored username
+        UserEntity user = userRepository.findByUsername(loginUsername).orElse(null);
         if (user != null) {
-            log.info("AD login: user {} already exists (found by AD email), updating password", username);
+            log.info("AD login: user {} already exists, updating info and password", loginUsername);
+            user.setEmail(email);
+            user.setFullName(displayName);
+            user.setPosition(title);
+            user.setBranch(department);
+            user.setDepartment(department);
+            user.setPhoneNumber(phone);
+            user.setMobile(mobile);
+            user.setCompany(company);
+            user.setStaffId(samAccount);
             user.setPassword(passwordEncoder.encode(loginDto.getPassword()));
             user.setLastLogin(LocalDateTime.now(ZoneId.of("UTC")));
             userRepository.save(user);
@@ -168,10 +174,10 @@ public class AuthServiceImpl implements AuthService {
             List<String> existingRoles = user.getRoles().stream()
                     .map(r -> r.getName().name())
                     .collect(Collectors.toList());
-            String existingToken = jwtGenerator.generateTokenForUser(username, existingRoles);
+            String existingToken = jwtGenerator.generateTokenForUser(loginUsername, existingRoles);
             UserResponseDto existingDto = authMapper.userToUserResponseDto(user);
             existingDto.setLastLogin(user.getLastLogin());
-            log.info("AD login successful for existing user: {}", username);
+            log.info("AD login successful for existing user: {}", loginUsername);
             return new AuthResponseDTO(existingToken, existingDto);
         }
 
@@ -179,28 +185,31 @@ public class AuthServiceImpl implements AuthService {
                 .orElseThrow(() -> new BadRequestException("STAFF role not found."));
 
         user = new UserEntity();
-        user.setUsername(username);
+        user.setUsername(loginUsername);
+        user.setEmail(email);
         user.setFullName(displayName);
         user.setPosition(title);
         user.setBranch(department);
-        user.setPhoneNumber(phone != null ? phone : mobile);
+        user.setDepartment(department);
+        user.setPhoneNumber(phone);
+        user.setMobile(mobile);
+        user.setCompany(company);
         user.setStaffId(samAccount);
         user.setStatus(StatusData.ACTIVE);
         user.setRoles(Collections.singletonList(role));
         user.setPassword(passwordEncoder.encode(loginDto.getPassword()));
-        log.info("AD login: creating new user record for {}", username);
-
         user.setLastLogin(LocalDateTime.now(ZoneId.of("UTC")));
+        log.info("AD login: creating new user record for {}", loginUsername);
         userRepository.save(user);
 
         List<String> roles = user.getRoles().stream()
                 .map(r -> r.getName().name())
                 .collect(Collectors.toList());
-        String token = jwtGenerator.generateTokenForUser(username, roles);
+        String token = jwtGenerator.generateTokenForUser(loginUsername, roles);
 
         UserResponseDto userDto = authMapper.userToUserResponseDto(user);
         userDto.setLastLogin(user.getLastLogin());
-        log.info("AD login successful for user: {}", username);
+        log.info("AD login successful for user: {}", loginUsername);
         return new AuthResponseDTO(token, userDto);
     }
 

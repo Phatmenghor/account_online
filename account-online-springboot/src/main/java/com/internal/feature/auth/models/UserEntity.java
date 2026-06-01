@@ -19,7 +19,9 @@ import java.util.List;
 public class UserEntity extends BaseEntity {
 
     @Column(nullable = false, unique = true)
-    private String username; // stores email address
+    private String username;
+
+    private String email;
 
     private String password;
 
@@ -32,6 +34,12 @@ public class UserEntity extends BaseEntity {
     private String staffId;
 
     private String phoneNumber;
+
+    private String mobile;
+
+    private String department;
+
+    private String company;
 
     private String branch;
 

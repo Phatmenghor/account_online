@@ -13,7 +13,8 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class UserResponseDto {
     private Long id;
-    private String idCard; // the email used as username
+    private String idCard;
+    private String email;
     private String userRole;
     private String userStatus;
     private String fullName;
@@ -21,7 +22,10 @@ public class UserResponseDto {
     private String profileUrl;
     private String staffId;
     private String phoneNumber;
+    private String mobile;
     private String branch;
+    private String department;
+    private String company;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private LocalDateTime lastLogin;
