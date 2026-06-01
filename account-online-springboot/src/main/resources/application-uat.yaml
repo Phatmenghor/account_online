@@ -15,6 +15,7 @@ ad:
 
 server:
   port: 7070
+  max-http-header-size: 65536
   tomcat:
     connection-timeout: 90000
     max-http-form-post-size: 200MB
