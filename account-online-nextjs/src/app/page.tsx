@@ -316,6 +316,36 @@ function OpenAccountContent() {
     handleClear();
   }, [setShowSuccessModal, handleClear]);
 
+  const handleSetSelectedLegalType = useCallback(
+    (val: any) => handleMasterDataChange(setSelectedLegalType, val),
+    [handleMasterDataChange, setSelectedLegalType],
+  );
+
+  const handleSetSelectedMaritalStatus = useCallback(
+    (val: any) => handleMasterDataChange(setSelectedMaritalStatus, val),
+    [handleMasterDataChange, setSelectedMaritalStatus],
+  );
+
+  const handleSetSelectedOccupation = useCallback(
+    (val: any) => handleMasterDataChange(setSelectedOccupation, val),
+    [handleMasterDataChange, setSelectedOccupation],
+  );
+
+  const handleSetSelectedReferenceBank = useCallback(
+    (val: any) => handleMasterDataChange(setSelectedReferenceBank, val),
+    [handleMasterDataChange, setSelectedReferenceBank],
+  );
+
+  const handleSetStaffCode = useCallback(
+    (val: any) => handleMasterDataChange(setStaffCode, val),
+    [handleMasterDataChange, setStaffCode],
+  );
+
+  const handleBranchChange = useCallback(
+    (val: any) => { onBranchChange(val); setIsVerified(false); },
+    [onBranchChange, setIsVerified],
+  );
+
   // ========================================
   // Context Setup
   // ========================================
@@ -385,7 +415,7 @@ function OpenAccountContent() {
                   datePickerKey={datePickerKey}
                   legalTypes={legalTypes}
                   selectedLegalType={selectedLegalType}
-                  setSelectedLegalType={(val) => handleMasterDataChange(setSelectedLegalType, val)}
+                  setSelectedLegalType={handleSetSelectedLegalType}
                   isLegalTypeLoading={isLegalTypeLoading}
                   getLegalTypeName={getLegalTypeName}
                   isVerified={isVerified}
@@ -401,23 +431,23 @@ function OpenAccountContent() {
                 <MasterDataFields
                   maritalStatuses={maritalStatuses}
                   selectedMaritalStatus={selectedMaritalStatus}
-                  setSelectedMaritalStatus={(val) => handleMasterDataChange(setSelectedMaritalStatus, val)}
+                  setSelectedMaritalStatus={handleSetSelectedMaritalStatus}
                   isLoadingMarital={isLoadingMarital}
                   getMaritalName={getMaritalName}
                   occupations={occupations}
                   selectedOccupation={selectedOccupation}
-                  setSelectedOccupation={(val) => handleMasterDataChange(setSelectedOccupation, val)}
+                  setSelectedOccupation={handleSetSelectedOccupation}
                   isLoadingOccupations={isLoadingOccupations}
                   getOccupationName={getOccupationName}
                   referenceBanks={referenceBanks}
                   selectedReferenceBank={selectedReferenceBank}
-                  setSelectedReferenceBank={(val) => handleMasterDataChange(setSelectedReferenceBank, val)}
+                  setSelectedReferenceBank={handleSetSelectedReferenceBank}
                   isLoadingReferenceBanks={isLoadingReferenceBanks}
                   getReferenceName={getReferenceName}
                   selectedBranch={selectedBranch}
-                  onBranchChange={(val) => { onBranchChange(val); setIsVerified(false); }}
+                  onBranchChange={handleBranchChange}
                   staffCode={staffCode}
-                  setStaffCode={(val) => handleMasterDataChange(setStaffCode, val)}
+                  setStaffCode={handleSetStaffCode}
                   isVerified={isVerified}
                 />
               </div>
