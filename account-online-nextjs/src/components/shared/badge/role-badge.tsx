@@ -26,10 +26,7 @@ const ROLE_CONFIG: Record<string, {
     icon: Users,
     className: "bg-teal-100 text-teal-700 border-teal-200 hover:bg-teal-200 dark:bg-teal-900/30 dark:text-teal-400 dark:border-teal-800",
   },
-  USER: {
-    icon: User,
-    className: "bg-green-100 text-green-700 border-green-200 hover:bg-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800",
-  },
+
 };
 
 const DEFAULT_CONFIG = {

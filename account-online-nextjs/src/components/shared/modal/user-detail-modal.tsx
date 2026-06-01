@@ -90,7 +90,7 @@ export function UserViewModal({ user, isOpen, onClose }: UserViewModalProps) {
                     <InfoRow label="Department" value={user.department} />
                     <div className="flex justify-between border-b pb-2 gap-4">
                       <Label className="text-sm font-medium text-muted-foreground shrink-0">Role:</Label>
-                      <RoleBadge role={user.userRole || "USER"} />
+                      <RoleBadge role={user.userRole || ""} />
                     </div>
                     <div className="flex justify-between border-b pb-2 gap-4">
                       <Label className="text-sm font-medium text-muted-foreground shrink-0">Status:</Label>
