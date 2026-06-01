@@ -212,6 +212,9 @@ public class AccountOnlineFinal extends BaseNoIdEntity {
     @Column(name = "selfie_image_name")
     private String selfieImageName;
 
+    @Column(name = "submitted_by", length = 255)
+    private String submittedBy;
+
     // === SMS NOTIFICATION HISTORY ===
     @Column(name = "sms_sent_phone")
     private String smsSentPhone;

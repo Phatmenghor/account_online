@@ -37,18 +37,8 @@ export const STATIC_MENU: StaticMenuItem[] = [
         roles: ["COMPLIANCE", "BUSINESS", "DEVELOPER", "ADMIN"],
       },
       {
-        title: "Pending Review",
-        href: "/pending-review",
-        roles: ["COMPLIANCE", "BUSINESS", "DEVELOPER", "ADMIN"],
-      },
-      {
         title: "Success Accounts",
         href: "/account-online-success",
-        roles: ["COMPLIANCE", "BUSINESS", "DEVELOPER", "ADMIN"],
-      },
-      {
-        title: "Review History",
-        href: "/review-history",
         roles: ["COMPLIANCE", "BUSINESS", "DEVELOPER", "ADMIN"],
       },
       {

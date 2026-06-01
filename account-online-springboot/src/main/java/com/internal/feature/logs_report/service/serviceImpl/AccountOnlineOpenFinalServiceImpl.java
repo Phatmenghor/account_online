@@ -56,6 +56,11 @@ public class AccountOnlineOpenFinalServiceImpl implements AccountOnlineOpenFinal
         try {
             log.info("Attempting to save AccountOnlineFinal for Legal ID: {}", request.getLegalId());
 
+            String submittedBy = "System";
+            try {
+                submittedBy = securityUtils.getCurrentUser().getUsername();
+            } catch (Exception ignored) {}
+
             LocalDate dob = parseDate(request.getDateOfBirth());
             LocalDate issueDate = parseDate(request.getLegalIssueDate());
             LocalDate expireDate = parseDate(request.getLegalExpireDate());
@@ -173,6 +178,7 @@ public class AccountOnlineOpenFinalServiceImpl implements AccountOnlineOpenFinal
                     // Images
                     .nidImageName(imagePaths != null ? imagePaths.getNidImagePath() : request.getNidImageName())
                     .selfieImageName(imagePaths != null ? imagePaths.getSelfieImagePath() : request.getSelfieImageName())
+                    .submittedBy(submittedBy)
                     .build();
 
             AccountOnlineFinal savedLog = accountOnlineFinalRepository.save(finalLog);

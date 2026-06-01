@@ -575,9 +575,7 @@ function OpenAccountContent() {
         <SubmitSuccessModal
           isOpen={showSuccessModal}
           onClose={handleSuccessModalClose}
-          title={successData.title}
-          message={successData.message}
-          status={successData.status}
+          data={successData}
         />
         <SubmitErrorModal
           isOpen={showSubmitErrorModal}

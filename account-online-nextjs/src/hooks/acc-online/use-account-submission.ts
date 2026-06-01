@@ -10,6 +10,7 @@ import { formatDate } from "@/constants/AppResource/format-date/format-dd-mm-yyy
 import { createOpenAccountService } from "@/services/open-account/openAccount.service";
 import { uploadDocument } from "@/services/document/document.service";
 import { parseDate } from "@/utils/date-parser";
+import { OpenAccountResponse } from "@/models/open-account/openAccount.response";
 
 interface UseAccountSubmissionProps {
   formData: ResponseNID;
@@ -63,11 +64,7 @@ export const useAccountSubmission = ({
   translate,
 }: UseAccountSubmissionProps) => {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const [successData, setSuccessData] = useState({
-    title: "",
-    message: "",
-    status: "PENDING",
-  });
+  const [successData, setSuccessData] = useState<OpenAccountResponse | null>(null);
   const [showSubmitErrorModal, setShowSubmitErrorModal] = useState(false);
   const [submitErrorData, setSubmitErrorData] = useState<{
     title: string;
@@ -91,7 +88,6 @@ export const useAccountSubmission = ({
     message: "",
   });
 
-  // ── Cache uploaded filenames to prevent duplicate uploads ──
   const uploadCache = useRef<UploadCache>({
     nidFileName: null,
     selfieFileName: null,
@@ -102,18 +98,15 @@ export const useAccountSubmission = ({
     setShowSubmitErrorModal(true);
   };
 
-  // ── Call this when user retakes NID or Selfie photo ──
   const resetUploadCache = () => {
     uploadCache.current = { nidFileName: null, selfieFileName: null };
   };
 
-  // ── Validate dates are not in the future ──
   const validateDates = (): boolean => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const todayFormatted = today.toISOString().split('T')[0];
 
-    // Validate legal issue date (issuedDate from NID)
     if (formData.issuedDate) {
       const issuedDate = parseDate(formData.issuedDate);
       if (!issuedDate) {
@@ -123,7 +116,6 @@ export const useAccountSubmission = ({
         });
         return false;
       }
-
       issuedDate.setHours(0, 0, 0, 0);
       if (issuedDate > today) {
         showError({
@@ -134,7 +126,6 @@ export const useAccountSubmission = ({
       }
     }
 
-    // Validate date of birth
     if (formData.dob) {
       const dob = parseDate(formData.dob);
       if (!dob) {
@@ -144,7 +135,6 @@ export const useAccountSubmission = ({
         });
         return false;
       }
-
       dob.setHours(0, 0, 0, 0);
       if (dob > today) {
         showError({
@@ -155,17 +145,12 @@ export const useAccountSubmission = ({
       }
     }
 
-    // Expiration date is allowed to be in future - no validation needed
     return true;
   };
 
   const handleSubmitAccount = async () => {
-    // ── 1. Guard: validate dates are not in future ──
-    if (!validateDates()) {
-      return;
-    }
+    if (!validateDates()) return;
 
-    // ── 2. Guard: validate images exist ──
     const nidBase64Full: string = uploadedImage?.idImage ?? "";
     const selfieBase64Full: string = selfieImage ?? "";
 
@@ -187,12 +172,11 @@ export const useAccountSubmission = ({
 
     setLoadingState({
       isLoading: true,
-      title: "កំពុងដាក់ស្នើ",
+      title: "កំពុងបង្កើតគណនី",
       message: "កំពុងផ្ទុករូបភាព...",
     });
 
     try {
-      // ── 3. Upload only if not already uploaded this session ──
       if (
         !uploadCache.current.nidFileName ||
         !uploadCache.current.selfieFileName
@@ -215,22 +199,17 @@ export const useAccountSubmission = ({
                 formData.idNumber,
               ),
         ]);
-
-        // Store in cache — retry reuses these, no duplicate upload
         uploadCache.current = { nidFileName, selfieFileName };
       }
 
       const { nidFileName, selfieFileName } = uploadCache.current;
 
-      // ── 4. Update loading message ──
       setLoadingState((prev) => ({
         ...prev,
-        message: "កំពុងដាក់ស្នើសុំបង្កើតគណនីសម្រាប់ឆ្លើយប្រតិកម្ម...",
+        message: "កំពុងបង្កើតគណនី... សូមរង់ចាំ",
       }));
 
-      // ── 5. Submit account ── Submit ALL available form data directly
       const accountData = {
-        // NID Data - from form
         legalId: formData.idNumber,
         familyName: formData.lastNameEn,
         givenName: formData.firstNameEn,
@@ -245,32 +224,16 @@ export const useAccountSubmission = ({
         legalMrz1: formData.MRZ1,
         legalMrz2: formData.MRZ2,
         legalMrz3: formData.MRZ3,
-
-        // Legal Type Selection - use empty string if not selected
         legalDocType: selectedLegalType?.legalTypeValue || "",
-
-        // Phone and Contact
         phoneNumber: phoneNumber,
-
-        // Marital Status - use empty string if not selected
         maritalStatus: selectedMaritalStatus
           ? getMaritalStatusString(selectedMaritalStatus.id.toString())
           : "",
-
-        // Occupation - use empty string if not selected
         occupation: selectedOccupation?.occupationCode || "",
-
-        // Reference Bank - use empty string if not selected
         companyName: selectedReferenceBank?.nameEn || "",
-
-        // Staff/Referral - use empty string if not provided
         referralId: staffCode || "",
         releasedBy: staffCode || "",
-
-        // Branch - always required
         branchCode: selectedBranch!.branchID,
-
-        // Current Address - use empty string if not selected
         customerCurrentProvince: locationData.currentAddress.province?.provinceCode || "",
         customerCurrentDistrict: locationData.currentAddress.district?.districtCode || "",
         customerCurrentCommune: locationData.currentAddress.commune?.communeCode || "",
@@ -279,8 +242,6 @@ export const useAccountSubmission = ({
         customerDistrictKh: locationData.currentAddress.district?.districtKh || "",
         customerCommuneKh: locationData.currentAddress.commune?.communeKh || "",
         customerVillageKh: locationData.currentAddress.village?.villageKh || "",
-
-        // Place of Birth Address - use empty string if not selected
         customerPobProvince: locationData.placeOfBirth.province?.provinceCode || "",
         customerPobDistrict: locationData.placeOfBirth.district?.districtCode || "",
         customerPobCommune: locationData.placeOfBirth.commune?.communeCode || "",
@@ -289,36 +250,20 @@ export const useAccountSubmission = ({
         customerPobDistrictKh: locationData.placeOfBirth.district?.districtKh || "",
         customerPobCommuneKh: locationData.placeOfBirth.commune?.communeKh || "",
         customerPobVillageKh: locationData.placeOfBirth.village?.villageKh || "",
-
-        // Images
         nidImageName: nidFileName!,
         selfieImageName: selfieFileName!,
-
-        // Default values
         customerRole: "OWNER",
       };
 
       const response = await createOpenAccountService(accountData);
-
-      // ── 6. Clear cache on success ──
       uploadCache.current = { nidFileName: null, selfieFileName: null };
 
-      setSuccessData({
-        title: "សូមរង់ចាំ",
-        message: response?.message || "ស្នើសុំបង្កើតគណនីរបស់អ្នកត្រូវបានបញ្ជូនដោយជោគជ័យ។\n\nយើ្ងកំពុងដំណើរការស្នើសុំរបស់អ្នក ដែលរួមបញ្ចូល៖\n• ពិនិត្យលម្អិតព័ត៌មាន\n• ផ្ទៀងផ្ទាត់ឯកសារ\n• វាយតម្លៃហានិភัយ\n\nសូមរង់ចាំក្នុងរយៈពេល ១-៣ ថ្ងៃធ្វើការ។\n\nប្រសិនបើអ្នកមានសំណួរ សូមទាក់ទងយើ្ង៖\n📞 ទូរស័ព្ទ: ០៧ ២០០ ០០២ ឬ ១៨០០ ២០០ ៨៨៨\n🕐 ម៉ោងបើកលើ: ០៨:០០ - ១៨:០០ (ច័ន្ទ - សុក្រ)\n💬 អ៊ីមែល: support@cpbank.com",
-        status: "PENDING",
-      });
+      setSuccessData(response?.data ?? response);
       setShowSuccessModal(true);
     } catch (error: any) {
-      // Extract actual error message from backend
       const errorMessage = error?.errorMessage || error?.message;
       const errorResponse = error?.rawError;
 
-      // Check if this is a pending request already exists message
-      const isPendingRequest = errorMessage?.toLowerCase().includes("ដាក់ស្នើសុំបង្កើតគណនីរួចហើយ");
-
-      // Check if account already exists (check for both English and Khmer keywords)
-      // Includes: account exists, mobile banking already exists, etc.
       const isAccountExists =
         errorMessage?.toLowerCase().includes("exist") ||
         errorMessage?.toLowerCase().includes("already") ||
@@ -328,35 +273,23 @@ export const useAccountSubmission = ({
         errorResponse?.message?.toLowerCase().includes("exist") ||
         errorResponse?.message?.toLowerCase().includes("already") ||
         errorResponse?.message?.includes("រួចហើយ") ||
-        // Mobile banking specific
         errorMessage?.toLowerCase().includes("username") ||
         errorMessage?.toLowerCase().includes("mobile banking");
 
-      if (isPendingRequest) {
-        // Show success modal for pending request - use message from backend
-        setSuccessData({
-          title: "សូមរង់ចាំ",
-          message: errorMessage,
-          status: "PENDING",
-        });
-        setShowSuccessModal(true);
-      } else if (isAccountExists) {
-        // Show account exists modal with account details (if available)
+      if (isAccountExists) {
         setAccountExistsData({
           cif: errorResponse?.data?.cif,
           accountNumber: errorResponse?.data?.accountNumber || errorResponse?.data?.khrAccount,
           accountName: errorResponse?.data?.accountName || errorResponse?.data?.legalHolderName,
-          message: errorMessage || "គណនីធនាគារលក់ដ៏ងរបស់អ្នកបានបង្កើតរួចរាល់។ អ្នកអាចបង្ហាញលេខគណនីរបស់អ្នក ឬបន្តប្រើប្រាស់វា។",
+          message: errorMessage || "គណនីធនាគារលក់ដ៏ងរបស់អ្នកបានបង្កើតរួចរាល់។",
         });
         setShowAccountExistsModal(true);
       } else if (errorMessage) {
-        // Show actual backend error message
         showError({
           title: "មានបញ្ហាកើតឡើង",
           message: errorMessage,
         });
       } else {
-        // Fallback to generic error only if no message available
         showError();
       }
     } finally {

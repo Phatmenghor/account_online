@@ -3,7 +3,6 @@ package com.internal.feature.telegram_alerts.service.serviceImpl;
 import com.internal.enumation.AmlStatusEnum;
 import com.internal.enumation.OpenAccStatusEnum;
 import com.internal.feature.aml.dto.response.AmlStatusDto;
-import com.internal.feature.open_account.dto.response.PendingAccountOpeningRequestDto;
 import com.internal.feature.telegram_alerts.config.TelegramService;
 import com.internal.feature.telegram_alerts.service.AlertsOpenAccOnlineService;
 import lombok.RequiredArgsConstructor;
@@ -308,93 +307,4 @@ public class OpenAccountTelegramAlertServiceImpl implements AlertsOpenAccOnlineS
                 "Time: " + now;
     }
 
-    @Override
-    public void sendAccountOpeningAlert(PendingAccountOpeningRequestDto request, String eventType) {
-        if (request == null) {
-            log.warn("Account Opening Telegram alert - request is null");
-            return;
-        }
-
-        try {
-            String header = "*Account Opening " + eventType.toUpperCase() + "*";
-            StringBuilder bodyBuilder = new StringBuilder();
-
-            // Request metadata
-            appendIfNotEmpty(bodyBuilder, "Request ID", request.getId() != null ? String.valueOf(request.getId()) : null);
-            appendIfNotEmpty(bodyBuilder, "Legal ID", request.getLegalId());
-            appendIfNotEmpty(bodyBuilder, "Phone Number", request.getPhoneNumber());
-            appendIfNotEmpty(bodyBuilder, "Branch Code", request.getBranchCode());
-            appendIfNotEmpty(bodyBuilder, "AML Status", request.getAmlStatus() != null ? request.getAmlStatus().name() : null);
-
-            // Customer name (Family Name + Given Name)
-            String customerName = joinNonNull(request.getLegalLastNameEn(), request.getLegalFirstNameEn());
-            if (customerName.isEmpty()) {
-                customerName = joinNonNull(request.getLegalLastNameKh(), request.getLegalFirstNameKh());
-            }
-            appendIfNotEmpty(bodyBuilder, "Name", customerName);
-
-            // Personal details
-            appendIfNotEmpty(bodyBuilder, "Gender", request.getLegalGender());
-            appendIfNotEmpty(bodyBuilder, "DOB", request.getLegalDateOfBirth() != null
-                    ? request.getLegalDateOfBirth().format(DateTimeFormatter.ofPattern("dd MMM yyyy"))
-                    : null);
-            appendIfNotEmpty(bodyBuilder, "Nationality", request.getNationality());
-
-            // Legal Address
-            appendIfNotEmpty(bodyBuilder, "Legal Address", request.getLegalAddress());
-
-            // Current Address - use Khmer names for display
-            String currentAddress = buildAddressString(
-                    request.getCustomerProvinceKh(),
-                    request.getCustomerDistrictKh(),
-                    request.getCustomerCommuneKh(),
-                    request.getCustomerVillageKh());
-            appendIfNotEmpty(bodyBuilder, "Current Address", currentAddress);
-
-            // Place of Birth Address
-            String pobAddress = buildAddressString(
-                    request.getCustomerPobProvinceKh(),
-                    request.getCustomerPobDistrictKh(),
-                    request.getCustomerPobCommuneKh(),
-                    request.getCustomerPobVillageKh());
-            appendIfNotEmpty(bodyBuilder, "Place of Birth", pobAddress);
-
-            String statusText = request.getStatus() != null ? request.getStatus().name() : "N/A";
-
-            // Add remark for REJECTED status
-            if ("REJECTED".equalsIgnoreCase(eventType) && request.getRemark() != null && !request.getRemark().isEmpty()) {
-                appendIfNotEmpty(bodyBuilder, "Remark", request.getRemark());
-            }
-
-            String footer = "Status: " + escapeMarkdown(statusText);
-
-            String message = header + "\n" + SEPARATOR + "\n" + bodyBuilder + SEPARATOR + "\n" + footer;
-
-            telegramService.sendMarkdownAccountOnlineMonitorMessage(message);
-            log.info("Account Opening {} alert sent to Telegram for ID: {}", eventType, request.getLegalId());
-
-        } catch (Exception e) {
-            log.error("Failed to send Account Opening alert to Telegram: {}", e.getMessage(), e);
-        }
-    }
-
-    private String buildAddressString(String province, String district, String commune, String village) {
-        StringBuilder address = new StringBuilder();
-        if (village != null && !village.isEmpty() && !village.equals("null")) {
-            address.append(village);
-        }
-        if (commune != null && !commune.isEmpty() && !commune.equals("null")) {
-            if (address.length() > 0) address.append(", ");
-            address.append(commune);
-        }
-        if (district != null && !district.isEmpty() && !district.equals("null")) {
-            if (address.length() > 0) address.append(", ");
-            address.append(district);
-        }
-        if (province != null && !province.isEmpty() && !province.equals("null")) {
-            if (address.length() > 0) address.append(", ");
-            address.append(province);
-        }
-        return address.toString();
-    }
 }

@@ -4,13 +4,8 @@ import axios from "axios";
 
 export async function createOpenAccountService(request: CreateOpenAccountReq) {
   try {
-    // Account creation can take longer due to multiple backend operations:
-    // - Customer matching, validation, AML processing
-    // - Customer creation, KHR/USD account creation, validation
-    // - Mobile banking activation
-    // Timeout is configurable via NEXT_PUBLIC_ACCOUNT_CREATION_TIMEOUT env variable (default: 5 minutes)
     const response = await axiosClientWithAuth.post(
-      "/api/v1/public/open-account/submit",
+      "/api/v1/open-account/process",
       request,
       { timeout: ACCOUNT_CREATION_TIMEOUT }
     );
@@ -20,7 +15,6 @@ export async function createOpenAccountService(request: CreateOpenAccountReq) {
       const raw = error.response?.data;
       const message = raw?.message;
       console.error("Axios error:", message);
-
       throw {
         errorMessage: message,
         rawError: raw,
@@ -28,9 +22,7 @@ export async function createOpenAccountService(request: CreateOpenAccountReq) {
       };
     } else {
       console.error("Unexpected error:", error);
-      throw {
-        rawError: error,
-      };
+      throw { rawError: error };
     }
   }
 }
