@@ -146,8 +146,10 @@ public class AuthServiceImpl implements AuthService {
 
         String loginUsername = loginDto.getUsername();
         String email = (String) adUser.get("mail");
-        String displayName = (String) adUser.get("displayName");
-        String title = (String) adUser.get("title");
+        String givenName = (String) adUser.get("givenName");
+        String sn = (String) adUser.get("sn");
+        String fullName = (sn != null ? sn : "") + (givenName != null ? " " + givenName : "");
+        String position = (String) adUser.get("title");
         String department = (String) adUser.get("department");
         String phone = (String) adUser.get("telephoneNumber");
         String samAccount = (String) adUser.get("samaccountName");
@@ -157,8 +159,8 @@ public class AuthServiceImpl implements AuthService {
         if (user != null) {
             log.info("AD login: user {} already exists, updating info and password", loginUsername);
             user.setEmail(email);
-            user.setFullName(displayName);
-            user.setPosition(title);
+            user.setFullName(fullName.trim());
+            user.setPosition(position);
             user.setBranch(department);
             user.setDepartment(department);
             user.setPhoneNumber(phone);
@@ -183,13 +185,11 @@ public class AuthServiceImpl implements AuthService {
         user = new UserEntity();
         user.setUsername(loginUsername);
         user.setEmail(email);
-        user.setFullName(displayName);
-        user.setPosition(title);
+        user.setFullName(fullName.trim());
+        user.setPosition(position);
         user.setBranch(department);
         user.setDepartment(department);
         user.setPhoneNumber(phone);
-        user.setMobile(mobile);
-        user.setCompany(company);
         user.setStaffId(samAccount);
         user.setStatus(StatusData.ACTIVE);
         user.setRoles(Collections.singletonList(role));
