@@ -57,8 +57,10 @@ public class AccountOnlineOpenFinalServiceImpl implements AccountOnlineOpenFinal
             log.info("Attempting to save AccountOnlineFinal for Legal ID: {}", request.getLegalId());
 
             String submittedBy = "System";
+            com.internal.feature.auth.models.UserEntity submittedByUser = null;
             try {
-                submittedBy = securityUtils.getCurrentUser().getUsername();
+                submittedByUser = securityUtils.getCurrentUser();
+                submittedBy = submittedByUser.getUsername();
             } catch (Exception ignored) {}
 
             LocalDate dob = parseDate(request.getDateOfBirth());
@@ -179,6 +181,7 @@ public class AccountOnlineOpenFinalServiceImpl implements AccountOnlineOpenFinal
                     .nidImageName(imagePaths != null ? imagePaths.getNidImagePath() : request.getNidImageName())
                     .selfieImageName(imagePaths != null ? imagePaths.getSelfieImagePath() : request.getSelfieImageName())
                     .submittedBy(submittedBy)
+                    .submittedByUser(submittedByUser)
                     .build();
 
             AccountOnlineFinal savedLog = accountOnlineFinalRepository.save(finalLog);

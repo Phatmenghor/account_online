@@ -2,6 +2,7 @@ package com.internal.feature.logs_report.model;
 
 import com.internal.config.entity.BaseNoIdEntity;
 import com.internal.enumation.AmlStatusEnum;
+import com.internal.feature.auth.models.UserEntity;
 import lombok.*;
 import javax.persistence.*;
 import java.time.LocalDate;
@@ -214,6 +215,10 @@ public class AccountOnlineFinal extends BaseNoIdEntity {
 
     @Column(name = "submitted_by", length = 255)
     private String submittedBy;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "submitted_by_user_id")
+    private UserEntity submittedByUser;
 
     // === SMS NOTIFICATION HISTORY ===
     @Column(name = "sms_sent_phone")

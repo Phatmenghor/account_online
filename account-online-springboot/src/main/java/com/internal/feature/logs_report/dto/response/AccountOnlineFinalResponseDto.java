@@ -1,6 +1,7 @@
 package com.internal.feature.logs_report.dto.response;
 
 import com.internal.enumation.AmlStatusEnum;
+import com.internal.feature.auth.dto.response.UserResponseDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -96,6 +97,10 @@ public class AccountOnlineFinalResponseDto {
     // === IMAGES ===
     private String nidImageName;
     private String selfieImageName;
+
+    // === SUBMITTED BY ===
+    private String submittedBy;
+    private UserResponseDto submittedByUser;
 
     // === TRACE FIELDS FROM BaseNoIdEntity ===
     private LocalDateTime createdAt;

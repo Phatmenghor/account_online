@@ -1,7 +1,9 @@
 package com.internal.feature.logs_report.mapper;
 
 
+import com.internal.feature.auth.dto.response.UserResponseDto;
 import com.internal.feature.auth.mapper.UserMapper;
+import com.internal.feature.auth.models.UserEntity;
 import com.internal.feature.logs_report.dto.response.AccountOnlineFinalExcelResponseDto;
 import com.internal.feature.logs_report.dto.response.AccountOnlineFinalResponseDto;
 import com.internal.feature.logs_report.dto.response.AllAccountOnlineFinalExcelResponseDto;
@@ -10,6 +12,7 @@ import com.internal.feature.logs_report.model.AccountOnlineFinal;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 
 import java.util.List;
@@ -17,6 +20,29 @@ import java.util.List;
 @Mapper(componentModel = "spring", uses = {UserMapper.class})
 public interface AccountOnlineFinalMapper {
 
+    @Named("userEntityToDto")
+    default UserResponseDto userEntityToDto(UserEntity user) {
+        if (user == null) return null;
+        return UserResponseDto.builder()
+                .id(user.getId())
+                .idCard(user.getUsername())
+                .email(user.getEmail())
+                .fullName(user.getFullName())
+                .position(user.getPosition())
+                .profileUrl(user.getProfileUrl())
+                .staffId(user.getStaffId())
+                .phoneNumber(user.getPhoneNumber())
+                .branch(user.getBranch())
+                .department(user.getDepartment())
+                .userRole(user.getRoles() != null && !user.getRoles().isEmpty()
+                        ? user.getRoles().stream()
+                            .map(r -> r.getName().name())
+                            .collect(java.util.stream.Collectors.joining(", "))
+                        : null)
+                .build();
+    }
+
+    @Mapping(target = "submittedByUser", source = "submittedByUser", qualifiedByName = "userEntityToDto")
     AccountOnlineFinalResponseDto toDto(AccountOnlineFinal history);
 
     @Mapping(target = "id", source = "id")
