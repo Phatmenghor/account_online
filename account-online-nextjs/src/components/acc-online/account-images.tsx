@@ -119,7 +119,7 @@ export const AccountImages: React.FC<AccountImagesProps> = ({
           hint="Tap to upload ID card"
           Icon={CreditCard}
           preview={uploadedImage?.idImage || null}
-          placeholder="/app/identity-card-4k.png"
+          placeholder="/app/placeholder-id-card.svg"
           hasError={!!validationErrors.idImage}
           onChange={handleImageUpload}
         />
@@ -129,7 +129,7 @@ export const AccountImages: React.FC<AccountImagesProps> = ({
           hint="Tap to upload selfie photo"
           Icon={Camera}
           preview={selfiePreview}
-          placeholder="/app/image_selfie_4K.png"
+          placeholder="/app/placeholder-selfie.svg"
           hasError={!!validationErrors.selfieImage}
           onChange={handleSelfieUpload}
         />
