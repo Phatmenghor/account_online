@@ -1012,3 +1012,36 @@ body:has([data-state="open"]) .pac-container {
 .pac-matched {
   font-weight: 600 !important;
 }
+
+/* ========== PRIMARY FOCUS / ACTIVE BORDERS ========== */
+input:focus,
+input:focus-visible,
+textarea:focus,
+textarea:focus-visible,
+select:focus,
+select:focus-visible {
+  outline: none !important;
+  border-color: hsl(var(--primary)) !important;
+  box-shadow: 0 0 0 2px hsl(var(--primary) / 0.15) !important;
+}
+
+/* shadcn Input component focus */
+.input:focus,
+[data-slot="input"]:focus {
+  border-color: hsl(var(--primary)) !important;
+  box-shadow: 0 0 0 2px hsl(var(--primary) / 0.15) !important;
+}
+
+/* shadcn Select trigger focus */
+[role="combobox"]:focus,
+button[data-state]:focus-visible {
+  outline: none !important;
+  border-color: hsl(var(--primary)) !important;
+  box-shadow: 0 0 0 2px hsl(var(--primary) / 0.15) !important;
+}
+
+/* Radix Select trigger when open */
+[data-state="open"][role="combobox"] {
+  border-color: hsl(var(--primary)) !important;
+  box-shadow: 0 0 0 2px hsl(var(--primary) / 0.15) !important;
+}
