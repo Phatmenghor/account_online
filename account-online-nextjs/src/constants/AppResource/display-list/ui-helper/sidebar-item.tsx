@@ -22,12 +22,7 @@ export function useNavItems() {
       href: ROUTES.DASHBOARD.USER,
       icon: User2,
     },
-    {
-      title: "Account Final",
-      href: ROUTES.DASHBOARD.ACCOUNT_ONLINE,
-      icon: IdCard,
-    },
-    {
+{
       title: "Success Accounts",
       href: ROUTES.DASHBOARD.STATIC.ACCOUNT_ONLINE_SUCCESS,
       icon: IdCard,

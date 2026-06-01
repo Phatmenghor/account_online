@@ -31,12 +31,7 @@ export const STATIC_MENU: StaticMenuItem[] = [
     icon: IdCard,
     roles: ["COMPLIANCE", "BUSINESS", "DEVELOPER"],
     children: [
-      {
-        title: "Account Final",
-        href: "/account-online",
-        roles: ["COMPLIANCE", "BUSINESS", "DEVELOPER"],
-      },
-      {
+{
         title: "Success Accounts",
         href: "/account-online-success",
         roles: ["COMPLIANCE", "BUSINESS", "DEVELOPER"],

@@ -27,7 +27,6 @@ export const ROUTES = {
       MANAGEMENT: "/aml-management",
       HISTORY: "/aml-history",
     },
-    ACCOUNT_ONLINE: "/account-online",
     MENU_CONFIG: "/menu-config"
   },
 };
