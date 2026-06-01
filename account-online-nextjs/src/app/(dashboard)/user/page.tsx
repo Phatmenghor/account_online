@@ -322,6 +322,8 @@ function UserPageContent() {
               />
             </div>
 
+          </div>
+          <div className="flex items-center gap-2">
             <Select value={roleFilter} onValueChange={setRoleFilter}>
               <SelectTrigger className="h-9 w-[160px] text-xs">
                 <SelectValue placeholder="All Roles" />
@@ -332,8 +334,6 @@ function UserPageContent() {
                 ))}
               </SelectContent>
             </Select>
-          </div>
-          <div>
             <Button onClick={handleAddUser}>New</Button>
           </div>
         </div>
