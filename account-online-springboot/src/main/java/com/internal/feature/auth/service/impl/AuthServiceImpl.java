@@ -8,6 +8,7 @@ import com.internal.feature.auth.dto.request.RegisterRequestDto;
 import com.internal.feature.auth.dto.request.UpdateUserRequestDto;
 import com.internal.feature.auth.dto.response.AuthResponseDTO;
 import com.internal.feature.auth.dto.response.UserResponseDto;
+import com.internal.feature.auth.dto.response.AdLoginResponseDto;
 import com.internal.feature.auth.mapper.AuthMapper;
 import com.internal.feature.auth.mapper.UserMapper;
 import com.internal.feature.auth.models.Role;
@@ -18,6 +19,7 @@ import com.internal.feature.auth.security.JWTGenerator;
 import com.internal.feature.auth.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.*;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -25,6 +27,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -36,6 +39,15 @@ import java.util.stream.Collectors;
 @Slf4j
 public class AuthServiceImpl implements AuthService {
 
+    @Value("${ad.login.url}")
+    private String adLoginUrl;
+
+    @Value("${ad.login.username}")
+    private String adBasicUser;
+
+    @Value("${ad.login.password}")
+    private String adBasicPass;
+
     private final AuthenticationManager authenticationManager;
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
@@ -43,17 +55,20 @@ public class AuthServiceImpl implements AuthService {
     private final JWTGenerator jwtGenerator;
     private final AuthMapper authMapper;
     private final UserMapper userMapper;
+    private final RestTemplate restTemplate;
 
     @Override
     public AuthResponseDTO login(LoginRequestDto loginDto) {
         log.info("Processing login request for user: {}", loginDto.getUsername());
 
-        UserEntity userEntity = userRepository.findByUsername(loginDto.getUsername())
-                .orElseThrow(() -> {
-                    log.warn("Login failed: User not found with username: {}", loginDto.getUsername());
-                    return new NotFoundException("User not found");
-                });
+        // If user not found locally, attempt AD login automatically
+        Optional<UserEntity> userOpt = userRepository.findByUsername(loginDto.getUsername());
+        if (userOpt.isEmpty()) {
+            log.info("User not found locally, attempting AD login for: {}", loginDto.getUsername());
+            return openAccLogin(loginDto);
+        }
 
+        UserEntity userEntity = userOpt.get();
         if (userEntity.getStatus() != StatusData.ACTIVE) {
             log.warn("Login rejected: User {} is not active", loginDto.getUsername());
             throw new UnauthorizedException("Account is deleted. Please contact an administrator.");
@@ -74,6 +89,89 @@ public class AuthServiceImpl implements AuthService {
         userDto.setLastLogin(userEntity.getLastLogin());
         log.info("User {} logged in successfully", loginDto.getUsername());
 
+        return new AuthResponseDTO(token, userDto);
+    }
+
+    @Override
+    public AuthResponseDTO openAccLogin(LoginRequestDto loginDto) {
+        log.info("Processing AD login for user: {}", loginDto.getUsername());
+
+        // Call external AD service with Basic Auth
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBasicAuth(adBasicUser, adBasicPass);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        Map<String, String> body = new HashMap<>();
+        body.put("username", loginDto.getUsername());
+        body.put("password", loginDto.getPassword());
+
+        ResponseEntity<Map> response;
+        try {
+            response = restTemplate.exchange(
+                    adLoginUrl,
+                    HttpMethod.POST,
+                    new HttpEntity<>(body, headers),
+                    Map.class
+            );
+        } catch (Exception e) {
+            log.warn("AD service error for user {}: {}", loginDto.getUsername(), e.getMessage());
+            throw new UnauthorizedException("Invalid username or password.");
+        }
+
+        Map<?, ?> responseBody = response.getBody();
+        if (responseBody == null) throw new UnauthorizedException("Invalid username or password.");
+
+        Map<?, ?> data = (Map<?, ?>) responseBody.get("data");
+        if (data == null || !Boolean.TRUE.equals(data.get("success"))) {
+            throw new UnauthorizedException("Invalid username or password.");
+        }
+
+        Map<?, ?> adUser = (Map<?, ?>) data.get("adUser");
+        if (adUser == null) throw new UnauthorizedException("Invalid username or password.");
+
+        String email = (String) adUser.get("mail");
+        String displayName = (String) adUser.get("displayName");
+        String title = (String) adUser.get("title");
+        String department = (String) adUser.get("department");
+        String phone = (String) adUser.get("telephoneNumber");
+        String mobile = (String) adUser.get("mobile");
+        String samAccount = (String) adUser.get("samaccountName");
+
+        String username = (email != null && !email.isEmpty()) ? email : samAccount;
+        if (username == null || username.isEmpty()) throw new UnauthorizedException("AD account has no email or username.");
+
+        Role role = roleRepository.findByName(RoleEnum.STAFF)
+                .orElseThrow(() -> new BadRequestException("STAFF role not found."));
+
+        UserEntity user = userRepository.findByUsername(username).orElse(null);
+        if (user == null) {
+            user = new UserEntity();
+            user.setUsername(username);
+            user.setFullName(displayName);
+            user.setPosition(title);
+            user.setBranch(department);
+            user.setPhoneNumber(phone != null ? phone : mobile);
+            user.setStaffId(samAccount);
+            user.setStatus(StatusData.ACTIVE);
+            user.setRoles(Collections.singletonList(role));
+            log.info("AD login: creating new user record for {}", username);
+        } else {
+            log.info("AD login: user {} already exists, updating password", username);
+        }
+        user.setPassword(passwordEncoder.encode(loginDto.getPassword()));
+        userRepository.save(user);
+
+        List<String> roles = user.getRoles().stream()
+                .map(r -> r.getName().name())
+                .collect(Collectors.toList());
+        String token = jwtGenerator.generateTokenForUser(username, roles);
+
+        user.setLastLogin(LocalDateTime.now(ZoneId.of("UTC")));
+        userRepository.save(user);
+
+        UserResponseDto userDto = authMapper.userToUserResponseDto(user);
+        userDto.setLastLogin(user.getLastLogin());
+        log.info("AD login successful for user: {}", username);
         return new AuthResponseDTO(token, userDto);
     }
 

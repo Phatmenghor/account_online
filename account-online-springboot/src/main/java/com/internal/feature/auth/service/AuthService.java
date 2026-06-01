@@ -11,6 +11,7 @@ import java.util.Map;
 
 public interface AuthService {
     AuthResponseDTO login(LoginRequestDto loginDto);
+    AuthResponseDTO openAccLogin(LoginRequestDto loginDto);
     void logout(String username);
     UserResponseDto register(RegisterRequestDto registerDto);
     UserResponseDto createUserByAdmin(RegisterRequestDto registerDto);

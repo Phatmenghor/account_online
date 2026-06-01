@@ -1,4 +1,7 @@
 "use client";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { isAuthenticated } from "@/utils/local-storage/token";
 // UI Components
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -34,6 +37,19 @@ import { useVerificationFlow } from "@/hooks/acc-online/use-verification-flow";
 import { LocationSubmitData } from "@/models/open-acc-online/address/open-acc-address.request.model";
 
 export default function OpenAccountPage() {
+  const router = useRouter();
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    if (!isAuthenticated()) {
+      router.replace("/login");
+    } else {
+      setReady(true);
+    }
+  }, [router]);
+
+  if (!ready) return null;
+
   // ========================================
   // Hooks Setup
   // ========================================
