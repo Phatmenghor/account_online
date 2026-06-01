@@ -6,7 +6,6 @@ import "@/styles/globals.css";
 import { type Locale } from "@/i18n/request";
 import { LocaleProvider } from "@/context/provider/local-provider";
 import { ClientProviders } from "@/context/provider/client-provider";
-import { ToastProvider } from "@/components/shared/toast/app-toast";
 
 // Define Kantumruy Pro font
 const kantumruyPro = localFont({
@@ -61,7 +60,7 @@ export default async function RootLayout({
         >
           <ClientProviders>
             <PageProgressBar />
-            <ToastProvider>{children}</ToastProvider>
+            {children}
           </ClientProviders>
         </LocaleProvider>
       </body>
