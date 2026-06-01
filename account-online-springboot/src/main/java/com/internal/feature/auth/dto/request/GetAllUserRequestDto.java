@@ -14,12 +14,15 @@ import lombok.NoArgsConstructor;
 public class GetAllUserRequestDto {
 
     @Schema(example = "1", defaultValue = "1")
+    @Builder.Default
     private int pageNo = 1;
 
     @Schema(example = "10", defaultValue = "10")
+    @Builder.Default
     private int pageSize = 10;
 
     private String search;
+    @Builder.Default
     private StatusData status = StatusData.ACTIVE;
     private java.util.List<String> roles;
 }

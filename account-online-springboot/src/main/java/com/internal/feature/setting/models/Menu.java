@@ -34,6 +34,7 @@ public class Menu extends BaseEntity {
 
     @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("displayOrder ASC")
+    @Builder.Default
     private List<Menu> children = new ArrayList<>();
 
     @Column(nullable = false)

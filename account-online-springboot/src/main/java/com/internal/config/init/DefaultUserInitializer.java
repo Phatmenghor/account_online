@@ -73,7 +73,6 @@ public class DefaultUserInitializer implements CommandLineRunner {
         UserEntity user = new UserEntity();
         user.setUsername(superCard);
         user.setStatus(StatusData.ACTIVE);
-        user.setEmailVerified(true);
         user.setPassword(passwordEncoder.encode(superPassword));
 
         List<Role> roles = new ArrayList<>();
