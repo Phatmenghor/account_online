@@ -67,7 +67,7 @@ public class AuthServiceImpl implements AuthService {
             throw new UnauthorizedException("Invalid username or password.");
         }
 
-        userEntity.setLastLogin(LocalDateTime.now(ZoneId.of("UTC")));
+        userEntity.setLastLogin(LocalDateTime.now(ZoneId.of("Asia/Phnom_Penh")));
         userRepository.save(userEntity);
 
         List<String> roles = userEntity.getRoles().stream()
@@ -190,7 +190,7 @@ public class AuthServiceImpl implements AuthService {
         user.setPassword(passwordEncoder.encode(pendingData.getPassword()));
         user.setStatus(StatusData.ACTIVE);
         user.setRoles(Collections.singletonList(role));
-        user.setLastLogin(LocalDateTime.now(ZoneId.of("UTC")));
+        user.setLastLogin(LocalDateTime.now(ZoneId.of("Asia/Phnom_Penh")));
         userRepository.save(user);
 
         pendingRegistrationStore.remove(dto.getEmail());
