@@ -11,7 +11,7 @@ import { SidebarUserProfile } from "@/components/app/profile/sidebar-profile";
 import { UserModel } from "@/models/user/user.response";
 import { AppIcons } from "@/constants/AppResource/icons/app-icons";
 import { getUserProfileService } from "@/services/dashboard/user/user.service";
-import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getRoles } from "@/utils/local-storage/roles";
 import { STATIC_MENU, StaticMenuItem, RoleEnum } from "@/constants/menu/static-menu";
@@ -36,25 +36,26 @@ export function DashboardSidebar({ isOpen = true, onToggle }: DashboardSidebarPr
   const [authUser, setAuthUser] = useState<UserModel | null>(null);
   const [isLoadingUser, setIsLoadingUser] = useState(true);
   const [openSubmenus, setOpenSubmenus] = useState<Record<string, boolean>>({});
+  const [mounted, setMounted] = useState(false);
+  const [menuItems, setMenuItems] = useState<StaticMenuItem[]>([]);
 
-  const role = (getRoles() ?? "") as RoleEnum;
-  const menuItems = filterMenuByRole(STATIC_MENU, role);
-
-  const toggleSubmenu = (title: string) => {
-    setOpenSubmenus((prev) => ({ ...prev, [title]: !prev[title] }));
-  };
-
+  // Resolve role and menu only on client to avoid hydration mismatch
   useEffect(() => {
-    // Auto-expand submenus that contain the current path
+    const role = (getRoles() ?? "") as RoleEnum;
+    const items = filterMenuByRole(STATIC_MENU, role);
+    setMenuItems(items);
+
+    // Auto-expand submenus containing current path, or all by default
     const expanded: Record<string, boolean> = {};
-    menuItems.forEach((item) => {
-      if (item.children?.some((c) => c.href && pathname.startsWith(c.href))) {
-        expanded[item.title] = true;
-      } else if (item.children) {
-        expanded[item.title] = true; // expand all by default
+    items.forEach((item) => {
+      if (item.children && item.children.length > 0) {
+        expanded[item.title] = item.children.some(
+          (c) => c.href && pathname.startsWith(c.href)
+        ) || true;
       }
     });
     setOpenSubmenus(expanded);
+    setMounted(true);
   }, [pathname]);
 
   useEffect(() => {
@@ -62,6 +63,10 @@ export function DashboardSidebar({ isOpen = true, onToggle }: DashboardSidebarPr
       .then((u) => setAuthUser(u ?? null))
       .finally(() => setIsLoadingUser(false));
   }, []);
+
+  const toggleSubmenu = (title: string) => {
+    setOpenSubmenus((prev) => ({ ...prev, [title]: !prev[title] }));
+  };
 
   if (isMobile && !isOpen) return null;
 
@@ -110,14 +115,14 @@ export function DashboardSidebar({ isOpen = true, onToggle }: DashboardSidebarPr
         {/* Navigation */}
         <ScrollArea className="flex-1 py-2">
           <nav className={cn("grid gap-0.5", isOpen ? "px-2" : "px-1")}>
-            {menuItems.map((item) => (
+            {mounted && menuItems.map((item) => (
               <div key={item.title} className="flex flex-col">
                 {item.children && item.children.length > 0 ? (
                   <>
                     {/* Parent with children */}
                     {isOpen ? (
                       <div
-                        className="flex h-9 w-full items-center gap-2 rounded-md px-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground transition-colors cursor-pointer"
+                        className="flex h-9 w-full items-center gap-2 rounded-md px-2 text-sm font-medium hover:bg-primary/10 hover:text-primary transition-colors cursor-pointer"
                         onClick={() => toggleSubmenu(item.title)}
                       >
                         {item.icon && <item.icon className="h-5 w-5 flex-shrink-0" />}
@@ -130,7 +135,7 @@ export function DashboardSidebar({ isOpen = true, onToggle }: DashboardSidebarPr
                         />
                       </div>
                     ) : (
-                      <div className="flex h-9 w-full items-center justify-center rounded-md px-2 hover:bg-accent hover:text-accent-foreground transition-colors group relative">
+                      <div className="flex h-9 w-full items-center justify-center rounded-md px-2 hover:bg-primary/10 hover:text-primary transition-colors group relative">
                         {item.icon && <item.icon className="h-5 w-5" />}
                         <div className="absolute left-full ml-2 px-2 py-1 bg-popover text-popover-foreground text-xs rounded-md shadow-md opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50">
                           {item.title}
@@ -140,39 +145,51 @@ export function DashboardSidebar({ isOpen = true, onToggle }: DashboardSidebarPr
 
                     {isOpen && openSubmenus[item.title] && (
                       <div className="ml-4 flex flex-col gap-0.5 mt-0.5 animate-in slide-in-from-top-1 duration-200">
-                        {item.children.map((child) => (
-                          <Link
-                            key={child.href}
-                            href={child.href ?? "#"}
-                            className={cn(
-                              "flex h-8 items-center rounded-md px-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors",
-                              pathname === child.href && "bg-accent text-accent-foreground font-medium"
-                            )}
-                          >
-                            {child.title}
-                          </Link>
-                        ))}
+                        {item.children.map((child) => {
+                          const isActive = pathname === child.href;
+                          return (
+                            <Link
+                              key={child.href}
+                              href={child.href ?? "#"}
+                              className={cn(
+                                "flex h-8 items-center rounded-md px-2 text-sm transition-colors",
+                                isActive
+                                  ? "bg-primary text-primary-foreground font-medium"
+                                  : "hover:bg-primary/10 hover:text-primary"
+                              )}
+                            >
+                              {child.title}
+                            </Link>
+                          );
+                        })}
                       </div>
                     )}
                   </>
                 ) : (
                   /* Leaf item */
-                  <Link
-                    href={item.href ?? "#"}
-                    className={cn(
-                      "flex h-9 w-full items-center gap-2 rounded-md px-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground transition-colors group relative",
-                      pathname === item.href && "bg-accent text-accent-foreground",
-                      !isOpen && "justify-center"
-                    )}
-                  >
-                    {item.icon && <item.icon className="h-5 w-5 flex-shrink-0" />}
-                    {isOpen && <span>{item.title}</span>}
-                    {!isOpen && (
-                      <div className="absolute left-full ml-2 px-2 py-1 bg-popover text-popover-foreground text-xs rounded-md shadow-md opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50">
-                        {item.title}
-                      </div>
-                    )}
-                  </Link>
+                  (() => {
+                    const isActive = pathname === item.href;
+                    return (
+                      <Link
+                        href={item.href ?? "#"}
+                        className={cn(
+                          "flex h-9 w-full items-center gap-2 rounded-md px-2 text-sm font-medium transition-colors group relative",
+                          isActive
+                            ? "bg-primary text-primary-foreground"
+                            : "hover:bg-primary/10 hover:text-primary",
+                          !isOpen && "justify-center"
+                        )}
+                      >
+                        {item.icon && <item.icon className="h-5 w-5 flex-shrink-0" />}
+                        {isOpen && <span>{item.title}</span>}
+                        {!isOpen && (
+                          <div className="absolute left-full ml-2 px-2 py-1 bg-popover text-popover-foreground text-xs rounded-md shadow-md opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50">
+                            {item.title}
+                          </div>
+                        )}
+                      </Link>
+                    );
+                  })()
                 )}
               </div>
             ))}
