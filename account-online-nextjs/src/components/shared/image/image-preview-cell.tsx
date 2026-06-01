@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Download, Eye, ImageOff, Loader2 } from "lucide-react";
 import {
   Dialog,
@@ -29,6 +29,9 @@ export function ImagePreviewCell({
   const [imgError, setImgError] = useState(false);
   const [hovered, setHovered] = useState(false);
   const [downloading, setDownloading] = useState(false);
+  // Defer src until after first paint so table text renders immediately
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
 
   if (!imageId || imgError) {
     return (
@@ -76,11 +79,11 @@ export function ImagePreviewCell({
         onMouseLeave={() => setHovered(false)}
         onClick={() => setOpen(true)}
       >
-        {/* Placeholder while loading */}
+        {/* Skeleton shown until image is loaded */}
         {!imgLoaded && <div className="absolute inset-0 bg-muted/60" />}
 
         <img
-          src={src}
+          src={mounted ? src : undefined}
           alt={label}
           loading="lazy"
           decoding="async"
