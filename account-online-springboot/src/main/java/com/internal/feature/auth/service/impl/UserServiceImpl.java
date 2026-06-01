@@ -186,7 +186,8 @@ public class UserServiceImpl implements UserService {
         if (request.getUserRole() != null) {
             Role role = roleRepository.findByName(request.getUserRole())
                     .orElseThrow(() -> new com.internal.exceptions.error.custom.BadRequestException("Invalid role: " + request.getUserRole()));
-            user.setRoles(Collections.singletonList(role));
+            user.getRoles().clear();
+            user.getRoles().add(role);
         }
     }
 

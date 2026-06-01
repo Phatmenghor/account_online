@@ -226,7 +226,7 @@ public class AuthServiceImpl implements AuthService {
         user.setDepartment(registerDto.getDepartment());
         user.setPassword(passwordEncoder.encode(registerDto.getPassword()));
         user.setStatus(StatusData.ACTIVE);
-        user.setRoles(Collections.singletonList(role));
+        user.getRoles().add(role);
 
         UserEntity savedUser = userRepository.save(user);
         log.info("Admin user creation successful for: {}", registerDto.getUsername());
