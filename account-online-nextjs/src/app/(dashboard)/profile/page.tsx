@@ -40,6 +40,10 @@ export default function ProfilePage() {
       status: Status.ACTIVE,
       position: "",
       profileUrl: "",
+      staffId: "",
+      phoneNumber: "",
+      branch: "",
+      department: "",
       id: 0,
     },
   });
@@ -63,6 +67,10 @@ export default function ProfilePage() {
             status: response.userStatus || Status.ACTIVE,
             position: response.position || "",
             profileUrl: response.profileUrl || "",
+            staffId: response.staffId || "",
+            phoneNumber: response.phoneNumber || "",
+            branch: response.branch || "",
+            department: response.department || "",
             id: response.id,
           },
           { keepDefaultValues: true }
@@ -122,12 +130,15 @@ export default function ProfilePage() {
       }
 
       const payload = {
-        username: values.username,
         email: values.email,
         fullName: values.fullName,
         position: values.position,
         status: values.status,
         profileUrl: uploadedProfileUrl,
+        staffId: values.staffId,
+        phoneNumber: values.phoneNumber,
+        branch: values.branch,
+        department: values.department,
       };
 
       const response = await updateUserProfileService(payload);
@@ -135,7 +146,7 @@ export default function ProfilePage() {
       if (response) {
         AppToast({ type: "success", message: "Profile updated successfully!" });
         setUser({ ...user!, ...response, profileUrl: uploadedProfileUrl });
-        reset({ ...payload, id: user?.id }, { keepDefaultValues: true });
+        reset({ ...payload, username: values.username, id: user?.id }, { keepDefaultValues: true });
         setImageData(null);
         setImagePreview(null);
       }
