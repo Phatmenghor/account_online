@@ -43,6 +43,24 @@ export const createSuccessAccountTableColumns = ({
       ),
     },
     {
+      key: "nidImage",
+      label: "NID Image",
+      maxWidth: "100px",
+      minWidth: "80px",
+      render: (account) => (
+        <ImagePreviewCell imageId={account.nidImageName} label="NID / ID Card" />
+      ),
+    },
+    {
+      key: "selfieImage",
+      label: "Selfie",
+      maxWidth: "100px",
+      minWidth: "80px",
+      render: (account) => (
+        <ImagePreviewCell imageId={account.selfieImageName} label="Selfie Photo" />
+      ),
+    },
+    {
       key: "cif",
       label: "CIF",
       truncate: true,
@@ -90,24 +108,6 @@ export const createSuccessAccountTableColumns = ({
       minWidth: "150px",
       render: (account) => (
         <span className="font-medium">{account.branchNameKh || "---"}</span>
-      ),
-    },
-    {
-      key: "nidImage",
-      label: "NID Image",
-      maxWidth: "100px",
-      minWidth: "80px",
-      render: (account) => (
-        <ImagePreviewCell imageId={account.nidImageName} label="NID / ID Card" />
-      ),
-    },
-    {
-      key: "selfieImage",
-      label: "Selfie",
-      maxWidth: "100px",
-      minWidth: "80px",
-      render: (account) => (
-        <ImagePreviewCell imageId={account.selfieImageName} label="Selfie Photo" />
       ),
     },
     {
