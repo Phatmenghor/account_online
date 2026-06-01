@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { toast } from "sonner";
+import { AppToast } from "@/components/shared/toast/app-toast";
 import { getAllPublicMaritalService } from "@/services/dashboard/marital/marital.service";
 import { getAllPublicOccupationService } from "@/services/dashboard/occupation/occupation.service";
 import { getAllPublicReferenceService } from "@/services/dashboard/reference/reference.service";
@@ -38,7 +38,7 @@ export const useMaritalStatuses = (): UseFetchDataResult<MaritalModel> => {
     } catch (err: any) {
       console.error("Failed to fetch marital statuses:", err);
       setError(err);
-      toast.error("Failed to load marital statuses");
+      AppToast({ type: "error", message: "Failed to load marital statuses" });
     } finally {
       setIsLoading(false);
     }
@@ -68,7 +68,7 @@ export const useOccupations = (): UseFetchDataResult<OccupationModel> => {
     } catch (err: any) {
       console.error("Failed to fetch occupations:", err);
       setError(err);
-      toast.error("Failed to load occupations");
+      AppToast({ type: "error", message: "Failed to load occupations" });
     } finally {
       setIsLoading(false);
     }
@@ -98,7 +98,7 @@ export const useLegalTypes = (): UseFetchDataResult<LegalTypeModel> => {
     } catch (err: any) {
       console.error("Failed to fetch legal type:", err);
       setError(err);
-      toast.error("Failed to load legal type");
+      AppToast({ type: "error", message: "Failed to load legal type" });
     } finally {
       setIsLoading(false);
     }
@@ -128,7 +128,7 @@ export const useReferenceBanks = (): UseFetchDataResult<ReferenceModel> => {
     } catch (err: any) {
       console.error("Failed to fetch reference banks:", err);
       setError(err);
-      toast.error("Failed to load reference banks");
+      AppToast({ type: "error", message: "Failed to load reference banks" });
     } finally {
       setIsLoading(false);
     }
@@ -161,7 +161,7 @@ export const useBranches = (): UseFetchDataResult<BranchModel> => {
     } catch (err: any) {
       console.error("Failed to fetch branches:", err);
       setError(err);
-      toast.error("Failed to load branches");
+      AppToast({ type: "error", message: "Failed to load branches" });
     } finally {
       setIsLoading(false);
     }

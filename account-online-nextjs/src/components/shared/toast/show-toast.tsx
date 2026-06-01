@@ -1,32 +1,24 @@
-import { toast } from "sonner";
+import { AppToast } from "@/components/shared/toast/app-toast";
 
 const showToast = (
   message: string,
   type: "success" | "error" | "info" | "warning" = "info"
 ) => {
-  const duration = type === "error" || type === "warning" ? 8000 : 4000;
-
-  const options = {
-    duration,
-    position: "top-center" as const,
-    closeButton: true,
-  };
-
   switch (type) {
     case "success":
-      toast.success(message, options);
+      AppToast({ type: "success", message });
       break;
     case "error":
-      toast.error(message, options);
+      AppToast({ type: "error", message });
       break;
     case "info":
-      toast.info(message, options);
+      AppToast({ type: "info", message });
       break;
     case "warning":
-      toast.warning(message, options);
+      AppToast({ type: "warning", message });
       break;
     default:
-      toast.info(message, options);
+      AppToast({ type: "info", message });
   }
 };
 

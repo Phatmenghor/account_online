@@ -9,8 +9,6 @@ import {
   logoutToken,
   storeToken,
 } from "../local-storage/token";
-import { toast } from "sonner";
-
 // Define types
 type RequestMetadata = {
   startTime: number;

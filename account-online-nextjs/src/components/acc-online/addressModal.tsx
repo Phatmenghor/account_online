@@ -21,7 +21,6 @@ import { ComboboxSelectProvince } from "../shared/combo-box/combobox-province";
 import { ComboboxSelectDistrict } from "../shared/combo-box/combobox-district";
 import { ComboboxSelectCommune } from "../shared/combo-box/combobox-commune";
 import { ComboboxSelectVillage } from "../shared/combo-box/combobox-village";
-import { toast } from "sonner";
 import { getAddressSelectService } from "@/services/address/selectAddress.service";
 import { AddressSelectReq } from "@/models/address/select-address/selectAddress.request";
 import { PosSelectReq } from "@/models/address/select-pos/selectPos.request";
