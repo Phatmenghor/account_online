@@ -1,6 +1,6 @@
 import {
   LayoutDashboard, User2, IdCard, FolderClosed,
-  Calendar1, MapPin, File, LucideIcon,
+  Calendar1, MapPin, LucideIcon,
 } from "lucide-react";
 
 export type RoleEnum = "STAFF" | "COMPLIANCE" | "BUSINESS" | "DEVELOPER" | "ADMIN";
@@ -97,11 +97,5 @@ export const STATIC_MENU: StaticMenuItem[] = [
       { title: "Commune", href: "/commune", roles: ["COMPLIANCE", "BUSINESS", "DEVELOPER", "ADMIN"] },
       { title: "Village", href: "/village", roles: ["COMPLIANCE", "BUSINESS", "DEVELOPER", "ADMIN"] },
     ],
-  },
-  {
-    title: "Report",
-    icon: File,
-    href: "/report",
-    roles: ["COMPLIANCE", "BUSINESS", "DEVELOPER", "ADMIN"],
   },
 ];

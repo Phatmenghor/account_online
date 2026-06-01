@@ -32,7 +32,6 @@ export const ROUTES = {
       PENDING_REVIEW_DETAIL: "/pending-review/:id",
     },
     ACCOUNT_ONLINE: "/account-online",
-    REPORT: "/report",
     MENU_CONFIG: "/menu-config"
   },
 };

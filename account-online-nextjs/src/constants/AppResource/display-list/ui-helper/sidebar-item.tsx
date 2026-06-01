@@ -3,7 +3,6 @@
 import { ROUTES } from "@/constants/AppRoutes/routes";
 import {
   Calendar1Icon,
-  File,
   FolderClosed,
   IdCard,
   LayoutDashboard,
@@ -73,11 +72,6 @@ export function useNavItems() {
         { title: "Commune", href: ROUTES.DASHBOARD.STATIC.COMMUNE },
         { title: "Village", href: ROUTES.DASHBOARD.STATIC.VILLAGE },
       ],
-    },
-    {
-      title: "Report",
-      href: ROUTES.DASHBOARD.REPORT,
-      icon: File,
     },
   ];
 }
