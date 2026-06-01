@@ -19,11 +19,11 @@ const step1Schema = z.object({
   email: z.string().min(1, "Email is required").email("Please enter a valid email"),
   password: z.string().min(6, "Password must be at least 6 characters"),
   confirmPassword: z.string().min(1, "Please confirm your password"),
-  fullName: z.string().optional(),
-  position: z.string().optional(),
-  staffId: z.string().optional(),
-  phoneNumber: z.string().optional(),
-  branch: z.string().optional(),
+  fullName: z.string().min(1, "Full name is required"),
+  position: z.string().min(1, "Position is required"),
+  staffId: z.string().min(1, "Staff ID is required"),
+  phoneNumber: z.string().min(1, "Phone number is required"),
+  branch: z.string().min(1, "Branch is required"),
 }).refine((d) => d.password === d.confirmPassword, {
   message: "Passwords do not match",
   path: ["confirmPassword"],
@@ -47,7 +47,7 @@ export default function RegisterPage() {
 
   const form1 = useForm<Step1Data>({
     resolver: zodResolver(step1Schema),
-    defaultValues: { email: "", password: "", confirmPassword: "", fullName: "", position: "", staffId: "", phoneNumber: "", branch: "" },
+    defaultValues: { email: "", password: "", confirmPassword: "", fullName: "", position: "", staffId: "", phoneNumber: "", branch: "" } as Step1Data,
   });
 
   const form2 = useForm<Step2Data>({
@@ -153,17 +153,15 @@ export default function RegisterPage() {
             {/* ── Step 1 ── */}
             {step === 1 && (
               <Form {...form1}>
-                <form onSubmit={form1.handleSubmit(onStep1Submit)} className="space-y-6">
+                <form onSubmit={form1.handleSubmit(onStep1Submit)} className="space-y-5">
 
-                  {/* Login credentials */}
-                  <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-4">
-                    <p className="text-xs font-semibold uppercase tracking-wider text-gray-400 pb-1">Login Credentials</p>
+                  <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 space-y-4">
 
+                    {/* Email */}
                     <FormField control={form1.control} name="email" render={({ field }) => (
                       <FormItem>
                         <FormLabel className="text-sm font-medium text-gray-700">
                           Email <span className="text-destructive">*</span>
-                          <span className="ml-2 text-[11px] font-normal text-gray-400 normal-case tracking-normal">OTP will be sent here</span>
                         </FormLabel>
                         <FormControl>
                           <Input {...field} type="email" placeholder="Please enter your email" disabled={isLoading} className="h-11 bg-gray-50 border-gray-200 focus:bg-white transition-colors" />
@@ -172,6 +170,7 @@ export default function RegisterPage() {
                       </FormItem>
                     )} />
 
+                    {/* Password row */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <FormField control={form1.control} name="password" render={({ field }) => (
                         <FormItem>
@@ -207,15 +206,16 @@ export default function RegisterPage() {
                         </FormItem>
                       )} />
                     </div>
-                  </div>
 
-                  {/* Personal information */}
-                  <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-4">
-                    <p className="text-xs font-semibold uppercase tracking-wider text-gray-400 pb-1">Personal Information</p>
+                    {/* Divider */}
+                    <div className="border-t border-gray-100 pt-2" />
 
+                    {/* Full Name */}
                     <FormField control={form1.control} name="fullName" render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-sm font-medium text-gray-700">Full Name</FormLabel>
+                        <FormLabel className="text-sm font-medium text-gray-700">
+                          Full Name <span className="text-destructive">*</span>
+                        </FormLabel>
                         <FormControl>
                           <Input {...field} placeholder="Please enter your full name" disabled={isLoading} className="h-11 bg-gray-50 border-gray-200 focus:bg-white transition-colors" />
                         </FormControl>
@@ -223,10 +223,13 @@ export default function RegisterPage() {
                       </FormItem>
                     )} />
 
+                    {/* Position / Staff ID */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <FormField control={form1.control} name="position" render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-sm font-medium text-gray-700">Position</FormLabel>
+                          <FormLabel className="text-sm font-medium text-gray-700">
+                            Position <span className="text-destructive">*</span>
+                          </FormLabel>
                           <FormControl>
                             <Input {...field} placeholder="Please enter position" disabled={isLoading} className="h-11 bg-gray-50 border-gray-200 focus:bg-white transition-colors" />
                           </FormControl>
@@ -236,7 +239,9 @@ export default function RegisterPage() {
 
                       <FormField control={form1.control} name="staffId" render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-sm font-medium text-gray-700">Staff ID</FormLabel>
+                          <FormLabel className="text-sm font-medium text-gray-700">
+                            Staff ID <span className="text-destructive">*</span>
+                          </FormLabel>
                           <FormControl>
                             <Input {...field} placeholder="Please enter staff ID" disabled={isLoading} className="h-11 bg-gray-50 border-gray-200 focus:bg-white transition-colors" />
                           </FormControl>
@@ -245,10 +250,13 @@ export default function RegisterPage() {
                       )} />
                     </div>
 
+                    {/* Phone / Branch */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <FormField control={form1.control} name="phoneNumber" render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-sm font-medium text-gray-700">Phone Number</FormLabel>
+                          <FormLabel className="text-sm font-medium text-gray-700">
+                            Phone Number <span className="text-destructive">*</span>
+                          </FormLabel>
                           <FormControl>
                             <Input {...field} type="tel" placeholder="Please enter phone number" disabled={isLoading} className="h-11 bg-gray-50 border-gray-200 focus:bg-white transition-colors" />
                           </FormControl>
@@ -258,7 +266,9 @@ export default function RegisterPage() {
 
                       <FormField control={form1.control} name="branch" render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-sm font-medium text-gray-700">Branch</FormLabel>
+                          <FormLabel className="text-sm font-medium text-gray-700">
+                            Branch <span className="text-destructive">*</span>
+                          </FormLabel>
                           <FormControl>
                             <Input {...field} placeholder="Please enter branch" disabled={isLoading} className="h-11 bg-gray-50 border-gray-200 focus:bg-white transition-colors" />
                           </FormControl>

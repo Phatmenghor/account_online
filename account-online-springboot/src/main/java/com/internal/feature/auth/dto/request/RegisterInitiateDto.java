@@ -8,7 +8,7 @@ import javax.validation.constraints.*;
 public class RegisterInitiateDto {
 
     @NotBlank(message = "Username is required")
-    @Size(min = 3, max = 50, message = "Username must be between 3 and 50 characters")
+    @Size(min = 3, max = 255, message = "Username must be between 3 and 255 characters")
     private String username;
 
     @NotBlank(message = "Email is required")
@@ -22,9 +22,18 @@ public class RegisterInitiateDto {
     @NotBlank(message = "Confirm password is required")
     private String confirmPassword;
 
+    @NotBlank(message = "Full name is required")
     private String fullName;
+
+    @NotBlank(message = "Position is required")
     private String position;
+
+    @NotBlank(message = "Staff ID is required")
     private String staffId;
+
+    @NotBlank(message = "Phone number is required")
     private String phoneNumber;
+
+    @NotBlank(message = "Branch is required")
     private String branch;
 }
