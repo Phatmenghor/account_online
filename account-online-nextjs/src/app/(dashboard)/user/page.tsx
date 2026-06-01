@@ -34,6 +34,14 @@ import Loading from "@/components/shared/common/loading";
 import { UserViewModal } from "@/components/shared/modal/user-detail-modal";
 import { ModalMode } from "@/constants/AppResource/display-list/enum/mode";
 import { getUserInfo } from "@/utils/local-storage/userInfo";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { ROLE_FILTER_WITH_ALL } from "@/constants/AppResource/filter/role";
 
 function UserPageContent() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -41,6 +49,7 @@ function UserPageContent() {
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [statusFilter, setStatusFilter] = useState("ACTIVE");
+  const [roleFilter, setRoleFilter] = useState("ALL");
   const [selectedUser, setSelectedUser] = useState<UserModel | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [mode, setMode] = useState<ModalMode>(ModalMode.CREATE_MODE);
@@ -88,6 +97,7 @@ function UserPageContent() {
         pageNo: currentPage,
         pageSize: 15,
         status: statusFilter,
+        role: roleFilter === "ALL" ? undefined : roleFilter,
       });
       setUsers(response);
     } catch (error: any) {
@@ -95,11 +105,11 @@ function UserPageContent() {
     } finally {
       setIsLoading(false);
     }
-  }, [debouncedSearchQuery, statusFilter, currentPage]);
+  }, [debouncedSearchQuery, statusFilter, roleFilter, currentPage]);
 
   useEffect(() => {
     loadUsers();
-  }, [loadUsers, debouncedSearchQuery, statusFilter]);
+  }, [loadUsers, debouncedSearchQuery, statusFilter, roleFilter]);
 
   // Simplified search change handler - just updates the state, debouncing handles the rest
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -153,11 +163,14 @@ function UserPageContent() {
         const response = await createUserService({
           email: createData.email,
           fullName: createData.fullName,
-          userPermission: createData.userPermission,
           password: createData.password,
           role: createData.role,
           username: createData.username,
           position: createData.position,
+          staffId: createData.staffId,
+          phoneNumber: createData.phoneNumber,
+          branch: createData.branch,
+          department: createData.department,
         });
 
         // Optimistic update
@@ -309,12 +322,16 @@ function UserPageContent() {
               />
             </div>
 
-            {/* <div className="flex items-center gap-2">
-              <StatusFilter
-                setStatusFilter={setStatusFilter}
-                statusFilter={statusFilter}
-              />
-            </div> */}
+            <Select value={roleFilter} onValueChange={setRoleFilter}>
+              <SelectTrigger className="h-9 w-[160px] text-xs">
+                <SelectValue placeholder="All Roles" />
+              </SelectTrigger>
+              <SelectContent>
+                {ROLE_FILTER_WITH_ALL.map((r) => (
+                  <SelectItem key={r.value} value={r.value}>{r.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           <div>
             <Button onClick={handleAddUser}>New</Button>

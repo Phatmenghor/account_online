@@ -14,9 +14,12 @@ export interface UserModel {
   userRole: string;
   userStatus: string;
   fullName: string;
-  userPermission: string;
   position: string;
   profileUrl: string;
+  staffId: string;
+  phoneNumber: string;
+  branch: string;
+  department: string;
   createdAt: string;
   updatedAt: string;
   lastLogin: string;

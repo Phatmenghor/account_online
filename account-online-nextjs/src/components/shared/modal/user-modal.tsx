@@ -1,4 +1,3 @@
-// Updated ModalUser with improved spacing for UX
 "use client";
 
 import React, { useEffect, useState, useCallback } from "react";
@@ -8,12 +7,14 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
 import {
   Select,
   SelectContent,
@@ -22,6 +23,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Eye, EyeOff, UserPlus, UserCog, Loader2 } from "lucide-react";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { getUserByIdService } from "@/services/dashboard/user/user.service";
 import { UserModel } from "@/models/user/user.response";
 import {
@@ -30,15 +32,12 @@ import {
   CreateUserForm,
   UpdateUserForm,
 } from "@/models/user/user.schema";
-
 import { CreateUserReq, UpdateUserReq } from "@/models/user/user.request";
 import Loading from "@/components/shared/common/loading";
 import { ModalMode } from "@/constants/AppResource/display-list/enum/mode";
 import { ROLE_FILTER } from "@/constants/AppResource/filter/role";
 import { STATUS_USER_OPTIONS } from "@/constants/AppResource/filter/status";
 import { Status } from "@/constants/AppResource/display-list/enum/status";
-import { UserPermission } from "@/constants/AppResource/display-list/enum/user";
-import { USER_PERMISSION_OPTIONS } from "@/constants/AppResource/filter/permission";
 
 type ModalUserProps = {
   isOpen: boolean;
@@ -47,10 +46,17 @@ type ModalUserProps = {
   userId?: number;
   isSubmitting?: boolean;
   error?: string | null;
-  onSave: (
-    data: CreateUserReq | { id: number; updates: UpdateUserReq }
-  ) => void;
+  onSave: (data: CreateUserReq | { id: number; updates: UpdateUserReq }) => void;
 };
+
+function SectionHeader({ color, title }: { color: string; title: string }) {
+  return (
+    <div className="flex items-center gap-2">
+      <div className={`w-1 h-6 ${color} rounded-full`} />
+      <h3 className="text-base font-semibold">{title}</h3>
+    </div>
+  );
+}
 
 export default function ModalUser({
   isOpen,
@@ -75,38 +81,36 @@ export default function ModalUser({
           email: "",
           password: "",
           fullName: "",
-          userPermission: UserPermission.NORMAL,
           role: ROLE_FILTER[0]?.value || "",
           position: "",
-          profileUrl: "",
-          status: Status.ACTIVE,
+          staffId: "",
+          phoneNumber: "",
+          branch: "",
+          department: "",
         }
       : undefined,
   });
 
-  const {
-    control,
-    handleSubmit,
-    reset,
-    formState: { errors, isDirty },
-  } = form;
+  const { control, handleSubmit, reset, formState: { errors, isDirty } } = form;
 
   const loadUserById = useCallback(async () => {
     if (!userId || isCreate) return;
-
     setIsLoadingData(true);
     try {
       const user = await getUserByIdService(userId);
       setUserDetail(user);
       reset({
         id: user.id,
-        username: user.idCard || "",
         email: user.email || "",
         fullName: user.fullName || "",
-        status: user.userStatus || STATUS_USER_OPTIONS[0]?.value,
-        userPermission: user.userPermission || UserPermission.NORMAL,
+        status: user.userStatus || Status.ACTIVE,
         position: user.position || "",
         profileUrl: user.profileUrl || "",
+        staffId: user.staffId || "",
+        phoneNumber: user.phoneNumber || "",
+        branch: user.branch || "",
+        department: user.department || "",
+        userRole: user.userRole || ROLE_FILTER[0]?.value || "",
       });
     } catch (err) {
       console.error("Failed to fetch user:", err);
@@ -124,12 +128,13 @@ export default function ModalUser({
         username: "",
         email: "",
         password: "",
-        userPermission: UserPermission.NORMAL,
         fullName: "",
         role: ROLE_FILTER[0]?.value || "",
         position: "",
-        profileUrl: "",
-        status: Status.ACTIVE,
+        staffId: "",
+        phoneNumber: "",
+        branch: "",
+        department: "",
       });
       setUserDetail(null);
     }
@@ -137,22 +142,22 @@ export default function ModalUser({
 
   const onSubmit = (data: CreateUserForm | UpdateUserForm) => {
     if (isCreate) {
-      const payload: CreateUserReq = data as CreateUserForm;
-      onSave(payload);
+      onSave(data as CreateUserReq);
     } else {
-      const updateData = data as UpdateUserForm;
-      if (!updateData.id) return console.error("Missing ID for update");
-
+      const u = data as UpdateUserForm;
+      if (!u.id) return;
       const payload: UpdateUserReq = {
-        username: updateData.username?.trim(),
-        email: updateData.email?.trim(),
-        fullName: updateData.fullName?.trim(),
-        status: updateData.status,
-        userPermission: updateData.userPermission ?? UserPermission.NORMAL,
-        position: updateData.position?.trim(),
-        profileUrl: updateData.profileUrl?.trim(),
+        email: u.email?.trim(),
+        fullName: u.fullName?.trim(),
+        status: u.status,
+        position: u.position?.trim(),
+        staffId: u.staffId?.trim(),
+        phoneNumber: u.phoneNumber?.trim(),
+        branch: u.branch?.trim(),
+        department: u.department?.trim(),
+        userRole: u.userRole,
       };
-      onSave({ id: updateData.id, updates: payload });
+      onSave({ id: u.id, updates: payload });
     }
   };
 
@@ -164,19 +169,14 @@ export default function ModalUser({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-2xl w-full max-h-[90vh] p-0 flex flex-col gap-0">
+      <DialogContent className="max-w-3xl h-[90vh] p-0 gap-0 flex flex-col">
+        {/* Header */}
         <DialogHeader className="px-6 py-4 border-b bg-muted/30 flex-shrink-0">
           <div className="flex items-center gap-4 pr-8">
-            <div
-              className={`p-2 rounded-full ${
-                isCreate ? "bg-green-100" : "bg-blue-100"
-              }`}
-            >
-              {isCreate ? (
-                <UserPlus className="h-5 w-5 text-green-600" />
-              ) : (
-                <UserCog className="h-5 w-5 text-blue-600" />
-              )}
+            <div className={`w-12 h-12 rounded-full flex items-center justify-center ${isCreate ? "bg-green-100" : "bg-blue-100"}`}>
+              {isCreate
+                ? <UserPlus className="h-6 w-6 text-green-600" />
+                : <UserCog className="h-6 w-6 text-blue-600" />}
             </div>
             <div className="flex-1">
               <DialogTitle className="text-xl font-semibold">
@@ -186,17 +186,16 @@ export default function ModalUser({
                 {isCreate
                   ? "Fill in the details to create a new user account"
                   : userDetail
-                  ? `Update information for "${
-                      userDetail.fullName || userDetail.email
-                    }"`
+                  ? `Update information for "${userDetail.fullName || userDetail.email}"`
                   : "Loading user information..."}
               </DialogDescription>
             </div>
           </div>
         </DialogHeader>
 
-        <div className="flex-1 min-h-0 overflow-auto">
-          <div className="p-6 space-y-8">
+        {/* Body */}
+        <ScrollArea className="flex-1 min-h-0">
+          <div className="p-6">
             {isLoadingData ? (
               <Loading />
             ) : !isCreate && !userDetail ? (
@@ -206,296 +205,184 @@ export default function ModalUser({
             ) : (
               <div className="space-y-6">
                 {error && (
-                  <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-md mt-2">
-                    <p className="text-sm text-destructive font-medium">
-                      {error}
-                    </p>
+                  <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-md">
+                    <p className="text-sm text-destructive font-medium">{error}</p>
                   </div>
                 )}
 
                 {!isCreate && (
-                  <Controller
-                    control={control}
-                    name="id"
-                    render={({ field }) => <input type="hidden" {...field} />}
-                  />
+                  <Controller control={control} name="id" render={({ field }) => <input type="hidden" {...field} />} />
                 )}
 
-                <div className="space-y-5">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {isCreate && (
-                      <div className="space-y-2">
-                        <Label
-                          htmlFor="username"
-                          className="text-sm font-medium"
-                        >
-                          Username (ID Card)
-                          <span className="text-red-500"> *</span>
-                        </Label>
+                {/* Account Credentials */}
+                <div className="space-y-4">
+                  <SectionHeader color="bg-blue-600" title="Account Credentials" />
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Username */}
+                    <div className="space-y-2">
+                      <Label htmlFor="username" className="text-sm font-medium">
+                        Username (ID Card){isCreate && <span className="text-red-500"> *</span>}
+                      </Label>
+                      {isCreate ? (
                         <Controller
                           control={control}
                           name="username"
                           render={({ field }) => (
-                            <Input
-                              {...field}
-                              id="username"
-                              placeholder="Enter username (e.g., 5589)"
-                              disabled={isSubmitting}
-                              className={`transition-colors h-10 ${
-                                errors.username ? "border-red-500" : ""
-                              }`}
-                            />
+                            <Input {...field} id="username" placeholder="e.g. 5589" disabled={isSubmitting}
+                              className={`h-10 ${(errors as any).username ? "border-red-500" : ""}`} />
                           )}
                         />
-                        {errors.username && (
-                          <p className="text-sm text-red-600">
-                            {errors.username.message as string}
-                          </p>
-                        )}
-                      </div>
-                    )}
+                      ) : (
+                        <Input value={userDetail?.idCard || ""} disabled className="h-10 bg-muted/50 cursor-not-allowed" />
+                      )}
+                      {(errors as any).username && (
+                        <p className="text-xs text-red-600">{(errors as any).username.message}</p>
+                      )}
+                    </div>
 
-                    {!isCreate && userDetail && (
-                      <div className="space-y-2">
-                        <Label
-                          htmlFor="username-readonly"
-                          className="text-sm font-medium"
-                        >
-                          Username (ID Card)
-                        </Label>
-                        <Input
-                          id="username-readonly"
-                          value={userDetail.idCard || "Not provided"}
-                          disabled
-                          className="bg-muted/50 cursor-not-allowed h-10"
-                        />
-                        <p className="text-xs text-muted-foreground">
-                          Username cannot be modified
-                        </p>
-                      </div>
-                    )}
-
+                    {/* Email */}
                     <div className="space-y-2">
                       <Label htmlFor="email" className="text-sm font-medium">
-                        Email{" "}
-                        {isCreate && <span className="text-red-500">*</span>}
+                        Email{isCreate && <span className="text-red-500"> *</span>}
                       </Label>
                       <Controller
                         control={control}
                         name="email"
                         render={({ field }) => (
-                          <Input
-                            {...field}
-                            id="email"
-                            type="email"
-                            placeholder="Enter official email address"
-                            disabled={isSubmitting}
-                            className={`transition-colors h-10 ${
-                              errors.email ? "border-red-500" : ""
-                            }`}
-                          />
+                          <Input {...field} id="email" type="email" placeholder="Enter email address"
+                            disabled={isSubmitting} className={`h-10 ${errors.email ? "border-red-500" : ""}`} />
                         )}
                       />
-                      {errors.email && (
-                        <p className="text-sm text-red-600">
-                          {errors.email.message as string}
-                        </p>
-                      )}
+                      {errors.email && <p className="text-xs text-red-600">{errors.email.message as string}</p>}
                     </div>
-                  </div>
 
-                  {isCreate && (
-                    <div className="space-y-2">
-                      <Label htmlFor="password" className="text-sm font-medium">
-                        Password <span className="text-red-500">*</span>
-                      </Label>
-                      <div className="relative">
-                        <Controller
-                          control={control}
-                          name="password"
-                          render={({ field }) => (
-                            <Input
-                              {...field}
-                              id="password"
-                              type={showPassword ? "text" : "password"}
-                              placeholder="Create a secure password (min. 8 characters)"
-                              disabled={isSubmitting}
-                              className={`transition-colors pr-10 h-10 ${
-                                (errors as any).password ? "border-red-500" : ""
-                              }`}
-                            />
-                          )}
-                        />
-                        <button
-                          type="button"
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                          onClick={() => setShowPassword((p) => !p)}
-                          tabIndex={-1}
-                        >
-                          {showPassword ? (
-                            <EyeOff className="h-4 w-4" />
-                          ) : (
-                            <Eye className="h-4 w-4" />
-                          )}
-                        </button>
+                    {/* Password (create only) */}
+                    {isCreate && (
+                      <div className="space-y-2 md:col-span-2">
+                        <Label htmlFor="password" className="text-sm font-medium">
+                          Password <span className="text-red-500">*</span>
+                        </Label>
+                        <div className="relative">
+                          <Controller
+                            control={control}
+                            name="password"
+                            render={({ field }) => (
+                              <Input {...field} id="password" type={showPassword ? "text" : "password"}
+                                placeholder="Min. 6 characters" disabled={isSubmitting}
+                                className={`h-10 pr-10 ${(errors as any).password ? "border-red-500" : ""}`} />
+                            )}
+                          />
+                          <button type="button" tabIndex={-1}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                            onClick={() => setShowPassword(p => !p)}>
+                            {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                          </button>
+                        </div>
+                        {(errors as any).password && (
+                          <p className="text-xs text-red-600">{(errors as any).password.message}</p>
+                        )}
                       </div>
-                      {(errors as any).password && (
-                        <p className="text-sm text-red-600">
-                          {(errors as any).password.message as string}
-                        </p>
-                      )}
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
 
-                <div className="space-y-5">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <Label htmlFor="fullName" className="text-sm font-medium">
-                        Full Name
-                      </Label>
-                      <Controller
-                        control={control}
-                        name="fullName"
-                        render={({ field }) => (
-                          <Input
-                            {...field}
-                            id="fullName"
-                            placeholder="Enter your full name"
-                            disabled={isSubmitting}
-                            className="transition-colors h-10"
-                          />
-                        )}
-                      />
-                    </div>
+                <Separator />
 
+                {/* Personal Information */}
+                <div className="space-y-4">
+                  <SectionHeader color="bg-purple-600" title="Personal Information" />
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="position" className="text-sm font-medium">
-                        Position
-                      </Label>
-                      <Controller
-                        control={control}
-                        name="position"
+                      <Label className="text-sm font-medium">Full Name</Label>
+                      <Controller control={control} name="fullName"
                         render={({ field }) => (
-                          <Input
-                            {...field}
-                            id="position"
-                            placeholder="Enter your position (e.g., Branch Officer)"
-                            disabled={isSubmitting}
-                            className="transition-colors h-10"
-                          />
-                        )}
-                      />
+                          <Input {...field} placeholder="Enter full name" disabled={isSubmitting} className="h-10" />
+                        )} />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium">Phone Number</Label>
+                      <Controller control={control} name="phoneNumber"
+                        render={({ field }) => (
+                          <Input {...field} placeholder="Enter phone number" disabled={isSubmitting} className="h-10" />
+                        )} />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium">Position</Label>
+                      <Controller control={control} name="position"
+                        render={({ field }) => (
+                          <Input {...field} placeholder="e.g. Branch Officer" disabled={isSubmitting} className="h-10" />
+                        )} />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium">Staff ID</Label>
+                      <Controller control={control} name="staffId"
+                        render={({ field }) => (
+                          <Input {...field} placeholder="Enter staff ID" disabled={isSubmitting} className="h-10" />
+                        )} />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium">Branch</Label>
+                      <Controller control={control} name="branch"
+                        render={({ field }) => (
+                          <Input {...field} placeholder="Enter branch" disabled={isSubmitting} className="h-10" />
+                        )} />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium">Department</Label>
+                      <Controller control={control} name="department"
+                        render={({ field }) => (
+                          <Input {...field} placeholder="Enter department" disabled={isSubmitting} className="h-10" />
+                        )} />
                     </div>
                   </div>
                 </div>
 
-                <div className="space-y-5">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <Separator />
+
+                {/* Role & Status */}
+                <div className="space-y-4">
+                  <SectionHeader color="bg-orange-600" title="Role & Status" />
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Role */}
                     <div className="space-y-2">
-                      <Label
-                        htmlFor="userPermission"
-                        className="text-sm font-medium"
-                      >
-                        User Permission{" "}
-                        {isCreate && <span className="text-red-500">*</span>}
+                      <Label className="text-sm font-medium">
+                        Role{isCreate && <span className="text-red-500"> *</span>}
                       </Label>
                       <Controller
                         control={control}
-                        name="userPermission"
+                        name={isCreate ? "role" : "userRole"}
                         render={({ field }) => (
-                          <Select
-                            value={field.value}
-                            onValueChange={field.onChange}
-                            disabled={isSubmitting}
-                          >
-                            <SelectTrigger
-                              id="userPermission"
-                              className="transition-colors h-10"
-                            >
-                              <SelectValue placeholder="Select user permission" />
+                          <Select value={field.value} onValueChange={field.onChange} disabled={isSubmitting}>
+                            <SelectTrigger className="h-10">
+                              <SelectValue placeholder="Select role" />
                             </SelectTrigger>
                             <SelectContent>
-                              {USER_PERMISSION_OPTIONS.map((r) => (
-                                <SelectItem key={r.value} value={r.value}>
-                                  {r.label}
-                                </SelectItem>
+                              {ROLE_FILTER.map((r) => (
+                                <SelectItem key={r.value} value={r.value}>{r.label}</SelectItem>
                               ))}
                             </SelectContent>
                           </Select>
                         )}
                       />
-                      {errors.userPermission && (
-                        <p className="text-sm text-red-600">
-                          {errors.userPermission.message as string}
-                        </p>
-                      )}
                     </div>
 
-                    {isCreate && (
-                      <div className="space-y-2">
-                        <Label htmlFor="role" className="text-sm font-medium">
-                          Role
-                        </Label>
-                        <Controller
-                          control={control}
-                          name="role"
-                          render={({ field }) => (
-                            <Select
-                              value={field.value}
-                              onValueChange={field.onChange}
-                              disabled={isSubmitting}
-                            >
-                              <SelectTrigger
-                                id="role"
-                                className="transition-colors h-10"
-                              >
-                                <SelectValue placeholder="Select role" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {ROLE_FILTER.map((r) => (
-                                  <SelectItem key={r.value} value={r.value}>
-                                    {r.label}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          )}
-                        />
-                      </div>
-                    )}
-
+                    {/* Status (edit only) */}
                     {!isCreate && (
                       <div className="space-y-2">
-                        <Label htmlFor="status" className="text-sm font-medium">
-                          Status <span className="text-red-500">*</span>
-                        </Label>
+                        <Label className="text-sm font-medium">Status</Label>
                         <Controller
                           control={control}
                           name="status"
                           render={({ field }) => (
-                            <Select
-                              value={field.value}
-                              onValueChange={field.onChange}
-                              disabled={isSubmitting}
-                            >
-                              <SelectTrigger
-                                id="status"
-                                className="transition-colors h-10"
-                              >
+                            <Select value={field.value} onValueChange={field.onChange} disabled={isSubmitting}>
+                              <SelectTrigger className="h-10">
                                 <SelectValue placeholder="Select status" />
                               </SelectTrigger>
                               <SelectContent>
                                 {STATUS_USER_OPTIONS.map((s) => (
                                   <SelectItem key={s.value} value={s.value}>
                                     <div className="flex items-center gap-2">
-                                      <div
-                                        className={`w-2 h-2 rounded-full ${
-                                          s.value === Status.ACTIVE
-                                            ? "bg-green-500"
-                                            : "bg-gray-400"
-                                        }`}
-                                      ></div>
+                                      <div className={`w-2 h-2 rounded-full ${s.value === Status.ACTIVE ? "bg-green-500" : "bg-gray-400"}`} />
                                       {s.label}
                                     </div>
                                   </SelectItem>
@@ -504,66 +391,38 @@ export default function ModalUser({
                             </Select>
                           )}
                         />
-                        {errors.status && (
-                          <p className="text-sm text-red-600">
-                            {errors.status.message as string}
-                          </p>
-                        )}
                       </div>
                     )}
                   </div>
                 </div>
+
               </div>
             )}
           </div>
-        </div>
+        </ScrollArea>
 
-        <div className="flex justify-between items-center p-6 border-t bg-muted/30 flex-shrink-0 gap-4">
+        {/* Footer */}
+        <DialogFooter className="px-6 py-4 border-t bg-muted/30 flex-shrink-0 flex items-center justify-between">
           <div className="text-sm text-muted-foreground flex items-center gap-2">
             {isSubmitting ? (
-              <>
-                <Loader2 className="h-3 w-3 animate-spin" />
-                {isCreate ? "Creating user..." : "Updating user..."}
-              </>
+              <><Loader2 className="h-3 w-3 animate-spin" />{isCreate ? "Creating..." : "Updating..."}</>
             ) : isDirty ? (
-              <>
-                <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
-                You have unsaved changes
-              </>
+              <><div className="w-2 h-2 bg-orange-500 rounded-full" />Unsaved changes</>
             ) : (
-              <>
-                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                {isCreate ? "Ready to create" : "No changes made"}
-              </>
+              <><div className="w-2 h-2 bg-green-500 rounded-full" />{isCreate ? "Ready to create" : "No changes"}</>
             )}
           </div>
           <div className="flex gap-3">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleClose}
-              disabled={isSubmitting}
-            >
+            <Button type="button" variant="outline" onClick={handleClose} disabled={isSubmitting}>
               Cancel
             </Button>
-            <Button
-              onClick={handleSubmit(onSubmit)}
-              disabled={isSubmitting || (!isCreate && !isDirty)}
-              className="min-w-[120px]"
-            >
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  {isCreate ? "Creating..." : "Updating..."}
-                </>
-              ) : isCreate ? (
-                "Create User"
-              ) : (
-                "Update User"
-              )}
+            <Button onClick={handleSubmit(onSubmit)} disabled={isSubmitting || (!isCreate && !isDirty)} className="min-w-[120px]">
+              {isSubmitting
+                ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />{isCreate ? "Creating..." : "Updating..."}</>
+                : isCreate ? "Create User" : "Update User"}
             </Button>
           </div>
-        </div>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

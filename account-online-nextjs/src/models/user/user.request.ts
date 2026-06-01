@@ -3,16 +3,20 @@ export interface AllUserReq {
   pageSize?: number;
   search?: string;
   status?: string;
+  role?: string;
 }
 
 export interface UpdateUserReq {
-  username?: string;
   email?: string;
   fullName?: string;
   status?: string;
-  userPermission?: string;
-  profileUrl?: string;
   position?: string;
+  profileUrl?: string;
+  staffId?: string;
+  phoneNumber?: string;
+  branch?: string;
+  department?: string;
+  userRole?: string;
 }
 
 export interface CreateUserReq {
@@ -20,9 +24,12 @@ export interface CreateUserReq {
   email: string;
   password: string;
   fullName?: string;
-  userPermission?: string;
   role?: string;
   position?: string;
+  staffId?: string;
+  phoneNumber?: string;
+  branch?: string;
+  department?: string;
 }
 
 export interface ChangePasswordReq {
