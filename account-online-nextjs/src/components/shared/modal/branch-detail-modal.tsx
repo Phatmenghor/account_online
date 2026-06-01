@@ -1,18 +1,17 @@
 "use client";
 
 import type React from "react";
-import { FileText } from "lucide-react";
+import { GitBranch } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
-  DialogTitle,
   DialogDescription,
   DialogFooter,
+  DialogHeader,
+  DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { useEffect, useState } from "react";
 import { BranchModel } from "@/models/static/branch/branch.response";
 import { getBranchByIdService } from "@/services/dashboard/branch/branch.service";
@@ -23,6 +22,24 @@ interface BranchViewModalProps {
   branchId?: number;
   isOpen: boolean;
   onClose: () => void;
+}
+
+function InfoRow({ label, value }: { label: string; value?: React.ReactNode }) {
+  return (
+    <div className="flex justify-between border-b pb-2 gap-4">
+      <Label className="text-sm font-medium text-muted-foreground shrink-0">{label}:</Label>
+      <span className="text-sm font-semibold text-right">{value || "N/A"}</span>
+    </div>
+  );
+}
+
+function SectionHeader({ color, title }: { color: string; title: string }) {
+  return (
+    <div className="flex items-center gap-2">
+      <div className={`w-1 h-6 ${color} rounded-full`} />
+      <h3 className="text-lg font-semibold">{title}</h3>
+    </div>
+  );
 }
 
 export default function BranchViewModal({
@@ -36,136 +53,54 @@ export default function BranchViewModal({
 
   useEffect(() => {
     if (!isOpen) return;
-
     if (initialBranch) {
       setBranch(initialBranch);
       return;
     }
-
     if (branchId) {
-      const fetchBranch = async () => {
-        setLoading(true);
-        try {
-          const data = await getBranchByIdService(branchId);
-          setBranch(data);
-        } catch (error) {
-          console.error("Failed to fetch branch:", error);
-        } finally {
-          setLoading(false);
-        }
-      };
-
-      fetchBranch();
+      setLoading(true);
+      getBranchByIdService(branchId)
+        .then(setBranch)
+        .catch((err) => console.error("Failed to fetch:", err))
+        .finally(() => setLoading(false));
     }
   }, [branchId, initialBranch, isOpen]);
 
-  const getStatusColor = (status: string) => {
-    switch (status?.toUpperCase()) {
-      case "ACTIVE":
-        return "bg-green-100 text-green-800 border-green-200";
-      case "DELETE":
-        return "bg-red-100 text-red-800 border-red-200";
-      default:
-        return "bg-gray-100 text-gray-800 border-gray-200";
-    }
-  };
-
-  const handleClose = () => {
-    onClose();
-  };
-
   return (
-    <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-2xl p-0 gap-0 flex flex-col">
-        {/* Header */}
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-lg p-0 gap-0 flex flex-col">
         <DialogHeader className="px-6 py-4 border-b bg-muted/30 flex-shrink-0">
           <div className="flex items-center gap-4 pr-8">
             <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
-              <FileText className="w-6 h-6 text-foreground" />
+              <GitBranch className="w-6 h-6 text-foreground" />
             </div>
             <div className="flex-1">
-              <DialogTitle className="text-xl font-semibold">
-                Branch Details
-              </DialogTitle>
-              <DialogDescription className="text-base text-muted-foreground">
-                {branch?.branchCode
-                  ? `Details for "${branch.branchCode}"`
-                  : branch?.branchKh
-                  ? `Details for "${branch?.branchKh}"`
-                  : "Branch information"}
-              </DialogDescription>
+              <DialogTitle className="text-xl font-semibold">Branch Details</DialogTitle>
+              <DialogDescription className="sr-only">Branch Details</DialogDescription>
             </div>
           </div>
         </DialogHeader>
 
-        {/* Content */}
-        <ScrollArea className="flex-1 min-h-0">
-          <div className="p-6">
-            {loading ? (
-              <div className="text-center text-muted-foreground">
-                Loading branch...
+        <div className="p-6">
+          {loading ? (
+            <div className="text-center py-8 text-muted-foreground">Loading...</div>
+          ) : branch ? (
+            <div className="space-y-4">
+              <SectionHeader color="bg-blue-600" title="Branch Information" />
+              <div className="space-y-3">
+                <InfoRow label="Branch Code" value={branch.branchCode} />
+                <InfoRow label="Branch Name KH" value={branch.branchKh} />
+                <InfoRow label="Created At" value={DateTimeFormat(branch.createdAt)} />
+                <InfoRow label="Updated At" value={DateTimeFormat(branch.updatedAt)} />
               </div>
-            ) : branch ? (
-              <div className="space-y-6">
-                {/* Basic Information */}
-                <div className="space-y-4">
-                  <div className="flex items-center gap-2">
-                    <div className="w-1 h-6 bg-blue-600 rounded-full"></div>
-                    <h3 className="text-lg font-semibold">Basic Information</h3>
-                  </div>
+            </div>
+          ) : (
+            <div className="text-center py-8 text-muted-foreground">No data available</div>
+          )}
+        </div>
 
-                  <div className="space-y-3">
-                    <div className="flex justify-between">
-                      <Label className="text-sm font-medium text-muted-foreground">
-                        Branch Code:
-                      </Label>
-                      <span className="text-sm flex items-center gap-2">
-                        {branch?.branchCode || "N/A"}
-                      </span>
-                    </div>
-
-                    <div className="flex justify-between">
-                      <Label className="text-sm font-medium text-muted-foreground">
-                        Branch (Khmer):
-                      </Label>
-                      <span className="text-sm flex items-center gap-2">
-                        {branch?.branchKh || "N/A"}
-                      </span>
-                    </div>
-
-                    <div className="flex justify-between">
-                      <Label className="text-sm font-medium text-muted-foreground">
-                        Created At:
-                      </Label>
-                      <span className="text-sm flex items-center gap-2">
-                        {DateTimeFormat(branch?.createdAt) || "N/A"}
-                      </span>
-                    </div>
-
-                    <div className="flex justify-between">
-                      <Label className="text-sm font-medium text-muted-foreground">
-                        Updated At:
-                      </Label>
-                      <span className="text-sm flex items-center gap-2">
-                        {DateTimeFormat(branch?.updatedAt) || "N/A"}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="text-center py-8">
-                <p className="text-muted-foreground">
-                  No branch data available
-                </p>
-              </div>
-            )}
-          </div>
-        </ScrollArea>
-
-        {/* Footer */}
         <DialogFooter className="px-6 py-4 border-t bg-muted/30 flex-shrink-0">
-          <Button variant="outline" onClick={handleClose}>
+          <Button variant="outline" onClick={onClose}>
             Close
           </Button>
         </DialogFooter>

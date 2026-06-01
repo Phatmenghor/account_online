@@ -1,7 +1,7 @@
 "use client";
 
 import type React from "react";
-import { FileText } from "lucide-react";
+import { MapPin } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import {
   Dialog,
@@ -72,7 +72,7 @@ export default function DistrictViewModal({
         <DialogHeader className="px-6 py-4 border-b bg-muted/30 flex-shrink-0">
           <div className="flex items-center gap-4 pr-8">
             <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
-              <FileText className="w-6 h-6 text-foreground" />
+              <MapPin className="w-6 h-6 text-foreground" />
             </div>
             <div className="flex-1">
               <DialogTitle className="text-xl font-semibold">
