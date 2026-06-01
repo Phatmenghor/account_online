@@ -98,7 +98,7 @@ export default function AmlViewDetailModal({
             <div className="flex-1">
               <DialogTitle className="text-xl font-semibold">AML Alert Details</DialogTitle>
               <DialogDescription className="text-base text-muted-foreground">
-                Transaction ID: {alert?.trxnID ?? "N/A"}
+                AML screening result details
               </DialogDescription>
               {alert && <div className="mt-2"><AmlStatusBadge status={alert.status} /></div>}
             </div>
@@ -193,40 +193,6 @@ export default function AmlViewDetailModal({
                     <InfoRow label="Action Taken" value={alert.actionTaken} />
                     <InfoRow label="Service Name" value={alert.serviceName} />
                     <InfoRow label="Total Rule Score" value={alert.totalRulesScore} />
-                  </div>
-                </div>
-
-                <Separator />
-
-                {/* ── Rules Triggered ── */}
-                <div className="space-y-4">
-                  <SectionHeader color="bg-red-600" title="Rules Triggered" />
-                  <div className="space-y-2">
-                    {(() => {
-                      try {
-                        let raw = alert.rulesTriggered ?? "";
-                        if (raw.startsWith('"')) raw = JSON.parse(raw);
-                        const rules: { RuleName: string }[] = JSON.parse(raw);
-                        if (Array.isArray(rules) && rules.length > 0) {
-                          return rules.map((rule, i) => (
-                            <div key={i} className="flex items-center justify-between p-3 rounded-lg border bg-muted/30">
-                              <span className="text-sm font-medium">{rule.RuleName}</span>
-                              <Badge variant="destructive">Triggered</Badge>
-                            </div>
-                          ));
-                        }
-                      } catch {
-                        if (alert.rulesTriggered) {
-                          return (
-                            <div className="flex items-center justify-between p-3 rounded-lg border bg-muted/30">
-                              <span className="text-sm font-medium">{alert.rulesTriggered}</span>
-                              <Badge variant="destructive">Triggered</Badge>
-                            </div>
-                          );
-                        }
-                      }
-                      return <p className="text-muted-foreground italic text-sm">No rules triggered</p>;
-                    })()}
                   </div>
                 </div>
 

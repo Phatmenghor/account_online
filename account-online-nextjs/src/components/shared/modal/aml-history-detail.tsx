@@ -98,7 +98,7 @@ export default function AmlHistoryDetailModal({
             <div className="flex-1">
               <DialogTitle className="text-xl font-semibold">AML History Details</DialogTitle>
               <DialogDescription className="text-base text-muted-foreground">
-                Transaction ID: {history?.trxnID ?? "N/A"}
+                AML screening result details
               </DialogDescription>
               {history && <div className="mt-2"><AmlStatusBadge status={history.status} /></div>}
             </div>
@@ -193,40 +193,6 @@ export default function AmlHistoryDetailModal({
                     <InfoRow label="Action Taken" value={history.actionTaken} />
                     <InfoRow label="Service Name" value={history.serviceName} />
                     <InfoRow label="Total Rule Score" value={history.totalRulesScore} />
-                  </div>
-                </div>
-
-                <Separator />
-
-                {/* ── Rules Triggered ── */}
-                <div className="space-y-4">
-                  <SectionHeader color="bg-red-600" title="Rules Triggered" />
-                  <div className="space-y-2">
-                    {(() => {
-                      try {
-                        let raw = history.rulesTriggered ?? "";
-                        if (raw.startsWith('"')) raw = JSON.parse(raw);
-                        const rules: { RuleName: string }[] = JSON.parse(raw);
-                        if (Array.isArray(rules) && rules.length > 0) {
-                          return rules.map((rule, i) => (
-                            <div key={i} className="flex items-center justify-between p-3 rounded-lg border bg-muted/30">
-                              <span className="text-sm font-medium">{rule.RuleName}</span>
-                              <Badge variant="destructive">Triggered</Badge>
-                            </div>
-                          ));
-                        }
-                      } catch {
-                        if (history.rulesTriggered) {
-                          return (
-                            <div className="flex items-center justify-between p-3 rounded-lg border bg-muted/30">
-                              <span className="text-sm font-medium">{history.rulesTriggered}</span>
-                              <Badge variant="destructive">Triggered</Badge>
-                            </div>
-                          );
-                        }
-                      }
-                      return <p className="text-muted-foreground italic text-sm">No rules triggered</p>;
-                    })()}
                   </div>
                 </div>
 
