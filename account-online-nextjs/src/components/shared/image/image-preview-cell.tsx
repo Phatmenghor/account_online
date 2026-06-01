@@ -17,14 +17,17 @@ interface ImagePreviewCellProps {
   className?: string;
 }
 
+const ease = "cubic-bezier(0.4,0,0.2,1)";
+
 export function ImagePreviewCell({
   imageId,
   label = "Image",
   className = "w-24 h-14",
 }: ImagePreviewCellProps) {
   const [open, setOpen] = useState(false);
-  const [imgError, setImgError] = useState(false);
   const [imgLoaded, setImgLoaded] = useState(false);
+  const [imgError, setImgError] = useState(false);
+  const [hovered, setHovered] = useState(false);
   const [downloading, setDownloading] = useState(false);
 
   if (!imageId || imgError) {
@@ -57,35 +60,55 @@ export function ImagePreviewCell({
     }
   };
 
+  const btnStyle = {
+    opacity: hovered ? 1 : 0,
+    transform: hovered ? "translateY(0)" : "translateY(-5px)",
+    transition: `opacity 0.18s ${ease}, transform 0.18s ${ease}`,
+    willChange: "opacity, transform",
+  };
+
   return (
     <>
-      {/* Thumbnail */}
       <div
-        className={`relative ${className} rounded-md overflow-hidden border border-border group cursor-pointer flex-shrink-0`}
+        className={`relative ${className} rounded-md overflow-hidden border border-border cursor-pointer flex-shrink-0`}
+        style={{ contain: "layout paint" }}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
         onClick={() => setOpen(true)}
       >
-        {/* Static placeholder — no animate-pulse to keep table smooth */}
-        {!imgLoaded && (
-          <div className="absolute inset-0 bg-muted/60" />
-        )}
+        {/* Placeholder while loading */}
+        {!imgLoaded && <div className="absolute inset-0 bg-muted/60" />}
 
         <img
           src={src}
           alt={label}
           loading="lazy"
           decoding="async"
-          className={`w-full h-full object-cover transition-opacity duration-200 ${imgLoaded ? "opacity-100" : "opacity-0"}`}
+          fetchPriority="low"
+          className="w-full h-full object-cover"
+          style={{
+            opacity: imgLoaded ? 1 : 0,
+            transition: `opacity 0.25s ${ease}`,
+            willChange: "opacity",
+          }}
           onLoad={() => setImgLoaded(true)}
           onError={() => setImgError(true)}
         />
 
-        {/* Subtle dark overlay on hover */}
-        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors duration-150 pointer-events-none" />
+        {/* Hover dark overlay */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background: hovered ? "rgba(0,0,0,0.28)" : "rgba(0,0,0,0)",
+            transition: `background 0.15s ${ease}`,
+          }}
+        />
 
         {/* Top-left: View */}
         <button
           onClick={(e) => { e.stopPropagation(); setOpen(true); }}
-          className="absolute top-1 left-1 opacity-0 group-hover:opacity-100 -translate-y-1 group-hover:translate-y-0 transition-all duration-200 p-1 rounded-md bg-black/65 hover:bg-black/85 text-white shadow-sm"
+          className="absolute top-1 left-1 p-1 rounded-md bg-black/65 hover:bg-black/85 text-white shadow-sm"
+          style={btnStyle}
           title="Preview"
         >
           <Eye className="w-3 h-3" />
@@ -95,24 +118,21 @@ export function ImagePreviewCell({
         <button
           onClick={handleDownload}
           disabled={downloading}
-          className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 -translate-y-1 group-hover:translate-y-0 transition-all duration-200 p-1 rounded-md bg-black/65 hover:bg-black/85 text-white shadow-sm disabled:opacity-60"
+          className="absolute top-1 right-1 p-1 rounded-md bg-black/65 hover:bg-black/85 text-white shadow-sm disabled:cursor-not-allowed"
+          style={btnStyle}
           title="Download"
         >
           {downloading
             ? <Loader2 className="w-3 h-3 animate-spin" />
-            : <Download className="w-3 h-3" />
-          }
+            : <Download className="w-3 h-3" />}
         </button>
       </div>
 
-      {/* Only mount Dialog when open — avoids 30 portals in the DOM */}
       {open && (
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogContent className="max-w-3xl p-0 gap-0 overflow-hidden">
             <DialogHeader className="px-4 py-3 border-b flex-row items-center justify-between">
-              <DialogTitle className="text-base font-semibold">
-                {label}
-              </DialogTitle>
+              <DialogTitle className="text-base font-semibold">{label}</DialogTitle>
               <div className="flex items-center gap-2 pr-8">
                 <Button
                   variant="outline"
@@ -123,8 +143,7 @@ export function ImagePreviewCell({
                 >
                   {downloading
                     ? <Loader2 className="w-4 h-4 animate-spin" />
-                    : <Download className="w-4 h-4" />
-                  }
+                    : <Download className="w-4 h-4" />}
                   {downloading ? "Downloading..." : "Download"}
                 </Button>
               </div>
