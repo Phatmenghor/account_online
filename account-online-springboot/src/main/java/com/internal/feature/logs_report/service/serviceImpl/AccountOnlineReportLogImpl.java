@@ -12,8 +12,6 @@ import com.internal.feature.logs_report.service.AccountOnlineReportLogService;
 import com.internal.utils.pagination.PaginationResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -93,22 +91,17 @@ public class AccountOnlineReportLogImpl implements AccountOnlineReportLogService
     @Override
     public PaginationResponse<AccountOnlineReportLogResponse> getLogsWithPagination(AccountOnlineReportLogDto request) {
         log.info("========== START getLogsWithPagination ==========");
-        log.info("Request - fromDate: {}, toDate: {}, status: {}, pageNo: {}, pageSize: {}",
-                request.getFromDate(), request.getToDate(), request.getStatus(), request.getPageNo(), request.getPageSize());
+        log.info("Request - fromDate: {}, toDate: {}, status: {}",
+                request.getFromDate(), request.getToDate(), request.getStatus());
         LocalDateTime fromDateTime = request.getFromDate() != null ? request.getFromDate().atStartOfDay() : null;
         LocalDateTime toDateTime = request.getToDate() != null ? request.getToDate().plusDays(1).atStartOfDay() : null;
 
-        Page<AccountOnlineReportLog> page = repository.findByDateRangeAndStatusesPaged(
-                fromDateTime, toDateTime, request.getStatus(),
-                PageRequest.of(request.getPageNo() - 1, request.getPageSize()));
+        List<AccountOnlineReportLog> logs = repository.findByDateRangeAndStatuses(fromDateTime, toDateTime, request.getStatus());
+        List<AccountOnlineReportLogResponse> responses = accountOnlineReportMapper.toResponseList(logs);
 
         PaginationResponse<AccountOnlineReportLogResponse> response = new PaginationResponse<>(
-                accountOnlineReportMapper.toResponseList(page.getContent()),
-                request.getPageNo(),
-                request.getPageSize(),
-                page.getTotalElements());
-        log.info("Response - totalRecords: {}, totalPages: {}, currentPage: {}, pageSize: {}",
-                page.getTotalElements(), page.getTotalPages(), request.getPageNo(), request.getPageSize());
+                responses, 1, responses.size(), responses.size());
+        log.info("Response - totalRecords: {}", responses.size());
         log.info("========== END getLogsWithPagination ==========");
         return response;
     }

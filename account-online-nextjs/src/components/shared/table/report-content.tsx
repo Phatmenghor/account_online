@@ -1,7 +1,6 @@
-import { indexDisplay } from "@/utils/common/common";
 import { TableColumn } from "./data-table";
 import { Badge } from "@/components/ui/badge";
-import { AllReportModel, ReportModel } from "@/models/report/report.response";
+import { ReportModel } from "@/models/report/report.response";
 import { DateTimeFormat } from "@/utils/date/date-time-format";
 
 // Unified color map
@@ -13,7 +12,7 @@ const STATUS_COLOR_MAP: Record<string, string> = {
   // add more statuses as needed
 };
 
-export const Report = (data: AllReportModel): TableColumn<ReportModel>[] => {
+export const Report = (): TableColumn<ReportModel>[] => {
   const getStatusColor = (status: string) => {
     if (!status) return "bg-gray-100 text-gray-800 border-gray-200";
     return (
@@ -29,9 +28,7 @@ export const Report = (data: AllReportModel): TableColumn<ReportModel>[] => {
       maxWidth: "60px",
       minWidth: "60px",
       render: (_, index) => (
-        <span className="font-medium">
-          {indexDisplay(data?.pageNo || 1, data?.pageSize || 10, index)}
-        </span>
+        <span className="font-medium">{index + 1}</span>
       ),
     },
     {

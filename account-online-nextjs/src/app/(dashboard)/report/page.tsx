@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, Suspense, useCallback } from "react";
-import { useSearchParams } from "next/navigation";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,7 +10,7 @@ import {
   PopoverContent,
 } from "@/components/ui/popover";
 import { Command, CommandGroup, CommandItem } from "@/components/ui/command";
-import { Check, Download, Search } from "lucide-react";
+import { Check, Download } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Separator } from "@radix-ui/react-select";
 import { toast } from "sonner";
@@ -19,19 +18,13 @@ import { toast } from "sonner";
 import { CustomDatePicker } from "@/components/shared/common/custom-date-picker";
 import { DataTable } from "@/components/shared/table/data-table";
 import { Report } from "@/components/shared/table/report-content";
-import { CustomPagination } from "@/components/shared/pagination/custom-pagination";
 
 import { STATUS_REPORT_OPTIONS } from "@/constants/AppResource/filter/status";
-import { ROUTES } from "@/constants/AppRoutes/routes";
-import { usePagination } from "@/hooks/use-pagination";
 
 import Loading from "@/components/shared/common/loading";
-import { AllReportModel, ReportModel } from "@/models/report/report.response";
+import { ReportModel } from "@/models/report/report.response";
 import { AllReportRequestModel } from "@/models/report/report.request";
-import {
-  getAccountOnlineReportAllDataService,
-  getAccountOnlineReportAllViewService,
-} from "@/services/report/acc-online-report.service";
+import { getAccountOnlineReportAllViewService } from "@/services/report/acc-online-report.service";
 import { exportReportToExcel } from "@/utils/export-file/exportReportExcel";
 import z from "zod";
 
@@ -56,28 +49,17 @@ const STATUS_COLOR_MAP: Record<string, string> = {
   Approved: "bg-green-500",
   Rejected: "bg-red-500",
   InProgress: "bg-blue-500",
-  // add more statuses as needed
 };
 
 function ReportPageContent() {
-  const searchParams = useSearchParams();
   const [formData, setFormData] = useState(defaultForm);
   const [validationErrors, setValidationErrors] = useState<
     Record<string, string>
   >({});
   const [statusFilter, setStatusFilter] = useState<string[]>([]);
-  const [report, setReport] = useState<AllReportModel | null>(null);
+  const [report, setReport] = useState<ReportModel[] | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isExportLoading, setIsExportLoading] = useState(false);
-
-  const { currentPage, updateUrlWithPage, handlePageChange } = usePagination({
-    baseRoute: ROUTES.DASHBOARD.REPORT,
-  });
-
-  useEffect(() => {
-    const pageParam = searchParams.get("pageNo");
-    if (!pageParam) updateUrlWithPage(1, true);
-  }, [searchParams, updateUrlWithPage]);
 
   const handleInputChange = (field: keyof ReportData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -100,40 +82,29 @@ function ReportPageContent() {
     setIsLoading(true);
     try {
       const req: AllReportRequestModel = {
-        pageNo: Number(currentPage),
-        pageSize: 15,
         fromDate: formData.fromDate,
         toDate: formData.toDate,
         status: statusFilter.length ? statusFilter : [],
       };
-      const res = await getAccountOnlineReportAllDataService(req);
+      const res = await getAccountOnlineReportAllViewService(req);
       setReport(res);
     } catch (err: any) {
       toast.error(err.errorMessage || "Failed to load report.");
     } finally {
       setIsLoading(false);
     }
-  }, [currentPage, statusFilter, formData.fromDate, formData.toDate]);
+  }, [statusFilter, formData.fromDate, formData.toDate]);
 
   useEffect(() => {
-    // Only trigger search if both dates are filled
     if (formData.fromDate && formData.toDate) {
       loadReport();
     }
-  }, [
-    formData.fromDate,
-    formData.toDate,
-    statusFilter,
-    currentPage,
-    loadReport,
-  ]);
+  }, [formData.fromDate, formData.toDate, statusFilter, loadReport]);
 
   const handleExportExcel = async () => {
     setIsExportLoading(true);
     try {
       const req: AllReportRequestModel = {
-        pageNo: 1,
-        pageSize: 100000,
         fromDate: formData.fromDate,
         toDate: formData.toDate,
         status: statusFilter.length ? statusFilter : [],
@@ -256,7 +227,7 @@ function ReportPageContent() {
               className="flex items-center gap-2"
               onClick={handleExportExcel}
               variant="secondary"
-              disabled={isExportLoading} // optional: disable button while loading
+              disabled={isExportLoading}
             >
               {isExportLoading ? (
                 <span className="flex items-center gap-2">
@@ -297,28 +268,10 @@ function ReportPageContent() {
         <div className="flex-1 overflow-x-auto bg-gray-50 rounded-lg p-2">
           <DataTable
             loading={isLoading}
-            data={report?.content || []}
+            data={report || []}
             emptyMessage="No report found"
             getRowKey={(row) => row.id}
-            columns={Report(
-              report ?? {
-                content: [],
-                pageNo: 1,
-                pageSize: 15,
-                totalElements: 0,
-                totalPages: 1,
-              }
-            )}
-          />
-        </div>
-
-        {/* PAGINATION */}
-        <div className="flex justify-end mt-2">
-          <CustomPagination
-            size="md"
-            currentPage={currentPage}
-            totalPages={report?.totalPages || 1}
-            onPageChange={handlePageChange}
+            columns={Report()}
           />
         </div>
       </CardContent>
