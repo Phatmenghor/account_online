@@ -289,23 +289,17 @@ public class OpenAccountXmlBuilder {
     }
 
     private String formatDateForT24NoFutureCheck(String date) {
-        if (date == null || date.isEmpty()) {
-            return "";
-        }
-        try {
-            LocalDate localDate = null;
-
-            if (date.matches("\\d{8}")) {
-                localDate = LocalDate.parse(date, T24_DATE_FORMATTER);
-            } else {
-                localDate = LocalDate.parse(date, DATE_FORMATTER);
+        if (date != null && !date.isEmpty()) {
+            try {
+                LocalDate localDate = date.matches("\\d{8}")
+                        ? LocalDate.parse(date, T24_DATE_FORMATTER)
+                        : LocalDate.parse(date, DATE_FORMATTER);
+                return localDate.format(T24_DATE_FORMATTER);
+            } catch (Exception e) {
+                log.warn("Could not format expiration date '{}', using default +10 years", date);
             }
-
-            return localDate.format(T24_DATE_FORMATTER);
-        } catch (Exception e) {
-            log.warn("Could not format expiration date {}, using as-is: {}", date, e.getMessage());
-            return date;
         }
+        return LocalDate.now().plusYears(10).format(T24_DATE_FORMATTER);
     }
 
     private String formatLegalIssueDateWithDefault(String date) {
