@@ -35,13 +35,6 @@ public class AuthController {
         return ResponseEntity.ok(ApiResponse.success(ResponseMessage.LOGIN_SUCCESS, authResponse));
     }
 
-    @PostMapping("/openacc/login")
-    public ResponseEntity<ApiResponse<AuthResponseDTO>> openAccLogin(@Valid @RequestBody LoginRequestDto loginDto) {
-        log.info("AD login attempt for user: {}", loginDto.getUsername());
-        AuthResponseDTO authResponse = authService.openAccLogin(loginDto);
-        return ResponseEntity.ok(ApiResponse.success(ResponseMessage.LOGIN_SUCCESS, authResponse));
-    }
-
     @PostMapping("/register")
     public ResponseEntity<ApiResponse<UserResponseDto>> register(@Valid @RequestBody RegisterRequestDto registerDto) {
         log.info("Registration attempt for email: {}", registerDto.getUsername());

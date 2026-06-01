@@ -134,8 +134,7 @@ public class AuthServiceImpl implements AuthService {
         return adUser;
     }
 
-    @Override
-    public AuthResponseDTO openAccLogin(LoginRequestDto loginDto) {
+    private AuthResponseDTO openAccLogin(LoginRequestDto loginDto) {
         log.info("Processing AD login for user: {}", loginDto.getUsername());
 
         Map<?, ?> adUser = verifyWithAD(loginDto);
