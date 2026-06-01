@@ -10,7 +10,6 @@ import { ROUTES } from "@/constants/AppRoutes/routes";
 import { usePagination } from "@/hooks/use-pagination";
 import { useDebounce } from "@/utils/debounce/debounce";
 import { Search } from "lucide-react";
-import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import Loading from "@/components/shared/common/loading";
 import { createSuccessAccountTableColumns } from "@/components/shared/table/success-account-content";
@@ -32,21 +31,12 @@ function SuccessAccountPageContent() {
     useState<SuccessAccountOnlineModel | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
 
-  const searchParams = useSearchParams();
-
   // Debounced search query - Optimized api performance when search
   const debouncedSearchQuery = useDebounce(searchQuery, 400);
 
-  const { currentPage, updateUrlWithPage, handlePageChange } = usePagination({
+  const { currentPage, handlePageChange } = usePagination({
     baseRoute: ROUTES.DASHBOARD.STATIC.ACCOUNT_ONLINE_SUCCESS,
   });
-
-  useEffect(() => {
-    const pageParam = searchParams.get("pageNo");
-    if (!pageParam) {
-      updateUrlWithPage(1, true);
-    }
-  }, [searchParams, updateUrlWithPage]);
 
   const loadAccounts = useCallback(async () => {
     setIsLoading(true);
@@ -70,7 +60,7 @@ function SuccessAccountPageContent() {
 
   useEffect(() => {
     loadAccounts();
-  }, [loadAccounts, debouncedSearchQuery]);
+  }, [loadAccounts]);
 
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {

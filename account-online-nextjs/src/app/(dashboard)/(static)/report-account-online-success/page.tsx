@@ -10,7 +10,6 @@ import { ROUTES } from "@/constants/AppRoutes/routes";
 import { usePagination } from "@/hooks/use-pagination";
 import { useDebounce } from "@/utils/debounce/debounce";
 import { Search, FileSpreadsheet, RotateCcw } from "lucide-react";
-import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import Loading from "@/components/shared/common/loading";
 import { createSuccessAccountTableColumns } from "@/components/shared/table/success-account-content";
@@ -46,18 +45,11 @@ function ReportSuccessAccountPageContent() {
     const [fromDate, setFromDate] = useState<string>(defaultFromDate);
     const [toDate, setToDate] = useState<string>(defaultToDate);
 
-    const searchParams = useSearchParams();
     const debouncedSearch = useDebounce(searchQuery, 400);
 
-    const { currentPage, updateUrlWithPage, handlePageChange } = usePagination({
+    const { currentPage, handlePageChange } = usePagination({
         baseRoute: ROUTES.DASHBOARD.STATIC.ACCOUNT_ONLINE_SUCCESS_REPORT,
     });
-
-    useEffect(() => {
-        if (!searchParams.get("pageNo")) {
-            updateUrlWithPage(1, true);
-        }
-    }, [searchParams, updateUrlWithPage]);
 
     const loadAccounts = useCallback(async () => {
         setIsLoading(true);
