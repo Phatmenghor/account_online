@@ -47,10 +47,10 @@ export default function LoginPage() {
       const role: string = data?.userRole?.userRole ?? "";
       const callbackUrl = searchParams.get("callbackUrl");
 
-      if (callbackUrl) {
-        router.replace(callbackUrl);
-      } else if (role === "STAFF") {
+      if (role === "STAFF") {
         router.replace("/");
+      } else if (callbackUrl) {
+        router.replace(callbackUrl);
       } else {
         router.replace(ROUTES.DASHBOARD.INDEX);
       }
