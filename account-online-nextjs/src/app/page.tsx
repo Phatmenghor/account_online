@@ -347,7 +347,7 @@ function OpenAccountContent() {
   // ========================================
   return (
     <FormStateProvider value={formStateContextValue}>
-      <div className="min-h-screen flex flex-col bg-gray-50/60" style={{ zoom: 1.1 }}>
+      <div className="min-h-screen flex flex-col bg-gray-50/60">
         <PageHeader />
 
         <main className="flex-1 pt-16 sm:pt-[60px]">

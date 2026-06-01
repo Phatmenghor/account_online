@@ -513,9 +513,8 @@
 }
 
 @layer base {
-  /* 35% smaller = 65% of original size (more compact display) */
   html {
-    font-size: 65%;
+    font-size: 75%;
   }
 
   :root {
