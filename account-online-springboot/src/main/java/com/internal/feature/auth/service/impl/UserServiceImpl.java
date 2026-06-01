@@ -1,6 +1,7 @@
 package com.internal.feature.auth.service.impl;
 
 import com.internal.enumation.StatusData;
+import com.internal.exceptions.error.custom.BadRequestException;
 import com.internal.exceptions.error.custom.NotFoundException;
 import com.internal.feature.auth.dto.request.ChangePasswordByAdminRequestDto;
 import com.internal.feature.auth.dto.request.ChangePasswordRequestDto;
@@ -53,6 +54,7 @@ public class UserServiceImpl implements UserService {
                 Math.max(requestDto.getPageSize(), 1),
                 requestDto.getSearch(),
                 requestDto.getStatus(),
+                null,
                 requestDto.getRoles());
 
         Pageable pageable = PageRequest.of(userRequestDto.getPageNo(), userRequestDto.getPageSize(), Sort.by(Sort.Direction.DESC, "createdAt"));

@@ -240,13 +240,7 @@ public class AuthServiceImpl implements AuthService {
         UserEntity user = userRepository.findByUsername(name)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-        if (requestDto.getUsername() != null) {
-            if (!user.getUsername().equals(requestDto.getUsername()) &&
-                    userRepository.existsByUsername(requestDto.getUsername())) {
-                throw new DuplicateNameException("Email is already in use, please choose another one.");
-            }
-            user.setUsername(requestDto.getUsername());
-        }
+        if (requestDto.getEmail() != null) user.setEmail(requestDto.getEmail());
         if (requestDto.getStatus() != null) user.setStatus(requestDto.getStatus());
         if (requestDto.getFullName() != null) user.setFullName(requestDto.getFullName());
         if (requestDto.getProfileUrl() != null) user.setProfileUrl(requestDto.getProfileUrl());
@@ -254,6 +248,7 @@ public class AuthServiceImpl implements AuthService {
         if (requestDto.getStaffId() != null) user.setStaffId(requestDto.getStaffId());
         if (requestDto.getPhoneNumber() != null) user.setPhoneNumber(requestDto.getPhoneNumber());
         if (requestDto.getBranch() != null) user.setBranch(requestDto.getBranch());
+        if (requestDto.getDepartment() != null) user.setDepartment(requestDto.getDepartment());
 
         UserEntity updatedUser = userRepository.save(user);
         return userMapper.mapToDto(updatedUser);
