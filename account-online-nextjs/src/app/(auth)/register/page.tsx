@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState, useRef, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { z } from "zod";
@@ -8,6 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Eye, EyeOff, Loader2, ArrowLeft, CheckCircle2 } from "lucide-react";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
@@ -29,12 +30,7 @@ const step1Schema = z.object({
   path: ["confirmPassword"],
 });
 
-const step2Schema = z.object({
-  otpCode: z.string().length(6, "Must be 6 digits").regex(/^\d+$/, "Digits only"),
-});
-
 type Step1Data = z.infer<typeof step1Schema>;
-type Step2Data = z.infer<typeof step2Schema>;
 
 export default function RegisterPage() {
   const [step, setStep] = useState<1 | 2>(1);
@@ -43,16 +39,64 @@ export default function RegisterPage() {
   const [showConfirm, setShowConfirm] = useState(false);
   const [pendingEmail, setPendingEmail] = useState("");
   const [countdown, setCountdown] = useState(0);
+  const [digits, setDigits] = useState<string[]>(["", "", "", "", "", ""]);
+  const [otpError, setOtpError] = useState("");
+  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
   const router = useRouter();
+
+  const handleDigitChange = useCallback((index: number, value: string) => {
+    const digit = value.replace(/\D/g, "").slice(-1);
+    const newDigits = [...digits];
+    newDigits[index] = digit;
+    setDigits(newDigits);
+    setOtpError("");
+    if (digit && index < 5) {
+      inputRefs.current[index + 1]?.focus();
+    }
+    if (newDigits.every(d => d !== "") && newDigits.join("").length === 6) {
+      handleOtpComplete(newDigits.join(""));
+    }
+  }, [digits]);
+
+  const handleDigitKeyDown = useCallback((index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Backspace" && !digits[index] && index > 0) {
+      inputRefs.current[index - 1]?.focus();
+    }
+  }, [digits]);
+
+  const handleDigitPaste = useCallback((e: React.ClipboardEvent) => {
+    const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
+    if (pasted.length === 6) {
+      const newDigits = pasted.split("");
+      setDigits(newDigits);
+      setOtpError("");
+      inputRefs.current[5]?.focus();
+      handleOtpComplete(pasted);
+    }
+  }, []);
+
+  async function handleOtpComplete(code: string) {
+    setIsLoading(true);
+    setOtpError("");
+    try {
+      const data = await registerVerifyService(pendingEmail, code);
+      AppToast({ type: "success", message: "Account created!", description: "Welcome to CP Bank." });
+      const role: string = data?.userRole?.userRole ?? "";
+      if (role === "STAFF") router.replace("/");
+      else router.replace(ROUTES.DASHBOARD.INDEX);
+    } catch (err: any) {
+      const msg = err?.response?.data?.message || "Invalid verification code. Please try again.";
+      setOtpError(msg);
+      setDigits(["", "", "", "", "", ""]);
+      setTimeout(() => inputRefs.current[0]?.focus(), 50);
+    } finally {
+      setIsLoading(false);
+    }
+  }
 
   const form1 = useForm<Step1Data>({
     resolver: zodResolver(step1Schema),
     defaultValues: { email: "", password: "", confirmPassword: "", fullName: "", position: "", staffId: "", phoneNumber: "", branch: "" } as Step1Data,
-  });
-
-  const form2 = useForm<Step2Data>({
-    resolver: zodResolver(step2Schema),
-    defaultValues: { otpCode: "" },
   });
 
   function startCountdown() {
@@ -68,25 +112,13 @@ export default function RegisterPage() {
       await registerInitiateService({ ...values, username: values.email });
       setPendingEmail(values.email);
       setStep(2);
+      setDigits(["", "", "", "", "", ""]);
+      setOtpError("");
       startCountdown();
+      setTimeout(() => inputRefs.current[0]?.focus(), 100);
       AppToast({ type: "success", message: "Verification code sent", description: `Check your email: ${values.email}` });
     } catch (err: any) {
       AppToast({ type: "error", message: err?.response?.data?.message || "Registration failed. Please try again." });
-    } finally {
-      setIsLoading(false);
-    }
-  }
-
-  async function onStep2Submit(values: Step2Data) {
-    setIsLoading(true);
-    try {
-      const data = await registerVerifyService(pendingEmail, values.otpCode);
-      AppToast({ type: "success", message: "Account created!", description: "Welcome to CP Bank." });
-      const role: string = data?.userRole?.userRole ?? "";
-      if (role === "STAFF") router.replace("/");
-      else router.replace(ROUTES.DASHBOARD.INDEX);
-    } catch (err: any) {
-      AppToast({ type: "error", message: err?.response?.data?.message || "Invalid verification code. Please try again." });
     } finally {
       setIsLoading(false);
     }
@@ -98,6 +130,9 @@ export default function RegisterPage() {
     try {
       await registerInitiateService({ ...form1.getValues(), username: form1.getValues().email });
       startCountdown();
+      setDigits(["", "", "", "", "", ""]);
+      setOtpError("");
+      setTimeout(() => inputRefs.current[0]?.focus(), 100);
       AppToast({ type: "success", message: "New code sent", description: `Check your email: ${pendingEmail}` });
     } catch {
       AppToast({ type: "error", message: "Failed to resend. Please try again." });
@@ -296,57 +331,61 @@ export default function RegisterPage() {
 
             {/* ── Step 2: Email OTP ── */}
             {step === 2 && (
-              <Form {...form2}>
-                <form onSubmit={form2.handleSubmit(onStep2Submit)}>
-                  <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-8 space-y-6">
-                    <div className="text-center">
-                      <p className="text-sm text-gray-500 mb-1">Verification code sent to</p>
-                      <p className="text-base font-semibold text-gray-900">{pendingEmail}</p>
+              <div>
+                <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-8 space-y-6">
+                  <div className="text-center">
+                    <p className="text-sm text-gray-500 mb-1">Verification code sent to</p>
+                    <p className="text-base font-semibold text-gray-900">{pendingEmail}</p>
+                  </div>
+
+                  {/* 6-box OTP input */}
+                  <div className="flex justify-center gap-3" onPaste={handleDigitPaste}>
+                    {digits.map((digit, i) => (
+                      <input
+                        key={i}
+                        ref={(el) => { inputRefs.current[i] = el; }}
+                        type="text"
+                        inputMode="numeric"
+                        maxLength={1}
+                        value={digit}
+                        disabled={isLoading}
+                        onChange={(e) => handleDigitChange(i, e.target.value)}
+                        onKeyDown={(e) => handleDigitKeyDown(i, e)}
+                        className={`w-12 h-14 text-center text-xl font-bold rounded-lg border-2 bg-gray-50 outline-none transition-all
+                          ${digit ? "border-primary bg-primary/5 text-primary" : "border-gray-200"}
+                          ${otpError ? "border-destructive" : ""}
+                          focus:border-primary focus:bg-white
+                          disabled:opacity-50`}
+                      />
+                    ))}
+                  </div>
+
+                  {otpError && (
+                    <p className="text-sm text-destructive text-center">{otpError}</p>
+                  )}
+
+                  {isLoading && (
+                    <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
+                      <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                      <span>Verifying...</span>
                     </div>
+                  )}
+                </div>
 
-                    <FormField control={form2.control} name="otpCode" render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-sm font-medium text-gray-700 text-center block">
-                          Enter 6-digit code <span className="text-destructive">*</span>
-                        </FormLabel>
-                        <FormControl>
-                          <Input
-                            {...field}
-                            type="text"
-                            inputMode="numeric"
-                            placeholder="Please enter verification code"
-                            maxLength={6}
-                            disabled={isLoading}
-                            className="h-14 text-2xl text-center tracking-[0.5em] font-bold bg-gray-50 border-gray-200 focus:bg-white"
-                            onChange={(e) => field.onChange(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                          />
-                        </FormControl>
-                        <FormMessage className="text-center" />
-                      </FormItem>
-                    )} />
-
-                    <Button type="submit" className="w-full h-11 font-semibold" disabled={isLoading}>
-                      {isLoading
-                        ? <><Loader2 className="h-4 w-4 animate-spin" /><span className="ml-2">Verifying...</span></>
-                        : "Verify & Create Account"}
-                    </Button>
-                  </div>
-
-                  <div className="flex items-center justify-between mt-4 px-1 text-sm">
-                    <button type="button" onClick={() => setStep(1)} className="flex items-center gap-1.5 text-gray-500 hover:text-gray-800 transition-colors font-medium">
-                      <ArrowLeft className="h-3.5 w-3.5" /> Back
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleResend}
-                      disabled={countdown > 0 || isLoading}
-                      className={`font-semibold transition-colors ${countdown > 0 || isLoading ? "text-gray-300 cursor-not-allowed" : "text-primary hover:underline"}`}
-                    >
-                      {countdown > 0 ? `Resend in ${countdown}s` : "Resend code"}
-                    </button>
-                  </div>
-                </form>
-              </Form>
+                <div className="flex items-center justify-between mt-4 px-1 text-sm">
+                  <button type="button" onClick={() => setStep(1)} className="flex items-center gap-1.5 text-gray-500 hover:text-gray-800 transition-colors font-medium">
+                    <ArrowLeft className="h-3.5 w-3.5" /> Back
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleResend}
+                    disabled={countdown > 0 || isLoading}
+                    className={`font-semibold transition-colors ${countdown > 0 || isLoading ? "text-gray-300 cursor-not-allowed" : "text-primary hover:underline"}`}
+                  >
+                    {countdown > 0 ? `Resend in ${countdown}s` : "Resend code"}
+                  </button>
+                </div>
+              </div>
             )}
 
           </div>
