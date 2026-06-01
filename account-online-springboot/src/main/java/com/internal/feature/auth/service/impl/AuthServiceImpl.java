@@ -26,6 +26,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
@@ -111,6 +112,10 @@ public class AuthServiceImpl implements AuthService {
                     new HttpEntity<>(body, headers),
                     Map.class
             );
+        } catch (HttpClientErrorException e) {
+            // AD service returned 4xx — means invalid credentials, not unreachable
+            log.warn("AD authentication failed for user {}: {}", loginDto.getUsername(), e.getMessage());
+            throw new UnauthorizedException("Your Active Directory username or password is incorrect. Please try again.");
         } catch (Exception e) {
             log.warn("AD service unreachable for user {}: {}", loginDto.getUsername(), e.getMessage());
             throw new UnauthorizedException("Unable to reach the authentication server. Please try again later.");
@@ -123,7 +128,7 @@ public class AuthServiceImpl implements AuthService {
 
         Map<?, ?> data = (Map<?, ?>) responseBody.get("data");
         if (data == null || !Boolean.TRUE.equals(data.get("success"))) {
-            throw new UnauthorizedException("Your Active Directory credentials are incorrect. Please check your username and password and try again.");
+            throw new UnauthorizedException("Your Active Directory username or password is incorrect. Please try again.");
         }
 
         Map<?, ?> adUser = (Map<?, ?>) data.get("adUser");
