@@ -1,112 +1,63 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 200" fill="none">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 210" fill="none">
   <defs>
-    <linearGradient id="bgGrad" x1="0" y1="0" x2="480" y2="200" gradientUnits="userSpaceOnUse">
+    <linearGradient id="bg" x1="0" y1="0" x2="480" y2="210" gradientUnits="userSpaceOnUse">
       <stop offset="0%" stop-color="#fff7ed"/>
-      <stop offset="100%" stop-color="#ffedd5"/>
+      <stop offset="100%" stop-color="#fff1e6"/>
     </linearGradient>
-    <linearGradient id="faceGrad" x1="0" y1="0" x2="0" y2="120" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#fed7aa"/>
-      <stop offset="100%" stop-color="#fdba74"/>
-    </linearGradient>
-    <linearGradient id="ringGrad" x1="0" y1="0" x2="120" y2="120" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#f97316"/>
-      <stop offset="100%" stop-color="#fb923c"/>
-    </linearGradient>
-    <filter id="glow">
-      <feGaussianBlur stdDeviation="3" result="blur"/>
-      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-    </filter>
   </defs>
 
   <!-- Background -->
-  <rect width="480" height="200" rx="14" fill="url(#bgGrad)"/>
+  <rect width="480" height="210" fill="url(#bg)"/>
 
-  <!-- Decorative corner brackets (face scan effect) -->
-  <!-- Top-left -->
-  <path d="M148 38 L148 52 M148 38 L162 38" stroke="#f97316" stroke-width="2.5" stroke-linecap="round" stroke-opacity="0.7"/>
-  <!-- Top-right -->
-  <path d="M332 38 L332 52 M332 38 L318 38" stroke="#f97316" stroke-width="2.5" stroke-linecap="round" stroke-opacity="0.7"/>
-  <!-- Bottom-left -->
-  <path d="M148 162 L148 148 M148 162 L162 162" stroke="#f97316" stroke-width="2.5" stroke-linecap="round" stroke-opacity="0.7"/>
-  <!-- Bottom-right -->
-  <path d="M332 162 L332 148 M332 162 L318 162" stroke="#f97316" stroke-width="2.5" stroke-linecap="round" stroke-opacity="0.7"/>
+  <!-- Oval face frame -->
+  <ellipse cx="240" cy="98" rx="62" ry="74" fill="#ffffff" stroke="#f97316" stroke-width="1.5" stroke-opacity="0.35"/>
 
-  <!-- Outer scan ring -->
-  <circle cx="240" cy="100" r="66" stroke="#f97316" stroke-width="1" stroke-opacity="0.2" stroke-dasharray="6 4"/>
-  <!-- Middle ring -->
-  <circle cx="240" cy="100" r="54" stroke="#f97316" stroke-width="1.5" stroke-opacity="0.3" stroke-dasharray="8 5"/>
+  <!-- Corner bracket guides -->
+  <path d="M178 24 L178 38 M178 24 L192 24" stroke="#f97316" stroke-width="2" stroke-linecap="round" stroke-opacity="0.5"/>
+  <path d="M302 24 L302 38 M302 24 L288 24" stroke="#f97316" stroke-width="2" stroke-linecap="round" stroke-opacity="0.5"/>
+  <path d="M178 186 L178 172 M178 186 L192 186" stroke="#f97316" stroke-width="2" stroke-linecap="round" stroke-opacity="0.5"/>
+  <path d="M302 186 L302 172 M302 186 L288 186" stroke="#f97316" stroke-width="2" stroke-linecap="round" stroke-opacity="0.5"/>
 
-  <!-- Face silhouette background circle -->
-  <circle cx="240" cy="88" r="44" fill="#fed7aa" opacity="0.5"/>
+  <!-- Shoulder / body area -->
+  <ellipse cx="240" cy="188" rx="52" ry="22" fill="#f97316" opacity="0.1"/>
 
   <!-- Neck -->
-  <rect x="226" y="118" width="28" height="20" rx="8" fill="#fdba74" opacity="0.6"/>
+  <rect x="228" y="148" width="24" height="26" rx="8" fill="#f97316" opacity="0.1"/>
 
   <!-- Head -->
-  <ellipse cx="240" cy="85" rx="30" ry="34" fill="url(#faceGrad)" opacity="0.75"/>
+  <ellipse cx="240" cy="90" rx="36" ry="42" fill="#f97316" opacity="0.1"/>
 
+  <!-- Face features — minimal clean lines -->
   <!-- Eyes -->
-  <ellipse cx="228" cy="80" rx="5" ry="6" fill="#fff" opacity="0.9"/>
-  <ellipse cx="252" cy="80" rx="5" ry="6" fill="#fff" opacity="0.9"/>
-  <circle cx="229" cy="81" r="3" fill="#c2410c" opacity="0.7"/>
-  <circle cx="253" cy="81" r="3" fill="#c2410c" opacity="0.7"/>
-  <!-- Eye shine -->
-  <circle cx="230" cy="80" r="1" fill="#fff" opacity="0.9"/>
-  <circle cx="254" cy="80" r="1" fill="#fff" opacity="0.9"/>
+  <ellipse cx="224" cy="85" rx="7" ry="8" fill="#f97316" opacity="0.12"/>
+  <ellipse cx="256" cy="85" rx="7" ry="8" fill="#f97316" opacity="0.12"/>
+  <circle cx="224" cy="86" r="4" fill="#f97316" opacity="0.22"/>
+  <circle cx="256" cy="86" r="4" fill="#f97316" opacity="0.22"/>
 
-  <!-- Eyebrows -->
-  <path d="M222 73 Q228 70 234 73" stroke="#c2410c" stroke-width="2" stroke-linecap="round" stroke-opacity="0.6"/>
-  <path d="M246 73 Q252 70 258 73" stroke="#c2410c" stroke-width="2" stroke-linecap="round" stroke-opacity="0.6"/>
+  <!-- Nose bridge (minimal) -->
+  <path d="M240 93 L236 106 Q240 109 244 106 Z" fill="#f97316" opacity="0.08"/>
 
-  <!-- Nose -->
-  <path d="M240 86 L236 96 Q240 99 244 96 Z" fill="#e8854a" opacity="0.3"/>
+  <!-- Mouth -->
+  <path d="M229 116 Q240 123 251 116" stroke="#f97316" stroke-width="1.8" stroke-linecap="round" fill="none" stroke-opacity="0.25"/>
 
-  <!-- Mouth / smile -->
-  <path d="M230 104 Q240 112 250 104" stroke="#c2410c" stroke-width="2" stroke-linecap="round" fill="none" stroke-opacity="0.5"/>
+  <!-- Camera icon - top left area -->
+  <rect x="28" y="82" width="42" height="32" rx="7" fill="#f97316" opacity="0.12" stroke="#f97316" stroke-width="1.2" stroke-opacity="0.35"/>
+  <circle cx="49" cy="98" r="9" fill="none" stroke="#f97316" stroke-width="1.5" stroke-opacity="0.45"/>
+  <circle cx="49" cy="98" r="4.5" fill="#f97316" opacity="0.3"/>
+  <rect x="30" y="78" width="10" height="6" rx="2" fill="#f97316" opacity="0.3"/>
+  <circle cx="65" cy="85" r="2.5" fill="#f97316" opacity="0.4"/>
 
-  <!-- Scan line effect -->
-  <rect x="175" y="99" width="130" height="2" rx="1" fill="#f97316" opacity="0.25"/>
+  <!-- Tips right side -->
+  <text x="370" y="80" text-anchor="middle" font-family="system-ui, sans-serif" font-size="8" fill="#c2410c" opacity="0.55" font-weight="500">Face forward</text>
+  <text x="370" y="94" text-anchor="middle" font-family="system-ui, sans-serif" font-size="8" fill="#c2410c" opacity="0.55" font-weight="500">Good lighting</text>
+  <text x="370" y="108" text-anchor="middle" font-family="system-ui, sans-serif" font-size="8" fill="#c2410c" opacity="0.55" font-weight="500">No glasses</text>
 
-  <!-- Face scan dots (landmark points) -->
-  <circle cx="240" cy="66" r="2" fill="#f97316" opacity="0.5"/>
-  <circle cx="215" cy="85" r="1.5" fill="#f97316" opacity="0.5"/>
-  <circle cx="265" cy="85" r="1.5" fill="#f97316" opacity="0.5"/>
-  <circle cx="228" cy="80" r="1.5" fill="#f97316" opacity="0.6" filter="url(#glow)"/>
-  <circle cx="252" cy="80" r="1.5" fill="#f97316" opacity="0.6" filter="url(#glow)"/>
-  <circle cx="240" cy="104" r="1.5" fill="#f97316" opacity="0.5"/>
+  <!-- Divider lines -->
+  <line x1="330" y1="76" x2="414" y2="76" stroke="#f97316" stroke-width="0.6" stroke-opacity="0.25"/>
+  <line x1="330" y1="88" x2="414" y2="88" stroke="#f97316" stroke-width="0.6" stroke-opacity="0.25"/>
+  <line x1="330" y1="100" x2="414" y2="100" stroke="#f97316" stroke-width="0.6" stroke-opacity="0.25"/>
+  <line x1="330" y1="112" x2="414" y2="112" stroke="#f97316" stroke-width="0.6" stroke-opacity="0.25"/>
 
-  <!-- Left side info -->
-  <text x="24" y="58" font-family="Inter, sans-serif" font-size="8" fill="#c2410c" font-weight="700" opacity="0.8" letter-spacing="0.5">FACE</text>
-  <text x="24" y="70" font-family="Inter, sans-serif" font-size="8" fill="#c2410c" font-weight="700" opacity="0.8" letter-spacing="0.5">VERIFY</text>
-  <line x1="24" y1="76" x2="60" y2="76" stroke="#f97316" stroke-width="1" stroke-opacity="0.4"/>
-
-  <!-- Check items left -->
-  <circle cx="29" cy="92" r="4" fill="#f97316" opacity="0.2" stroke="#f97316" stroke-width="1" stroke-opacity="0.5"/>
-  <text x="29" y="95" text-anchor="middle" font-family="Inter, sans-serif" font-size="7" fill="#c2410c" opacity="0.8">✓</text>
-  <text x="38" y="95" font-family="Inter, sans-serif" font-size="7" fill="#c2410c" opacity="0.7">Face</text>
-
-  <circle cx="29" cy="108" r="4" fill="#f97316" opacity="0.2" stroke="#f97316" stroke-width="1" stroke-opacity="0.5"/>
-  <text x="29" y="111" text-anchor="middle" font-family="Inter, sans-serif" font-size="7" fill="#c2410c" opacity="0.8">✓</text>
-  <text x="38" y="111" font-family="Inter, sans-serif" font-size="7" fill="#c2410c" opacity="0.7">Eyes</text>
-
-  <circle cx="29" cy="124" r="4" fill="#f97316" opacity="0.2" stroke="#f97316" stroke-width="1" stroke-opacity="0.5"/>
-  <text x="29" y="127" text-anchor="middle" font-family="Inter, sans-serif" font-size="7" fill="#c2410c" opacity="0.8">✓</text>
-  <text x="38" y="127" font-family="Inter, sans-serif" font-size="7" fill="#c2410c" opacity="0.7">Smile</text>
-
-  <!-- Right side -->
-  <text x="394" y="58" font-family="Inter, sans-serif" font-size="8" fill="#c2410c" font-weight="700" opacity="0.8">SELFIE</text>
-  <text x="389" y="70" font-family="Inter, sans-serif" font-size="8" fill="#c2410c" font-weight="700" opacity="0.8">PHOTO</text>
-  <line x1="387" y1="76" x2="456" y2="76" stroke="#f97316" stroke-width="1" stroke-opacity="0.4"/>
-
-  <!-- Camera icon right side -->
-  <rect x="403" y="86" width="36" height="26" rx="5" fill="#f97316" opacity="0.15" stroke="#f97316" stroke-width="1.2" stroke-opacity="0.5"/>
-  <circle cx="421" cy="99" r="8" fill="none" stroke="#f97316" stroke-width="1.5" stroke-opacity="0.6"/>
-  <circle cx="421" cy="99" r="4" fill="#f97316" opacity="0.4"/>
-  <rect x="407" y="82" width="8" height="5" rx="2" fill="#f97316" opacity="0.4"/>
-  <circle cx="435" cy="88" r="2" fill="#f97316" opacity="0.5"/>
-
-  <!-- Bottom hint bar -->
-  <rect x="140" y="170" width="200" height="22" rx="8" fill="#f97316" opacity="0.12"/>
-  <text x="240" y="179" text-anchor="middle" font-family="Inter, sans-serif" font-size="7.5" fill="#c2410c" font-weight="600" opacity="0.9">📷  Tap to Take Selfie</text>
-  <text x="240" y="189" text-anchor="middle" font-family="Inter, sans-serif" font-size="6.5" fill="#ea580c" opacity="0.7">Look straight · Good lighting</text>
+  <!-- Bottom hint -->
+  <text x="240" y="196" text-anchor="middle" font-family="system-ui, sans-serif" font-size="9" fill="#ea580c" font-weight="500" opacity="0.6">Tap to take a selfie photo</text>
 </svg>
