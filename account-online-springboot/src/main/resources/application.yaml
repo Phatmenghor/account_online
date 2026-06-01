@@ -89,12 +89,6 @@ email:
   sender:
     address: ithelpdesk@cambodiapostbank.com.kh
 
-ad:
-  login:
-    url: http://192.168.101.5:5050/api/v1/auth/login
-    username: admin
-    password: admin123
-
 file:
   upload:
     directory: /app/customer-image

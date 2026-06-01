@@ -1,7 +1,13 @@
 # ==============================================================
-# UAT / DEVELOPMENT PROFILE
-# Active when: spring.profiles.active=uat  (default)
+# UAT PROFILE
+# Active when: spring.profiles.active=uat
 # ==============================================================
+
+ad:
+  login:
+    url: http://192.168.101.5:5050/api/v1/auth/login
+    username: admin
+    password: admin123
 
 server:
   port: 7070
