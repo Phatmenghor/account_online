@@ -95,7 +95,6 @@ export default function VillageViewModal({
                 <InfoRow label="District" value={village.commune?.district?.districtEn} />
                 <InfoRow label="Province" value={village.commune?.district?.province?.provinceEn} />
                 <InfoRow label="Created At" value={DateTimeFormat(village.createdAt)} />
-                <InfoRow label="Updated At" value={DateTimeFormat(village.updatedAt)} />
               </div>
             </div>
           ) : (

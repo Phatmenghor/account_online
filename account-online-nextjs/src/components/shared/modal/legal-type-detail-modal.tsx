@@ -94,7 +94,6 @@ export default function LegalTypeViewModal({
                 <InfoRow label="Legal Type Value" value={legalType.legalTypeValue} />
                 <InfoRow label="Status" value={<StatusBadge status={legalType.status} />} />
                 <InfoRow label="Created At" value={DateTimeFormat(legalType.createdAt)} />
-                <InfoRow label="Updated At" value={DateTimeFormat(legalType.updatedAt)} />
               </div>
             </div>
           ) : (

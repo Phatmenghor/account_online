@@ -93,7 +93,6 @@ export default function MaritalViewModal({
                 <InfoRow label="Name (KH)" value={marital.nameKh} />
                 <InfoRow label="Status" value={<StatusBadge status={marital.status} />} />
                 <InfoRow label="Created At" value={DateTimeFormat(marital.createdAt)} />
-                <InfoRow label="Updated At" value={DateTimeFormat(marital.updatedAt)} />
               </div>
             </div>
           ) : (
