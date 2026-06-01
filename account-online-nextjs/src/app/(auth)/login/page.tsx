@@ -17,7 +17,7 @@ import { ROUTES } from "@/constants/AppRoutes/routes";
 import { AppToast } from "@/components/shared/toast/app-toast";
 
 const schema = z.object({
-  username: z.string().min(1, "Please enter your username"),
+  username: z.string().min(1, "Please enter your email"),
   password: z.string().min(1, "Please enter your password"),
 });
 
@@ -101,11 +101,11 @@ export default function LoginPage() {
                   name="username"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Username <span className="text-destructive">*</span></FormLabel>
+                      <FormLabel>Email <span className="text-destructive">*</span></FormLabel>
                       <FormControl>
                         <div className="relative">
                           <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                          <Input {...field} type="text" placeholder="Please enter your username" disabled={isLoading} autoComplete="off" readOnly onFocus={(e) => e.target.removeAttribute("readonly")} className="pl-10 h-11" />
+                          <Input {...field} type="text" placeholder="Please enter your email" disabled={isLoading} autoComplete="off" readOnly onFocus={(e) => e.target.removeAttribute("readonly")} className="pl-10 h-11" />
                         </div>
                       </FormControl>
                       <FormMessage />
