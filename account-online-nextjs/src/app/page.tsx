@@ -48,10 +48,8 @@ export default function OpenAccountPage() {
     }
   }, [router]);
 
-  if (!ready) return null;
-
   // ========================================
-  // Hooks Setup
+  // Hooks Setup — must be called before any early return
   // ========================================
   const {
     formData,
@@ -200,6 +198,8 @@ export default function OpenAccountPage() {
 
   // Combine all busy states into one flag to disable buttons consistently
   const isBusy = isLoading || isValidating || loadingState.isLoading;
+
+  if (!ready) return null;
 
   // ========================================
   // Event Handlers
