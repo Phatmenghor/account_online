@@ -4,3 +4,8 @@ export enum Role {
   COMPLIANCE = "COMPLIANCE",
   STAFF = "STAFF",
 }
+
+export enum UserPermission {
+  NORMAL = "NORMAL",
+  APPROVED = "APPROVED",
+}
