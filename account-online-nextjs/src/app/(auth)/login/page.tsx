@@ -105,7 +105,7 @@ export default function LoginPage() {
                       <FormControl>
                         <div className="relative">
                           <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                          <Input {...field} type="text" placeholder="Please enter your username" disabled={isLoading} autoComplete="off" className="pl-10 h-11" />
+                          <Input {...field} type="text" placeholder="Please enter your username" disabled={isLoading} autoComplete="off" readOnly onFocus={(e) => e.target.removeAttribute("readonly")} className="pl-10 h-11" />
                         </div>
                       </FormControl>
                       <FormMessage />
@@ -128,6 +128,8 @@ export default function LoginPage() {
                             placeholder="Please enter your password"
                             disabled={isLoading}
                             autoComplete="new-password"
+                            readOnly
+                            onFocus={(e) => e.target.removeAttribute("readonly")}
                             className="pl-10 pr-10 h-11"
                           />
                           <button
