@@ -5,7 +5,7 @@
 
 email:
   sender:
-    enabled: false    # uat: OTP is always 123456, no need to send email
+    enabled: true
 
 ad:
   login:
@@ -65,7 +65,7 @@ simulator:
     internal-error: false
 
 cpb:
-  environment: development
+  environment: uat
   camdx:
     url: http://192.168.103.106:8099/api/v1/
   aml:
