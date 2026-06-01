@@ -42,11 +42,17 @@ interface AccountOpeningChartCardProps {
   loading: boolean;
 }
 
+function todayKey() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
 export function AccountOpeningChartCard({ data, loading }: AccountOpeningChartCardProps) {
   const chartRef = useRef<HTMLCanvasElement | null>(null);
   const chartInstanceRef = useRef<Chart | null>(null);
 
   const total = data.reduce((acc, d) => acc + d.successCount, 0);
+  const todayCount = data.find((d) => d.date === todayKey())?.successCount ?? 0;
 
   useEffect(() => {
     if (!chartRef.current || loading) return;
@@ -141,9 +147,16 @@ export function AccountOpeningChartCard({ data, loading }: AccountOpeningChartCa
             <CardDescription>Daily account openings — last 30 days</CardDescription>
           </div>
           {!loading && (
-            <div className="text-right">
-              <p className="text-lg font-bold text-primary">{total}</p>
-              <p className="text-xs text-muted-foreground">total openings</p>
+            <div className="flex items-center gap-3">
+              <div className="text-right">
+                <p className="text-2xl font-bold text-primary">{todayCount}</p>
+                <p className="text-xs text-muted-foreground">today</p>
+              </div>
+              <div className="w-px h-8 bg-border" />
+              <div className="text-right">
+                <p className="text-lg font-semibold text-foreground">{total}</p>
+                <p className="text-xs text-muted-foreground">this month</p>
+              </div>
             </div>
           )}
         </div>
