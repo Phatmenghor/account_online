@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Download, Eye, ImageOff, X } from "lucide-react";
+import { Download, Eye, ImageOff } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -14,35 +14,39 @@ import { getImageService } from "@/services/dashboard/image/image.service";
 interface ImagePreviewCellProps {
   imageId: string;
   label?: string;
-  /** Thumbnail size class — defaults to "w-10 h-10" */
-  size?: string;
+  /**
+   * Tailwind classes for the thumbnail container.
+   * Defaults to landscape NID-card ratio: w-24 h-14
+   */
+  className?: string;
 }
 
 export function ImagePreviewCell({
   imageId,
   label = "Image",
-  size = "w-10 h-10",
+  className = "w-24 h-14",
 }: ImagePreviewCellProps) {
   const [open, setOpen] = useState(false);
   const [imgError, setImgError] = useState(false);
+  const [imgLoaded, setImgLoaded] = useState(false);
 
-  if (!imageId) {
-    return (
-      <div
-        className={`${size} rounded-md bg-muted flex items-center justify-center`}
-      >
-        <ImageOff className="w-4 h-4 text-muted-foreground" />
-      </div>
-    );
-  }
+  const placeholder = (
+    <div
+      className={`${className} rounded-md bg-muted flex items-center justify-center border border-border`}
+    >
+      <ImageOff className="w-4 h-4 text-muted-foreground" />
+    </div>
+  );
+
+  if (!imageId || imgError) return placeholder;
 
   const src = getImageService(imageId);
 
   const handleDownload = async (e: { stopPropagation: () => void }) => {
     e.stopPropagation();
     try {
-      const response = await fetch(src);
-      const blob = await response.blob();
+      const res = await fetch(src);
+      const blob = await res.blob();
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
@@ -54,59 +58,57 @@ export function ImagePreviewCell({
     }
   };
 
-  if (imgError) {
-    return (
-      <div
-        className={`${size} rounded-md bg-muted flex items-center justify-center`}
-      >
-        <ImageOff className="w-4 h-4 text-muted-foreground" />
-      </div>
-    );
-  }
-
   return (
     <>
-      {/* Thumbnail with hover actions */}
+      {/* Thumbnail */}
       <div
-        className={`relative ${size} rounded-md overflow-hidden border border-border group cursor-pointer`}
+        className={`relative ${className} rounded-md overflow-hidden border border-border group cursor-pointer flex-shrink-0`}
         onClick={() => setOpen(true)}
       >
+        {/* Skeleton while loading */}
+        {!imgLoaded && (
+          <div className="absolute inset-0 bg-muted animate-pulse" />
+        )}
+
         <img
           src={src}
           alt={label}
-          className="w-full h-full object-cover"
+          loading="lazy"
+          decoding="async"
+          className={`w-full h-full object-cover transition-opacity duration-300 ${
+            imgLoaded ? "opacity-100" : "opacity-0"
+          }`}
+          onLoad={() => setImgLoaded(true)}
           onError={() => setImgError(true)}
         />
-        {/* Hover overlay with icons */}
-        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/50 transition-all flex items-center justify-center gap-1">
+
+        {/* Hover overlay */}
+        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/45 transition-colors duration-200 flex items-center justify-center gap-2">
           <button
-            onClick={(e) => {
-              e.stopPropagation();
-              setOpen(true);
-            }}
-            className="opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded-full bg-white/20 hover:bg-white/40 text-white"
+            onClick={(e) => { e.stopPropagation(); setOpen(true); }}
+            className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-full bg-white/20 hover:bg-white/40 text-white"
             title="Preview"
           >
-            <Eye className="w-3 h-3" />
+            <Eye className="w-3.5 h-3.5" />
           </button>
           <button
             onClick={handleDownload}
-            className="opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded-full bg-white/20 hover:bg-white/40 text-white"
+            className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-full bg-white/20 hover:bg-white/40 text-white"
             title="Download"
           >
-            <Download className="w-3 h-3" />
+            <Download className="w-3.5 h-3.5" />
           </button>
         </div>
       </div>
 
-      {/* Fullscreen preview dialog */}
+      {/* Full preview dialog */}
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-3xl p-0 gap-0 overflow-hidden">
           <DialogHeader className="px-4 py-3 border-b flex-row items-center justify-between">
             <DialogTitle className="text-base font-semibold">
               {label}
             </DialogTitle>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 pr-8">
               <Button
                 variant="outline"
                 size="sm"
@@ -116,20 +118,14 @@ export function ImagePreviewCell({
                 <Download className="w-4 h-4" />
                 Download
               </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setOpen(false)}
-              >
-                <X className="w-4 h-4" />
-              </Button>
             </div>
           </DialogHeader>
-          <div className="flex items-center justify-center bg-black/5 min-h-[400px] max-h-[80vh] p-4">
+          <div className="flex items-center justify-center bg-muted/30 min-h-[360px] max-h-[80vh] p-6">
             <img
               src={src}
               alt={label}
-              className="max-h-[75vh] max-w-full object-contain rounded-md shadow"
+              decoding="async"
+              className="max-h-[74vh] max-w-full object-contain rounded-md shadow-lg"
             />
           </div>
         </DialogContent>

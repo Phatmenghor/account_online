@@ -108,7 +108,7 @@ export default function SuccessAccountViewModal({
                               <ImagePreviewCell
                                 imageId={account.nidImageName}
                                 label="NID / ID Card"
-                                size="w-full h-48"
+                                className="w-full h-48"
                               />
                             </div>
                           )}
@@ -120,7 +120,7 @@ export default function SuccessAccountViewModal({
                               <ImagePreviewCell
                                 imageId={account.selfieImageName}
                                 label="Selfie Photo"
-                                size="w-full h-48"
+                                className="w-full h-48"
                               />
                             </div>
                           )}

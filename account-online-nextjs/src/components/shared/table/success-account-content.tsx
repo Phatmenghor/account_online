@@ -45,8 +45,8 @@ export const createSuccessAccountTableColumns = ({
     {
       key: "nidImage",
       label: "NID Image",
-      maxWidth: "100px",
-      minWidth: "80px",
+      maxWidth: "120px",
+      minWidth: "110px",
       render: (account) => (
         <ImagePreviewCell imageId={account.nidImageName} label="NID / ID Card" />
       ),
@@ -54,8 +54,8 @@ export const createSuccessAccountTableColumns = ({
     {
       key: "selfieImage",
       label: "Selfie",
-      maxWidth: "100px",
-      minWidth: "80px",
+      maxWidth: "120px",
+      minWidth: "110px",
       render: (account) => (
         <ImagePreviewCell imageId={account.selfieImageName} label="Selfie Photo" />
       ),
