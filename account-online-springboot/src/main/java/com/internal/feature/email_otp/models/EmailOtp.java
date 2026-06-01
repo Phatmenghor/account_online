@@ -1,4 +1,4 @@
-package com.internal.feature.sms_otp.models;
+package com.internal.feature.email_otp.models;
 
 import com.internal.config.entity.BaseEntity;
 import lombok.*;
@@ -12,11 +12,11 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "acc_online_otp_sms")
-public class OtpSms extends BaseEntity {
+@Table(name = "acc_online_email_otp")
+public class EmailOtp extends BaseEntity {
 
-    @Column(name = "phone", nullable = false, length = 20)
-    private String phone;
+    @Column(name = "email", nullable = false, length = 255)
+    private String email;
 
     @Column(name = "otp_code", nullable = false, length = 6)
     private String otpCode;
@@ -37,11 +37,4 @@ public class OtpSms extends BaseEntity {
 
     @Column(name = "expires_at", nullable = false)
     private LocalDateTime expiresAt;
-
-    @PrePersist
-    protected void onCreate() {
-        if (expiresAt == null) {
-            expiresAt = LocalDateTime.now().plusMinutes(5);
-        }
-    }
 }

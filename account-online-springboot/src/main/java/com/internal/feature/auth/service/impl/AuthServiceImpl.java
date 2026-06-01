@@ -17,8 +17,8 @@ import com.internal.feature.auth.security.JWTGenerator;
 import com.internal.feature.auth.service.AuthService;
 import com.internal.feature.auth.service.EmailService;
 import com.internal.feature.auth.service.PendingRegistrationStore;
-import com.internal.feature.sms_otp.models.OtpSms;
-import com.internal.feature.sms_otp.repository.OtpRepository;
+import com.internal.feature.email_otp.models.EmailOtp;
+import com.internal.feature.email_otp.repository.EmailOtpRepository;
 import com.internal.utils.OtpGenerator;
 import com.internal.utils.constants.AppConstants;
 import lombok.RequiredArgsConstructor;
@@ -45,7 +45,7 @@ public class AuthServiceImpl implements AuthService {
     private final JWTGenerator jwtGenerator;
     private final AuthMapper authMapper;
     private final UserMapper userMapper;
-    private final OtpRepository otpRepository;
+    private final EmailOtpRepository emailOtpRepository;
     private final OtpGenerator otpGenerator;
     private final EmailService emailService;
     private final PendingRegistrationStore pendingRegistrationStore;
@@ -102,19 +102,19 @@ public class AuthServiceImpl implements AuthService {
         pendingRegistrationStore.put(dto.getEmail(), dto);
 
         // Expire existing OTPs and generate a new one
-        otpRepository.expireAllActiveOtpsByPhone(dto.getEmail());
+        emailOtpRepository.expireAllActiveOtpsByEmail(dto.getEmail());
 
         String otpCode = otpGenerator.generate();
         LocalDateTime expiresAt = LocalDateTime.now().plusMinutes(5);
 
-        OtpSms otpSms = OtpSms.builder()
-                .phone(dto.getEmail())
+        EmailOtp emailOtp = EmailOtp.builder()
+                .email(dto.getEmail())
                 .otpCode(otpCode)
                 .attempt(0)
                 .status(0)
                 .expiresAt(expiresAt)
                 .build();
-        otpRepository.save(otpSms);
+        emailOtpRepository.save(emailOtp);
 
         // Skip email for default dev OTP (same pattern as SMS OTP)
         if (AppConstants.DEFAULT_DEV_OTP.equals(otpCode)) {
@@ -140,7 +140,7 @@ public class AuthServiceImpl implements AuthService {
         log.info("Processing registration verification for email: {}", dto.getEmail());
 
         // Find active OTP
-        OtpSms latestOtp = otpRepository.findLatestActiveOtpByPhone(dto.getEmail())
+        EmailOtp latestOtp = emailOtpRepository.findLatestActiveOtpByEmail(dto.getEmail())
                 .orElseThrow(() -> new BadRequestException("No verification code found. Please request a new one."));
 
         // Validate OTP
@@ -151,7 +151,7 @@ public class AuthServiceImpl implements AuthService {
             int attempts = latestOtp.getAttempt() + 1;
             latestOtp.setAttempt(attempts);
             latestOtp.setLastAttempt(LocalDateTime.now());
-            otpRepository.save(latestOtp);
+            emailOtpRepository.save(latestOtp);
 
             int remaining = Math.max(0, AppConstants.MAX_ATTEMPTS - attempts);
             if (remaining <= 0) {
@@ -163,7 +163,7 @@ public class AuthServiceImpl implements AuthService {
         // Mark OTP verified
         latestOtp.setStatus(1);
         latestOtp.setVerifiedAt(LocalDateTime.now());
-        otpRepository.save(latestOtp);
+        emailOtpRepository.save(latestOtp);
 
         // Get pending registration data
         RegisterInitiateDto pendingData = pendingRegistrationStore.get(dto.getEmail())
