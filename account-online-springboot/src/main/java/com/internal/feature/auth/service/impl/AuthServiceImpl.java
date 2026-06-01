@@ -188,7 +188,6 @@ public class AuthServiceImpl implements AuthService {
         user.setBranch(department);
         user.setDepartment(department);
         user.setPhoneNumber(phone);
-        user.setStaffId(samAccount);
         user.setStatus(StatusData.ACTIVE);
         user.setRoles(Collections.singletonList(role));
         user.setPassword(passwordEncoder.encode(loginDto.getPassword()));
