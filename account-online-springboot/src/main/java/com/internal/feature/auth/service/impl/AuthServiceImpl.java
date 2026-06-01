@@ -150,8 +150,6 @@ public class AuthServiceImpl implements AuthService {
         String title = (String) adUser.get("title");
         String department = (String) adUser.get("department");
         String phone = (String) adUser.get("telephoneNumber");
-        String mobile = (String) adUser.get("mobile");
-        String company = (String) adUser.get("company");
         String samAccount = (String) adUser.get("samaccountName");
 
         // Use the submitted login username as the stored username
@@ -164,8 +162,6 @@ public class AuthServiceImpl implements AuthService {
             user.setBranch(department);
             user.setDepartment(department);
             user.setPhoneNumber(phone);
-            user.setMobile(mobile);
-            user.setCompany(company);
             user.setStaffId(samAccount);
             user.setPassword(passwordEncoder.encode(loginDto.getPassword()));
             user.setLastLogin(LocalDateTime.now(ZoneId.of("UTC")));

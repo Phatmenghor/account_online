@@ -35,11 +35,7 @@ public class UserEntity extends BaseEntity {
 
     private String phoneNumber;
 
-    private String mobile;
-
     private String department;
-
-    private String company;
 
     private String branch;
 

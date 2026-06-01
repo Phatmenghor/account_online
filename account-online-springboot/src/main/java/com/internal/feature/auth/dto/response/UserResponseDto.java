@@ -22,10 +22,8 @@ public class UserResponseDto {
     private String profileUrl;
     private String staffId;
     private String phoneNumber;
-    private String mobile;
     private String branch;
     private String department;
-    private String company;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private LocalDateTime lastLogin;
