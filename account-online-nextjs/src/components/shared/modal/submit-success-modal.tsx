@@ -52,7 +52,7 @@ export default function SubmitSuccessModal({ isOpen, onClose }: SuccessModalProp
                 transition={{ delay: 0.2, duration: 0.4 }}
                 className="text-xl sm:text-2xl font-bold text-gray-900 text-center"
               >
-                គណនីត្រូវបានបង្កើតដោយជោគជ័យ!
+                សូមស្វាគមន៍មកកាន់ Cambodia Post Bank!
               </motion.h2>
 
               <motion.div
@@ -62,16 +62,22 @@ export default function SubmitSuccessModal({ isOpen, onClose }: SuccessModalProp
                 className="h-1 w-10 bg-primary rounded-full mt-2 mb-5"
               />
 
-              <motion.p
+              <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3, duration: 0.4 }}
-                className="text-sm sm:text-base text-gray-600 text-center leading-relaxed mb-8"
+                className="w-full bg-primary/5 border border-primary/15 rounded-2xl px-5 py-4 mb-8 text-center space-y-2"
               >
-                ព័ត៌មានលម្អិតគណនីរបស់លោក/លោកស្រី
-                នឹងត្រូវបានផ្ញើទៅកាន់លេខទូរស័ព្ទ
-                តាមរយៈសារ SMS ។
-              </motion.p>
+                <p className="text-sm sm:text-base text-gray-700 leading-relaxed">
+                  គណនីធនាគាររបស់លោក/លោកស្រី
+                  <span className="font-semibold text-primary"> ត្រូវបានបង្កើតដោយជោគជ័យ</span> រួចរាល់ហើយ។
+                </p>
+                <p className="text-sm text-gray-500 leading-relaxed">
+                  ព័ត៌មានលម្អិតគណនីនឹងត្រូវបានផ្ញើទៅកាន់
+                  លេខទូរស័ព្ទរបស់លោក/លោកស្រីតាមរយៈ
+                  <span className="font-medium text-gray-600"> សារ SMS </span>ក្នុងពេលឆាប់ៗនេះ។
+                </p>
+              </motion.div>
 
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
