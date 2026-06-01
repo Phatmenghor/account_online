@@ -169,7 +169,7 @@ export default function ModalUser({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-3xl h-[90vh] p-0 gap-0 flex flex-col">
+      <DialogContent className="max-w-3xl max-h-[90vh] p-0 gap-0 flex flex-col">
         {/* Header */}
         <DialogHeader className="px-6 py-4 border-b bg-muted/30 flex-shrink-0">
           <div className="flex items-center gap-4 pr-8">
@@ -233,7 +233,7 @@ export default function ModalUser({
                           )}
                         />
                       ) : (
-                        <Input value={userDetail?.idCard || ""} disabled className="h-10 bg-muted/50 cursor-not-allowed" />
+                        <Input value={userDetail?.idCard?.split("@")[0] || ""} disabled className="h-10 bg-muted/50 cursor-not-allowed" />
                       )}
                       {(errors as any).username && (
                         <p className="text-xs text-red-600">{(errors as any).username.message}</p>

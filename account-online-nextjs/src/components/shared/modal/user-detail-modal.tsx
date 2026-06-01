@@ -48,7 +48,7 @@ function SectionHeader({ color, title }: { color: string; title: string }) {
 export function UserViewModal({ user, isOpen, onClose }: UserViewModalProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-3xl h-[88vh] p-0 gap-0 flex flex-col">
+      <DialogContent className="max-w-3xl max-h-[88vh] p-0 gap-0 flex flex-col">
         {/* Header */}
         <DialogHeader className="px-6 py-4 border-b bg-muted/30 flex-shrink-0">
           <div className="flex items-center gap-4 pr-8">
@@ -82,7 +82,7 @@ export function UserViewModal({ user, isOpen, onClose }: UserViewModalProps) {
                   <SectionHeader color="bg-blue-600" title="Personal Information" />
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <InfoRow label="Full Name" value={user.fullName} />
-                    <InfoRow label="Username (ID Card)" value={user.idCard} />
+                    <InfoRow label="Username (ID Card)" value={user.idCard?.split("@")[0]} />
                     <InfoRow label="Email" value={user.email} />
                     <InfoRow label="Phone Number" value={user.phoneNumber} />
                     <InfoRow label="Position" value={user.position} />

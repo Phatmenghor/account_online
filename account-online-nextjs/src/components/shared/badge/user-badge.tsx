@@ -8,13 +8,6 @@ export const UserStatusBadge: React.FC<StatusBadgeProps> = ({ status }) => {
   const getStatusConfig = (status: string) => {
     switch (status) {
       case Status.ACTIVE:
-        if (status) {
-          return {
-            className:
-              "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200",
-            label: "Expiring Soon",
-          };
-        }
         return {
           className:
             "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
