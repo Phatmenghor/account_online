@@ -154,7 +154,7 @@ export function DashboardSidebar({ isOpen = true, onToggle }: DashboardSidebarPr
                               className={cn(
                                 "flex h-8 items-center rounded-md px-2 text-sm transition-colors",
                                 isActive
-                                  ? "bg-primary text-primary-foreground font-medium"
+                                  ? "bg-primary/80 text-primary-foreground font-medium"
                                   : "hover:bg-primary/10 hover:text-primary"
                               )}
                             >
@@ -175,7 +175,7 @@ export function DashboardSidebar({ isOpen = true, onToggle }: DashboardSidebarPr
                         className={cn(
                           "flex h-9 w-full items-center gap-2 rounded-md px-2 text-sm font-medium transition-colors group relative",
                           isActive
-                            ? "bg-primary text-primary-foreground"
+                            ? "bg-primary/80 text-primary-foreground"
                             : "hover:bg-primary/10 hover:text-primary",
                           !isOpen && "justify-center"
                         )}
