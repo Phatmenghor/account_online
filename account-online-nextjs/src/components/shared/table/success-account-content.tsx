@@ -111,6 +111,16 @@ export const createSuccessAccountTableColumns = ({
       ),
     },
     {
+      key: "submittedBy",
+      label: "Created By",
+      truncate: true,
+      maxWidth: "200px",
+      minWidth: "150px",
+      render: (account) => (
+        <span className="font-medium">{account.submittedBy || "---"}</span>
+      ),
+    },
+    {
       key: "createdAt",
       label: "Created At",
       truncate: true,
