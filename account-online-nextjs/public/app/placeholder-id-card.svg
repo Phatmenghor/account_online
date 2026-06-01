@@ -1,73 +1,116 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 210" fill="none">
-  <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="480" y2="210" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#fff7ed"/>
-      <stop offset="100%" stop-color="#fff1e6"/>
-    </linearGradient>
-  </defs>
-
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 260" fill="none">
   <!-- Card background -->
-  <rect width="480" height="210" fill="url(#bg)"/>
+  <rect x="10" y="10" width="380" height="240" rx="12" fill="#ffffff" stroke="#f97316" stroke-width="2"/>
 
-  <!-- Card shape centered -->
-  <rect x="60" y="28" width="360" height="154" rx="10" fill="#ffffff" stroke="#f97316" stroke-width="1.5" stroke-opacity="0.35"/>
-
-  <!-- Orange top bar -->
-  <rect x="60" y="28" width="360" height="8" rx="10" fill="#f97316" opacity="0.7"/>
-  <rect x="60" y="32" width="360" height="4" fill="#f97316" opacity="0.7"/>
+  <!-- Header bar -->
+  <rect x="10" y="10" width="380" height="42" rx="12" fill="#f97316"/>
+  <rect x="10" y="36" width="380" height="16" fill="#f97316"/>
+  <text x="200" y="37" text-anchor="middle" font-family="system-ui, Arial, sans-serif" font-size="15" font-weight="700" fill="#ffffff" letter-spacing="2">ID CARD</text>
 
   <!-- Photo box -->
-  <rect x="80" y="52" width="64" height="80" rx="6" fill="#fff7ed" stroke="#f97316" stroke-width="1.2" stroke-opacity="0.5" stroke-dasharray="5 3"/>
-  <!-- Person silhouette -->
-  <circle cx="112" cy="76" r="16" fill="#f97316" opacity="0.18"/>
-  <ellipse cx="112" cy="114" rx="22" ry="14" fill="#f97316" opacity="0.14"/>
+  <rect x="28" y="62" width="100" height="120" rx="6" fill="#fff7ed" stroke="#f97316" stroke-width="1.5"/>
 
-  <!-- Country tag -->
-  <rect x="160" y="52" width="24" height="14" rx="3" fill="#f97316" opacity="0.15"/>
-  <text x="172" y="62" text-anchor="middle" font-family="system-ui, sans-serif" font-size="7" font-weight="700" fill="#c2410c">KH</text>
+  <!-- Person silhouette inside photo box -->
+  <!-- Head -->
+  <ellipse cx="78" cy="100" rx="24" ry="27" fill="#fed7aa" stroke="#f97316" stroke-width="1.5"/>
+  <!-- Hair top -->
+  <path d="M54 95 Q56 72 78 70 Q100 72 102 95 Q98 80 78 78 Q58 80 54 95Z" fill="#ea580c" opacity="0.7"/>
+  <!-- Neck -->
+  <rect x="70" y="125" width="16" height="14" rx="3" fill="#fed7aa" stroke="#f97316" stroke-width="1"/>
+  <!-- Shoulders -->
+  <path d="M28 182 Q38 138 78 136 Q118 138 128 182 Z" fill="#fdba74" stroke="#f97316" stroke-width="1.5"/>
 
-  <!-- Card title -->
-  <text x="192" y="62" font-family="system-ui, sans-serif" font-size="9" font-weight="700" fill="#9a3412" letter-spacing="0.8" opacity="0.75">NATIONAL IDENTITY CARD</text>
+  <!-- Right side: field lines -->
+  <!-- Row 1 -->
+  <rect x="146" y="70" width="100" height="10" rx="4" fill="#f97316" opacity="0.7"/>
+  <rect x="254" y="70" width="60" height="10" rx="4" fill="#f97316" opacity="0.35"/>
+  <rect x="322" y="70" width="52" height="10" rx="4" fill="#f97316" opacity="0.35"/>
 
-  <!-- Divider -->
-  <line x1="160" y1="72" x2="400" y2="72" stroke="#f97316" stroke-width="0.6" stroke-opacity="0.3"/>
+  <!-- Row 2 -->
+  <rect x="146" y="92" width="130" height="9" rx="4" fill="#f97316" opacity="0.25"/>
+  <rect x="284" y="92" width="90" height="9" rx="4" fill="#f97316" opacity="0.25"/>
 
-  <!-- Field: Name -->
-  <rect x="160" y="80" width="60" height="6" rx="3" fill="#f97316" opacity="0.12"/>
-  <rect x="228" y="80" width="110" height="6" rx="3" fill="#f97316" opacity="0.08"/>
+  <!-- Row 3 -->
+  <rect x="146" y="113" width="90" height="9" rx="4" fill="#f97316" opacity="0.25"/>
+  <rect x="244" y="113" width="130" height="9" rx="4" fill="#f97316" opacity="0.15"/>
 
-  <!-- Field: ID -->
-  <rect x="160" y="96" width="44" height="6" rx="3" fill="#f97316" opacity="0.12"/>
-  <rect x="212" y="96" width="80" height="6" rx="3" fill="#f97316" opacity="0.08"/>
+  <!-- Row 4 -->
+  <rect x="146" y="134" width="120" height="9" rx="4" fill="#f97316" opacity="0.2"/>
+  <rect x="274" y="134" width="100" height="9" rx="4" fill="#f97316" opacity="0.15"/>
 
-  <!-- Field: DOB -->
-  <rect x="160" y="112" width="50" height="6" rx="3" fill="#f97316" opacity="0.12"/>
-  <rect x="218" y="112" width="68" height="6" rx="3" fill="#f97316" opacity="0.08"/>
+  <!-- Row 5 -->
+  <rect x="146" y="155" width="228" height="9" rx="4" fill="#f97316" opacity="0.15"/>
 
-  <!-- Field: Address -->
-  <rect x="160" y="128" width="200" height="6" rx="3" fill="#f97316" opacity="0.08"/>
-  <rect x="160" y="140" width="160" height="6" rx="3" fill="#f97316" opacity="0.06"/>
-
-  <!-- Barcode box -->
-  <rect x="350" y="96" width="52" height="48" rx="4" fill="#fff7ed" stroke="#f97316" stroke-width="1" stroke-opacity="0.3"/>
-  <line x1="356" y1="103" x2="356" y2="137" stroke="#c2410c" stroke-width="1.2" stroke-opacity="0.4"/>
-  <line x1="359" y1="103" x2="359" y2="137" stroke="#c2410c" stroke-width="0.8" stroke-opacity="0.4"/>
-  <line x1="361" y1="103" x2="361" y2="137" stroke="#c2410c" stroke-width="1.6" stroke-opacity="0.4"/>
-  <line x1="364" y1="103" x2="364" y2="137" stroke="#c2410c" stroke-width="0.8" stroke-opacity="0.4"/>
-  <line x1="366" y1="103" x2="366" y2="137" stroke="#c2410c" stroke-width="1.2" stroke-opacity="0.4"/>
-  <line x1="369" y1="103" x2="369" y2="137" stroke="#c2410c" stroke-width="1.8" stroke-opacity="0.4"/>
-  <line x1="372" y1="103" x2="372" y2="137" stroke="#c2410c" stroke-width="0.8" stroke-opacity="0.4"/>
-  <line x1="374" y1="103" x2="374" y2="137" stroke="#c2410c" stroke-width="1.2" stroke-opacity="0.4"/>
-  <line x1="377" y1="103" x2="377" y2="137" stroke="#c2410c" stroke-width="0.8" stroke-opacity="0.4"/>
-  <line x1="379" y1="103" x2="379" y2="137" stroke="#c2410c" stroke-width="1.6" stroke-opacity="0.4"/>
-  <line x1="382" y1="103" x2="382" y2="137" stroke="#c2410c" stroke-width="0.8" stroke-opacity="0.4"/>
-  <line x1="384" y1="103" x2="384" y2="137" stroke="#c2410c" stroke-width="1.2" stroke-opacity="0.4"/>
-  <line x1="387" y1="103" x2="387" y2="137" stroke="#c2410c" stroke-width="1.8" stroke-opacity="0.4"/>
-  <line x1="390" y1="103" x2="390" y2="137" stroke="#c2410c" stroke-width="0.8" stroke-opacity="0.4"/>
-  <line x1="392" y1="103" x2="392" y2="137" stroke="#c2410c" stroke-width="1.2" stroke-opacity="0.4"/>
-  <line x1="395" y1="103" x2="395" y2="137" stroke="#c2410c" stroke-width="0.8" stroke-opacity="0.4"/>
-  <line x1="397" y1="103" x2="397" y2="137" stroke="#c2410c" stroke-width="1.6" stroke-opacity="0.4"/>
-
-  <!-- Bottom hint -->
-  <text x="240" y="194" text-anchor="middle" font-family="system-ui, sans-serif" font-size="9" fill="#ea580c" font-weight="500" opacity="0.6">Tap to upload your National ID Card</text>
+  <!-- Barcode area -->
+  <rect x="146" y="176" width="228" height="42" rx="4" fill="#fff7ed" stroke="#f97316" stroke-width="1" stroke-opacity="0.4"/>
+  <!-- Barcode lines -->
+  <line x1="154" y1="183" x2="154" y2="211" stroke="#ea580c" stroke-width="1.4" stroke-opacity="0.6"/>
+  <line x1="157" y1="183" x2="157" y2="211" stroke="#ea580c" stroke-width="0.8" stroke-opacity="0.6"/>
+  <line x1="160" y1="183" x2="160" y2="211" stroke="#ea580c" stroke-width="2" stroke-opacity="0.6"/>
+  <line x1="163" y1="183" x2="163" y2="211" stroke="#ea580c" stroke-width="0.8" stroke-opacity="0.6"/>
+  <line x1="166" y1="183" x2="166" y2="211" stroke="#ea580c" stroke-width="1.4" stroke-opacity="0.6"/>
+  <line x1="170" y1="183" x2="170" y2="211" stroke="#ea580c" stroke-width="2.2" stroke-opacity="0.6"/>
+  <line x1="173" y1="183" x2="173" y2="211" stroke="#ea580c" stroke-width="0.8" stroke-opacity="0.6"/>
+  <line x1="176" y1="183" x2="176" y2="211" stroke="#ea580c" stroke-width="1.4" stroke-opacity="0.6"/>
+  <line x1="179" y1="183" x2="179" y2="211" stroke="#ea580c" stroke-width="0.8" stroke-opacity="0.6"/>
+  <line x1="182" y1="183" x2="182" y2="211" stroke="#ea580c" stroke-width="2" stroke-opacity="0.6"/>
+  <line x1="185" y1="183" x2="185" y2="211" stroke="#ea580c" stroke-width="0.8" stroke-opacity="0.6"/>
+  <line x1="188" y1="183" x2="188" y2="211" stroke="#ea580c" stroke-width="1.4" stroke-opacity="0.6"/>
+  <line x1="192" y1="183" x2="192" y2="211" stroke="#ea580c" stroke-width="2.2" stroke-opacity="0.6"/>
+  <line x1="195" y1="183" x2="195" y2="211" stroke="#ea580c" stroke-width="0.8" stroke-opacity="0.6"/>
+  <line x1="198" y1="183" x2="198" y2="211" stroke="#ea580c" stroke-width="1.4" stroke-opacity="0.6"/>
+  <line x1="201" y1="183" x2="201" y2="211" stroke="#ea580c" stroke-width="0.8" stroke-opacity="0.6"/>
+  <line x1="204" y1="183" x2="204" y2="211" stroke="#ea580c" stroke-width="2" stroke-opacity="0.6"/>
+  <line x1="207" y1="183" x2="207" y2="211" stroke="#ea580c" stroke-width="1.4" stroke-opacity="0.6"/>
+  <line x1="211" y1="183" x2="211" y2="211" stroke="#ea580c" stroke-width="0.8" stroke-opacity="0.6"/>
+  <line x1="214" y1="183" x2="214" y2="211" stroke="#ea580c" stroke-width="2.2" stroke-opacity="0.6"/>
+  <line x1="217" y1="183" x2="217" y2="211" stroke="#ea580c" stroke-width="0.8" stroke-opacity="0.6"/>
+  <line x1="220" y1="183" x2="220" y2="211" stroke="#ea580c" stroke-width="1.4" stroke-opacity="0.6"/>
+  <line x1="223" y1="183" x2="223" y2="211" stroke="#ea580c" stroke-width="0.8" stroke-opacity="0.6"/>
+  <line x1="226" y1="183" x2="226" y2="211" stroke="#ea580c" stroke-width="2" stroke-opacity="0.6"/>
+  <line x1="229" y1="183" x2="229" y2="211" stroke="#ea580c" stroke-width="0.8" stroke-opacity="0.6"/>
+  <line x1="232" y1="183" x2="232" y2="211" stroke="#ea580c" stroke-width="1.4" stroke-opacity="0.6"/>
+  <line x1="236" y1="183" x2="236" y2="211" stroke="#ea580c" stroke-width="2.2" stroke-opacity="0.6"/>
+  <line x1="239" y1="183" x2="239" y2="211" stroke="#ea580c" stroke-width="0.8" stroke-opacity="0.6"/>
+  <line x1="242" y1="183" x2="242" y2="211" stroke="#ea580c" stroke-width="1.4" stroke-opacity="0.6"/>
+  <line x1="245" y1="183" x2="245" y2="211" stroke="#ea580c" stroke-width="2" stroke-opacity="0.6"/>
+  <line x1="248" y1="183" x2="248" y2="211" stroke="#ea580c" stroke-width="0.8" stroke-opacity="0.6"/>
+  <line x1="251" y1="183" x2="251" y2="211" stroke="#ea580c" stroke-width="1.4" stroke-opacity="0.6"/>
+  <line x1="255" y1="183" x2="255" y2="211" stroke="#ea580c" stroke-width="0.8" stroke-opacity="0.6"/>
+  <line x1="258" y1="183" x2="258" y2="211" stroke="#ea580c" stroke-width="2.2" stroke-opacity="0.6"/>
+  <line x1="261" y1="183" x2="261" y2="211" stroke="#ea580c" stroke-width="1.4" stroke-opacity="0.6"/>
+  <line x1="264" y1="183" x2="264" y2="211" stroke="#ea580c" stroke-width="0.8" stroke-opacity="0.6"/>
+  <line x1="267" y1="183" x2="267" y2="211" stroke="#ea580c" stroke-width="2" stroke-opacity="0.6"/>
+  <line x1="270" y1="183" x2="270" y2="211" stroke="#ea580c" stroke-width="0.8" stroke-opacity="0.6"/>
+  <line x1="273" y1="183" x2="273" y2="211" stroke="#ea580c" stroke-width="1.4" stroke-opacity="0.6"/>
+  <line x1="277" y1="183" x2="277" y2="211" stroke="#ea580c" stroke-width="2.2" stroke-opacity="0.6"/>
+  <line x1="280" y1="183" x2="280" y2="211" stroke="#ea580c" stroke-width="0.8" stroke-opacity="0.6"/>
+  <line x1="283" y1="183" x2="283" y2="211" stroke="#ea580c" stroke-width="1.4" stroke-opacity="0.6"/>
+  <line x1="286" y1="183" x2="286" y2="211" stroke="#ea580c" stroke-width="0.8" stroke-opacity="0.6"/>
+  <line x1="289" y1="183" x2="289" y2="211" stroke="#ea580c" stroke-width="2" stroke-opacity="0.6"/>
+  <line x1="292" y1="183" x2="292" y2="211" stroke="#ea580c" stroke-width="0.8" stroke-opacity="0.6"/>
+  <line x1="295" y1="183" x2="295" y2="211" stroke="#ea580c" stroke-width="1.4" stroke-opacity="0.6"/>
+  <line x1="299" y1="183" x2="299" y2="211" stroke="#ea580c" stroke-width="2.2" stroke-opacity="0.6"/>
+  <line x1="302" y1="183" x2="302" y2="211" stroke="#ea580c" stroke-width="0.8" stroke-opacity="0.6"/>
+  <line x1="305" y1="183" x2="305" y2="211" stroke="#ea580c" stroke-width="1.4" stroke-opacity="0.6"/>
+  <line x1="308" y1="183" x2="308" y2="211" stroke="#ea580c" stroke-width="2" stroke-opacity="0.6"/>
+  <line x1="311" y1="183" x2="311" y2="211" stroke="#ea580c" stroke-width="0.8" stroke-opacity="0.6"/>
+  <line x1="314" y1="183" x2="314" y2="211" stroke="#ea580c" stroke-width="1.4" stroke-opacity="0.6"/>
+  <line x1="318" y1="183" x2="318" y2="211" stroke="#ea580c" stroke-width="0.8" stroke-opacity="0.6"/>
+  <line x1="321" y1="183" x2="321" y2="211" stroke="#ea580c" stroke-width="2.2" stroke-opacity="0.6"/>
+  <line x1="324" y1="183" x2="324" y2="211" stroke="#ea580c" stroke-width="0.8" stroke-opacity="0.6"/>
+  <line x1="327" y1="183" x2="327" y2="211" stroke="#ea580c" stroke-width="1.4" stroke-opacity="0.6"/>
+  <line x1="330" y1="183" x2="330" y2="211" stroke="#ea580c" stroke-width="2" stroke-opacity="0.6"/>
+  <line x1="333" y1="183" x2="333" y2="211" stroke="#ea580c" stroke-width="0.8" stroke-opacity="0.6"/>
+  <line x1="336" y1="183" x2="336" y2="211" stroke="#ea580c" stroke-width="1.4" stroke-opacity="0.6"/>
+  <line x1="340" y1="183" x2="340" y2="211" stroke="#ea580c" stroke-width="2.2" stroke-opacity="0.6"/>
+  <line x1="343" y1="183" x2="343" y2="211" stroke="#ea580c" stroke-width="0.8" stroke-opacity="0.6"/>
+  <line x1="346" y1="183" x2="346" y2="211" stroke="#ea580c" stroke-width="1.4" stroke-opacity="0.6"/>
+  <line x1="349" y1="183" x2="349" y2="211" stroke="#ea580c" stroke-width="0.8" stroke-opacity="0.6"/>
+  <line x1="352" y1="183" x2="352" y2="211" stroke="#ea580c" stroke-width="2" stroke-opacity="0.6"/>
+  <line x1="355" y1="183" x2="355" y2="211" stroke="#ea580c" stroke-width="0.8" stroke-opacity="0.6"/>
+  <line x1="358" y1="183" x2="358" y2="211" stroke="#ea580c" stroke-width="1.4" stroke-opacity="0.6"/>
+  <line x1="362" y1="183" x2="362" y2="211" stroke="#ea580c" stroke-width="2.2" stroke-opacity="0.6"/>
+  <line x1="365" y1="183" x2="365" y2="211" stroke="#ea580c" stroke-width="0.8" stroke-opacity="0.6"/>
+  <line x1="368" y1="183" x2="368" y2="211" stroke="#ea580c" stroke-width="1.4" stroke-opacity="0.6"/>
 </svg>

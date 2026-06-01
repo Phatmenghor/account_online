@@ -1,63 +1,38 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 210" fill="none">
-  <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="480" y2="210" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#fff7ed"/>
-      <stop offset="100%" stop-color="#fff1e6"/>
-    </linearGradient>
-  </defs>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" fill="none">
+  <!-- White background -->
+  <rect width="400" height="400" fill="#ffffff"/>
 
-  <!-- Background -->
-  <rect width="480" height="210" fill="url(#bg)"/>
-
-  <!-- Oval face frame -->
-  <ellipse cx="240" cy="98" rx="62" ry="74" fill="#ffffff" stroke="#f97316" stroke-width="1.5" stroke-opacity="0.35"/>
-
-  <!-- Corner bracket guides -->
-  <path d="M178 24 L178 38 M178 24 L192 24" stroke="#f97316" stroke-width="2" stroke-linecap="round" stroke-opacity="0.5"/>
-  <path d="M302 24 L302 38 M302 24 L288 24" stroke="#f97316" stroke-width="2" stroke-linecap="round" stroke-opacity="0.5"/>
-  <path d="M178 186 L178 172 M178 186 L192 186" stroke="#f97316" stroke-width="2" stroke-linecap="round" stroke-opacity="0.5"/>
-  <path d="M302 186 L302 172 M302 186 L288 186" stroke="#f97316" stroke-width="2" stroke-linecap="round" stroke-opacity="0.5"/>
-
-  <!-- Shoulder / body area -->
-  <ellipse cx="240" cy="188" rx="52" ry="22" fill="#f97316" opacity="0.1"/>
+  <!-- Body / torso -->
+  <path d="M80 400 Q80 310 140 290 Q160 283 200 282 Q240 283 260 290 Q320 310 320 400 Z" fill="#fed7aa" stroke="#f97316" stroke-width="4" stroke-linejoin="round"/>
 
   <!-- Neck -->
-  <rect x="228" y="148" width="24" height="26" rx="8" fill="#f97316" opacity="0.1"/>
+  <path d="M176 268 Q176 292 200 296 Q224 292 224 268 Z" fill="#fff7ed" stroke="#f97316" stroke-width="3.5"/>
 
-  <!-- Head -->
-  <ellipse cx="240" cy="90" rx="36" ry="42" fill="#f97316" opacity="0.1"/>
+  <!-- Head base -->
+  <ellipse cx="200" cy="200" rx="88" ry="100" fill="#fff7ed" stroke="#f97316" stroke-width="4"/>
 
-  <!-- Face features — minimal clean lines -->
-  <!-- Eyes -->
-  <ellipse cx="224" cy="85" rx="7" ry="8" fill="#f97316" opacity="0.12"/>
-  <ellipse cx="256" cy="85" rx="7" ry="8" fill="#f97316" opacity="0.12"/>
-  <circle cx="224" cy="86" r="4" fill="#f97316" opacity="0.22"/>
-  <circle cx="256" cy="86" r="4" fill="#f97316" opacity="0.22"/>
+  <!-- Left ear -->
+  <ellipse cx="114" cy="210" rx="14" ry="19" fill="#fff7ed" stroke="#f97316" stroke-width="3.5"/>
+  <!-- Right ear -->
+  <ellipse cx="286" cy="210" rx="14" ry="19" fill="#fff7ed" stroke="#f97316" stroke-width="3.5"/>
 
-  <!-- Nose bridge (minimal) -->
-  <path d="M240 93 L236 106 Q240 109 244 106 Z" fill="#f97316" opacity="0.08"/>
+  <!-- Hair — swept style like original -->
+  <path d="M114 175
+    Q116 110 148 90
+    Q170 76 200 74
+    Q236 74 258 90
+    Q284 108 286 150
+    Q280 130 264 118
+    Q248 108 230 104
+    Q220 102 216 108
+    Q212 118 224 128
+    Q240 140 240 155
+    Q230 148 212 144
+    Q190 140 172 142
+    Q148 148 136 165
+    Q122 178 114 175Z"
+    fill="#fb923c" stroke="#f97316" stroke-width="3.5" stroke-linejoin="round"/>
 
-  <!-- Mouth -->
-  <path d="M229 116 Q240 123 251 116" stroke="#f97316" stroke-width="1.8" stroke-linecap="round" fill="none" stroke-opacity="0.25"/>
-
-  <!-- Camera icon - top left area -->
-  <rect x="28" y="82" width="42" height="32" rx="7" fill="#f97316" opacity="0.12" stroke="#f97316" stroke-width="1.2" stroke-opacity="0.35"/>
-  <circle cx="49" cy="98" r="9" fill="none" stroke="#f97316" stroke-width="1.5" stroke-opacity="0.45"/>
-  <circle cx="49" cy="98" r="4.5" fill="#f97316" opacity="0.3"/>
-  <rect x="30" y="78" width="10" height="6" rx="2" fill="#f97316" opacity="0.3"/>
-  <circle cx="65" cy="85" r="2.5" fill="#f97316" opacity="0.4"/>
-
-  <!-- Tips right side -->
-  <text x="370" y="80" text-anchor="middle" font-family="system-ui, sans-serif" font-size="8" fill="#c2410c" opacity="0.55" font-weight="500">Face forward</text>
-  <text x="370" y="94" text-anchor="middle" font-family="system-ui, sans-serif" font-size="8" fill="#c2410c" opacity="0.55" font-weight="500">Good lighting</text>
-  <text x="370" y="108" text-anchor="middle" font-family="system-ui, sans-serif" font-size="8" fill="#c2410c" opacity="0.55" font-weight="500">No glasses</text>
-
-  <!-- Divider lines -->
-  <line x1="330" y1="76" x2="414" y2="76" stroke="#f97316" stroke-width="0.6" stroke-opacity="0.25"/>
-  <line x1="330" y1="88" x2="414" y2="88" stroke="#f97316" stroke-width="0.6" stroke-opacity="0.25"/>
-  <line x1="330" y1="100" x2="414" y2="100" stroke="#f97316" stroke-width="0.6" stroke-opacity="0.25"/>
-  <line x1="330" y1="112" x2="414" y2="112" stroke="#f97316" stroke-width="0.6" stroke-opacity="0.25"/>
-
-  <!-- Bottom hint -->
-  <text x="240" y="196" text-anchor="middle" font-family="system-ui, sans-serif" font-size="9" fill="#ea580c" font-weight="500" opacity="0.6">Tap to take a selfie photo</text>
+  <!-- Hair highlight on right side (swept-over look) -->
+  <path d="M240 106 Q262 112 278 132 Q286 148 284 165 Q278 148 264 136 Q250 125 240 124 Z" fill="#f97316" opacity="0.25"/>
 </svg>
