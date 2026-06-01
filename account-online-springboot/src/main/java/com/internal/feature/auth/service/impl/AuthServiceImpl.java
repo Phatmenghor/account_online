@@ -94,11 +94,7 @@ public class AuthServiceImpl implements AuthService {
             throw new BadRequestException("Passwords do not match.");
         }
 
-        if (userRepository.existsByUsername(dto.getUsername())) {
-            throw new DuplicateNameException("This username is already taken. Please choose another.");
-        }
-
-        if (userRepository.existsByEmail(dto.getEmail())) {
+        if (userRepository.existsByEmail(dto.getEmail()) || userRepository.existsByUsername(dto.getUsername())) {
             throw new DuplicateNameException("This email is already registered. Please login instead.");
         }
 
