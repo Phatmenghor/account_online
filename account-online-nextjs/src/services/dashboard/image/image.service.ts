@@ -17,5 +17,5 @@ export async function uploadImageService(data: UploadImageReq) {
 
 export function getImageService(imageId: string): string {
   const base = process.env.NEXT_PUBLIC_API_BASE_URL_IMAGE ?? "";
-  return `${base}/api/images/${imageId}`;
+  return `${base}/api/customer-images/${imageId}`;
 }
