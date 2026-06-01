@@ -22,9 +22,6 @@ public class TelegramService {
     @Value("${telegram.bot.uat-acl-chat-id}")
     private String chatId_acl_internal;
 
-    @Value("${telegram.bot.uat-dev-team-chat-id:}")
-    private String chatId_dev_team;
-
     private final RestTemplate restTemplate = new RestTemplate();
     private final TaskExecutor taskExecutor;
 
@@ -34,25 +31,6 @@ public class TelegramService {
 
     public void sendMarkdownAclInternalMessage(String message) {
         taskExecutor.execute(() -> sendMarkdownToChat(chatId_acl_internal, message));
-    }
-
-    public void sendDetailedErrorToDevTeam(String message) {
-        taskExecutor.execute(() -> {
-            if (chatId_dev_team == null || chatId_dev_team.trim().isEmpty()) {
-                log.debug("Dev Team chat ID not configured - skipping Telegram alert");
-                return;
-            }
-            sendMarkdownToChat(chatId_dev_team, message);
-        });
-    }
-
-    public void sendCriticalErrorAlert(String title, String details) {
-        taskExecutor.execute(() -> {
-            String message = String.format(
-                    "*🚨 %s*\n%s",
-                    title, details);
-            sendMarkdownToChat(chatId_dev_team, message);
-        });
     }
 
     public void sendMarkdownToChat(String chatId, String message) {
