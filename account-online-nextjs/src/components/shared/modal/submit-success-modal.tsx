@@ -73,9 +73,9 @@ export default function SubmitSuccessModal({ isOpen, onClose }: SuccessModalProp
                   <span className="font-semibold text-primary"> ត្រូវបានបង្កើតដោយជោគជ័យ</span> រួចរាល់ហើយ។
                 </p>
                 <p className="text-sm text-gray-500 leading-relaxed">
-                  ព័ត៌មានលម្អិតគណនីនឹងត្រូវបានផ្ញើទៅកាន់
+                  ព័ត៌មានលម្អិតគណនីត្រូវបានផ្ញើទៅកាន់
                   លេខទូរស័ព្ទរបស់លោក/លោកស្រីតាមរយៈ
-                  <span className="font-medium text-gray-600"> សារ SMS </span>ក្នុងពេលឆាប់ៗនេះ។
+                  <span className="font-medium text-gray-600"> សារ SMS </span>រួចរាល់ហើយ។
                 </p>
               </motion.div>
 
