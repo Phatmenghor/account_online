@@ -228,7 +228,8 @@ export default function ModalUser({
                           control={control}
                           name="username"
                           render={({ field }) => (
-                            <Input {...field} id="username" placeholder="e.g. 5589" disabled={isSubmitting}
+                            <Input {...field} id="username" autoComplete="off" placeholder="Enter your username"
+                              disabled={isSubmitting}
                               className={`h-10 ${(errors as any).username ? "border-red-500" : ""}`} />
                           )}
                         />
@@ -249,7 +250,8 @@ export default function ModalUser({
                         control={control}
                         name="email"
                         render={({ field }) => (
-                          <Input {...field} id="email" type="email" placeholder="Enter email address"
+                          <Input {...field} id="email" type="email" autoComplete="off"
+                            placeholder="Enter your email"
                             disabled={isSubmitting} className={`h-10 ${errors.email ? "border-red-500" : ""}`} />
                         )}
                       />
@@ -258,7 +260,7 @@ export default function ModalUser({
 
                     {/* Password (create only) */}
                     {isCreate && (
-                      <div className="space-y-2 md:col-span-2">
+                      <div className="space-y-2">
                         <Label htmlFor="password" className="text-sm font-medium">
                           Password <span className="text-red-500">*</span>
                         </Label>
@@ -267,8 +269,9 @@ export default function ModalUser({
                             control={control}
                             name="password"
                             render={({ field }) => (
-                              <Input {...field} id="password" type={showPassword ? "text" : "password"}
-                                placeholder="Min. 6 characters" disabled={isSubmitting}
+                              <Input {...field} id="password" autoComplete="new-password"
+                                type={showPassword ? "text" : "password"}
+                                placeholder="Enter your password" disabled={isSubmitting}
                                 className={`h-10 pr-10 ${(errors as any).password ? "border-red-500" : ""}`} />
                             )}
                           />
@@ -283,66 +286,7 @@ export default function ModalUser({
                         )}
                       </div>
                     )}
-                  </div>
-                </div>
 
-                <Separator />
-
-                {/* Personal Information */}
-                <div className="space-y-4">
-                  <SectionHeader color="bg-purple-600" title="Personal Information" />
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label className="text-sm font-medium">Full Name</Label>
-                      <Controller control={control} name="fullName"
-                        render={({ field }) => (
-                          <Input {...field} placeholder="Enter full name" disabled={isSubmitting} className="h-10" />
-                        )} />
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="text-sm font-medium">Phone Number</Label>
-                      <Controller control={control} name="phoneNumber"
-                        render={({ field }) => (
-                          <Input {...field} placeholder="Enter phone number" disabled={isSubmitting} className="h-10" />
-                        )} />
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="text-sm font-medium">Position</Label>
-                      <Controller control={control} name="position"
-                        render={({ field }) => (
-                          <Input {...field} placeholder="e.g. Branch Officer" disabled={isSubmitting} className="h-10" />
-                        )} />
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="text-sm font-medium">Staff ID</Label>
-                      <Controller control={control} name="staffId"
-                        render={({ field }) => (
-                          <Input {...field} placeholder="Enter staff ID" disabled={isSubmitting} className="h-10" />
-                        )} />
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="text-sm font-medium">Branch</Label>
-                      <Controller control={control} name="branch"
-                        render={({ field }) => (
-                          <Input {...field} placeholder="Enter branch" disabled={isSubmitting} className="h-10" />
-                        )} />
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="text-sm font-medium">Department</Label>
-                      <Controller control={control} name="department"
-                        render={({ field }) => (
-                          <Input {...field} placeholder="Enter department" disabled={isSubmitting} className="h-10" />
-                        )} />
-                    </div>
-                  </div>
-                </div>
-
-                <Separator />
-
-                {/* Role & Status */}
-                <div className="space-y-4">
-                  <SectionHeader color="bg-orange-600" title="Role & Status" />
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {/* Role */}
                     <div className="space-y-2">
                       <Label className="text-sm font-medium">
@@ -393,6 +337,57 @@ export default function ModalUser({
                         />
                       </div>
                     )}
+                  </div>
+                </div>
+
+                <Separator />
+
+                {/* Personal Information */}
+                <div className="space-y-4">
+                  <SectionHeader color="bg-purple-600" title="Personal Information" />
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium">Full Name</Label>
+                      <Controller control={control} name="fullName"
+                        render={({ field }) => (
+                          <Input {...field} autoComplete="off" placeholder="Enter your full name" disabled={isSubmitting} className="h-10" />
+                        )} />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium">Phone Number</Label>
+                      <Controller control={control} name="phoneNumber"
+                        render={({ field }) => (
+                          <Input {...field} autoComplete="off" placeholder="Enter your phone number" disabled={isSubmitting} className="h-10" />
+                        )} />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium">Position</Label>
+                      <Controller control={control} name="position"
+                        render={({ field }) => (
+                          <Input {...field} autoComplete="off" placeholder="Enter your position" disabled={isSubmitting} className="h-10" />
+                        )} />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium">Staff ID</Label>
+                      <Controller control={control} name="staffId"
+                        render={({ field }) => (
+                          <Input {...field} autoComplete="off" placeholder="Enter your staff ID" disabled={isSubmitting} className="h-10" />
+                        )} />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium">Branch</Label>
+                      <Controller control={control} name="branch"
+                        render={({ field }) => (
+                          <Input {...field} autoComplete="off" placeholder="Enter your branch" disabled={isSubmitting} className="h-10" />
+                        )} />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium">Department</Label>
+                      <Controller control={control} name="department"
+                        render={({ field }) => (
+                          <Input {...field} autoComplete="off" placeholder="Enter your department" disabled={isSubmitting} className="h-10" />
+                        )} />
+                    </div>
                   </div>
                 </div>
 
