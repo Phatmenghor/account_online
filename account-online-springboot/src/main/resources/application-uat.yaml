@@ -69,7 +69,7 @@ cpb:
   camdx:
     url: http://192.168.103.106:8099/api/v1/
   aml:
-    url: http://192.168.103.106:9095/api/aml
+    url: https://192.168.103.106:9095/api/aml
     username: cpbaml
     password: aml123!@#
   t24:
