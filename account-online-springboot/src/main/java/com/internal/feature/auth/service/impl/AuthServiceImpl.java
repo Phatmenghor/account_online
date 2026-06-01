@@ -3,12 +3,10 @@ package com.internal.feature.auth.service.impl;
 import com.internal.enumation.RoleEnum;
 import com.internal.enumation.StatusData;
 import com.internal.exceptions.error.custom.*;
-import com.internal.feature.auth.dto.request.LoginRequestDto;
-import com.internal.feature.auth.dto.request.RegisterRequestDto;
-import com.internal.feature.auth.dto.request.UpdateUserRequestDto;
+import com.internal.feature.auth.dto.request.*;
 import com.internal.feature.auth.dto.response.AuthResponseDTO;
+import com.internal.feature.auth.dto.response.RegisterInitiateResponse;
 import com.internal.feature.auth.dto.response.UserResponseDto;
-import com.internal.feature.auth.dto.response.AdLoginResponseDto;
 import com.internal.feature.auth.mapper.AuthMapper;
 import com.internal.feature.auth.mapper.UserMapper;
 import com.internal.feature.auth.models.Role;
@@ -17,17 +15,19 @@ import com.internal.feature.auth.repository.RoleRepository;
 import com.internal.feature.auth.repository.UserRepository;
 import com.internal.feature.auth.security.JWTGenerator;
 import com.internal.feature.auth.service.AuthService;
+import com.internal.feature.auth.service.EmailService;
+import com.internal.feature.auth.service.PendingRegistrationStore;
+import com.internal.feature.sms_otp.models.OtpSms;
+import com.internal.feature.sms_otp.repository.OtpRepository;
+import com.internal.utils.OtpGenerator;
+import com.internal.utils.constants.AppConstants;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -39,170 +39,45 @@ import java.util.stream.Collectors;
 @Slf4j
 public class AuthServiceImpl implements AuthService {
 
-    @Value("${ad.login.url}")
-    private String adLoginUrl;
-
-    @Value("${ad.login.username}")
-    private String adBasicUser;
-
-    @Value("${ad.login.password}")
-    private String adBasicPass;
-
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final JWTGenerator jwtGenerator;
     private final AuthMapper authMapper;
     private final UserMapper userMapper;
-    private final RestTemplate restTemplate;
+    private final OtpRepository otpRepository;
+    private final OtpGenerator otpGenerator;
+    private final EmailService emailService;
+    private final PendingRegistrationStore pendingRegistrationStore;
 
     @Override
     public AuthResponseDTO login(LoginRequestDto loginDto) {
         log.info("Processing login request for user: {}", loginDto.getUsername());
 
-        Optional<UserEntity> userOpt = userRepository.findByUsername(loginDto.getUsername());
+        UserEntity userEntity = userRepository.findByUsername(loginDto.getUsername())
+                .orElseThrow(() -> new UnauthorizedException("Invalid username or password."));
 
-        if (userOpt.isPresent()) {
-            // User exists in DB — verify credentials via AD, then return with existing roles
-            UserEntity userEntity = userOpt.get();
-            if (userEntity.getStatus() != StatusData.ACTIVE) {
-                log.warn("Login rejected: User {} is not active", loginDto.getUsername());
-                throw new UnauthorizedException("Your account has been deactivated. Please contact an administrator.");
-            }
-
-            verifyWithAD(loginDto);
-
-            userEntity.setPassword(passwordEncoder.encode(loginDto.getPassword()));
-            userEntity.setLastLogin(LocalDateTime.now(ZoneId.of("UTC")));
-            userRepository.save(userEntity);
-
-            List<String> roles = userEntity.getRoles().stream()
-                    .map(r -> r.getName().name())
-                    .collect(Collectors.toList());
-            String token = jwtGenerator.generateTokenForUser(userEntity.getUsername(), roles);
-
-            UserResponseDto userDto = authMapper.userToUserResponseDto(userEntity);
-            userDto.setLastLogin(userEntity.getLastLogin());
-            log.info("User {} logged in successfully", loginDto.getUsername());
-            return new AuthResponseDTO(token, userDto);
+        if (userEntity.getStatus() != StatusData.ACTIVE) {
+            log.warn("Login rejected: User {} is not active", loginDto.getUsername());
+            throw new UnauthorizedException("Your account has been deactivated. Please contact an administrator.");
         }
 
-        // User not found in DB — authenticate via AD and create new user with STAFF role
-        log.info("User not found locally, attempting AD login for: {}", loginDto.getUsername());
-        return openAccLogin(loginDto);
-    }
-
-    /**
-     * Calls the AD service to verify credentials. Throws UnauthorizedException on failure.
-     */
-    private Map<?, ?> verifyWithAD(LoginRequestDto loginDto) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setBasicAuth(adBasicUser, adBasicPass);
-        headers.setContentType(MediaType.APPLICATION_JSON);
-
-        Map<String, String> body = new HashMap<>();
-        body.put("username", loginDto.getUsername());
-        body.put("password", loginDto.getPassword());
-
-        ResponseEntity<Map> response;
-        try {
-            response = restTemplate.exchange(
-                    adLoginUrl,
-                    HttpMethod.POST,
-                    new HttpEntity<>(body, headers),
-                    Map.class
-            );
-        } catch (HttpClientErrorException e) {
-            // AD service returned 4xx — means invalid credentials, not unreachable
-            log.warn("AD authentication failed for user {}: {}", loginDto.getUsername(), e.getMessage());
-            throw new UnauthorizedException("Your Active Directory username or password is incorrect. Please try again.");
-        } catch (Exception e) {
-            log.warn("AD service unreachable for user {}: {}", loginDto.getUsername(), e.getMessage());
-            throw new UnauthorizedException("Unable to reach the authentication server. Please try again later.");
+        if (!passwordEncoder.matches(loginDto.getPassword(), userEntity.getPassword())) {
+            log.warn("Login failed: Invalid password for user {}", loginDto.getUsername());
+            throw new UnauthorizedException("Invalid username or password.");
         }
 
-        Map<?, ?> responseBody = response.getBody();
-        if (responseBody == null) {
-            throw new UnauthorizedException("Authentication server returned an empty response. Please try again.");
-        }
+        userEntity.setLastLogin(LocalDateTime.now(ZoneId.of("UTC")));
+        userRepository.save(userEntity);
 
-        Map<?, ?> data = (Map<?, ?>) responseBody.get("data");
-        if (data == null || !Boolean.TRUE.equals(data.get("success"))) {
-            throw new UnauthorizedException("Your Active Directory username or password is incorrect. Please try again.");
-        }
-
-        Map<?, ?> adUser = (Map<?, ?>) data.get("adUser");
-        if (adUser == null) {
-            throw new UnauthorizedException("No Active Directory account was found for the provided credentials.");
-        }
-
-        return adUser;
-    }
-
-    private AuthResponseDTO openAccLogin(LoginRequestDto loginDto) {
-        log.info("Processing AD login for user: {}", loginDto.getUsername());
-
-        Map<?, ?> adUser = verifyWithAD(loginDto);
-
-        String loginUsername = loginDto.getUsername();
-        String email = (String) adUser.get("mail");
-        String givenName = (String) adUser.get("givenName");
-        String sn = (String) adUser.get("sn");
-        String fullName = (sn != null ? sn : "") + (givenName != null ? " " + givenName : "");
-        String position = (String) adUser.get("title");
-        String department = (String) adUser.get("department");
-        String phone = (String) adUser.get("telephoneNumber");
-
-        // Use the submitted login username as the stored username
-        UserEntity user = userRepository.findByUsername(loginUsername).orElse(null);
-        if (user != null) {
-            log.info("AD login: user {} already exists, updating info and password", loginUsername);
-            user.setEmail(email);
-            user.setFullName(fullName.trim());
-            user.setPosition(position);
-            user.setBranch(department);
-            user.setDepartment(department);
-            user.setPhoneNumber(phone);
-            user.setPassword(passwordEncoder.encode(loginDto.getPassword()));
-            user.setLastLogin(LocalDateTime.now(ZoneId.of("UTC")));
-            userRepository.save(user);
-
-            List<String> existingRoles = user.getRoles().stream()
-                    .map(r -> r.getName().name())
-                    .collect(Collectors.toList());
-            String existingToken = jwtGenerator.generateTokenForUser(loginUsername, existingRoles);
-            UserResponseDto existingDto = authMapper.userToUserResponseDto(user);
-            existingDto.setLastLogin(user.getLastLogin());
-            log.info("AD login successful for existing user: {}", loginUsername);
-            return new AuthResponseDTO(existingToken, existingDto);
-        }
-
-        Role role = roleRepository.findByName(RoleEnum.STAFF)
-                .orElseThrow(() -> new BadRequestException("STAFF role not found."));
-
-        user = new UserEntity();
-        user.setUsername(loginUsername);
-        user.setEmail(email);
-        user.setFullName(fullName.trim());
-        user.setPosition(position);
-        user.setBranch(department);
-        user.setDepartment(department);
-        user.setPhoneNumber(phone);
-        user.setStatus(StatusData.ACTIVE);
-        user.setRoles(Collections.singletonList(role));
-        user.setPassword(passwordEncoder.encode(loginDto.getPassword()));
-        user.setLastLogin(LocalDateTime.now(ZoneId.of("UTC")));
-        log.info("AD login: creating new user record for {}", loginUsername);
-        userRepository.save(user);
-
-        List<String> roles = user.getRoles().stream()
+        List<String> roles = userEntity.getRoles().stream()
                 .map(r -> r.getName().name())
                 .collect(Collectors.toList());
-        String token = jwtGenerator.generateTokenForUser(loginUsername, roles);
+        String token = jwtGenerator.generateTokenForUser(userEntity.getUsername(), roles);
 
-        UserResponseDto userDto = authMapper.userToUserResponseDto(user);
-        userDto.setLastLogin(user.getLastLogin());
-        log.info("AD login successful for user: {}", loginUsername);
+        UserResponseDto userDto = authMapper.userToUserResponseDto(userEntity);
+        userDto.setLastLogin(userEntity.getLastLogin());
+        log.info("User {} logged in successfully", loginDto.getUsername());
         return new AuthResponseDTO(token, userDto);
     }
 
@@ -212,47 +87,129 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public UserResponseDto register(RegisterRequestDto registerDto) {
-        log.info("Processing registration request for email: {}", registerDto.getUsername());
+    public RegisterInitiateResponse registerInitiate(RegisterInitiateDto dto) {
+        log.info("Processing registration initiation for email: {}", dto.getEmail());
 
-        if (userRepository.existsByUsername(registerDto.getUsername())) {
-            log.warn("Registration failed: Email already in use: {}", registerDto.getUsername());
-            throw new DuplicateNameException("Email is already in use, please choose another one.");
+        if (!dto.getPassword().equals(dto.getConfirmPassword())) {
+            throw new BadRequestException("Passwords do not match.");
         }
 
+        if (userRepository.existsByUsername(dto.getEmail())) {
+            throw new DuplicateNameException("This email is already registered. Please login instead.");
+        }
+
+        // Store pending registration data
+        pendingRegistrationStore.put(dto.getEmail(), dto);
+
+        // Expire existing OTPs and generate a new one
+        otpRepository.expireAllActiveOtpsByPhone(dto.getEmail());
+
+        String otpCode = otpGenerator.generate();
+        LocalDateTime expiresAt = LocalDateTime.now().plusMinutes(5);
+
+        OtpSms otpSms = OtpSms.builder()
+                .phone(dto.getEmail())
+                .otpCode(otpCode)
+                .attempt(0)
+                .status(0)
+                .expiresAt(expiresAt)
+                .build();
+        otpRepository.save(otpSms);
+
+        // Send email OTP (non-blocking on failure)
+        try {
+            emailService.sendOtpEmail(dto.getEmail(), otpCode);
+        } catch (Exception e) {
+            log.error("Failed to send OTP email to {}: {}", dto.getEmail(), e.getMessage());
+        }
+
+        log.info("Registration OTP sent to email: {}", dto.getEmail());
+        return RegisterInitiateResponse.builder()
+                .message("A verification code has been sent to your email address.")
+                .email(dto.getEmail())
+                .expiresAt(expiresAt.toString())
+                .build();
+    }
+
+    @Override
+    public AuthResponseDTO registerVerify(RegisterVerifyDto dto) {
+        log.info("Processing registration verification for email: {}", dto.getEmail());
+
+        // Find active OTP
+        OtpSms latestOtp = otpRepository.findLatestActiveOtpByPhone(dto.getEmail())
+                .orElseThrow(() -> new BadRequestException("No verification code found. Please request a new one."));
+
+        // Validate OTP
+        boolean isValid = latestOtp.getOtpCode().equals(dto.getOtpCode())
+                && latestOtp.getExpiresAt().isAfter(LocalDateTime.now());
+
+        if (!isValid) {
+            int attempts = latestOtp.getAttempt() + 1;
+            latestOtp.setAttempt(attempts);
+            latestOtp.setLastAttempt(LocalDateTime.now());
+            otpRepository.save(latestOtp);
+
+            int remaining = Math.max(0, AppConstants.MAX_ATTEMPTS - attempts);
+            if (remaining <= 0) {
+                throw new UnauthorizedException("Too many failed attempts. Please request a new verification code.");
+            }
+            throw new UnauthorizedException("Invalid verification code. " + remaining + " attempt(s) remaining.");
+        }
+
+        // Mark OTP verified
+        latestOtp.setStatus(1);
+        latestOtp.setVerifiedAt(LocalDateTime.now());
+        otpRepository.save(latestOtp);
+
+        // Get pending registration data
+        RegisterInitiateDto pendingData = pendingRegistrationStore.get(dto.getEmail())
+                .orElseThrow(() -> new BadRequestException("Registration session expired. Please start over."));
+
+        // Re-check username hasn't been taken while waiting
+        if (userRepository.existsByUsername(dto.getEmail())) {
+            pendingRegistrationStore.remove(dto.getEmail());
+            throw new DuplicateNameException("This email was registered by someone else. Please try a different email.");
+        }
+
+        // Create user with STAFF role
         Role role = roleRepository.findByName(RoleEnum.STAFF)
-                .orElseThrow(() -> new BadRequestException("STAFF role not found. Please contact an administrator."));
+                .orElseThrow(() -> new BadRequestException("STAFF role not found."));
 
         UserEntity user = new UserEntity();
-        user.setUsername(registerDto.getUsername());
-        user.setFullName(registerDto.getFullName());
-        user.setPosition(registerDto.getPosition());
-        user.setStaffId(registerDto.getStaffId());
-        user.setPhoneNumber(registerDto.getPhoneNumber());
-        user.setBranch(registerDto.getBranch());
-        user.setPassword(passwordEncoder.encode(registerDto.getPassword()));
+        user.setUsername(pendingData.getEmail());
+        user.setEmail(pendingData.getEmail());
+        user.setFullName(pendingData.getFullName());
+        user.setPosition(pendingData.getPosition());
+        user.setStaffId(pendingData.getStaffId());
+        user.setPhoneNumber(pendingData.getPhoneNumber());
+        user.setBranch(pendingData.getBranch());
+        user.setPassword(passwordEncoder.encode(pendingData.getPassword()));
         user.setStatus(StatusData.ACTIVE);
         user.setRoles(Collections.singletonList(role));
+        user.setLastLogin(LocalDateTime.now(ZoneId.of("UTC")));
+        userRepository.save(user);
 
-        UserEntity savedUser = userRepository.save(user);
-        log.info("Registration successful for email: {}", registerDto.getUsername());
-        return authMapper.userToUserResponseDto(savedUser);
+        pendingRegistrationStore.remove(dto.getEmail());
+
+        List<String> roles = Collections.singletonList(RoleEnum.STAFF.name());
+        String token = jwtGenerator.generateTokenForUser(user.getUsername(), roles);
+
+        UserResponseDto userDto = authMapper.userToUserResponseDto(user);
+        userDto.setLastLogin(user.getLastLogin());
+        log.info("Registration completed and user created: {}", dto.getEmail());
+        return new AuthResponseDTO(token, userDto);
     }
 
     @Override
     public UserResponseDto createUserByAdmin(RegisterRequestDto registerDto) {
-        log.info("Processing admin user creation for email: {}", registerDto.getUsername());
+        log.info("Processing admin user creation for: {}", registerDto.getUsername());
 
         if (userRepository.existsByUsername(registerDto.getUsername())) {
-            log.warn("Admin creation failed: Email already in use: {}", registerDto.getUsername());
             throw new DuplicateNameException("Email is already in use, please choose another one.");
         }
 
         Role role = roleRepository.findByName(registerDto.getRole())
-                .orElseThrow(() -> {
-                    log.warn("Admin creation failed: Invalid role: {}", registerDto.getRole());
-                    return new BadRequestException("Invalid role provided: " + registerDto.getRole());
-                });
+                .orElseThrow(() -> new BadRequestException("Invalid role provided: " + registerDto.getRole()));
 
         UserEntity user = new UserEntity();
         user.setUsername(registerDto.getUsername());
@@ -266,7 +223,7 @@ public class AuthServiceImpl implements AuthService {
         user.setRoles(Collections.singletonList(role));
 
         UserEntity savedUser = userRepository.save(user);
-        log.info("Admin creation successful for email: {}", registerDto.getUsername());
+        log.info("Admin user creation successful for: {}", registerDto.getUsername());
         return authMapper.userToUserResponseDto(savedUser);
     }
 
@@ -278,7 +235,10 @@ public class AuthServiceImpl implements AuthService {
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
         if (requestDto.getUsername() != null) {
-            validateUniqueUsername(user, requestDto.getUsername());
+            if (!user.getUsername().equals(requestDto.getUsername()) &&
+                    userRepository.existsByUsername(requestDto.getUsername())) {
+                throw new DuplicateNameException("Email is already in use, please choose another one.");
+            }
             user.setUsername(requestDto.getUsername());
         }
         if (requestDto.getStatus() != null) user.setStatus(requestDto.getStatus());
@@ -293,15 +253,8 @@ public class AuthServiceImpl implements AuthService {
         return userMapper.mapToDto(updatedUser);
     }
 
-    private void validateUniqueUsername(UserEntity user, String newUsername) {
-        if (!user.getUsername().equals(newUsername) && userRepository.existsByUsername(newUsername)) {
-            throw new DuplicateNameException("Email is already in use, please choose another one.");
-        }
-    }
-
     @Override
     public List<Map<String, Object>> getAvailableRoles() {
-        log.debug("Fetching available roles");
         return Arrays.stream(RoleEnum.values())
                 .map(role -> {
                     Map<String, Object> roleMap = new HashMap<>();
@@ -316,7 +269,6 @@ public class AuthServiceImpl implements AuthService {
     public boolean validateToken() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String username = auth.getName();
-        log.debug("Validating token for user: {}", username);
         Optional<UserEntity> userOpt = userRepository.findByUsername(username);
         if (userOpt.isPresent() && userOpt.get().getStatus() != StatusData.ACTIVE) {
             log.warn("Token validation failed: User {} is not active", username);

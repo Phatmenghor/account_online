@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginService } from "@/services/auth/login.service";
@@ -148,6 +149,11 @@ export default function LoginPage() {
                     <><Loader2 className="h-4 w-4 animate-spin" /><span className="ml-2">Logging in...</span></>
                   ) : "Login"}
                 </Button>
+
+                <p className="text-center text-sm text-muted-foreground pt-3">
+                  Don&apos;t have an account?{" "}
+                  <Link href="/register" className="text-primary font-semibold hover:underline">Register</Link>
+                </p>
               </form>
             </Form>
           </CardContent>
