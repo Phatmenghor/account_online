@@ -89,6 +89,9 @@ export interface SuccessAccountOnlineModel {
   amlRulesTriggered: string;
   nidImage: string;
   selfieImage: string;
+  mbActivationCode: string;
+  mbAppDownloadLink: string;
+  submittedBy: string;
   createdAt: string;
   updatedAt: string;
   createdBy: string;

@@ -83,6 +83,7 @@ function SuccessAccountPageContent() {
   };
 
 
+
   return (
     <Card className="h-full flex flex-col">
       <CardContent className="space-y-6 p-6 flex flex-col h-full">

@@ -13,7 +13,7 @@ import {
   SuccessAccountOnlineModel,
 } from "@/models/open-acc-success/success-account-response.model";
 import { DateTimeFormat } from "@/utils/date/date-time-format";
-import AmlStatusBadge from "../badge/aml-badge";
+import { ImagePreviewCell } from "@/components/shared/image/image-preview-cell";
 
 interface SuccessAccountTableHandlers {
   handleViewAccountDetail: (account: SuccessAccountOnlineModel) => void;
@@ -93,12 +93,22 @@ export const createSuccessAccountTableColumns = ({
       ),
     },
     {
-      key: "amlStatus",
-      label: "AML Status",
-      truncate: true,
-      maxWidth: "150px",
-      minWidth: "120px",
-      render: (account) => <AmlStatusBadge status={account.amlStatus || "---"} />,
+      key: "nidImage",
+      label: "NID Image",
+      maxWidth: "100px",
+      minWidth: "80px",
+      render: (account) => (
+        <ImagePreviewCell imageId={account.nidImage} label="NID / ID Card" />
+      ),
+    },
+    {
+      key: "selfieImage",
+      label: "Selfie",
+      maxWidth: "100px",
+      minWidth: "80px",
+      render: (account) => (
+        <ImagePreviewCell imageId={account.selfieImage} label="Selfie Photo" />
+      ),
     },
     {
       key: "createdAt",
