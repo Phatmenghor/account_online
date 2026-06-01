@@ -82,23 +82,26 @@ export function ImagePreviewCell({
           onError={() => setImgError(true)}
         />
 
-        {/* Hover overlay */}
-        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/45 transition-colors duration-200 flex items-center justify-center gap-2">
-          <button
-            onClick={(e) => { e.stopPropagation(); setOpen(true); }}
-            className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-full bg-white/20 hover:bg-white/40 text-white"
-            title="Preview"
-          >
-            <Eye className="w-3.5 h-3.5" />
-          </button>
-          <button
-            onClick={handleDownload}
-            className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-full bg-white/20 hover:bg-white/40 text-white"
-            title="Download"
-          >
-            <Download className="w-3.5 h-3.5" />
-          </button>
-        </div>
+        {/* Subtle dark overlay on hover */}
+        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors duration-200 pointer-events-none" />
+
+        {/* Top-left: View */}
+        <button
+          onClick={(e) => { e.stopPropagation(); setOpen(true); }}
+          className="absolute top-1 left-1 opacity-0 group-hover:opacity-100 transition-all duration-200 translate-y-1 group-hover:translate-y-0 p-1 rounded-md bg-black/60 hover:bg-black/80 text-white shadow"
+          title="Preview"
+        >
+          <Eye className="w-3 h-3" />
+        </button>
+
+        {/* Top-right: Download */}
+        <button
+          onClick={handleDownload}
+          className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-all duration-200 translate-y-1 group-hover:translate-y-0 p-1 rounded-md bg-black/60 hover:bg-black/80 text-white shadow"
+          title="Download"
+        >
+          <Download className="w-3 h-3" />
+        </button>
       </div>
 
       {/* Full preview dialog */}
