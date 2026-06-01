@@ -67,7 +67,6 @@ export function UserViewModal({ user, isOpen, onClose }: UserViewModalProps) {
                   : "User profile information"}
               </DialogDescription>
             </div>
-            {user?.userRole && <RoleBadge role={user.userRole} />}
           </div>
         </DialogHeader>
 
@@ -77,7 +76,7 @@ export function UserViewModal({ user, isOpen, onClose }: UserViewModalProps) {
             {user ? (
               <div className="space-y-6">
 
-                {/* Personal Information */}
+                {/* Personal Information (merged with Account Information) */}
                 <div className="space-y-4">
                   <SectionHeader color="bg-blue-600" title="Personal Information" />
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -89,15 +88,6 @@ export function UserViewModal({ user, isOpen, onClose }: UserViewModalProps) {
                     <InfoRow label="Staff ID" value={user.staffId} />
                     <InfoRow label="Branch" value={user.branch} />
                     <InfoRow label="Department" value={user.department} />
-                  </div>
-                </div>
-
-                <Separator />
-
-                {/* Account Information */}
-                <div className="space-y-4">
-                  <SectionHeader color="bg-purple-600" title="Account Information" />
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="flex justify-between border-b pb-2 gap-4">
                       <Label className="text-sm font-medium text-muted-foreground shrink-0">Role:</Label>
                       <RoleBadge role={user.userRole || "USER"} />
