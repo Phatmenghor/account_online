@@ -351,7 +351,7 @@ function OpenAccountContent() {
         <PageHeader />
 
         <main className="flex-1 pt-16 sm:pt-[60px]">
-          <div className="max-w-5xl mx-auto w-full px-3 sm:px-5 lg:px-8 py-4 sm:py-6 lg:py-8">
+          <div className="max-w-7xl mx-auto w-full px-3 sm:px-5 lg:px-8 py-4 sm:py-6 lg:py-8">
 
             {/* Page title */}
             <HeaderSection
