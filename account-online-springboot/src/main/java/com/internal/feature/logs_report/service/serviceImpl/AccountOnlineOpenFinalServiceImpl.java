@@ -203,7 +203,10 @@ public class AccountOnlineOpenFinalServiceImpl implements AccountOnlineOpenFinal
 
         Pageable pageable = PageRequest.of(request.getPageNo() - 1, request.getPageSize(), Sort.by(Sort.Direction.DESC, "createdAt"));
 
-        Page<AccountOnlineFinal> page = accountOnlineFinalRepository.findBySearch(request.getSearch(), pageable);
+        LocalDateTime fromDateTime = request.getFromDate() != null ? request.getFromDate().atStartOfDay() : null;
+        LocalDateTime toDateTime = request.getToDate() != null ? request.getToDate().plusDays(1).atStartOfDay() : null;
+
+        Page<AccountOnlineFinal> page = accountOnlineFinalRepository.findBySearch(request.getSearch(), fromDateTime, toDateTime, pageable);
 
         log.info("Found {} accounts on page {} of {}", page.getNumberOfElements(),
                 request.getPageNo(), page.getTotalPages());

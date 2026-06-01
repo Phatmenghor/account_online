@@ -1,10 +1,13 @@
 package com.internal.feature.logs_report.dto.request;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.time.LocalDate;
 
 @Builder
 @Data
@@ -21,4 +24,10 @@ public class AllAccountOnlineSuccessRequestDto {
     private int pageSize = 10;
 
     private String search;
+
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private LocalDate fromDate;
+
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private LocalDate toDate;
 }
