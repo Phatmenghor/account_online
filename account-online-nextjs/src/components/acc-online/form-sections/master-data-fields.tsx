@@ -14,6 +14,7 @@ import { OccupationModel } from "@/models/static/occupation/occupation.response"
 import { ReferenceModel } from "@/models/static/reference/reference.response";
 import { BranchModel } from "@/models/branch/branch.response";
 import { useFormState } from "@/contexts/form-state-context";
+import { CheckCircle } from "lucide-react";
 
 interface MasterDataFieldsProps {
   maritalStatuses: MaritalModel[];
@@ -74,6 +75,12 @@ export const MasterDataFields: React.FC<MasterDataFieldsProps> = ({
   const renderLabel = (labelKey: string) => (
     <Label htmlFor={labelKey} className="text-sm sm:text-base mb-1 block">
       {translate(labelKey)}
+      {isVerified && (
+        <span className="float-right text-green-600 text-sm flex items-center gap-1">
+          <CheckCircle className="h-4 w-4" />
+          Verified
+        </span>
+      )}
     </Label>
   );
 

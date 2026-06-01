@@ -281,6 +281,12 @@ export default function OTPInput({
       <div>
         <label className="text-sm sm:text-base font-medium text-gray-700 block mb-1">
           {translate("contactNumber")}
+          {isOtpVerified && (
+            <span className="float-right text-green-600 text-sm flex items-center gap-1">
+              <CheckCircle className="h-4 w-4" />
+              {translate("otp_verified_label")}
+            </span>
+          )}
         </label>
         <div className="relative">
           <Input

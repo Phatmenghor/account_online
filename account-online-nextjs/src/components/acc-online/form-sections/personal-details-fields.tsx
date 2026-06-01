@@ -13,6 +13,7 @@ import { CustomDateTimePicker } from "@/components/shared/common/custom-datetime
 import { ResponseNID } from "@/models/open-acc-online/nid.response.model";
 import { LegalTypeModel } from "@/models/static/legal-type/legal-type.response";
 import { useFormState } from "@/contexts/form-state-context";
+import { CheckCircle } from "lucide-react";
 
 interface PersonalDetailsFieldsProps {
   formData: ResponseNID;
@@ -60,6 +61,12 @@ export const PersonalDetailsFields: React.FC<PersonalDetailsFieldsProps> = ({
   const renderLabel = (labelKey: string) => (
     <Label htmlFor={labelKey} className="text-sm sm:text-base mb-1 block">
       {translate(labelKey)}
+      {isVerified && (
+        <span className="float-right text-green-600 text-sm flex items-center gap-1">
+          <CheckCircle className="h-4 w-4" />
+          Verified
+        </span>
+      )}
     </Label>
   );
 

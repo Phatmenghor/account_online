@@ -331,3 +331,6 @@ export function CustomDatePicker({
     </Popover>
   );
 }
+
+// Re-export so DateTimePickerField can import CustomDateTimePicker from this file
+export { CustomDateTimePicker } from "./custom-datetime-picker";

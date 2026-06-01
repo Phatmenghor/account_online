@@ -1,6 +1,12 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import {
   Select,
   SelectContent,
@@ -8,141 +14,393 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Calendar, ChevronLeft, ChevronRight, X, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { DATE_RANGE_CALENDAR_DAYS, YEAR_RANGE_OFFSET } from "@/constants/form-options";
 
-interface CustomDateTimePickerProps {
-  value?: string; // YYYY-MM-DD
+interface DateTimePickerProps {
+  value?: string;
   onChange: (date: string) => void;
   disabled?: boolean;
+  placeholder?: string;
   className?: string;
   error?: boolean;
+  mode?: "date" | "datetime";
+  id?: string;
 }
 
 const MONTHS = [
-  { value: "01", label: "មករា" },
-  { value: "02", label: "កុម្ភៈ" },
-  { value: "03", label: "មីនា" },
-  { value: "04", label: "មេសា" },
-  { value: "05", label: "ឧសភា" },
-  { value: "06", label: "មិថុនា" },
-  { value: "07", label: "កក្កដា" },
-  { value: "08", label: "សីហា" },
-  { value: "09", label: "កញ្ញា" },
-  { value: "10", label: "តុលា" },
-  { value: "11", label: "វិច្ឆិកា" },
-  { value: "12", label: "ធ្នូ" },
-];
+  "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+] as const;
 
-function getDaysInMonth(month: string, year: string): number {
-  const m = parseInt(month);
-  const y = parseInt(year);
-  if (!m || !y) return 31;
-  return new Date(y, m, 0).getDate();
-}
+const DAYS = ["S", "M", "T", "W", "T", "F", "S"] as const;
 
 export function CustomDateTimePicker({
   value,
   onChange,
   disabled = false,
+  placeholder = "Select date",
   className,
   error = false,
-}: CustomDateTimePickerProps) {
-  const [day, setDay] = useState("");
-  const [month, setMonth] = useState("");
-  const [year, setYear] = useState("");
+  mode = "date",
+  id,
+}: DateTimePickerProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [viewDate, setViewDate] = useState<Date>(new Date());
+  const [selectedHour, setSelectedHour] = useState<string>("12");
+  const [selectedMinute, setSelectedMinute] = useState<string>("00");
+  const [selectedPeriod, setSelectedPeriod] = useState<"AM" | "PM">("PM");
 
   useEffect(() => {
     if (value) {
-      const parts = value.split("-");
-      if (parts.length === 3) {
-        setYear(parts[0]);
-        setMonth(parts[1]);
-        setDay(String(parseInt(parts[2])).padStart(2, "0"));
+      const date = new Date(value);
+      if (!isNaN(date.getTime())) {
+        setSelectedDate(date);
+        setViewDate(date);
+        if (mode === "datetime") {
+          const hours = date.getHours();
+          const minutes = date.getMinutes();
+          setSelectedPeriod(hours >= 12 ? "PM" : "AM");
+          setSelectedHour(String(hours % 12 || 12).padStart(2, "0"));
+          setSelectedMinute(String(minutes).padStart(2, "0"));
+        }
       }
     } else {
-      setDay("");
-      setMonth("");
-      setYear("");
+      setSelectedDate(null);
+      setViewDate(new Date());
     }
-  }, [value]);
+  }, [value, mode]);
 
-  const emitChange = (d: string, m: string, y: string) => {
-    if (d && m && y && y.length === 4) {
-      onChange(`${y}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`);
+  const formatDate = (date: Date): string => {
+    const dateStr = date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+    if (mode === "datetime") {
+      const hours = date.getHours();
+      const minutes = date.getMinutes();
+      const period = hours >= 12 ? "PM" : "AM";
+      const displayHour = hours % 12 || 12;
+      return `${dateStr}, ${displayHour}:${String(minutes).padStart(2, "0")} ${period}`;
+    }
+    return dateStr;
+  };
+
+  const formatDateForForm = (date: Date): string => {
+    if (mode === "datetime") {
+      return date.toISOString();
+    }
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
+  const handleDateSelect = (day: number) => {
+    const newDate = new Date(viewDate.getFullYear(), viewDate.getMonth(), day);
+    if (mode === "datetime" && selectedDate) {
+      newDate.setHours(selectedDate.getHours());
+      newDate.setMinutes(selectedDate.getMinutes());
+    }
+    setSelectedDate(newDate);
+    if (mode === "date") {
+      onChange(formatDateForForm(newDate));
+      setIsOpen(false);
     }
   };
 
-  const handleDayChange = (d: string) => {
-    setDay(d);
-    emitChange(d, month, year);
+  const handleTimeChange = () => {
+    if (!selectedDate) return;
+    const newDate = new Date(selectedDate);
+    let hours = parseInt(selectedHour);
+    if (selectedPeriod === "PM" && hours !== 12) hours += 12;
+    else if (selectedPeriod === "AM" && hours === 12) hours = 0;
+    newDate.setHours(hours);
+    newDate.setMinutes(parseInt(selectedMinute));
+    setSelectedDate(newDate);
+    onChange(formatDateForForm(newDate));
   };
 
-  const handleMonthChange = (m: string) => {
-    setMonth(m);
-    const maxDay = getDaysInMonth(m, year);
-    const clampedDay = day && parseInt(day) > maxDay ? String(maxDay).padStart(2, "0") : day;
-    if (clampedDay !== day) setDay(clampedDay);
-    emitChange(clampedDay || day, m, year);
+  const applyDateTime = () => {
+    if (selectedDate && mode === "datetime") {
+      handleTimeChange();
+      setIsOpen(false);
+    }
   };
 
-  const handleYearChange = (y: string) => {
-    setYear(y);
-    emitChange(day, month, y);
+  const handleMonthChange = (month: string) => {
+    const monthIndex = MONTHS.indexOf(month as typeof MONTHS[number]);
+    setViewDate(new Date(viewDate.getFullYear(), monthIndex, 1));
   };
 
-  const currentYear = new Date().getFullYear();
-  const years = Array.from({ length: 100 }, (_, i) => String(currentYear - i));
-  const daysInMonth = getDaysInMonth(month, year);
-  const days = Array.from({ length: daysInMonth }, (_, i) =>
-    String(i + 1).padStart(2, "0")
-  );
+  const handleYearChange = (year: string) => {
+    setViewDate(new Date(parseInt(year), viewDate.getMonth(), 1));
+  };
 
-  const triggerClass = (extra?: string) =>
-    cn("h-10 text-sm", error && "border-red-500", extra);
+  const navigateMonth = (direction: "prev" | "next") => {
+    const newDate = new Date(viewDate);
+    newDate.setMonth(newDate.getMonth() + (direction === "prev" ? -1 : 1));
+    setViewDate(newDate);
+  };
+
+  const generateCalendarDays = () => {
+    const year = viewDate.getFullYear();
+    const month = viewDate.getMonth();
+    const firstDayOfMonth = new Date(year, month, 1);
+    const startDate = new Date(firstDayOfMonth);
+    startDate.setDate(startDate.getDate() - firstDayOfMonth.getDay());
+
+    const days = [];
+    const currentDate = new Date(startDate);
+    for (let i = 0; i < DATE_RANGE_CALENDAR_DAYS; i++) {
+      days.push({
+        date: new Date(currentDate),
+        day: currentDate.getDate(),
+        isCurrentMonth: currentDate.getMonth() === month,
+        isSelected: selectedDate
+          ? currentDate.toDateString() === selectedDate.toDateString()
+          : false,
+        isToday: currentDate.toDateString() === new Date().toDateString(),
+      });
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+    return days;
+  };
+
+  const generateYearOptions = () => {
+    const currentYear = new Date().getFullYear();
+    const years = [];
+    for (let i = currentYear - YEAR_RANGE_OFFSET; i <= currentYear + YEAR_RANGE_OFFSET; i++) {
+      years.push(i.toString());
+    }
+    return years;
+  };
+
+  const hours = Array.from({ length: 12 }, (_, i) => String(i + 1).padStart(2, "0"));
+  const minutes = Array.from({ length: 60 }, (_, i) => String(i).padStart(2, "0"));
+
+  const clearSelection = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    setSelectedDate(null);
+    onChange("");
+  };
+
+  const calendarDays = generateCalendarDays();
+  const yearOptions = generateYearOptions();
 
   return (
-    <div className={cn("flex gap-2", className)}>
-      {/* Day */}
-      <Select value={day} onValueChange={handleDayChange} disabled={disabled}>
-        <SelectTrigger className={triggerClass("flex-1")}>
-          <SelectValue placeholder="ថ្ងៃ" />
-        </SelectTrigger>
-        <SelectContent className="max-h-52">
-          {days.map((d) => (
-            <SelectItem key={d} value={d}>
-              {parseInt(d)}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+    <Popover open={isOpen} onOpenChange={setIsOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          id={id}
+          variant="outline"
+          className={cn(
+            "w-full justify-start text-left font-normal h-10 px-3 text-sm transition-all duration-200 border-input",
+            !selectedDate && "text-muted-foreground",
+            "hover:bg-primary/10 hover:border-primary hover:text-primary",
+            "focus:bg-primary/10 focus:border-primary focus:text-primary focus:ring-2 focus:ring-primary/30",
+            isOpen && "bg-primary/20 border-primary text-primary",
+            error && "border-red-500 focus:border-red-500",
+            disabled && "opacity-50 cursor-not-allowed",
+            className
+          )}
+          disabled={disabled}
+        >
+          {mode === "datetime" ? (
+            <Clock className="mr-2 h-4 w-4" />
+          ) : (
+            <Calendar className="mr-2 h-4 w-4" />
+          )}
+          <span className="flex-1">
+            {selectedDate ? formatDate(selectedDate) : placeholder}
+          </span>
+          {selectedDate && !disabled && (
+            <div
+              className="ml-1 h-6 w-6 p-0 flex items-center justify-center rounded hover:bg-destructive/10 hover:text-destructive cursor-pointer transition-colors"
+              onClick={clearSelection}
+              role="button"
+              tabIndex={0}
+              aria-label="Clear date selection"
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") clearSelection(e as any);
+              }}
+            >
+              <X className="h-3 w-3" />
+            </div>
+          )}
+        </Button>
+      </PopoverTrigger>
 
-      {/* Month */}
-      <Select value={month} onValueChange={handleMonthChange} disabled={disabled}>
-        <SelectTrigger className={triggerClass("flex-[1.6]")}>
-          <SelectValue placeholder="ខែ" />
-        </SelectTrigger>
-        <SelectContent>
-          {MONTHS.map((m) => (
-            <SelectItem key={m.value} value={m.value}>
-              {m.label}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+      <PopoverContent className="w-72 p-0" align="start">
+        {/* Header */}
+        <div className="flex items-center justify-between p-3 border-b bg-muted/30">
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigateMonth("prev")}
+              className="h-6 w-6 p-0 hover:bg-accent"
+            >
+              <ChevronLeft className="h-3 w-3" />
+            </Button>
+            <div className="flex gap-1">
+              <Select value={MONTHS[viewDate.getMonth()]} onValueChange={handleMonthChange}>
+                <SelectTrigger className="h-8 text-sm w-auto min-w-[60px] border-0 bg-transparent hover:bg-primary/10 hover:text-primary transition-colors">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {MONTHS.map((month) => (
+                    <SelectItem key={month} value={month}>{month}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={viewDate.getFullYear().toString()} onValueChange={handleYearChange}>
+                <SelectTrigger className="h-8 text-sm w-auto min-w-[65px] border-0 bg-transparent hover:bg-primary/10 hover:text-primary transition-colors">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {yearOptions.map((year) => (
+                    <SelectItem key={year} value={year}>{year}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigateMonth("next")}
+              className="h-6 w-6 p-0 hover:bg-accent"
+            >
+              <ChevronRight className="h-3 w-3" />
+            </Button>
+          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setIsOpen(false)}
+            className="h-6 w-6 p-0 opacity-50 hover:opacity-100 hover:bg-accent"
+          >
+            <X className="h-3 w-3" />
+          </Button>
+        </div>
 
-      {/* Year */}
-      <Select value={year} onValueChange={handleYearChange} disabled={disabled}>
-        <SelectTrigger className={triggerClass("flex-[1.4]")}>
-          <SelectValue placeholder="ឆ្នាំ" />
-        </SelectTrigger>
-        <SelectContent className="max-h-52">
-          {years.map((y) => (
-            <SelectItem key={y} value={y}>
-              {y}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-    </div>
+        {/* Calendar Grid */}
+        <div className="p-3">
+          <div className="grid grid-cols-7 gap-1 mb-2">
+            {DAYS.map((day, index) => (
+              <div
+                key={index}
+                className="h-8 w-8 flex items-center justify-center text-xs font-medium text-muted-foreground"
+              >
+                {day}
+              </div>
+            ))}
+          </div>
+          <div className="grid grid-cols-7 gap-1">
+            {calendarDays.map((dayObj, index) => (
+              <Button
+                key={index}
+                variant="ghost"
+                size="sm"
+                onClick={() => handleDateSelect(dayObj.day)}
+                disabled={!dayObj.isCurrentMonth}
+                className={cn(
+                  "h-8 w-8 p-0 text-xs font-normal transition-all hover:bg-primary/10 hover:text-primary",
+                  !dayObj.isCurrentMonth &&
+                    "text-muted-foreground/30 hover:text-muted-foreground/30 hover:bg-transparent cursor-not-allowed",
+                  dayObj.isSelected && "bg-primary/20 text-primary font-medium hover:bg-primary/20",
+                  dayObj.isToday && !dayObj.isSelected &&
+                    "bg-primary/10 text-primary font-semibold ring-1 ring-primary/20"
+                )}
+              >
+                {dayObj.day}
+              </Button>
+            ))}
+          </div>
+        </div>
+
+        {/* Time Picker */}
+        {mode === "datetime" && (
+          <div className="p-3 border-t">
+            <div className="flex items-center justify-center gap-2">
+              <Clock className="h-4 w-4 text-muted-foreground" />
+              <Select value={selectedHour} onValueChange={setSelectedHour}>
+                <SelectTrigger className="h-9 w-16 text-sm border-input hover:bg-primary/10 hover:border-primary hover:text-primary transition-colors">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {hours.map((hour) => (
+                    <SelectItem key={hour} value={hour}>{hour}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <span className="text-lg font-medium">:</span>
+              <Select value={selectedMinute} onValueChange={setSelectedMinute}>
+                <SelectTrigger className="h-9 w-16 text-sm border-input hover:bg-primary/10 hover:border-primary hover:text-primary transition-colors">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {minutes.map((minute) => (
+                    <SelectItem key={minute} value={minute}>{minute}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select
+                value={selectedPeriod}
+                onValueChange={(val) => setSelectedPeriod(val as "AM" | "PM")}
+              >
+                <SelectTrigger className="h-9 w-16 text-sm border-input hover:bg-primary/10 hover:border-primary hover:text-primary transition-colors">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="AM">AM</SelectItem>
+                  <SelectItem value="PM">PM</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        )}
+
+        {/* Footer */}
+        <div className="p-3 border-t bg-muted/30 flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              const today = new Date();
+              setSelectedDate(today);
+              setViewDate(today);
+              if (mode === "datetime") {
+                const h = today.getHours();
+                const m = today.getMinutes();
+                setSelectedPeriod(h >= 12 ? "PM" : "AM");
+                setSelectedHour(String(h % 12 || 12).padStart(2, "0"));
+                setSelectedMinute(String(m).padStart(2, "0"));
+              }
+              onChange(formatDateForForm(today));
+              setIsOpen(false);
+            }}
+            className="flex-1 h-8 text-xs hover:bg-primary/10 hover:border-primary hover:text-primary transition-colors"
+          >
+            Now
+          </Button>
+          {mode === "datetime" && (
+            <Button
+              variant="default"
+              size="sm"
+              onClick={applyDateTime}
+              disabled={!selectedDate}
+              className="flex-1 h-8 text-xs bg-primary hover:bg-primary/90"
+            >
+              Apply
+            </Button>
+          )}
+        </div>
+      </PopoverContent>
+    </Popover>
   );
 }
