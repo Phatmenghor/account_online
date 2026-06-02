@@ -12,7 +12,6 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { UserModel } from "@/models/user/user.response";
 import { DateTimeFormat } from "@/utils/date/date-time-format";
@@ -71,7 +70,7 @@ export function UserViewModal({ user, isOpen, onClose }: UserViewModalProps) {
         </DialogHeader>
 
         {/* Content */}
-        <ScrollArea className="flex-1 min-h-0">
+        <div className="flex-1 min-h-0 overflow-y-auto">
           <div className="p-6">
             {user ? (
               <div className="space-y-6">
@@ -118,7 +117,7 @@ export function UserViewModal({ user, isOpen, onClose }: UserViewModalProps) {
               </div>
             )}
           </div>
-        </ScrollArea>
+        </div>
 
         {/* Footer */}
         <DialogFooter className="px-6 py-4 border-t bg-muted/30 flex-shrink-0">

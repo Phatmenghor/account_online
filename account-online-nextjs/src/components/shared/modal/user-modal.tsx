@@ -22,7 +22,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Eye, EyeOff, UserPlus, UserCog, Loader2 } from "lucide-react";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { getUserByIdService } from "@/services/dashboard/user/user.service";
 import { UserModel } from "@/models/user/user.response";
 import {
@@ -193,7 +192,7 @@ export default function ModalUser({
         </DialogHeader>
 
         {/* Body */}
-        <ScrollArea className="flex-1 min-h-0">
+        <div className="flex-1 min-h-0 overflow-y-auto">
           <div className="p-6">
             {isLoadingData ? (
               <Loading />
@@ -393,7 +392,7 @@ export default function ModalUser({
               </div>
             )}
           </div>
-        </ScrollArea>
+        </div>
 
         {/* Footer */}
         <div className="px-6 py-4 border-t bg-muted/30 flex-shrink-0 flex items-center justify-between">

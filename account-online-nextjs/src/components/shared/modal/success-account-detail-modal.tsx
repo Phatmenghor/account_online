@@ -12,7 +12,6 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { SuccessAccountOnlineModel } from "@/models/open-acc-success/success-account-response.model";
 import { DateTimeFormat } from "@/utils/date/date-time-format";
 import { Separator } from "@/components/ui/separator";
@@ -75,7 +74,7 @@ export default function SuccessAccountViewModal({
         </DialogHeader>
 
         {/* Content */}
-        <ScrollArea className="flex-1 min-h-0">
+        <div className="flex-1 min-h-0 overflow-y-auto">
           <div className="p-6">
             {account ? (
               <div className="space-y-6">
@@ -214,7 +213,7 @@ export default function SuccessAccountViewModal({
               </div>
             )}
           </div>
-        </ScrollArea>
+        </div>
 
         {/* Footer */}
         <DialogFooter className="px-6 py-4 border-t bg-muted/30 flex-shrink-0">

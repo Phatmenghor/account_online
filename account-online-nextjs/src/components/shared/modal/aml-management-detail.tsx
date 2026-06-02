@@ -11,7 +11,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -104,7 +103,7 @@ export default function AmlViewDetailModal({
         </DialogHeader>
 
         {/* Body */}
-        <ScrollArea className="flex-1 min-h-0">
+        <div className="flex-1 min-h-0 overflow-y-auto">
           <div className="p-6">
             {loading ? (
               <div className="text-center py-8 text-muted-foreground">Loading AML alert...</div>
@@ -236,7 +235,7 @@ export default function AmlViewDetailModal({
               </div>
             )}
           </div>
-        </ScrollArea>
+        </div>
 
         {/* Footer */}
         <DialogFooter className="px-6 py-4 border-t bg-muted/30 flex-shrink-0">
