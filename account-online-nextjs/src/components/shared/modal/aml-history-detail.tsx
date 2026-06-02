@@ -88,7 +88,7 @@ export default function AmlHistoryDetailModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-5xl h-[92vh] p-0 gap-0 flex flex-col">
+      <DialogContent className="max-w-5xl h-[92vh] overflow-hidden p-0 gap-0 flex flex-col">
         {/* Header */}
         <DialogHeader className="px-6 py-4 border-b bg-muted/30 flex-shrink-0">
           <div className="flex items-center gap-4 pr-8">

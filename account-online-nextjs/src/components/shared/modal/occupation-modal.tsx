@@ -148,7 +148,7 @@ export default function ModalOccupation({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-2xl w-full max-h-[90vh] p-0 flex flex-col gap-0">
+      <DialogContent className="max-w-2xl w-full max-h-[90vh] overflow-hidden p-0 flex flex-col gap-0">
         {/* Header */}
         <DialogHeader className="px-6 py-4 border-b flex-shrink-0">
           <div className="flex items-center gap-4 pr-8">
