@@ -25,9 +25,6 @@ import { useRouter } from "next/navigation";
 import { logoutToken } from "@/utils/local-storage/token";
 import { logoutRole } from "@/utils/local-storage/roles";
 import { clearUserInfo, getUserInfo } from "@/utils/local-storage/userInfo";
-import LanguageSwitcher from "../common/language-switcher";
-import { ThemeToggle } from "./theme-toggle";
-import { useTranslations } from "next-intl";
 import { ROUTES } from "@/constants/AppRoutes/routes";
 import { cn } from "@/lib/utils";
 import { AppIcons } from "@/constants/AppResource/icons/app-icons";
@@ -43,7 +40,6 @@ export function TopBar({ onMenuClick }: TopBarProps) {
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [user, setUser] = useState<ReturnType<typeof getUserInfo>>(null);
-  const t = useTranslations();
 
   // Load client-side only to avoid SSR/client hydration mismatch
   useEffect(() => { setUser(getUserInfo()); }, []);
@@ -93,11 +89,8 @@ export function TopBar({ onMenuClick }: TopBarProps) {
           </Link>
         </div>
 
-        {/* Right: theme, language, profile dropdown */}
+        {/* Right: profile dropdown */}
         <div className="flex items-center gap-2 sm:gap-3">
-          <ThemeToggle />
-          <LanguageSwitcher />
-
           {/* Profile dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
