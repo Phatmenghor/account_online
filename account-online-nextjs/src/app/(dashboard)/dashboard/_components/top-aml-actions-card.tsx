@@ -23,12 +23,12 @@ function AmlUserRow({ user, rank }: { user: TopAmlActionUser; rank: number }) {
       </td>
       <td className="py-3 pr-3">
         <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400">
-          {user.approveCount} ✓
+          {user.approveCount}
         </span>
       </td>
       <td className="py-3 pr-3">
         <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-rose-100 text-rose-700 dark:bg-rose-950/40 dark:text-rose-400">
-          {user.rejectCount} ✗
+          {user.rejectCount}
         </span>
       </td>
       <td className="py-3 text-right">
