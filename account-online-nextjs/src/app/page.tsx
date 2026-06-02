@@ -177,6 +177,7 @@ function OpenAccountContent() {
     selectedOccupation,
     selectedReferenceBank,
     selectedLegalType,
+    selectedCategory,
     phoneNumber,
   });
 

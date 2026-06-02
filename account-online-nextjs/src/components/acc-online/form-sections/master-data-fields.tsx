@@ -96,7 +96,7 @@ export const MasterDataFields: React.FC<MasterDataFieldsProps> = ({
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6">
       {/* Marital Status */}
-      <div className="md:col-span-2 space-y-1">
+      <div className="space-y-1">
         {renderLabel("marital")}
         <Select
           value={selectedMaritalStatus?.id.toString() || ""}
@@ -196,29 +196,35 @@ export const MasterDataFields: React.FC<MasterDataFieldsProps> = ({
       </div>
 
       {/* Account Product */}
-      <div className="md:col-span-2 space-y-1">
-        <Label className="text-sm sm:text-base mb-1 block">Account Product</Label>
+      <div className="space-y-1">
+        {renderLabel("accountProduct")}
         <Select
           value={selectedCategory?.id.toString() || ""}
           onValueChange={(value) => {
             const category = accOnlineCategories.find((c) => c.id.toString() === value);
             setSelectedCategory(category || null);
+            validateField("accountProduct", value);
           }}
           disabled={isLoading || isValidating || isLoadingCategories}
         >
-          <SelectTrigger className="w-full h-10 text-sm">
+          <SelectTrigger
+            className={`w-full h-10 text-sm ${validationErrors.accountProduct ? "border-red-500" : ""}`}
+          >
             <SelectValue
-              placeholder={isLoadingCategories ? translate("loading") : "Select product"}
+              placeholder={isLoadingCategories ? translate("loading") : translateSelect("selectAccount")}
             />
           </SelectTrigger>
           <SelectContent>
             {accOnlineCategories.map((cat) => (
               <SelectItem key={cat.id} value={cat.id.toString()}>
-                {cat.lookupName}
+                {cat.lookupId} - {cat.lookupName}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
+        {validationErrors.accountProduct && (
+          <p className="text-xs text-red-500">{translate("err_accountProduct")}</p>
+        )}
       </div>
 
       {/* Reference */}

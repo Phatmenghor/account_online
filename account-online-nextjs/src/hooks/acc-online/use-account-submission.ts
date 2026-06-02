@@ -10,7 +10,6 @@ import { LocationSubmitData } from "@/models/open-acc-online/address/open-acc-ad
 import { formatDate } from "@/constants/AppResource/format-date/format-dd-mm-yyyy";
 import { createOpenAccountService } from "@/services/open-account/openAccount.service";
 import { uploadDocument } from "@/services/document/document.service";
-import { parseDate } from "@/utils/date-parser";
 import { OpenAccountResponse } from "@/models/open-account/openAccount.response";
 
 interface UseAccountSubmissionProps {
@@ -105,55 +104,7 @@ export const useAccountSubmission = ({
     uploadCache.current = { nidFileName: null, selfieFileName: null };
   };
 
-  const validateDates = (): boolean => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const todayFormatted = today.toISOString().split('T')[0];
-
-    if (formData.issuedDate) {
-      const issuedDate = parseDate(formData.issuedDate);
-      if (!issuedDate) {
-        showError({
-          title: "កាលបរិច្ឆេទមិនត្រឹមត្រូវ",
-          message: `មិនអាចវិश្ញាសនកាលបរិច្ឆេទចេញលិខិត (${formData.issuedDate})។ ទម្រង់ត្រឹមត្រូវគឺ DD/MM/YYYY ឬ YYYY-MM-DD។`,
-        });
-        return false;
-      }
-      issuedDate.setHours(0, 0, 0, 0);
-      if (issuedDate > today) {
-        showError({
-          title: "កាលបរិច្ឆេទមិនត្រឹមត្រូវ",
-          message: `កាលបរិច្ឆេទចេញលិខិត (${formData.issuedDate}) មិនអាចជាកាលបរិច្ឆេទពេលអនាគតបានទេ។ សូមប្រើនឹង៖ ${todayFormatted} ឬលឿងជាង។`,
-        });
-        return false;
-      }
-    }
-
-    if (formData.dob) {
-      const dob = parseDate(formData.dob);
-      if (!dob) {
-        showError({
-          title: "កាលបរិច្ឆេទមិនត្រឹមត្រូវ",
-          message: `មិនអាចវិស្ញាសនកាលបរិច្ឆេទកំណើត (${formData.dob})។ ទម្រង់ត្រឹមត្រូវគឺ DD/MM/YYYY ឬ YYYY-MM-DD។`,
-        });
-        return false;
-      }
-      dob.setHours(0, 0, 0, 0);
-      if (dob > today) {
-        showError({
-          title: "កាលបរិច្ឆេទមិនត្រឹមត្រូវ",
-          message: `កាលបរិច្ឆេទកំណើត (${formData.dob}) មិនអាចជាកាលបរិច្ឆេទពេលអនាគតបានទេ។ សូមប្រើ៖ ${todayFormatted} ឬលឿងជាង។`,
-        });
-        return false;
-      }
-    }
-
-    return true;
-  };
-
   const handleSubmitAccount = async () => {
-    if (!validateDates()) return;
-
     const nidBase64Full: string = uploadedImage?.idImage ?? "";
     const selfieBase64Full: string = selfieImage ?? "";
 

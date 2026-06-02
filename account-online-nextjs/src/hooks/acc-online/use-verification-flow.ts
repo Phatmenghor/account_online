@@ -19,6 +19,7 @@ import {
   NIDVerificationSchema,
 } from "@/components/acc-online/form-field/form-validate-error";
 import { LegalTypeModel } from "@/models/static/legal-type/legal-type.response";
+import { AccOnlineCategoryModel } from "@/models/static/acc-online-category/acc-online-category.response";
 import { LocationSubmitData } from "@/models/open-acc-online/address/open-acc-address.request.model";
 import { applicationName } from "@/constants/AppResource/display-list/enum/status";
 
@@ -38,6 +39,7 @@ interface UseVerificationFlowProps {
   selectedOccupation: OccupationModel | null;
   selectedReferenceBank: ReferenceModel | null;
   selectedLegalType: LegalTypeModel | null;
+  selectedCategory: AccOnlineCategoryModel | null;
   phoneNumber: string;
 }
 
@@ -51,6 +53,7 @@ export const useVerificationFlow = ({
   selectedOccupation,
   selectedReferenceBank,
   selectedLegalType,
+  selectedCategory,
   phoneNumber,
 }: UseVerificationFlowProps) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -121,6 +124,7 @@ export const useVerificationFlow = ({
       maritalStatus: selectedMaritalStatus?.nameEn || "",
       occupation: selectedOccupation?.occupationCode || "",
       branch: selectedBranch?.branchkh || "",
+      accountProduct: selectedCategory?.lookupId || "",
       referenceBank: selectedReferenceBank?.nameEn || "",
       staffCode: staffCode,
       phoneNumber: phoneNumberData,
