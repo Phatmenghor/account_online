@@ -10,13 +10,13 @@ import javax.validation.constraints.Size;
 @Data
 public class RegisterRequestDto {
 
-    @NotBlank(message = "Username is required")
+    @NotBlank(message = "Username is required.")
     private String username;
 
     private String email;
 
-    @NotBlank(message = "Password is required")
-    @Size(min = 6, message = "Password must have at least 6 characters")
+    @NotBlank(message = "Password is required.")
+    @Size(min = 6, message = "Password must be at least 6 characters long.")
     private String password;
 
     private String fullName;

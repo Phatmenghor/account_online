@@ -104,11 +104,15 @@ public class AuthServiceImpl implements AuthService {
         log.info("Processing registration initiation for email: {}", dto.getEmail());
 
         if (!dto.getPassword().equals(dto.getConfirmPassword())) {
-            throw new BadRequestException("Passwords do not match.");
+            throw new BadRequestException(
+                    "The passwords you entered do not match. "
+                    + "Please make sure both fields contain the same password.");
         }
 
         if (userRepository.existsByEmail(dto.getEmail()) || userRepository.existsByUsername(dto.getUsername())) {
-            throw new DuplicateNameException("This email is already registered. Please login instead.");
+            throw new DuplicateNameException(
+                    "An account with the email address \"" + dto.getEmail() + "\" already exists. "
+                    + "Please sign in to your existing account instead.");
         }
 
         // Store pending registration data keyed by email (used for OTP)
@@ -142,7 +146,8 @@ public class AuthServiceImpl implements AuthService {
 
         log.info("Registration OTP sent to email: {}", dto.getEmail());
         return RegisterInitiateResponse.builder()
-                .message("A verification code has been sent to your email address.")
+                .message("A 6-digit verification code has been sent to \"" + dto.getEmail() + "\". "
+                        + "Please check your inbox and enter the code within 5 minutes to complete your registration.")
                 .email(dto.getEmail())
                 .expiresAt(expiresAt.toString())
                 .build();
@@ -154,7 +159,9 @@ public class AuthServiceImpl implements AuthService {
 
         // Find active OTP
         EmailOtp latestOtp = emailOtpRepository.findLatestActiveOtpByEmail(dto.getEmail())
-                .orElseThrow(() -> new BadRequestException("No verification code found. Please request a new one."));
+                .orElseThrow(() -> new BadRequestException(
+                        "No active verification code was found for \"" + dto.getEmail() + "\". "
+                        + "Please go back and request a new code."));
 
         // Validate OTP
         boolean isValid = latestOtp.getOtpCode().equals(dto.getOtpCode())
@@ -168,9 +175,13 @@ public class AuthServiceImpl implements AuthService {
 
             int remaining = Math.max(0, AppConstants.MAX_ATTEMPTS - attempts);
             if (remaining <= 0) {
-                throw new UnauthorizedException("Too many failed attempts. Please request a new verification code.");
+                throw new UnauthorizedException(
+                        "Too many incorrect attempts. Your verification code has been invalidated. "
+                        + "Please go back and request a new code to continue.");
             }
-            throw new UnauthorizedException("Invalid verification code. " + remaining + " attempt(s) remaining.");
+            throw new UnauthorizedException(
+                    "That verification code is incorrect. "
+                    + "You have " + remaining + " attempt" + (remaining == 1 ? "" : "s") + " remaining.");
         }
 
         // Mark OTP verified
@@ -180,12 +191,16 @@ public class AuthServiceImpl implements AuthService {
 
         // Get pending registration data
         RegisterInitiateDto pendingData = pendingRegistrationStore.get(dto.getEmail())
-                .orElseThrow(() -> new BadRequestException("Registration session expired. Please start over."));
+                .orElseThrow(() -> new BadRequestException(
+                        "Your registration session has expired. "
+                        + "Please start the registration process again."));
 
         // Re-check in case taken while waiting for OTP
         if (userRepository.existsByUsername(pendingData.getUsername())) {
             pendingRegistrationStore.remove(dto.getEmail());
-            throw new DuplicateNameException("This username was just taken. Please register again with a different username.");
+            throw new DuplicateNameException(
+                    "The email address \"" + dto.getEmail() + "\" was registered by someone else while you were verifying. "
+                    + "Please start the registration process again.");
         }
 
         // Create user with STAFF role
@@ -221,8 +236,11 @@ public class AuthServiceImpl implements AuthService {
     public UserResponseDto createUserByAdmin(RegisterRequestDto registerDto) {
         log.info("Processing admin user creation for: {}", registerDto.getUsername());
 
-        if (userRepository.existsByUsername(registerDto.getUsername())) {
-            throw new DuplicateNameException("Email is already in use, please choose another one.");
+        if (userRepository.existsByUsername(registerDto.getUsername())
+                || (registerDto.getEmail() != null && userRepository.existsByEmail(registerDto.getEmail()))) {
+            throw new DuplicateNameException(
+                    "An account with this email address already exists. "
+                    + "Please use a different email address.");
         }
 
         Role role = roleRepository.findByName(registerDto.getRole())
