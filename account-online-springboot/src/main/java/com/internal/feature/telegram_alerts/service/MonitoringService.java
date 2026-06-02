@@ -21,12 +21,12 @@ public class MonitoringService {
     private final TelegramService telegramService;
     private final CustomerImageService customerImageService;
 
-    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
     public void sendHighRiskAmlAlert(AmlStatusDto amlDto) {
         if (amlDto == null) return;
         try {
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+            DateTimeFormatter formatter = DATE_FORMATTER;
             String timeFormatted = amlDto.getCreatedAt() != null
                     ? amlDto.getCreatedAt().format(formatter)
                     : LocalDateTime.now(ZoneId.of("Asia/Phnom_Penh")).format(formatter);
