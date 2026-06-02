@@ -16,6 +16,7 @@ import com.internal.feature.open_account.dto.response.AmlExternalResponseDto;
 import com.internal.feature.open_account.dto.response.CustomerResponse;
 import com.internal.feature.open_account.mapper.OpenAccountAmlStatusMapper;
 import com.internal.feature.open_account.service.external.AmlMiddlewareService;
+import com.internal.feature.telegram_alerts.service.MonitoringService;
 import com.internal.utils.constants.AppConstants;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,6 +35,7 @@ public class ComplianceService {
     private final OccupationService occupationService;
     private final OpenAccountAmlStatusMapper openAccountAmlStatusMapper;
     private final ObjectMapper objectMapper;
+    private final MonitoringService monitoringService;
 
     public AmlStatusDto processAml(CustomerRequest request) throws Exception {
         log.info("========== START AML Processing for Legal ID: {} ==========", request.getLegalId());
@@ -65,6 +67,12 @@ public class ComplianceService {
             log.warn("HIGH RISK customer detected | Legal ID: {} | RiskLevel: {} | Rules: {}",
                     request.getLegalId(), amlResponse.getRiskLevel(), amlResponse.getRulesTriggered());
             amlService.createAmlStatus(createRequest);
+            try {
+                AmlStatusDto amlDto = openAccountAmlStatusMapper.fromRequestAndResponse(request, amlResponse, AmlStatusEnum.PENDING);
+                monitoringService.sendHighRiskAmlAlert(amlDto);
+            } catch (Exception e) {
+                log.error("Failed to send HIGH RISK Telegram alert: {}", e.getMessage());
+            }
         } else {
             log.info("LOW RISK customer approved | Legal ID: {} | RiskLevel: {}",
                     request.getLegalId(), amlResponse.getRiskLevel());

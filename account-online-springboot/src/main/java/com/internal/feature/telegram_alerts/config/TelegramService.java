@@ -70,6 +70,14 @@ public class TelegramService {
         }
     }
 
+    public void sendPhotoToMonitor(String caption, Resource imageResource) {
+        if (monitorChatId == null || monitorChatId.trim().isEmpty()) {
+            log.debug("Monitor chat ID not configured - skipping photo");
+            return;
+        }
+        sendPhoto(monitorChatId, caption, imageResource);
+    }
+
     public void sendPhoto(String chatId, String caption, Resource imageResource) {
         if (chatId == null || chatId.trim().isEmpty()) {
             return;
