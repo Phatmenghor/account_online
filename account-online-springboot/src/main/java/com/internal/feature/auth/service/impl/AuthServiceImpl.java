@@ -56,21 +56,28 @@ public class AuthServiceImpl implements AuthService {
 
         UserEntity userEntity = userRepository.findByUsername(loginDto.getUsername())
                 .orElseThrow(() -> new UnauthorizedException(
-                        "Your username \"" + loginDto.getUsername() + "\" was not found."));
+                        "We couldn't find an account with the username \"" + loginDto.getUsername() + "\". "
+                        + "Please double-check your username and try again."));
 
         if (userEntity.getStatus() == StatusData.INACTIVE) {
             log.warn("Login rejected: User {} account is inactive", loginDto.getUsername());
-            throw new UnauthorizedException("Your account is inactive. Please contact an administrator.");
+            throw new UnauthorizedException(
+                    "Your account \"" + loginDto.getUsername() + "\" is currently inactive. "
+                    + "Please contact your administrator to reactivate your account.");
         }
 
         if (userEntity.getStatus() == StatusData.DELETE) {
             log.warn("Login rejected: User {} account has been deleted", loginDto.getUsername());
-            throw new UnauthorizedException("Your account has been deactivated. Please contact an administrator.");
+            throw new UnauthorizedException(
+                    "Your account \"" + loginDto.getUsername() + "\" has been deactivated. "
+                    + "Please contact your administrator for further assistance.");
         }
 
         if (!passwordEncoder.matches(loginDto.getPassword(), userEntity.getPassword())) {
             log.warn("Login failed: Incorrect password for user {}", loginDto.getUsername());
-            throw new UnauthorizedException("Incorrect password. Please try again.");
+            throw new UnauthorizedException(
+                    "The password you entered is incorrect. "
+                    + "Please check your password and try again.");
         }
 
         userEntity.setLastLogin(LocalDateTime.now(ZoneId.of("Asia/Phnom_Penh")));
