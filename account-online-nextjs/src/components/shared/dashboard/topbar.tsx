@@ -20,7 +20,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { logoutToken } from "@/utils/local-storage/token";
 import { logoutRole } from "@/utils/local-storage/roles";
@@ -42,9 +42,12 @@ export function TopBar({ onMenuClick }: TopBarProps) {
   const router = useRouter();
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [user, setUser] = useState<ReturnType<typeof getUserInfo>>(null);
   const t = useTranslations();
 
-  const user = getUserInfo();
+  // Load client-side only to avoid SSR/client hydration mismatch
+  useEffect(() => { setUser(getUserInfo()); }, []);
+
   const profileImageUrl = user?.profileUrl
     ? `${process.env.NEXT_PUBLIC_API_BASE_URL_IMAGE}${user.profileUrl}`
     : "";
