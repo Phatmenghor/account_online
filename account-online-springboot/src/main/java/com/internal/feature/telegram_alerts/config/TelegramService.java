@@ -19,10 +19,10 @@ public class TelegramService {
     @Value("${telegram.bot.token}")
     private String botToken;
 
-    @Value("${telegram.bot.uat-acl-chat-id}")
+    @Value("${telegram.bot.dev-chat-id}")
     private String chatId_acl_internal;
 
-    @Value("${telegram.bot.uat-dev-team-chat-id:}")
+    @Value("${telegram.bot.monitor-chat-id:}")
     private String chatId_dev_team;
 
     private final RestTemplate restTemplate = new RestTemplate();
