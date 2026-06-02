@@ -63,7 +63,7 @@ export default function LoginPage() {
 
       AppToast({ type: "success", message: "Login successful" });
 
-      if (forceChange || passwordExpired) {
+      if ((forceChange || passwordExpired) && role !== "STAFF") {
         setPendingRole(role);
         setForceChangeReason(forceChange ? "force" : "expired");
         setShowForceChange(true);
