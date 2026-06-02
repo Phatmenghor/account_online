@@ -65,6 +65,7 @@ public class MonitoringService {
 
             appendIfNotEmpty(msg, "Transaction ID", amlDto.getTrxnID());
             appendIfNotEmpty(msg, "Remarks", amlDto.getRemarks());
+            appendIfNotEmpty(msg, "Created By", amlDto.getSubmittedBy());
 
             msg.append("--------------------\n")
                     .append("Status: `PENDING`\n")

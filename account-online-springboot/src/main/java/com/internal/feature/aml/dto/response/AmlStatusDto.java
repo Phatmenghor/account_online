@@ -34,6 +34,7 @@ public class AmlStatusDto {
     private String trxnID;
 
     // AUDIT FIELDS
+    private String submittedBy;
     private UserResponseDto approvedBy;
     private UserResponseDto rejectedBy;
     private LocalDateTime createdAt;

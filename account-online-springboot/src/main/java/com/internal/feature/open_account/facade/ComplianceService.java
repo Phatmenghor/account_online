@@ -17,6 +17,7 @@ import com.internal.feature.open_account.dto.response.CustomerResponse;
 import com.internal.feature.open_account.mapper.OpenAccountAmlStatusMapper;
 import com.internal.feature.open_account.service.external.AmlMiddlewareService;
 import com.internal.feature.telegram_alerts.service.MonitoringService;
+import com.internal.utils.SecurityUtils;
 import com.internal.utils.constants.AppConstants;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,6 +37,7 @@ public class ComplianceService {
     private final OpenAccountAmlStatusMapper openAccountAmlStatusMapper;
     private final ObjectMapper objectMapper;
     private final MonitoringService monitoringService;
+    private final SecurityUtils securityUtils;
 
     public AmlStatusDto processAml(CustomerRequest request) throws Exception {
         log.info("========== START AML Processing for Legal ID: {} ==========", request.getLegalId());
@@ -68,7 +70,10 @@ public class ComplianceService {
                     request.getLegalId(), amlResponse.getRiskLevel(), amlResponse.getRulesTriggered());
             amlService.createAmlStatus(createRequest);
             try {
+                String submittedBy = "System";
+                try { submittedBy = securityUtils.getCurrentUser().getUsername(); } catch (Exception ignored) {}
                 AmlStatusDto amlDto = openAccountAmlStatusMapper.fromRequestAndResponse(request, amlResponse, AmlStatusEnum.PENDING);
+                amlDto.setSubmittedBy(submittedBy);
                 monitoringService.sendHighRiskAmlAlert(amlDto);
             } catch (Exception e) {
                 log.error("Failed to send HIGH RISK Telegram alert: {}", e.getMessage());
