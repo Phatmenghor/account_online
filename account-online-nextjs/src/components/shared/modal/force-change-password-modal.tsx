@@ -13,7 +13,6 @@ import {
   Clock,
   CheckCircle2,
   Lock,
-  AlertTriangle,
 } from "lucide-react";
 import {
   Dialog,
@@ -101,10 +100,7 @@ export default function ForceChangePasswordModal({
         bannerBg: "bg-orange-50 dark:bg-orange-950/40",
         bannerBorder: "border-orange-200 dark:border-orange-800",
         bannerText: "text-orange-800 dark:text-orange-300",
-        badgeBg: "bg-orange-100 dark:bg-orange-900",
-        badgeText: "text-orange-700 dark:text-orange-300",
         Icon: Clock,
-        badge: "Password Expired",
         title: "Your Password Has Expired",
         description:
           "For your account security, passwords must be updated regularly. Please set a new password to continue accessing your account.",
@@ -117,10 +113,7 @@ export default function ForceChangePasswordModal({
         bannerBg: "bg-yellow-50 dark:bg-yellow-950/40",
         bannerBorder: "border-yellow-200 dark:border-yellow-800",
         bannerText: "text-yellow-800 dark:text-yellow-300",
-        badgeBg: "bg-yellow-100 dark:bg-yellow-900",
-        badgeText: "text-yellow-700 dark:text-yellow-300",
         Icon: ShieldAlert,
-        badge: "Action Required",
         title: "Password Reset Required",
         description:
           "Your administrator has reset your password. You must set a new password before you can access your account.",
@@ -149,14 +142,6 @@ export default function ForceChangePasswordModal({
               <config.Icon className={`w-6 h-6 ${config.iconColor}`} />
             </div>
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-1 flex-wrap">
-                <span
-                  className={`inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full ${config.badgeBg} ${config.badgeText}`}
-                >
-                  <AlertTriangle className="w-3 h-3" />
-                  {config.badge}
-                </span>
-              </div>
               <DialogTitle className="text-lg font-bold text-foreground leading-tight">
                 {config.title}
               </DialogTitle>
