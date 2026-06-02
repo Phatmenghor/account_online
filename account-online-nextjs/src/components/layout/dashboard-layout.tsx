@@ -60,9 +60,6 @@ export default function DashboardLayout({
 
   function handleForceChangeSuccess() {
     setShowForceChange(false);
-    getUserProfileService()
-      .then((user) => { if (user) storeUserInfo(user); })
-      .catch(() => {});
   }
 
   return (

@@ -10,10 +10,12 @@ import com.internal.feature.auth.dto.request.UpdateUserRequestDto;
 import com.internal.feature.auth.models.Role;
 import com.internal.feature.auth.repository.RoleRepository;
 import com.internal.feature.auth.dto.response.AllUserResponseDto;
+import com.internal.feature.auth.dto.response.AuthResponseDTO;
 import com.internal.feature.auth.dto.response.UserResponseDto;
 import com.internal.feature.auth.mapper.UserMapper;
 import com.internal.feature.auth.models.UserEntity;
 import com.internal.feature.auth.repository.UserRepository;
+import com.internal.feature.auth.security.JWTGenerator;
 import com.internal.feature.auth.service.UserService;
 import com.internal.utils.SecurityUtils;
 import lombok.RequiredArgsConstructor;
@@ -46,6 +48,7 @@ public class UserServiceImpl implements UserService {
     private final SecurityUtils securityUtils;
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
+    private final JWTGenerator jwtGenerator;
 
     @Override
     public AllUserResponseDto getAllUser(GetAllUserRequestDto requestDto) {
@@ -151,7 +154,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserResponseDto forceChangePassword(String newPassword, String confirmNewPassword) {
+    public AuthResponseDTO forceChangePassword(String newPassword, String confirmNewPassword) {
         UserEntity user = securityUtils.getCurrentUser();
         log.info("Force password change for user: {}", user.getUsername());
 
@@ -159,10 +162,16 @@ public class UserServiceImpl implements UserService {
 
         user.setPassword(passwordEncoder.encode(newPassword));
         user.setForcePasswordChange(false);
-        user.setPasswordChangedAt(java.time.LocalDateTime.now(java.time.ZoneId.of("Asia/Phnom_Penh")));
+        user.setPasswordChangedAt(LocalDateTime.now(ZoneId.of("Asia/Phnom_Penh")));
         UserEntity saved = userRepository.save(user);
 
-        return userMapper.mapToDto(saved);
+        List<String> roles = saved.getRoles().stream()
+                .map(r -> r.getName().name())
+                .collect(Collectors.toList());
+        String token = jwtGenerator.generateTokenForUser(saved.getUsername(), roles);
+
+        UserResponseDto dto = userMapper.mapToDto(saved);
+        return new AuthResponseDTO(token, dto);
     }
 
     private Page<UserEntity> fetchUsers(String search, StatusData status, List<String> roles, Pageable pageable) {

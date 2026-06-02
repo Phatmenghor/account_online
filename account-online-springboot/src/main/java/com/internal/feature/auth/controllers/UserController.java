@@ -4,6 +4,7 @@ import com.internal.config.RequiresRole;
 import com.internal.exceptions.response.ApiResponse;
 import com.internal.feature.auth.dto.request.*;
 import com.internal.feature.auth.dto.response.AllUserResponseDto;
+import com.internal.feature.auth.dto.response.AuthResponseDTO;
 import com.internal.feature.auth.dto.response.UserResponseDto;
 import com.internal.feature.auth.service.AuthService;
 import com.internal.feature.auth.service.UserService;
@@ -91,10 +92,10 @@ public class UserController {
     }
 
     @PostMapping("/force-change-password")
-    public ResponseEntity<ApiResponse<UserResponseDto>> forceChangePassword(@Valid @RequestBody ForceChangePasswordRequestDto dto) {
+    public ResponseEntity<ApiResponse<AuthResponseDTO>> forceChangePassword(@Valid @RequestBody ForceChangePasswordRequestDto dto) {
         log.info("Force password change request");
-        UserResponseDto userDto = userService.forceChangePassword(dto.getNewPassword(), dto.getConfirmNewPassword());
-        log.info("Force password change completed for user: {}", userDto.getIdCard());
-        return ResponseEntity.ok(ApiResponse.success("Password updated successfully.", userDto));
+        AuthResponseDTO authResponse = userService.forceChangePassword(dto.getNewPassword(), dto.getConfirmNewPassword());
+        log.info("Force password change completed successfully");
+        return ResponseEntity.ok(ApiResponse.success("Password updated successfully.", authResponse));
     }
 }

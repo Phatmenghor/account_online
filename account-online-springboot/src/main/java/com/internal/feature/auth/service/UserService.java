@@ -5,6 +5,7 @@ import com.internal.feature.auth.dto.request.ChangePasswordRequestDto;
 import com.internal.feature.auth.dto.request.GetAllUserRequestDto;
 import com.internal.feature.auth.dto.request.UpdateUserRequestDto;
 import com.internal.feature.auth.dto.response.AllUserResponseDto;
+import com.internal.feature.auth.dto.response.AuthResponseDTO;
 import com.internal.feature.auth.dto.response.UserResponseDto;
 
 public interface UserService {
@@ -22,5 +23,5 @@ public interface UserService {
 
     UserResponseDto changePasswordByAdmin(ChangePasswordByAdminRequestDto requestDto);
 
-    UserResponseDto forceChangePassword(String newPassword, String confirmNewPassword);
+    AuthResponseDTO forceChangePassword(String newPassword, String confirmNewPassword);
 }

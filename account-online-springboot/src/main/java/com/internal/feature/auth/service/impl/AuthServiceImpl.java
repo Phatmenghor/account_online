@@ -81,16 +81,13 @@ public class AuthServiceImpl implements AuthService {
         }
 
         userEntity.setLastLogin(LocalDateTime.now(ZoneId.of("Asia/Phnom_Penh")));
-
-        // Initialise passwordChangedAt for existing users who never had it set
-        if (userEntity.getPasswordChangedAt() == null) {
-            userEntity.setPasswordChangedAt(LocalDateTime.now(ZoneId.of("Asia/Phnom_Penh")));
-        }
         userRepository.save(userEntity);
 
         // Determine password state flags
+        // null passwordChangedAt means the user has never changed their own password → require change
         boolean forceChange = userEntity.isForcePasswordChange();
-        boolean passwordExpired = !forceChange
+        boolean neverChanged = userEntity.getPasswordChangedAt() == null;
+        boolean passwordExpired = !forceChange && !neverChanged
                 && userEntity.getPasswordChangedAt().isBefore(
                         LocalDateTime.now(ZoneId.of("Asia/Phnom_Penh")).minusMonths(3));
 
@@ -101,10 +98,10 @@ public class AuthServiceImpl implements AuthService {
 
         UserResponseDto userDto = authMapper.userToUserResponseDto(userEntity);
         userDto.setLastLogin(userEntity.getLastLogin());
-        userDto.setForcePasswordChange(forceChange);
+        userDto.setForcePasswordChange(forceChange || neverChanged);
         userDto.setPasswordExpired(passwordExpired);
-        log.info("User {} logged in successfully (forceChange={}, expired={})",
-                loginDto.getUsername(), forceChange, passwordExpired);
+        log.info("User {} logged in successfully (forceChange={}, neverChanged={}, expired={})",
+                loginDto.getUsername(), forceChange, neverChanged, passwordExpired);
         return new AuthResponseDTO(token, userDto);
     }
 
