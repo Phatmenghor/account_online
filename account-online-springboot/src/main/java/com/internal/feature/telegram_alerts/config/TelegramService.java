@@ -22,6 +22,9 @@ public class TelegramService {
     @Value("${telegram.bot.uat-acl-chat-id}")
     private String chatId_acl_internal;
 
+    @Value("${telegram.bot.enabled:false}")
+    private boolean enabled;
+
     private final RestTemplate restTemplate = new RestTemplate();
     private final TaskExecutor taskExecutor;
 
@@ -30,10 +33,12 @@ public class TelegramService {
     }
 
     public void sendMarkdownAclInternalMessage(String message) {
+        if (!enabled) return;
         taskExecutor.execute(() -> sendMarkdownToChat(chatId_acl_internal, message));
     }
 
     public void sendMarkdownToChat(String chatId, String message) {
+        if (!enabled) return;
         if (chatId == null || chatId.trim().isEmpty()) {
             return;
         }
@@ -58,6 +63,7 @@ public class TelegramService {
     }
 
     public void sendPhoto(String chatId, String caption, Resource imageResource) {
+        if (!enabled) return;
         if (chatId == null || chatId.trim().isEmpty()) {
             return;
         }
