@@ -31,9 +31,14 @@ export interface Image {
 export default function MyProfilePage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const defaultTab = searchParams.get("tab") === "password" ? "password" : "account";
-
+  const [activeTab, setActiveTab] = useState(
+    searchParams.get("tab") === "password" ? "password" : "account"
+  );
   const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    setActiveTab(searchParams.get("tab") === "password" ? "password" : "account");
+  }, [searchParams]);
   const [isLoading, setIsLoading] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [imageData, setImageData] = useState<Image | null>(null);
@@ -176,7 +181,7 @@ export default function MyProfilePage() {
         <div className="max-w-5xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
           <h1 className="text-2xl font-bold tracking-tight mb-6">My Profile</h1>
 
-          <Tabs defaultValue={defaultTab} className="space-y-4">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
             <TabsList>
               <TabsTrigger value="account" className="flex items-center gap-2">
                 <User className="h-4 w-4" /> Account
