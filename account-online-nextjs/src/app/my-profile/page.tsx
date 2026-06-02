@@ -22,13 +22,14 @@ import {
 import { Status } from "@/constants/AppResource/display-list/enum/status";
 import { isAuthenticated } from "@/utils/local-storage/token";
 import { ROUTES } from "@/constants/AppRoutes/routes";
+import { Suspense } from "react";
 
 export interface Image {
   type: string;
   base64: string;
 }
 
-export default function MyProfilePage() {
+function MyProfilePageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState(
@@ -208,5 +209,13 @@ export default function MyProfilePage() {
         </div>
       </main>
     </div>
+  );
+}
+
+export default function MyProfilePage() {
+  return (
+    <Suspense fallback={<Loading />}>
+      <MyProfilePageContent />
+    </Suspense>
   );
 }

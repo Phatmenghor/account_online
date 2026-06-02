@@ -19,13 +19,14 @@ import {
 } from "@/models/auth/profile.schema";
 import { Status } from "@/constants/AppResource/display-list/enum/status";
 import { useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 
 export interface Image {
   type: string;
   base64: string;
 }
 
-export default function ProfilePage() {
+function ProfilePageContent() {
   const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState(
     searchParams.get("tab") === "password" ? "password" : "account"
@@ -205,5 +206,13 @@ export default function ProfilePage() {
         </Tabs>
       </div>
     </div>
+  );
+}
+
+export default function ProfilePage() {
+  return (
+    <Suspense fallback={<Loading />}>
+      <ProfilePageContent />
+    </Suspense>
   );
 }
