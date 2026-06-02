@@ -344,7 +344,7 @@ public class AuthServiceImpl implements AuthService {
     private void sendLoginFailAlert(String username, String ip, String reason) {
         try {
             String time = LocalDateTime.now(ZoneId.of("Asia/Phnom_Penh")).format(DT_FMT);
-            String msg = "🔐 *Login Failed*\n"
+            String msg = "*Login Failed*\n"
                     + "--------------------\n"
                     + "- Username: `" + escapeMarkdown(username) + "`\n"
                     + "- IP: `" + escapeMarkdown(ip) + "`\n"
