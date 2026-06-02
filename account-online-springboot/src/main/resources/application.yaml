@@ -4,7 +4,7 @@
 # ==============================================================
 spring:
   profiles:
-    active: local
+    active: uat
   application:
     name: account_online
   main:
