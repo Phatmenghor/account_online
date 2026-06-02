@@ -41,8 +41,7 @@ public class OpenAccountTelegramAlertServiceImpl implements AlertsOpenAccOnlineS
             appendIfNotEmpty(bodyBuilder, "Remark", remarkBuilder != null ? remarkBuilder.toString() : null);
 
             String message = buildStandardMessage("Account Online Error", bodyBuilder.toString(), status.name(), "-");
-            // Changed to send to ACL (Error) channel as requested
-            telegramService.sendMarkdownAclInternalMessage(message);
+            log.info("Account online error recorded for ID: {}", idNumber);
         } catch (Exception e) {
             log.error("Telegram alert sending failed: {}", e.getMessage(), e);
         }
@@ -107,9 +106,6 @@ public class OpenAccountTelegramAlertServiceImpl implements AlertsOpenAccOnlineS
                 "Time: " + escapeMarkdown(timeFormatted);
 
         String message = header + "\n" + SEPARATOR + "\n" + bodyBuilder + SEPARATOR + "\n" + footer;
-
-        // Send to ACL internal channel for all AML statuses
-        telegramService.sendMarkdownAclInternalMessage(message);
 
         // Send detailed alert to Dev Team for HIGH RISK cases
         if ("HIGH".equalsIgnoreCase(amlDto.getRiskLevel())) {

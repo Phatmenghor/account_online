@@ -139,8 +139,7 @@ public class T24Service {
                             "**Error:** `SECURITY VIOLATION DURING SIGN ON PROCESS`\n" +
                             "**Action Required:** Check T24 credentials in `application.yaml`.",
                     operation);
-            telegramService.sendMarkdownAclInternalMessage(errorMessage);
-            log.error("T24 Security Violation Detected! Alert sent to Telegram.");
+            log.error("T24 Security Violation Detected!");
         }
     }
 }

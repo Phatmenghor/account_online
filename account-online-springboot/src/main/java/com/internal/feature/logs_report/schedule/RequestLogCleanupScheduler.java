@@ -107,7 +107,7 @@ public class RequestLogCleanupScheduler {
                     .append("Report Generated At: ").append(generatedAt).append("\n")
                     .append("This is an automated notification from the Account Online System.");
 
-            telegramService.sendMarkdownAclInternalMessage(sb.toString());
+            telegramService.sendDetailedErrorToDevTeam(sb.toString());
 
             log.info("Daily report sent. Total={}, Male={}, Female={}", totalCount, maleCount, femaleCount);
 
@@ -121,7 +121,7 @@ public class RequestLogCleanupScheduler {
                     + "Please review the application logs for further investigation.\n"
                     + "This is an automated notification from the Account Online System.";
 
-            telegramService.sendMarkdownAclInternalMessage(errorMsg);
+            telegramService.sendDetailedErrorToDevTeam(errorMsg);
         }
     }
 
@@ -161,7 +161,7 @@ public class RequestLogCleanupScheduler {
             sb.append("Report Generated At: ").append(generatedAt).append("\n")
                     .append("This is an automated notification from the Account Online System.");
 
-            telegramService.sendMarkdownAclInternalMessage(sb.toString());
+            telegramService.sendDetailedErrorToDevTeam(sb.toString());
 
             log.info("AML pending report sent. Pending={}", pendingCount);
 
@@ -175,7 +175,7 @@ public class RequestLogCleanupScheduler {
                     + "Please review the application logs for further investigation.\n"
                     + "This is an automated notification from the Account Online System.";
 
-            telegramService.sendMarkdownAclInternalMessage(errorMsg);
+            telegramService.sendDetailedErrorToDevTeam(errorMsg);
         }
     }
 
