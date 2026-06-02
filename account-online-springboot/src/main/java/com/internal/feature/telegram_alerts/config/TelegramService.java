@@ -22,11 +22,24 @@ public class TelegramService {
     @Value("${telegram.bot.monitor-chat-id:}")
     private String monitorChatId;
 
+    @Value("${telegram.bot.dev-chat-id:}")
+    private String devChatId;
+
     private final RestTemplate restTemplate = new RestTemplate();
     private final TaskExecutor taskExecutor;
 
     public TelegramService(TaskExecutor taskExecutor) {
         this.taskExecutor = taskExecutor;
+    }
+
+    public void sendToDev(String message) {
+        taskExecutor.execute(() -> {
+            if (devChatId == null || devChatId.trim().isEmpty()) {
+                log.debug("Dev chat ID not configured - skipping alert");
+                return;
+            }
+            sendMarkdownToChat(devChatId, message);
+        });
     }
 
     public void sendToMonitor(String message) {

@@ -19,6 +19,7 @@ import com.internal.feature.auth.service.EmailService;
 import com.internal.feature.auth.service.PendingRegistrationStore;
 import com.internal.feature.email_otp.models.EmailOtp;
 import com.internal.feature.email_otp.repository.EmailOtpRepository;
+import com.internal.feature.telegram_alerts.config.TelegramService;
 import com.internal.utils.OtpGenerator;
 import com.internal.utils.constants.AppConstants;
 import lombok.RequiredArgsConstructor;
@@ -28,9 +29,13 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
+import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -49,18 +54,26 @@ public class AuthServiceImpl implements AuthService {
     private final OtpGenerator otpGenerator;
     private final EmailService emailService;
     private final PendingRegistrationStore pendingRegistrationStore;
+    private final TelegramService telegramService;
+
+    private static final DateTimeFormatter DT_FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     @Override
     public AuthResponseDTO login(LoginRequestDto loginDto) {
         log.info("Processing login request for user: {}", loginDto.getUsername());
+        String clientIp = getClientIp();
 
         UserEntity userEntity = userRepository.findByUsername(loginDto.getUsername())
-                .orElseThrow(() -> new UnauthorizedException(
-                        "We couldn't find an account with the username \"" + loginDto.getUsername() + "\". "
-                        + "Please double-check your username and try again."));
+                .orElseThrow(() -> {
+                    sendLoginFailAlert(loginDto.getUsername(), clientIp, "Account not found");
+                    return new UnauthorizedException(
+                            "We couldn't find an account with the username \"" + loginDto.getUsername() + "\". "
+                            + "Please double-check your username and try again.");
+                });
 
         if (userEntity.getStatus() == StatusData.INACTIVE) {
             log.warn("Login rejected: User {} account is inactive", loginDto.getUsername());
+            sendLoginFailAlert(loginDto.getUsername(), clientIp, "Account inactive");
             throw new UnauthorizedException(
                     "Your account \"" + loginDto.getUsername() + "\" is currently inactive. "
                     + "Please contact your administrator to reactivate your account.");
@@ -68,6 +81,7 @@ public class AuthServiceImpl implements AuthService {
 
         if (userEntity.getStatus() == StatusData.DELETE) {
             log.warn("Login rejected: User {} account has been deleted", loginDto.getUsername());
+            sendLoginFailAlert(loginDto.getUsername(), clientIp, "Account deleted");
             throw new UnauthorizedException(
                     "Your account \"" + loginDto.getUsername() + "\" has been deactivated. "
                     + "Please contact your administrator for further assistance.");
@@ -75,6 +89,7 @@ public class AuthServiceImpl implements AuthService {
 
         if (!passwordEncoder.matches(loginDto.getPassword(), userEntity.getPassword())) {
             log.warn("Login failed: Incorrect password for user {}", loginDto.getUsername());
+            sendLoginFailAlert(loginDto.getUsername(), clientIp, "Wrong password");
             throw new UnauthorizedException(
                     "The password you entered is incorrect. "
                     + "Please check your password and try again.");
@@ -324,5 +339,40 @@ public class AuthServiceImpl implements AuthService {
         return Arrays.stream(roleName.split("_"))
                 .map(word -> word.substring(0, 1).toUpperCase() + word.substring(1).toLowerCase())
                 .collect(Collectors.joining(" "));
+    }
+
+    private void sendLoginFailAlert(String username, String ip, String reason) {
+        try {
+            String time = LocalDateTime.now(ZoneId.of("Asia/Phnom_Penh")).format(DT_FMT);
+            String msg = "🔐 *Login Failed*\n"
+                    + "--------------------\n"
+                    + "- Username: `" + escapeMarkdown(username) + "`\n"
+                    + "- IP: `" + escapeMarkdown(ip) + "`\n"
+                    + "- Reason: `" + reason + "`\n"
+                    + "--------------------\n"
+                    + "- Time: `" + time + "`";
+            telegramService.sendToDev(msg);
+        } catch (Exception e) {
+            log.debug("Failed to send login-fail alert: {}", e.getMessage());
+        }
+    }
+
+    private String getClientIp() {
+        try {
+            HttpServletRequest request = ((ServletRequestAttributes)
+                    RequestContextHolder.currentRequestAttributes()).getRequest();
+            String xff = request.getHeader("X-Forwarded-For");
+            if (xff != null && !xff.isBlank()) return xff.split(",")[0].trim();
+            String xri = request.getHeader("X-Real-IP");
+            if (xri != null && !xri.isBlank()) return xri;
+            return request.getRemoteAddr();
+        } catch (Exception e) {
+            return "Unknown";
+        }
+    }
+
+    private String escapeMarkdown(String text) {
+        if (text == null) return "";
+        return text.replace("_", "\\_").replace("*", "\\*").replace("`", "\\`").replace("~", "\\~");
     }
 }
