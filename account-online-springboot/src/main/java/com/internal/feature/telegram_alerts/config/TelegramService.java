@@ -20,7 +20,7 @@ public class TelegramService {
     private String botToken;
 
     @Value("${telegram.bot.monitor-chat-id:}")
-    private String chatId_dev_team;
+    private String monitorChatId;
 
     private final RestTemplate restTemplate = new RestTemplate();
     private final TaskExecutor taskExecutor;
@@ -29,22 +29,20 @@ public class TelegramService {
         this.taskExecutor = taskExecutor;
     }
 
-    public void sendDetailedErrorToDevTeam(String message) {
+    public void sendToMonitor(String message) {
         taskExecutor.execute(() -> {
-            if (chatId_dev_team == null || chatId_dev_team.trim().isEmpty()) {
-                log.debug("Dev Team chat ID not configured - skipping Telegram alert");
+            if (monitorChatId == null || monitorChatId.trim().isEmpty()) {
+                log.debug("Monitor chat ID not configured - skipping Telegram alert");
                 return;
             }
-            sendMarkdownToChat(chatId_dev_team, message);
+            sendMarkdownToChat(monitorChatId, message);
         });
     }
 
-    public void sendCriticalErrorAlert(String title, String details) {
+    public void sendCriticalAlert(String title, String details) {
         taskExecutor.execute(() -> {
-            String message = String.format(
-                    "*🚨 %s*\n%s",
-                    title, details);
-            sendMarkdownToChat(chatId_dev_team, message);
+            String message = String.format("*🚨 %s*\n%s", title, details);
+            sendMarkdownToChat(monitorChatId, message);
         });
     }
 
