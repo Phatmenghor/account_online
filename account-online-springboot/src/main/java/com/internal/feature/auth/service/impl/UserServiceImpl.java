@@ -87,9 +87,13 @@ public class UserServiceImpl implements UserService {
         log.debug("Getting current user by token");
         UserEntity currentUser = securityUtils.getCurrentUser();
         UserResponseDto dto = userMapper.mapToDto(currentUser);
-        if (!currentUser.isForcePasswordChange() && currentUser.getPasswordChangedAt() != null) {
-            LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Phnom_Penh"));
-            dto.setPasswordExpired(currentUser.getPasswordChangedAt().isBefore(now.minusMonths(3)));
+        if (!currentUser.isForcePasswordChange()) {
+            if (currentUser.getPasswordChangedAt() == null) {
+                dto.setPasswordExpired(true);
+            } else {
+                LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Phnom_Penh"));
+                dto.setPasswordExpired(currentUser.getPasswordChangedAt().isBefore(now.minusMonths(3)));
+            }
         }
         return dto;
     }

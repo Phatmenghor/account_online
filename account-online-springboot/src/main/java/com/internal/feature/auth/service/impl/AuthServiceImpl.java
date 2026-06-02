@@ -83,13 +83,13 @@ public class AuthServiceImpl implements AuthService {
         userEntity.setLastLogin(LocalDateTime.now(ZoneId.of("Asia/Phnom_Penh")));
         userRepository.save(userEntity);
 
-        // Determine password state flags
-        // null passwordChangedAt means the user has never changed their own password → require change
+        // Case 1: admin explicitly reset password → forcePasswordChange flag
+        // Case 2: password never set (null) OR older than 3 months → passwordExpired flag
         boolean forceChange = userEntity.isForcePasswordChange();
-        boolean neverChanged = userEntity.getPasswordChangedAt() == null;
-        boolean passwordExpired = !forceChange && !neverChanged
-                && userEntity.getPasswordChangedAt().isBefore(
-                        LocalDateTime.now(ZoneId.of("Asia/Phnom_Penh")).minusMonths(3));
+        boolean passwordExpired = !forceChange && (
+                userEntity.getPasswordChangedAt() == null ||
+                userEntity.getPasswordChangedAt().isBefore(
+                        LocalDateTime.now(ZoneId.of("Asia/Phnom_Penh")).minusMonths(3)));
 
         List<String> roles = userEntity.getRoles().stream()
                 .map(r -> r.getName().name())
@@ -98,10 +98,10 @@ public class AuthServiceImpl implements AuthService {
 
         UserResponseDto userDto = authMapper.userToUserResponseDto(userEntity);
         userDto.setLastLogin(userEntity.getLastLogin());
-        userDto.setForcePasswordChange(forceChange || neverChanged);
+        userDto.setForcePasswordChange(forceChange);
         userDto.setPasswordExpired(passwordExpired);
-        log.info("User {} logged in successfully (forceChange={}, neverChanged={}, expired={})",
-                loginDto.getUsername(), forceChange, neverChanged, passwordExpired);
+        log.info("User {} logged in successfully (forceChange={}, passwordExpired={})",
+                loginDto.getUsername(), forceChange, passwordExpired);
         return new AuthResponseDTO(token, userDto);
     }
 

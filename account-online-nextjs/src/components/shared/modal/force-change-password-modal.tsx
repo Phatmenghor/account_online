@@ -92,7 +92,7 @@ export default function ForceChangePasswordModal({
               </DialogTitle>
               <DialogDescription className="text-sm text-muted-foreground mt-0.5">
                 {isExpired
-                  ? "Your password is over 3 months old and must be changed."
+                  ? "Your password has expired and must be updated before you can continue."
                   : "Your administrator has reset your password. Please set a new one to continue."}
               </DialogDescription>
             </div>
