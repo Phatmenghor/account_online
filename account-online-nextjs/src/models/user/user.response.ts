@@ -23,4 +23,6 @@ export interface UserModel {
   createdAt: string;
   updatedAt: string;
   lastLogin: string;
+  forcePasswordChange: boolean;
+  passwordExpired: boolean;
 }

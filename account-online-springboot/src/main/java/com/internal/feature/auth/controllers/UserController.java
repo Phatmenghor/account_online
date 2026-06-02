@@ -89,4 +89,12 @@ public class UserController {
         log.info("Admin successfully changed password for user ID: {}, username: {}", changePasswordDto.getId(), userDto.getIdCard());
         return ResponseEntity.ok(ApiResponse.success(ResponseMessage.PASSWORD_CHANGED_BY_ADMIN, userDto));
     }
+
+    @PostMapping("/force-change-password")
+    public ResponseEntity<ApiResponse<UserResponseDto>> forceChangePassword(@Valid @RequestBody ForceChangePasswordRequestDto dto) {
+        log.info("Force password change request");
+        UserResponseDto userDto = userService.forceChangePassword(dto.getNewPassword(), dto.getConfirmNewPassword());
+        log.info("Force password change completed for user: {}", userDto.getIdCard());
+        return ResponseEntity.ok(ApiResponse.success("Password updated successfully.", userDto));
+    }
 }

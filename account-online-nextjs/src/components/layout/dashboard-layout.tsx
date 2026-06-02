@@ -10,6 +10,9 @@ import { TopBar } from "@/components/shared/dashboard/topbar";
 import { isAuthenticated } from "@/utils/local-storage/token";
 import { getRoles } from "@/utils/local-storage/roles";
 import { ROUTES } from "@/constants/AppRoutes/routes";
+import { getUserProfileService } from "@/services/dashboard/user/user.service";
+import { storeUserInfo } from "@/utils/local-storage/userInfo";
+import ForceChangePasswordModal from "@/components/shared/modal/force-change-password-modal";
 
 export default function DashboardLayout({
   children,
@@ -17,6 +20,8 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [showForceChange, setShowForceChange] = useState(false);
+  const [forceChangeReason, setForceChangeReason] = useState<"force" | "expired">("force");
   const isMobile = useIsMobile();
   const pathname = usePathname();
   const router = useRouter();
@@ -28,6 +33,24 @@ export default function DashboardLayout({
     }
   }, [pathname, router]);
 
+  // On mount: fetch fresh profile to catch admin-reset or expired-password situations
+  useEffect(() => {
+    if (!isAuthenticated() || getRoles() === "STAFF") return;
+    getUserProfileService()
+      .then((user) => {
+        if (!user) return;
+        storeUserInfo(user);
+        if (user.forcePasswordChange) {
+          setForceChangeReason("force");
+          setShowForceChange(true);
+        } else if (user.passwordExpired) {
+          setForceChangeReason("expired");
+          setShowForceChange(true);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
   // Close sidebar on mobile when route changes
   useEffect(() => {
     if (isMobile) {
@@ -35,8 +58,20 @@ export default function DashboardLayout({
     }
   }, [pathname, isMobile]);
 
+  function handleForceChangeSuccess() {
+    setShowForceChange(false);
+    getUserProfileService()
+      .then((user) => { if (user) storeUserInfo(user); })
+      .catch(() => {});
+  }
+
   return (
     <div className="flex h-screen w-full overflow-hidden bg-background">
+      <ForceChangePasswordModal
+        isOpen={showForceChange}
+        reason={forceChangeReason}
+        onSuccess={handleForceChangeSuccess}
+      />
       {/* Sidebar - Fixed, no scroll */}
       <DashboardSidebar
         isOpen={isSidebarOpen}

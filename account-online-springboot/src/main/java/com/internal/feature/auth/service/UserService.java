@@ -21,4 +21,6 @@ public interface UserService {
     UserResponseDto changePassword(ChangePasswordRequestDto requestDto);
 
     UserResponseDto changePasswordByAdmin(ChangePasswordByAdminRequestDto requestDto);
+
+    UserResponseDto forceChangePassword(String newPassword, String confirmNewPassword);
 }

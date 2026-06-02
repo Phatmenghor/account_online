@@ -183,6 +183,22 @@ export async function ChangeUserPasswordByAdminService(
   }
 }
 
+export async function forceChangePasswordService(newPassword: string, confirmNewPassword: string) {
+  try {
+    const response = await axiosClientWithAuth.post(`/api/v1/user/force-change-password`, {
+      newPassword,
+      confirmNewPassword,
+    });
+    return response.data.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      const raw = error.response?.data;
+      throw new Error(raw?.message || "Failed to update password.");
+    }
+    throw new Error("An unexpected error occurred.");
+  }
+}
+
 export async function ChangePasswordService(req: ChangePasswordReq) {
   try {
     const response = await axiosClientWithAuth.post(

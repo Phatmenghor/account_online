@@ -27,4 +27,6 @@ public class UserResponseDto {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private LocalDateTime lastLogin;
+    private boolean forcePasswordChange;
+    private boolean passwordExpired;
 }

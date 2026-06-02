@@ -15,6 +15,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ROUTES } from "@/constants/AppRoutes/routes";
 import { AppToast } from "@/components/shared/toast/app-toast";
+import ForceChangePasswordModal from "@/components/shared/modal/force-change-password-modal";
 
 const schema = z.object({
   username: z.string().min(1, "Please enter your email"),
@@ -26,6 +27,9 @@ type FormData = z.infer<typeof schema>;
 export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [showForceChange, setShowForceChange] = useState(false);
+  const [forceChangeReason, setForceChangeReason] = useState<"force" | "expired">("force");
+  const [pendingRole, setPendingRole] = useState<string>("");
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -33,6 +37,17 @@ export default function LoginPage() {
     resolver: zodResolver(schema),
     defaultValues: { username: "", password: "" },
   });
+
+  function navigateAfterLogin(role: string) {
+    const callbackUrl = searchParams.get("callbackUrl");
+    if (role === "STAFF") {
+      router.replace("/");
+    } else if (callbackUrl) {
+      router.replace(callbackUrl);
+    } else {
+      router.replace(ROUTES.DASHBOARD.INDEX);
+    }
+  }
 
   async function onSubmit(values: FormData) {
     setIsLoading(true);
@@ -42,18 +57,20 @@ export default function LoginPage() {
         password: values.password,
       });
 
+      const role: string = data?.userRole?.userRole ?? "";
+      const forceChange: boolean = data?.userRole?.forcePasswordChange ?? false;
+      const passwordExpired: boolean = data?.userRole?.passwordExpired ?? false;
+
       AppToast({ type: "success", message: "Login successful" });
 
-      const role: string = data?.userRole?.userRole ?? "";
-      const callbackUrl = searchParams.get("callbackUrl");
-
-      if (role === "STAFF") {
-        router.replace("/");
-      } else if (callbackUrl) {
-        router.replace(callbackUrl);
-      } else {
-        router.replace(ROUTES.DASHBOARD.INDEX);
+      if (forceChange || passwordExpired) {
+        setPendingRole(role);
+        setForceChangeReason(forceChange ? "force" : "expired");
+        setShowForceChange(true);
+        return;
       }
+
+      navigateAfterLogin(role);
     } catch (error: any) {
       AppToast({
         type: "error",
@@ -64,8 +81,18 @@ export default function LoginPage() {
     }
   }
 
+  function handleForceChangeSuccess() {
+    setShowForceChange(false);
+    navigateAfterLogin(pendingRole);
+  }
+
   return (
     <div className="flex h-screen w-screen overflow-hidden">
+      <ForceChangePasswordModal
+        isOpen={showForceChange}
+        reason={forceChangeReason}
+        onSuccess={handleForceChangeSuccess}
+      />
       {/* Left hero */}
       <div className="hidden lg:flex flex-1 relative overflow-hidden">
         <Image src="/assets/cpbank.png" alt="CP Bank" fill sizes="50vw" className="object-cover" priority />

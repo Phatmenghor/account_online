@@ -81,7 +81,18 @@ public class AuthServiceImpl implements AuthService {
         }
 
         userEntity.setLastLogin(LocalDateTime.now(ZoneId.of("Asia/Phnom_Penh")));
+
+        // Initialise passwordChangedAt for existing users who never had it set
+        if (userEntity.getPasswordChangedAt() == null) {
+            userEntity.setPasswordChangedAt(LocalDateTime.now(ZoneId.of("Asia/Phnom_Penh")));
+        }
         userRepository.save(userEntity);
+
+        // Determine password state flags
+        boolean forceChange = userEntity.isForcePasswordChange();
+        boolean passwordExpired = !forceChange
+                && userEntity.getPasswordChangedAt().isBefore(
+                        LocalDateTime.now(ZoneId.of("Asia/Phnom_Penh")).minusMonths(3));
 
         List<String> roles = userEntity.getRoles().stream()
                 .map(r -> r.getName().name())
@@ -90,7 +101,10 @@ public class AuthServiceImpl implements AuthService {
 
         UserResponseDto userDto = authMapper.userToUserResponseDto(userEntity);
         userDto.setLastLogin(userEntity.getLastLogin());
-        log.info("User {} logged in successfully", loginDto.getUsername());
+        userDto.setForcePasswordChange(forceChange);
+        userDto.setPasswordExpired(passwordExpired);
+        log.info("User {} logged in successfully (forceChange={}, expired={})",
+                loginDto.getUsername(), forceChange, passwordExpired);
         return new AuthResponseDTO(token, userDto);
     }
 

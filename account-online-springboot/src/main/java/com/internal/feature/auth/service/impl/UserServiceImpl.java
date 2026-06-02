@@ -26,6 +26,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -80,9 +82,13 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserResponseDto getUserByToken() {
         log.debug("Getting current user by token");
-        
         UserEntity currentUser = securityUtils.getCurrentUser();
-        return userMapper.mapToDto(currentUser);
+        UserResponseDto dto = userMapper.mapToDto(currentUser);
+        if (!currentUser.isForcePasswordChange() && currentUser.getPasswordChangedAt() != null) {
+            LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Phnom_Penh"));
+            dto.setPasswordExpired(currentUser.getPasswordChangedAt().isBefore(now.minusMonths(3)));
+        }
+        return dto;
     }
 
     @Transactional
@@ -121,24 +127,42 @@ public class UserServiceImpl implements UserService {
         validatePasswordMatch(requestDto.getNewPassword(), requestDto.getConfirmNewPassword());
 
         user.setPassword(passwordEncoder.encode(requestDto.getNewPassword()));
+        user.setForcePasswordChange(false);
+        user.setPasswordChangedAt(java.time.LocalDateTime.now(java.time.ZoneId.of("Asia/Phnom_Penh")));
         UserEntity userEntity = userRepository.save(user);
-        
+
         return userMapper.mapToDto(userEntity);
     }
 
     @Override
     public UserResponseDto changePasswordByAdmin(ChangePasswordByAdminRequestDto requestDto) {
         log.info("Admin changing password for user with id: {}", requestDto.getId());
-        
+
         UserEntity user = userRepository.findById(requestDto.getId())
                 .orElseThrow(() -> new NotFoundException("User with id " + requestDto.getId() + " not found"));
 
         validatePasswordMatch(requestDto.getNewPassword(), requestDto.getConfirmNewPassword());
 
         user.setPassword(passwordEncoder.encode(requestDto.getNewPassword()));
+        user.setForcePasswordChange(true);
         UserEntity userEntity = userRepository.save(user);
-        
+
         return userMapper.mapToDto(userEntity);
+    }
+
+    @Override
+    public UserResponseDto forceChangePassword(String newPassword, String confirmNewPassword) {
+        UserEntity user = securityUtils.getCurrentUser();
+        log.info("Force password change for user: {}", user.getUsername());
+
+        validatePasswordMatch(newPassword, confirmNewPassword);
+
+        user.setPassword(passwordEncoder.encode(newPassword));
+        user.setForcePasswordChange(false);
+        user.setPasswordChangedAt(java.time.LocalDateTime.now(java.time.ZoneId.of("Asia/Phnom_Penh")));
+        UserEntity saved = userRepository.save(user);
+
+        return userMapper.mapToDto(saved);
     }
 
     private Page<UserEntity> fetchUsers(String search, StatusData status, List<String> roles, Pageable pageable) {
