@@ -19,9 +19,6 @@ public class TelegramService {
     @Value("${telegram.bot.token}")
     private String botToken;
 
-    @Value("${telegram.bot.dev-chat-id}")
-    private String chatId_acl_internal;
-
     @Value("${telegram.bot.monitor-chat-id:}")
     private String chatId_dev_team;
 
@@ -30,10 +27,6 @@ public class TelegramService {
 
     public TelegramService(TaskExecutor taskExecutor) {
         this.taskExecutor = taskExecutor;
-    }
-
-    public void sendMarkdownAclInternalMessage(String message) {
-        taskExecutor.execute(() -> sendMarkdownToChat(chatId_acl_internal, message));
     }
 
     public void sendDetailedErrorToDevTeam(String message) {
