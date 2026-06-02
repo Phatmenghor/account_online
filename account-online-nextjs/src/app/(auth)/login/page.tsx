@@ -87,28 +87,31 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex h-screen w-screen overflow-hidden">
+    <div className="relative h-screen w-screen overflow-hidden">
       <ForceChangePasswordModal
         isOpen={showForceChange}
         reason={forceChangeReason}
         onSuccess={handleForceChangeSuccess}
         onClose={() => setShowForceChange(false)}
       />
-      {/* Left hero */}
-      <div className="hidden lg:flex flex-1 relative overflow-hidden">
-        <Image src="/assets/cpbank.png" alt="CP Bank" fill sizes="50vw" className="object-cover" priority />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/30 to-black/10" />
-        <div className="absolute bottom-10 left-10 right-10 text-white">
-          <p className="text-xs font-semibold uppercase tracking-widest text-white/50 mb-3">Cambodia Post Bank</p>
-          <h2 className="text-3xl font-bold leading-snug">Account Online</h2>
-          <p className="text-sm text-white/50 mt-2 max-w-xs leading-relaxed">
-            Secure access to the Cambodia Post Bank account opening and review platform.
-          </p>
-        </div>
+
+      {/* Full-screen background image */}
+      <Image src="/assets/cpbank.png" alt="CP Bank" fill sizes="100vw" className="object-cover" priority />
+
+      {/* Darker overlay — heavier on mobile so form text stays readable */}
+      <div className="absolute inset-0 bg-gradient-to-br from-black/80 via-black/60 to-black/40" />
+
+      {/* Branding text — bottom-left, desktop only */}
+      <div className="absolute bottom-10 left-10 right-10 text-white hidden lg:block">
+        <p className="text-xs font-semibold uppercase tracking-widest text-white/50 mb-3">Cambodia Post Bank</p>
+        <h2 className="text-3xl font-bold leading-snug">Account Online</h2>
+        <p className="text-sm text-white/50 mt-2 max-w-xs leading-relaxed">
+          Secure access to the Cambodia Post Bank account opening and review platform.
+        </p>
       </div>
 
-      {/* Right form */}
-      <div className="flex flex-1 items-center justify-center bg-muted/40 p-6">
+      {/* Form — centered on mobile, right side on desktop */}
+      <div className="absolute inset-0 flex items-center justify-center lg:justify-end p-4 sm:p-6 lg:pr-16 lg:pl-0">
         <Card className="w-full max-w-lg shadow-2xl border border-border/60 rounded-2xl overflow-hidden">
           <div className="bg-primary/5 border-b border-border/50 px-8 pt-8 pb-6">
             <div className="flex items-center gap-3 mb-5">
@@ -193,3 +196,4 @@ export default function LoginPage() {
     </div>
   );
 }
+
