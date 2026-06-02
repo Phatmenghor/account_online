@@ -72,16 +72,23 @@ public class MonitoringService {
 
             telegramService.sendToMonitor(msg.toString());
 
-            // Send NID photo if available
+            // Send NID and selfie photos if available
             if (legalId != null) {
                 try {
                     Resource nidImage = customerImageService.getNidImageResourceForEmail(legalId);
                     if (nidImage != null && nidImage.exists()) {
-                        String caption = "*HIGH RISK - NID Photo*\nLegal ID: `" + escape(legalId) + "`";
-                        telegramService.sendPhotoToMonitor(caption, nidImage);
+                        telegramService.sendPhotoToMonitor("*HIGH RISK - NID Photo*\nLegal ID: `" + escape(legalId) + "`", nidImage);
                     }
                 } catch (Exception e) {
                     log.debug("Could not send NID photo for {}: {}", legalId, e.getMessage());
+                }
+                try {
+                    Resource selfieImage = customerImageService.getSelfieImageResourceForEmail(legalId);
+                    if (selfieImage != null && selfieImage.exists()) {
+                        telegramService.sendPhotoToMonitor("*HIGH RISK - Face Photo*\nLegal ID: `" + escape(legalId) + "`", selfieImage);
+                    }
+                } catch (Exception e) {
+                    log.debug("Could not send selfie photo for {}: {}", legalId, e.getMessage());
                 }
             }
 
