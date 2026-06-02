@@ -92,6 +92,7 @@ export default function LoginPage() {
         isOpen={showForceChange}
         reason={forceChangeReason}
         onSuccess={handleForceChangeSuccess}
+        onClose={() => setShowForceChange(false)}
       />
       {/* Left hero */}
       <div className="hidden lg:flex flex-1 relative overflow-hidden">

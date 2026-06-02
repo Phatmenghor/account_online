@@ -47,6 +47,7 @@ interface ForceChangePasswordModalProps {
   isOpen: boolean;
   reason: "force" | "expired";
   onSuccess: () => void;
+  onClose?: () => void; // when provided, the X button closes the modal
 }
 
 const RULES = [
@@ -59,6 +60,7 @@ export default function ForceChangePasswordModal({
   isOpen,
   reason,
   onSuccess,
+  onClose,
 }: ForceChangePasswordModalProps) {
   const [showNew, setShowNew] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
@@ -127,7 +129,7 @@ export default function ForceChangePasswordModal({
       };
 
   return (
-    <Dialog open={isOpen} onOpenChange={() => {}}>
+    <Dialog open={isOpen} onOpenChange={(open) => { if (!open) onClose?.(); }}>
       <DialogContent
         className="w-full max-w-lg mx-auto p-0 gap-0 overflow-hidden rounded-2xl shadow-2xl"
         onPointerDownOutside={(e) => e.preventDefault()}
