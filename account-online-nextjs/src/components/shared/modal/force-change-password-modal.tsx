@@ -4,7 +4,17 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Eye, EyeOff, KeyRound, Loader2, ShieldAlert, Clock } from "lucide-react";
+import {
+  Eye,
+  EyeOff,
+  KeyRound,
+  Loader2,
+  ShieldAlert,
+  Clock,
+  CheckCircle2,
+  Lock,
+  AlertTriangle,
+} from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -20,7 +30,10 @@ import { forceChangePasswordService } from "@/services/dashboard/user/user.servi
 
 const schema = z
   .object({
-    newPassword: z.string().min(6, "Password must be at least 6 characters."),
+    newPassword: z
+      .string()
+      .min(6, "Password must be at least 6 characters.")
+      .max(64, "Password must not exceed 64 characters."),
     confirmNewPassword: z.string().min(1, "Please confirm your new password."),
   })
   .refine((d) => d.newPassword === d.confirmNewPassword, {
@@ -36,6 +49,12 @@ interface ForceChangePasswordModalProps {
   onSuccess: () => void;
 }
 
+const RULES = [
+  "At least 6 characters long",
+  "Mix of letters and numbers recommended",
+  "Do not reuse your previous password",
+];
+
 export default function ForceChangePasswordModal({
   isOpen,
   reason,
@@ -48,15 +67,18 @@ export default function ForceChangePasswordModal({
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors },
     reset,
   } = useForm<FormData>({ resolver: zodResolver(schema) });
+
+  const newPasswordValue = watch("newPassword", "");
 
   async function onSubmit(values: FormData) {
     setIsSubmitting(true);
     try {
       await forceChangePasswordService(values.newPassword, values.confirmNewPassword);
-      AppToast({ type: "success", message: "Password updated successfully." });
+      AppToast({ type: "success", message: "Password updated successfully. Welcome!" });
       reset();
       onSuccess();
     } catch (err: any) {
@@ -70,106 +92,205 @@ export default function ForceChangePasswordModal({
   }
 
   const isExpired = reason === "expired";
+  const config = isExpired
+    ? {
+        iconBg: "bg-orange-100 dark:bg-orange-950",
+        iconColor: "text-orange-600 dark:text-orange-400",
+        bannerBg: "bg-orange-50 dark:bg-orange-950/40",
+        bannerBorder: "border-orange-200 dark:border-orange-800",
+        bannerText: "text-orange-800 dark:text-orange-300",
+        badgeBg: "bg-orange-100 dark:bg-orange-900",
+        badgeText: "text-orange-700 dark:text-orange-300",
+        Icon: Clock,
+        badge: "Password Expired",
+        title: "Your Password Has Expired",
+        description:
+          "For your account security, passwords must be updated regularly. Please set a new password to continue accessing your account.",
+        reason:
+          "Your password has expired (passwords expire every 3 months) or has never been set.",
+      }
+    : {
+        iconBg: "bg-yellow-100 dark:bg-yellow-950",
+        iconColor: "text-yellow-600 dark:text-yellow-400",
+        bannerBg: "bg-yellow-50 dark:bg-yellow-950/40",
+        bannerBorder: "border-yellow-200 dark:border-yellow-800",
+        bannerText: "text-yellow-800 dark:text-yellow-300",
+        badgeBg: "bg-yellow-100 dark:bg-yellow-900",
+        badgeText: "text-yellow-700 dark:text-yellow-300",
+        Icon: ShieldAlert,
+        badge: "Action Required",
+        title: "Password Reset Required",
+        description:
+          "Your administrator has reset your password. You must set a new password before you can access your account.",
+        reason:
+          "This is a one-time requirement. Once changed, you can log in normally.",
+      };
 
   return (
     <Dialog open={isOpen} onOpenChange={() => {}}>
       <DialogContent
-        className="max-w-md overflow-hidden p-0 gap-0 flex flex-col"
+        className="w-full max-w-lg mx-auto p-0 gap-0 overflow-hidden rounded-2xl shadow-2xl"
         onPointerDownOutside={(e) => e.preventDefault()}
         onEscapeKeyDown={(e) => e.preventDefault()}
       >
-        {/* Header */}
-        <DialogHeader className="px-6 py-5 border-b bg-muted/30 flex-shrink-0">
-          <div className="flex items-center gap-4 pr-8">
-            <div className={`w-12 h-12 rounded-full flex items-center justify-center ${isExpired ? "bg-orange-100" : "bg-yellow-100"}`}>
-              {isExpired
-                ? <Clock className="w-6 h-6 text-orange-600" />
-                : <ShieldAlert className="w-6 h-6 text-yellow-600" />}
+        {/* ── Top accent bar ── */}
+        <div
+          className={`h-1.5 w-full ${isExpired ? "bg-orange-500" : "bg-yellow-500"}`}
+        />
+
+        {/* ── Header ── */}
+        <DialogHeader className="px-6 pt-6 pb-0">
+          <div className="flex items-start gap-4">
+            <div
+              className={`shrink-0 w-12 h-12 rounded-xl flex items-center justify-center ${config.iconBg}`}
+            >
+              <config.Icon className={`w-6 h-6 ${config.iconColor}`} />
             </div>
-            <div>
-              <DialogTitle className="text-lg font-semibold">
-                {isExpired ? "Password Expired" : "Password Reset Required"}
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-1 flex-wrap">
+                <span
+                  className={`inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full ${config.badgeBg} ${config.badgeText}`}
+                >
+                  <AlertTriangle className="w-3 h-3" />
+                  {config.badge}
+                </span>
+              </div>
+              <DialogTitle className="text-lg font-bold text-foreground leading-tight">
+                {config.title}
               </DialogTitle>
-              <DialogDescription className="text-sm text-muted-foreground mt-0.5">
-                {isExpired
-                  ? "Your password has expired and must be updated before you can continue."
-                  : "Your administrator has reset your password. Please set a new one to continue."}
+              <DialogDescription className="text-sm text-muted-foreground mt-1 leading-relaxed">
+                {config.description}
               </DialogDescription>
             </div>
           </div>
         </DialogHeader>
 
-        {/* Body */}
         <form onSubmit={handleSubmit(onSubmit)}>
-          <div className="flex-1 p-6 space-y-4">
-            {/* New Password */}
+          <div className="px-6 py-5 space-y-5">
+            {/* ── Info banner ── */}
+            <div
+              className={`flex items-start gap-3 p-3.5 rounded-xl border text-sm ${config.bannerBg} ${config.bannerBorder}`}
+            >
+              <Lock className={`w-4 h-4 mt-0.5 shrink-0 ${config.iconColor}`} />
+              <p className={`leading-relaxed ${config.bannerText}`}>
+                {config.reason}
+              </p>
+            </div>
+
+            {/* ── New Password ── */}
             <div className="space-y-1.5">
-              <Label className="text-sm font-medium">
+              <Label htmlFor="newPassword" className="text-sm font-medium">
                 New Password <span className="text-destructive">*</span>
               </Label>
               <div className="relative">
                 <Input
+                  id="newPassword"
                   {...register("newPassword")}
                   type={showNew ? "text" : "password"}
-                  placeholder="Enter new password"
+                  placeholder="Enter your new password"
                   disabled={isSubmitting}
-                  className="pr-10"
+                  className="pr-10 h-11"
                 />
                 <button
                   type="button"
                   onClick={() => setShowNew((v) => !v)}
                   tabIndex={-1}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  disabled={isSubmitting}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                 >
-                  {showNew ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  {showNew ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
                 </button>
               </div>
-              {errors.newPassword && (
-                <p className="text-xs text-destructive">{errors.newPassword.message}</p>
+              {errors.newPassword ? (
+                <p className="text-xs text-destructive">
+                  {errors.newPassword.message}
+                </p>
+              ) : (
+                newPasswordValue.length > 0 && (
+                  <p className="text-xs text-muted-foreground">
+                    Strength: {newPasswordValue.length < 8 ? "Weak — add more characters" : newPasswordValue.length < 12 ? "Good" : "Strong"}
+                  </p>
+                )
               )}
             </div>
 
-            {/* Confirm Password */}
+            {/* ── Confirm Password ── */}
             <div className="space-y-1.5">
-              <Label className="text-sm font-medium">
+              <Label htmlFor="confirmNewPassword" className="text-sm font-medium">
                 Confirm Password <span className="text-destructive">*</span>
               </Label>
               <div className="relative">
                 <Input
+                  id="confirmNewPassword"
                   {...register("confirmNewPassword")}
                   type={showConfirm ? "text" : "password"}
-                  placeholder="Confirm new password"
+                  placeholder="Re-enter your new password"
                   disabled={isSubmitting}
-                  className="pr-10"
+                  className="pr-10 h-11"
                 />
                 <button
                   type="button"
                   onClick={() => setShowConfirm((v) => !v)}
                   tabIndex={-1}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  disabled={isSubmitting}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                 >
-                  {showConfirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  {showConfirm ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
                 </button>
               </div>
               {errors.confirmNewPassword && (
-                <p className="text-xs text-destructive">{errors.confirmNewPassword.message}</p>
+                <p className="text-xs text-destructive">
+                  {errors.confirmNewPassword.message}
+                </p>
               )}
             </div>
 
-            <p className="text-xs text-muted-foreground">
-              Password must be at least 6 characters long.
-            </p>
+            {/* ── Password rules ── */}
+            <div className="rounded-xl border border-border/60 bg-muted/30 p-3.5 space-y-2">
+              <p className="text-xs font-semibold text-foreground/70 uppercase tracking-wide">
+                Password requirements
+              </p>
+              <ul className="space-y-1.5">
+                {RULES.map((rule) => (
+                  <li key={rule} className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <CheckCircle2 className="w-3.5 h-3.5 shrink-0 text-muted-foreground/50" />
+                    {rule}
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
 
-          {/* Footer */}
-          <div className="px-6 py-4 border-t bg-muted/30 flex-shrink-0">
-            <Button type="submit" className="w-full" disabled={isSubmitting}>
+          {/* ── Footer ── */}
+          <div className="px-6 pb-6">
+            <Button
+              type="submit"
+              className="w-full h-11 font-semibold"
+              disabled={isSubmitting}
+            >
               {isSubmitting ? (
-                <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Updating...</>
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  Updating Password...
+                </>
               ) : (
-                <><KeyRound className="h-4 w-4 mr-2" /> Update Password</>
+                <>
+                  <KeyRound className="h-4 w-4 mr-2" />
+                  Update Password & Continue
+                </>
               )}
             </Button>
+            <p className="text-center text-xs text-muted-foreground mt-3">
+              This action is required. You cannot access the system until your password is updated.
+            </p>
           </div>
         </form>
       </DialogContent>
