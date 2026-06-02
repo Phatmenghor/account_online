@@ -50,7 +50,7 @@ public class UserEntity extends BaseEntity {
 
     private LocalDateTime lastLogin;
 
-    @Column(name = "force_password_change", nullable = false)
+    @Column(name = "force_password_change", nullable = false, columnDefinition = "boolean default false")
     private boolean forcePasswordChange = false;
 
     @Column(name = "password_changed_at")
