@@ -1,5 +1,6 @@
 package com.internal.feature.telegram_alerts.service;
 
+import com.internal.enumation.AmlStatusEnum;
 import com.internal.feature.aml.dto.response.AmlStatusDto;
 import com.internal.feature.logs_report.service.CustomerImageService;
 import com.internal.feature.telegram_alerts.config.TelegramService;
@@ -96,6 +97,55 @@ public class MonitoringService {
         } catch (Exception e) {
             log.error("Failed to send HIGH RISK AML alert: {}", e.getMessage());
         }
+    }
+
+    public void sendAmlActionAlert(AmlStatusDto amlDto) {
+        if (amlDto == null || amlDto.getStatus() == null) return;
+        if (amlDto.getStatus() != AmlStatusEnum.APPROVE && amlDto.getStatus() != AmlStatusEnum.REJECT) return;
+        try {
+            String legalId = amlDto.getCustomerInfo() != null ? amlDto.getCustomerInfo().getLegalId() : null;
+            String name = amlDto.getCustomerInfo() != null ? buildName(amlDto) : "";
+            String status = amlDto.getStatus().name();
+            String actionBy = resolveActionBy(amlDto);
+            String timeFormatted = amlDto.getUpdatedAt() != null
+                    ? amlDto.getUpdatedAt().format(DATE_FORMATTER)
+                    : LocalDateTime.now(ZoneId.of("Asia/Phnom_Penh")).format(DATE_FORMATTER);
+
+            StringBuilder msg = new StringBuilder();
+            msg.append(amlDto.getStatus() == AmlStatusEnum.APPROVE
+                    ? "*AML Account Online - APPROVED ✅*\n"
+                    : "*AML Account Online - REJECTED ❌*\n")
+                    .append("--------------------\n");
+
+            appendIfNotEmpty(msg, "Name", name);
+            appendIfNotEmpty(msg, "Legal ID", legalId);
+            if (amlDto.getCustomerInfo() != null) {
+                appendIfNotEmpty(msg, "Phone Number", amlDto.getCustomerInfo().getPhoneNumber());
+            }
+            appendIfNotEmpty(msg, "Risk Level", amlDto.getRiskLevel());
+            appendIfNotEmpty(msg, "Remarks", amlDto.getRemarks());
+
+            msg.append("--------------------\n")
+                    .append("Status: `").append(status).append("`\n")
+                    .append("By: `").append(escape(actionBy)).append("`\n")
+                    .append("Time: `").append(timeFormatted).append("`");
+
+            telegramService.sendToMonitor(msg.toString());
+        } catch (Exception e) {
+            log.error("Failed to send AML action alert: {}", e.getMessage());
+        }
+    }
+
+    private String resolveActionBy(AmlStatusDto amlDto) {
+        if (amlDto.getStatus() == AmlStatusEnum.APPROVE && amlDto.getApprovedBy() != null) {
+            String name = amlDto.getApprovedBy().getFullName();
+            return (name != null && !name.isBlank()) ? name : amlDto.getApprovedBy().getIdCard();
+        }
+        if (amlDto.getStatus() == AmlStatusEnum.REJECT && amlDto.getRejectedBy() != null) {
+            String name = amlDto.getRejectedBy().getFullName();
+            return (name != null && !name.isBlank()) ? name : amlDto.getRejectedBy().getIdCard();
+        }
+        return "Unknown";
     }
 
     private String buildName(AmlStatusDto amlDto) {
