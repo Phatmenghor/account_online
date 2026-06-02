@@ -25,6 +25,9 @@ public class OpenAccountTelegramAlertServiceImpl implements AlertsOpenAccOnlineS
     @Value("${telegram.bot.uat-acl-chat-id}")
     private String chatId_acl_internal;
 
+    @Value("${telegram.bot.uat-dev-team-chat-id:}")
+    private String chatId_dev_team;
+
     @Value("${telegram.bot.compliance-mention}")
     private String complianceMention;
 
@@ -169,6 +172,7 @@ public class OpenAccountTelegramAlertServiceImpl implements AlertsOpenAccOnlineS
 
             detailedMsg.append("Time: `").append(timeFormatted).append("`");
 
+            telegramService.sendDetailedErrorToDevTeam(detailedMsg.toString());
         } catch (Exception e) {
             log.debug("Detailed AML alert not sent: {}", e.getMessage());
         }
