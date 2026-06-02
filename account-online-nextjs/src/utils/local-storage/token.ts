@@ -1,7 +1,7 @@
 import { deleteCookie, getCookie, setCookie } from "cookies-next";
 
-// Token expiration time in seconds (1 year = 365 * 24 * 60 * 60 seconds)
-const DEFAULT_TOKEN_EXPIRY = 365 * 24 * 60 * 60;
+// Token expiration time in seconds (30 days = 30 * 24 * 60 * 60 seconds)
+const DEFAULT_TOKEN_EXPIRY = 30 * 24 * 60 * 60;
 
 interface TokenData {
   token: string;
@@ -13,8 +13,8 @@ export function storeTokenRemember(token: string | undefined): void {
     return;
   }
 
-  // Remember token for 365 days
-  const rememberMaxAge = 365 * 24 * 60 * 60;
+  // Remember token for 30 days
+  const rememberMaxAge = 30 * 24 * 60 * 60;
   setCookie("auth-token", token, { maxAge: rememberMaxAge });
   setCookie("auth-token-expires", String(Date.now() + rememberMaxAge * 1000));
 }
