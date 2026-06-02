@@ -14,7 +14,6 @@ export interface RegisterInitiateData {
   staffId?: string;
   phoneNumber?: string;
   branch?: string;
-  passwordChangedAt?: string;
 }
 
 export interface RegisterInitiateResponse {
@@ -24,8 +23,7 @@ export interface RegisterInitiateResponse {
 }
 
 export async function registerInitiateService(data: RegisterInitiateData): Promise<RegisterInitiateResponse> {
-  const payload = { ...data, passwordChangedAt: new Date().toISOString() };
-  const response = await axiosClient.post("/api/v1/auth/register/initiate", payload);
+  const response = await axiosClient.post("/api/v1/auth/register/initiate", data);
   return response.data.data;
 }
 
