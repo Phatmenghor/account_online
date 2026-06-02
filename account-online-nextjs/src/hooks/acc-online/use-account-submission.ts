@@ -4,6 +4,7 @@ import { MaritalModel } from "@/models/static/marital/marital.response";
 import { OccupationModel } from "@/models/static/occupation/occupation.response";
 import { ReferenceModel } from "@/models/static/reference/reference.response";
 import { LegalTypeModel } from "@/models/static/legal-type/legal-type.response";
+import { AccOnlineCategoryModel } from "@/models/static/acc-online-category/acc-online-category.response";
 import { BranchModel } from "@/models/branch/branch.response";
 import { LocationSubmitData } from "@/models/open-acc-online/address/open-acc-address.request.model";
 import { formatDate } from "@/constants/AppResource/format-date/format-dd-mm-yyyy";
@@ -22,6 +23,7 @@ interface UseAccountSubmissionProps {
   selectedReferenceBank: ReferenceModel | null;
   selectedLegalType: LegalTypeModel | null;
   selectedBranch: BranchModel | null;
+  selectedCategory: AccOnlineCategoryModel | null;
   staffCode: string;
   locationData: LocationSubmitData;
   convertGenderToAPI: (gender: string) => string;
@@ -57,6 +59,7 @@ export const useAccountSubmission = ({
   selectedReferenceBank,
   selectedLegalType,
   selectedBranch,
+  selectedCategory,
   staffCode,
   locationData,
   convertGenderToAPI,
@@ -253,6 +256,7 @@ export const useAccountSubmission = ({
         nidImageName: nidFileName!,
         selfieImageName: selfieFileName!,
         customerRole: "OWNER",
+        accountType: selectedCategory?.lookupId || "6011",
       };
 
       const response = await createOpenAccountService(accountData);

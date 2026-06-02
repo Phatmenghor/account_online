@@ -2,10 +2,12 @@ package com.internal.feature.master_data.controller;
 
 import com.internal.exceptions.response.ApiResponse;
 import com.internal.feature.master_data.dto.request.PublicReferenceRequest;
+import com.internal.feature.master_data.dto.response.AccOnlineCategoryDto;
 import com.internal.feature.master_data.dto.response.MaritalStatusDto;
 import com.internal.feature.master_data.dto.response.OccupationDto;
 import com.internal.feature.master_data.dto.response.LegalTypeDto;
 import com.internal.feature.master_data.dto.response.ReferenceDto;
+import com.internal.feature.master_data.service.AccOnlineCategoryService;
 import com.internal.feature.master_data.service.MaritalStatusService;
 import com.internal.feature.master_data.service.OccupationService;
 import com.internal.feature.master_data.service.LegalTypeService;
@@ -28,6 +30,7 @@ public class PublicReferenceController {
     private final MaritalStatusService maritalStatusService;
     private final ReferenceService referenceService;
     private final LegalTypeService legalTypeService;
+    private final AccOnlineCategoryService accOnlineCategoryService;
 
     @PostMapping("/occupation/all")
     public ResponseEntity<ApiResponse<List<OccupationDto>>> getAllOccupations(@RequestBody PublicReferenceRequest request) {
@@ -67,5 +70,15 @@ public class PublicReferenceController {
         long duration = System.currentTimeMillis() - startTime;
         log.info("✓ SUCCESS: Retrieved {} legal types ({}ms)", list.size(), duration);
         return ResponseEntity.ok(ApiResponse.success(ResponseMessage.retrieved(ResponseMessage.ALL_LEGAL_TYPES), list));
+    }
+
+    @PostMapping("/acc-online-category/all")
+    public ResponseEntity<ApiResponse<List<AccOnlineCategoryDto>>> getAllAccOnlineCategories(@RequestBody PublicReferenceRequest request) {
+        long startTime = System.currentTimeMillis();
+        log.info(">>> FETCHING ACC ONLINE CATEGORIES");
+        List<AccOnlineCategoryDto> list = accOnlineCategoryService.getAll(request.getSearch());
+        long duration = System.currentTimeMillis() - startTime;
+        log.info("✓ SUCCESS: Retrieved {} categories ({}ms)", list.size(), duration);
+        return ResponseEntity.ok(ApiResponse.success("Categories retrieved successfully.", list));
     }
 }

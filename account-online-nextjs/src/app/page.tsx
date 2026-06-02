@@ -116,6 +116,10 @@ function OpenAccountContent() {
     isLegalTypeLoading,
     selectedLegalType,
     setSelectedLegalType,
+    accOnlineCategories,
+    isLoadingCategories,
+    selectedCategory,
+    setSelectedCategory,
     getMaritalName,
     getOccupationName,
     getReferenceName,
@@ -198,6 +202,7 @@ function OpenAccountContent() {
     selectedReferenceBank,
     selectedLegalType,
     selectedBranch,
+    selectedCategory,
     staffCode,
     locationData,
     convertGenderToAPI,
@@ -441,6 +446,10 @@ function OpenAccountContent() {
                   onBranchChange={handleBranchChange}
                   staffCode={staffCode}
                   setStaffCode={handleSetStaffCode}
+                  accOnlineCategories={accOnlineCategories}
+                  selectedCategory={selectedCategory}
+                  setSelectedCategory={setSelectedCategory}
+                  isLoadingCategories={isLoadingCategories}
                   isVerified={isVerified}
                 />
               </div>

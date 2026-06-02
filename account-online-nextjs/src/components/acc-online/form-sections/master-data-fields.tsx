@@ -13,6 +13,7 @@ import { MaritalModel } from "@/models/static/marital/marital.response";
 import { OccupationModel } from "@/models/static/occupation/occupation.response";
 import { ReferenceModel } from "@/models/static/reference/reference.response";
 import { BranchModel } from "@/models/branch/branch.response";
+import { AccOnlineCategoryModel } from "@/models/static/acc-online-category/acc-online-category.response";
 import { useFormState } from "@/contexts/form-state-context";
 import { CheckCircle } from "lucide-react";
 
@@ -36,6 +37,10 @@ interface MasterDataFieldsProps {
   onBranchChange: (branch: BranchModel) => void;
   staffCode: string;
   setStaffCode: (value: string) => void;
+  accOnlineCategories: AccOnlineCategoryModel[];
+  selectedCategory: AccOnlineCategoryModel | null;
+  setSelectedCategory: (value: AccOnlineCategoryModel | null) => void;
+  isLoadingCategories: boolean;
   isVerified?: boolean;
 }
 
@@ -59,6 +64,10 @@ export const MasterDataFields: React.FC<MasterDataFieldsProps> = ({
   onBranchChange,
   staffCode,
   setStaffCode,
+  accOnlineCategories,
+  selectedCategory,
+  setSelectedCategory,
+  isLoadingCategories,
   isVerified = false,
 }) => {
   // Get values from FormStateContext
@@ -184,6 +193,32 @@ export const MasterDataFields: React.FC<MasterDataFieldsProps> = ({
         {validationErrors.branch && (
           <p className="text-xs text-red-500">{translate("err_branch")}</p>
         )}
+      </div>
+
+      {/* Account Product */}
+      <div className="md:col-span-2 space-y-1">
+        <Label className="text-sm sm:text-base mb-1 block">Account Product</Label>
+        <Select
+          value={selectedCategory?.id.toString() || ""}
+          onValueChange={(value) => {
+            const category = accOnlineCategories.find((c) => c.id.toString() === value);
+            setSelectedCategory(category || null);
+          }}
+          disabled={isLoading || isValidating || isLoadingCategories}
+        >
+          <SelectTrigger className="w-full h-10 text-sm">
+            <SelectValue
+              placeholder={isLoadingCategories ? translate("loading") : "Select product"}
+            />
+          </SelectTrigger>
+          <SelectContent>
+            {accOnlineCategories.map((cat) => (
+              <SelectItem key={cat.id} value={cat.id.toString()}>
+                {cat.lookupName}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Reference */}

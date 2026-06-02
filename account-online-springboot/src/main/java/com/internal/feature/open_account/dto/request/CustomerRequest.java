@@ -216,4 +216,7 @@ public class CustomerRequest {
 
     @JsonProperty("customer_pob_village_kh")
     private String customerPobVillageKh;
+
+    @JsonProperty("account_type")
+    private String accountType;
 }

@@ -10,6 +10,8 @@ import { ReferenceModel } from "@/models/static/reference/reference.response";
 import { BranchModel } from "@/models/branch/branch.response";
 import { LegalTypeModel } from "@/models/static/legal-type/legal-type.response";
 import { getAllPublicLegalTypeService } from "@/services/dashboard/legal-type/legal-type.service";
+import { AccOnlineCategoryModel } from "@/models/static/acc-online-category/acc-online-category.response";
+import { getAllPublicAccOnlineCategoryService } from "@/services/dashboard/acc-online-category/acc-online-category.service";
 
 /**
  * Generic hook for fetching data with loading and error states
@@ -129,6 +131,36 @@ export const useReferenceBanks = (): UseFetchDataResult<ReferenceModel> => {
       console.error("Failed to fetch reference banks:", err);
       setError(err);
       AppToast({ type: "error", message: "Failed to load reference banks" });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  return { data, isLoading, error, refetch: fetchData };
+};
+
+/**
+ * Hook to fetch acc_online_category list
+ */
+export const useAccOnlineCategories = (): UseFetchDataResult<AccOnlineCategoryModel> => {
+  const [data, setData] = useState<AccOnlineCategoryModel[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
+
+  const fetchData = async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const response = await getAllPublicAccOnlineCategoryService({});
+      setData(response || []);
+    } catch (err: any) {
+      console.error("Failed to fetch acc online categories:", err);
+      setError(err);
+      AppToast({ type: "error", message: "Failed to load product categories" });
     } finally {
       setIsLoading(false);
     }
