@@ -134,8 +134,8 @@ export default function RegisterPage() {
       setOtpError("");
       setTimeout(() => inputRefs.current[0]?.focus(), 100);
       AppToast({ type: "success", message: "New code sent", description: `Check your email: ${pendingEmail}` });
-    } catch {
-      AppToast({ type: "error", message: "Failed to resend. Please try again." });
+    } catch (err: any) {
+      AppToast({ type: "error", message: err?.response?.data?.message || "Failed to resend the verification code. Please try again." });
     } finally {
       setIsLoading(false);
     }
