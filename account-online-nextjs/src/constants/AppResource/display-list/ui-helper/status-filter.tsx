@@ -17,6 +17,7 @@ export default function StatusFilter({
 
   const STATUS_FILTER = [
     { value: Status.ACTIVE, label: t("active") },
+    { value: Status.INACTIVE, label: t("inactive") },
     { value: Status.DELETE, label: t("delete") },
   ];
 

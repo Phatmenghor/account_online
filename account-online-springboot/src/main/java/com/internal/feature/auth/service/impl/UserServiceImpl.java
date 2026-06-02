@@ -146,7 +146,7 @@ public class UserServiceImpl implements UserService {
         boolean hasStatus = status != null;
         boolean hasRoles = roles != null && !roles.isEmpty();
 
-        List<StatusData> statuses = hasStatus ? Collections.singletonList(status) : Arrays.asList(StatusData.ACTIVE, StatusData.DELETE);
+        List<StatusData> statuses = hasStatus ? Collections.singletonList(status) : Arrays.asList(StatusData.ACTIVE, StatusData.INACTIVE, StatusData.DELETE);
 
         if (hasRoles) {
             List<RoleEnum> roleEnums = roles.stream()

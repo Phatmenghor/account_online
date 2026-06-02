@@ -55,16 +55,21 @@ public class AuthServiceImpl implements AuthService {
         log.info("Processing login request for user: {}", loginDto.getUsername());
 
         UserEntity userEntity = userRepository.findByUsername(loginDto.getUsername())
-                .orElseThrow(() -> new UnauthorizedException("Invalid username or password."));
+                .orElseThrow(() -> new UnauthorizedException("User not found."));
 
-        if (userEntity.getStatus() != StatusData.ACTIVE) {
-            log.warn("Login rejected: User {} is not active", loginDto.getUsername());
+        if (userEntity.getStatus() == StatusData.INACTIVE) {
+            log.warn("Login rejected: User {} account is inactive", loginDto.getUsername());
+            throw new UnauthorizedException("Your account is inactive. Please contact an administrator.");
+        }
+
+        if (userEntity.getStatus() == StatusData.DELETE) {
+            log.warn("Login rejected: User {} account has been deleted", loginDto.getUsername());
             throw new UnauthorizedException("Your account has been deactivated. Please contact an administrator.");
         }
 
         if (!passwordEncoder.matches(loginDto.getPassword(), userEntity.getPassword())) {
-            log.warn("Login failed: Invalid password for user {}", loginDto.getUsername());
-            throw new UnauthorizedException("Invalid username or password.");
+            log.warn("Login failed: Incorrect password for user {}", loginDto.getUsername());
+            throw new UnauthorizedException("Incorrect password.");
         }
 
         userEntity.setLastLogin(LocalDateTime.now(ZoneId.of("Asia/Phnom_Penh")));

@@ -325,7 +325,7 @@ export default function ModalUser({
                                 {STATUS_USER_OPTIONS.map((s) => (
                                   <SelectItem key={s.value} value={s.value}>
                                     <div className="flex items-center gap-2">
-                                      <div className={`w-2 h-2 rounded-full ${s.value === Status.ACTIVE ? "bg-green-500" : "bg-gray-400"}`} />
+                                      <div className={`w-2 h-2 rounded-full ${s.value === Status.ACTIVE ? "bg-green-500" : s.value === Status.INACTIVE ? "bg-yellow-400" : "bg-gray-400"}`} />
                                       {s.label}
                                     </div>
                                   </SelectItem>

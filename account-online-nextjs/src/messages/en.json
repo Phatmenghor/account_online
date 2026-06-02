@@ -29,6 +29,7 @@
     "status": {
       "all": "All Status",
       "active": "Active",
+      "inactive": "Inactive",
       "delete": "Delete"
     },
     "chooseOne": "--- Choose one ---",
