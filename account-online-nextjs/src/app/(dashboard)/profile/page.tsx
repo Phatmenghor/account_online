@@ -18,6 +18,7 @@ import {
   UpdateUserProfileSchema,
 } from "@/models/auth/profile.schema";
 import { Status } from "@/constants/AppResource/display-list/enum/status";
+import { useSearchParams } from "next/navigation";
 
 export interface Image {
   type: string;
@@ -25,6 +26,8 @@ export interface Image {
 }
 
 export default function ProfilePage() {
+  const searchParams = useSearchParams();
+  const defaultTab = searchParams.get("tab") === "password" ? "password" : "account";
   const [isLoading, setIsLoading] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [imageData, setImageData] = useState<Image | null>(null);
@@ -170,7 +173,7 @@ export default function ProfilePage() {
       <div className="flex flex-col gap-4">
         <h1 className="text-2xl font-bold tracking-tight">My Profile</h1>
 
-        <Tabs defaultValue="account" className="space-y-4">
+        <Tabs defaultValue={defaultTab} className="space-y-4">
           <TabsList>
             <TabsTrigger value="account" className="flex items-center gap-2">
               <User className="h-4 w-4" /> Account
