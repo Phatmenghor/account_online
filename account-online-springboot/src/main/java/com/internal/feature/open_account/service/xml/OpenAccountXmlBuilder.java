@@ -47,9 +47,6 @@ public class OpenAccountXmlBuilder {
         String pobCommune = getOrDefault(request.getCustomerPobCommune(), "");
         String pobVillage = getOrDefault(request.getCustomerPobVillage(), "");
 
-        String referralId = getOrDefault(request.getReferralId(), "");
-        String releasedBy = getOrDefault(request.getReleasedBy(), "");
-
         // Format dates to T24 format (YYYYMMDD)
         String dateOfBirth = formatDateForT24(request.getDateOfBirth());
         String legalIssueDate = formatLegalIssueDateWithDefault(request.getLegalIssueDate());
@@ -149,7 +146,7 @@ public class OpenAccountXmlBuilder {
                 + "<cus:RelationManager></cus:RelationManager>"
                 + "<cus:LoanOfficer></cus:LoanOfficer>"
                 + "<cus:Staff></cus:Staff>"
-                + "<cus:ReferralBy>" + releasedBy + "</cus:ReferralBy>"
+                + "<cus:ReferralBy></cus:ReferralBy>"
 
                 // Place of birth address (Primary P fields)
                 + "<cus:CUSTPROVINCEP>" + pobProvince + "</cus:CUSTPROVINCEP>"
