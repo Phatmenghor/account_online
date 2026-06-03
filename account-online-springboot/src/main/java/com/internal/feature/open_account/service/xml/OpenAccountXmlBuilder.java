@@ -319,8 +319,8 @@ public class OpenAccountXmlBuilder {
                 log.warn("Could not parse legal issue date '{}', using default yesterday", date);
             }
         }
-        String fallback = today.format(T24_DATE_FORMATTER);
-        log.debug("formatLegalIssueDateWithDefault: using fallback today={}", fallback);
+        String fallback = today.minusYears(1).format(T24_DATE_FORMATTER);
+        log.debug("formatLegalIssueDateWithDefault: using fallback 1 year ago={}", fallback);
         return fallback;
     }
 
