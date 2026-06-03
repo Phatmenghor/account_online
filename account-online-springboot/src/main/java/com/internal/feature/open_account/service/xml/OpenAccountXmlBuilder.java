@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
 @Component
@@ -51,6 +52,7 @@ public class OpenAccountXmlBuilder {
         String dateOfBirth = formatDateForT24(request.getDateOfBirth());
         String legalIssueDate = formatLegalIssueDateWithDefault(request.getLegalIssueDate());
         String legalExpDate = formatDateForT24NoFutureCheck(request.getLegalExpireDate());
+        log.info("T24 date fields | DOB={} | IssDate={} (raw='{}') | ExpDate={}", dateOfBirth, legalIssueDate, request.getLegalIssueDate(), legalExpDate);
 
         // Determine title from gender (use request title if provided)
         String title = getOrDefault(request.getTitle(), determineTitle(request.getGender()));
@@ -300,19 +302,26 @@ public class OpenAccountXmlBuilder {
     }
 
     private String formatLegalIssueDateWithDefault(String date) {
+        log.debug("formatLegalIssueDateWithDefault: input='{}'", date);
+        LocalDate today = LocalDate.now(ZoneId.of("Asia/Phnom_Penh"));
         if (date != null && !date.isEmpty()) {
             try {
                 LocalDate localDate = date.matches("\\d{8}")
                         ? LocalDate.parse(date, T24_DATE_FORMATTER)
                         : LocalDate.parse(date, DATE_FORMATTER);
-                if (!localDate.isAfter(LocalDate.now())) {
-                    return localDate.format(T24_DATE_FORMATTER);
+                if (!localDate.isAfter(today)) {
+                    String result = localDate.format(T24_DATE_FORMATTER);
+                    log.debug("formatLegalIssueDateWithDefault: parsed={}, result={}", localDate, result);
+                    return result;
                 }
+                log.warn("formatLegalIssueDateWithDefault: date '{}' is in the future (parsed={}, today={}), capping to yesterday", date, localDate, today);
             } catch (Exception e) {
                 log.warn("Could not parse legal issue date '{}', using default yesterday", date);
             }
         }
-        return LocalDate.now().minusDays(1).format(T24_DATE_FORMATTER);
+        String fallback = today.minusDays(1).format(T24_DATE_FORMATTER);
+        log.debug("formatLegalIssueDateWithDefault: using fallback yesterday={}", fallback);
+        return fallback;
     }
 
     private String determineTitle(String gender) {
