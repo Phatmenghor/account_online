@@ -8,8 +8,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.event.TransactionPhase;
-import org.springframework.transaction.event.TransactionalEventListener;
 
 @Component
 @RequiredArgsConstructor
@@ -18,7 +16,7 @@ public class AccountOpenedEventListener {
 
     private final ReportingService reportingService;
 
-    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    @EventListener
     public void handleAccountOpenedEvent(AccountOpenedEvent event) {
         OpenAccountContext context = event.getContext();
         log.info("Processing post-opening events for Legal ID: {}", context.getRequest().getLegalId());
@@ -39,8 +37,7 @@ public class AccountOpenedEventListener {
                 accInfo,
                 context.getAmlResult(),
                 imagePaths,
-                context.getMbActivationCode(),
-                context.getSubmittedBy()
+                context.getMbActivationCode()
         );
 
         // Step 12: Report log

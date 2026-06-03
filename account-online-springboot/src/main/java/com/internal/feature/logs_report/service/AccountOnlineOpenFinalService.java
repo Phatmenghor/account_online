@@ -28,8 +28,7 @@ public interface AccountOnlineOpenFinalService {
             CustomerResponse accountInfo,
             AmlStatusDto amlProcessResult,
             CustomerImageUploadResponseDto imagePaths,
-            String mbActivationCode,
-            String submittedBy
+            String mbActivationCode
     );
 
     AllAccountOnlineFinalResponseDto getSuccessOpenAccount(AllAccountOnlineSuccessRequestDto request);
