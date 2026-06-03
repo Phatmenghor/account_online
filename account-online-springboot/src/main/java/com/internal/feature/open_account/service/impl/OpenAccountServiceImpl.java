@@ -42,7 +42,7 @@ public class OpenAccountServiceImpl implements OpenAccountService {
 
         log.info("Processing account opening | Legal ID: {} | Submitted by: {}", legalId, submittedBy);
 
-        OpenAccountContext context = OpenAccountContext.builder().request(request).build();
+        OpenAccountContext context = OpenAccountContext.builder().request(request).submittedBy(submittedBy).build();
 
         try {
             log.info("Step 1: Testing connection | Legal ID: {}", legalId);

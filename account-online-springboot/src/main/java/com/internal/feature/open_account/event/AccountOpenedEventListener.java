@@ -39,7 +39,8 @@ public class AccountOpenedEventListener {
                 accInfo,
                 context.getAmlResult(),
                 imagePaths,
-                context.getMbActivationCode()
+                context.getMbActivationCode(),
+                context.getSubmittedBy()
         );
 
         // Step 12: Report log

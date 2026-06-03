@@ -50,18 +50,12 @@ public class AccountOnlineOpenFinalServiceImpl implements AccountOnlineOpenFinal
             CustomerResponse accountInfo,
             AmlStatusDto amlProcessResult,
             CustomerImageUploadResponseDto imagePaths,
-            String mbActivationCode
+            String mbActivationCode,
+            String submittedBy
 
     ) {
         try {
             log.info("Attempting to save AccountOnlineFinal for Legal ID: {}", request.getLegalId());
-
-            String submittedBy = "System";
-            com.internal.feature.auth.models.UserEntity submittedByUser = null;
-            try {
-                submittedByUser = securityUtils.getCurrentUser();
-                submittedBy = submittedByUser.getUsername();
-            } catch (Exception ignored) {}
 
             LocalDate dob = parseDate(request.getDateOfBirth());
             LocalDate issueDate = parseDate(request.getLegalIssueDate());
@@ -181,7 +175,6 @@ public class AccountOnlineOpenFinalServiceImpl implements AccountOnlineOpenFinal
                     .nidImageName(imagePaths != null ? imagePaths.getNidImagePath() : request.getNidImageName())
                     .selfieImageName(imagePaths != null ? imagePaths.getSelfieImagePath() : request.getSelfieImageName())
                     .submittedBy(submittedBy)
-                    .submittedByUser(submittedByUser)
                     .build();
 
             AccountOnlineFinal savedLog = accountOnlineFinalRepository.save(finalLog);
