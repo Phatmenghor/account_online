@@ -244,6 +244,7 @@ public class AuthServiceImpl implements AuthService {
         user.setPassword(passwordEncoder.encode(pendingData.getPassword()));
         user.setStatus(StatusData.ACTIVE);
         user.setRoles(Collections.singletonList(role));
+        user.setPasswordChangedAt(LocalDateTime.now(ZoneId.of("Asia/Phnom_Penh")));
         user.setLastLogin(LocalDateTime.now(ZoneId.of("Asia/Phnom_Penh")));
         userRepository.save(user);
 

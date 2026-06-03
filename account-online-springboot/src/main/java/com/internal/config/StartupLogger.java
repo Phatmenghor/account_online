@@ -21,7 +21,7 @@ public class StartupLogger {
         String port = env.getProperty("local.server.port", "8080");
         String[] profiles = env.getActiveProfiles();
 
-        log.info("New Bro");
+        log.info("New Bro Hi");
         log.info("============================================================");
         log.info("Account Online Application STARTED SUCCESSFULLY");
         log.info("------------------------------------------------------------");
