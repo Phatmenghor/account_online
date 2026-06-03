@@ -109,7 +109,7 @@ public class OpenAccountXmlBuilder {
                 + "<cus:LegalIssAuth>" + getOrDefault(request.getLegalIssAuth(), request.getGivenName())
                 + "</cus:LegalIssAuth>"
                 + "<cus:LegalIssDate>" + legalIssueDate + "</cus:LegalIssDate>"
-                + "<cus:LegalExpDate>" + legalExpDate + "</cus:LegalExpDate>"
+                + "<cus:LegalExpDate>" + request.getLegalExpireDate() + "</cus:LegalExpDate>"
                 + "</cus:mLEGALID></cus:gLEGALID>"
 
                 // Language
