@@ -112,7 +112,7 @@ public class AccountOnlineOpenFinalServiceImpl implements AccountOnlineOpenFinal
                     .occupation(request.getOccupation())
                     .averageIncome("0")
                     .referralId(request.getReferralId())
-                    .releasedBy("")
+                    .releasedBy(request.getReleasedBy())
 
                     // Branch
                     .branchCode(request.getBranchCode())
