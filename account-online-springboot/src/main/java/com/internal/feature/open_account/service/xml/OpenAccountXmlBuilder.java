@@ -304,23 +304,24 @@ public class OpenAccountXmlBuilder {
     private String formatLegalIssueDateWithDefault(String date) {
         log.debug("formatLegalIssueDateWithDefault: input='{}'", date);
         LocalDate today = LocalDate.now(ZoneId.of("Asia/Phnom_Penh"));
+        LocalDate maxAllowed = today.minusYears(1);
         if (date != null && !date.isEmpty()) {
             try {
                 LocalDate localDate = date.matches("\\d{8}")
                         ? LocalDate.parse(date, T24_DATE_FORMATTER)
                         : LocalDate.parse(date, DATE_FORMATTER);
-                if (!localDate.isAfter(today)) {
+                if (!localDate.isAfter(maxAllowed)) {
                     String result = localDate.format(T24_DATE_FORMATTER);
                     log.debug("formatLegalIssueDateWithDefault: parsed={}, result={}", localDate, result);
                     return result;
                 }
-                log.warn("formatLegalIssueDateWithDefault: date '{}' is in the future (parsed={}, today={}), capping to yesterday", date, localDate, today);
+                log.warn("formatLegalIssueDateWithDefault: date '{}' exceeds max allowed {} (today-1yr), capping", date, maxAllowed);
             } catch (Exception e) {
-                log.warn("Could not parse legal issue date '{}', using default yesterday", date);
+                log.warn("Could not parse legal issue date '{}', using default 1 year ago", date);
             }
         }
-        String fallback = today.minusYears(1).format(T24_DATE_FORMATTER);
-        log.debug("formatLegalIssueDateWithDefault: using fallback 1 year ago={}", fallback);
+        String fallback = maxAllowed.format(T24_DATE_FORMATTER);
+        log.debug("formatLegalIssueDateWithDefault: using fallback 1-year-ago={}", fallback);
         return fallback;
     }
 
