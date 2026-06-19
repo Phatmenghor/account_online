@@ -31,8 +31,6 @@ public class UserEntity extends BaseEntity {
 
     private String profileUrl;
 
-    private String staffId;
-
     private String phoneNumber;
 
     private String department;

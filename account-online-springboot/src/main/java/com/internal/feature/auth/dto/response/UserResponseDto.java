@@ -20,7 +20,6 @@ public class UserResponseDto {
     private String fullName;
     private String position;
     private String profileUrl;
-    private String staffId;
     private String phoneNumber;
     private String branch;
     private String department;

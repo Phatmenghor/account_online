@@ -36,7 +36,6 @@ export interface SubmittedByUser {
   fullName: string;
   position: string;
   profileUrl: string;
-  staffId: string | null;
   phoneNumber: string | null;
   branch: string | null;
   department: string | null;

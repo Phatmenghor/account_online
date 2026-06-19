@@ -30,7 +30,6 @@ public interface AccountOnlineFinalMapper {
                 .fullName(user.getFullName())
                 .position(user.getPosition())
                 .profileUrl(user.getProfileUrl())
-                .staffId(user.getStaffId())
                 .phoneNumber(user.getPhoneNumber())
                 .branch(user.getBranch())
                 .department(user.getDepartment())

@@ -11,7 +11,6 @@ public class UpdateUserRequestDto {
     private StatusData status;
     private String profileUrl;
     private String position;
-    private String staffId;
     private String phoneNumber;
     private String branch;
     private String department;

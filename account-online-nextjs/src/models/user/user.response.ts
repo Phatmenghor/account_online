@@ -16,7 +16,6 @@ export interface UserModel {
   fullName: string;
   position: string;
   profileUrl: string;
-  staffId: string;
   phoneNumber: string;
   branch: string;
   department: string;

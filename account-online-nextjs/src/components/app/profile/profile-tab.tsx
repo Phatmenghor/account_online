@@ -76,11 +76,10 @@ export default function ProfileTab({
   const readOnlyFields = ["username", "status"];
 
   const formFields: { name: keyof UpdateUserProfileForm; label: string }[] = [
-    { name: "username", label: "Username" },
+    { name: "username", label: "ID Card" },
     { name: "email", label: "Email" },
     { name: "fullName", label: "Full Name" },
     { name: "position", label: "Position" },
-    { name: "staffId", label: "Staff ID" },
     { name: "phoneNumber", label: "Phone Number" },
     { name: "branch", label: "Branch" },
     { name: "department", label: "Department" },
@@ -136,7 +135,6 @@ export default function ProfileTab({
         status: user.userStatus || Status.ACTIVE,
         position: user.position || "",
         profileUrl: user.profileUrl || "",
-        staffId: user.staffId || "",
         phoneNumber: user.phoneNumber || "",
         branch: user.branch || "",
         department: user.department || "",

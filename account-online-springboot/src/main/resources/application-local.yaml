@@ -39,7 +39,7 @@ oracle:
       connection-timeout: 30000
       idle-timeout: 600000
       max-lifetime: 1800000
-      initialization-fail-fast: false
+      initialization-fail-timeout: -1
       pool-name: Oracle-DWH-Pool
   stg:
     datasource:
@@ -53,8 +53,25 @@ oracle:
       connection-timeout: 30000
       idle-timeout: 600000
       max-lifetime: 1800000
-      initialization-fail-fast: false
+      initialization-fail-timeout: -1
       pool-name: Oracle-STG-Pool
+
+# MSSQL — Staff (HR) lookup database
+mssql:
+  staff:
+    datasource:
+      jdbc-url: jdbc:sqlserver://192.168.103.71:1433;databaseName=CPBHD;encrypt=true;trustServerCertificate=true
+      username: cpb_int
+      password: 123cp!@#
+      driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+      maximum-pool-size: 10
+      minimum-idle: 0
+      connection-timeout: 30000
+      idle-timeout: 60000000
+      max-lifetime: 1800000
+      initialization-fail-timeout: -1
+      pool-name: MSSQL-Staff-Pool
+
 # Simulators — all disabled by default
 simulator:
   report-logs: false

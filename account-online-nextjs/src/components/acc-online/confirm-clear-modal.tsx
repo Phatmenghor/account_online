@@ -37,17 +37,17 @@ export const ConfirmClearModal = ({
                         transition={{ type: "spring", damping: 25, stiffness: 300 }}
                         className="relative bg-white w-full sm:max-w-sm rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden z-10"
                     >
-                        <div className="h-1.5 w-full bg-gradient-to-r from-orange-400 via-orange-500 to-amber-500" />
+                        <div className="h-1.5 w-full bg-primary" />
 
                         <div className="px-6 pt-7 pb-6">
-                            <div className="flex items-center justify-center w-14 h-14 bg-gradient-to-br from-orange-100 to-amber-100 border border-orange-200 rounded-lg mx-auto mb-4">
-                                <Trash2 className="text-orange-500" style={{ width: 24, height: 24 }} />
+                            <div className="flex items-center justify-center w-14 h-14 bg-primary/10 border border-primary/20 rounded-lg mx-auto mb-4">
+                                <Trash2 className="text-primary" style={{ width: 24, height: 24 }} />
                             </div>
 
-                            <h3 className="text-base sm:text-lg font-bold text-gray-800 text-center mb-2">
+                            <h3 className="text-lg sm:text-xl font-bold text-gray-800 text-center mb-2">
                                 {title || "Clear Form?"}
                             </h3>
-                            <p className="text-sm text-gray-500 text-center mb-6 leading-relaxed">
+                            <p className="text-base text-gray-500 text-center mb-6 leading-relaxed">
                                 {message || "Are you sure you want to clear all fields? This action cannot be undone."}
                             </p>
 
@@ -56,7 +56,7 @@ export const ConfirmClearModal = ({
                                     whileHover={{ scale: 1.01 }}
                                     whileTap={{ scale: 0.99 }}
                                     onClick={onClose}
-                                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 border-2 border-gray-200 text-gray-600 font-semibold rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-all text-sm"
+                                    className="flex-1 h-12 flex items-center justify-center gap-2 px-4 border-2 border-gray-200 text-gray-600 font-semibold rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-all text-base"
                                 >
                                     <X className="w-4 h-4" />
                                     Cancel
@@ -65,7 +65,7 @@ export const ConfirmClearModal = ({
                                     whileHover={{ scale: 1.01 }}
                                     whileTap={{ scale: 0.99 }}
                                     onClick={onConfirm}
-                                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-semibold rounded-lg transition-all shadow-sm text-sm"
+                                    className="flex-1 h-12 flex items-center justify-center gap-2 px-4 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-lg transition-all shadow-sm text-base"
                                 >
                                     <Trash2 className="w-4 h-4" />
                                     Clear All

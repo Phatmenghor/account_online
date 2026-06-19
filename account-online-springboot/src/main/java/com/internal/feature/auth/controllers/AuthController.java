@@ -3,7 +3,6 @@ package com.internal.feature.auth.controllers;
 import com.internal.exceptions.response.ApiResponse;
 import com.internal.feature.auth.dto.request.*;
 import com.internal.feature.auth.dto.response.AuthResponseDTO;
-import com.internal.feature.auth.dto.response.RegisterInitiateResponse;
 import com.internal.feature.auth.dto.response.UserResponseDto;
 import com.internal.feature.auth.service.AuthService;
 import com.internal.utils.constants.ResponseMessage;
@@ -33,19 +32,11 @@ public class AuthController {
         return ResponseEntity.ok(ApiResponse.success(ResponseMessage.LOGIN_SUCCESS, authResponse));
     }
 
-    @PostMapping("/register/initiate")
-    public ResponseEntity<ApiResponse<RegisterInitiateResponse>> registerInitiate(
+    @PostMapping("/register/public")
+    public ResponseEntity<ApiResponse<AuthResponseDTO>> register(
             @Valid @RequestBody RegisterInitiateDto dto) {
-        log.info("Registration initiation for email: {}", dto.getEmail());
-        RegisterInitiateResponse response = authService.registerInitiate(dto);
-        return ResponseEntity.ok(ApiResponse.success("Verification code sent to your email.", response));
-    }
-
-    @PostMapping("/register/verify")
-    public ResponseEntity<ApiResponse<AuthResponseDTO>> registerVerify(
-            @Valid @RequestBody RegisterVerifyDto dto) {
-        log.info("Registration verification for email: {}", dto.getEmail());
-        AuthResponseDTO authResponse = authService.registerVerify(dto);
+        log.info("Registration request for ID Card: {}", dto.getIdCard());
+        AuthResponseDTO authResponse = authService.register(dto);
         return ResponseEntity.ok(ApiResponse.success("Registration completed successfully.", authResponse));
     }
 

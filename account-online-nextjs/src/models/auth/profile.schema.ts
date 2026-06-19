@@ -7,7 +7,6 @@ export const UpdateUserProfileSchema = z.object({
   status: z.string().optional(),
   profileUrl: z.string().optional(),
   position: z.string().optional(),
-  staffId: z.string().optional(),
   phoneNumber: z.string().optional(),
   branch: z.string().optional(),
   department: z.string().optional(),

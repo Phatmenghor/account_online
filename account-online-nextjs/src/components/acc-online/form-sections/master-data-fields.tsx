@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -11,11 +11,14 @@ import {
 import { ComboboxSelectBranch } from "@/components/shared/combo-box/combobox-branch";
 import { MaritalModel } from "@/models/static/marital/marital.response";
 import { OccupationModel } from "@/models/static/occupation/occupation.response";
-import { ReferenceModel } from "@/models/static/reference/reference.response";
 import { BranchModel } from "@/models/branch/branch.response";
 import { AccOnlineCategoryModel } from "@/models/static/acc-online-category/acc-online-category.response";
 import { useFormState } from "@/contexts/form-state-context";
-import { CheckCircle } from "lucide-react";
+import { CheckCircle, Loader2 } from "lucide-react";
+import { findStaffByIdCardService } from "@/services/auth/register.service";
+import { getUserInfo } from "@/utils/local-storage/userInfo";
+
+const STAFF_LOOKUP_DEBOUNCE_MS = 450;
 
 interface MasterDataFieldsProps {
   maritalStatuses: MaritalModel[];
@@ -28,11 +31,6 @@ interface MasterDataFieldsProps {
   setSelectedOccupation: (value: OccupationModel | null) => void;
   isLoadingOccupations: boolean;
   getOccupationName: (item: OccupationModel) => string;
-  referenceBanks: ReferenceModel[];
-  selectedReferenceBank: ReferenceModel | null;
-  setSelectedReferenceBank: (value: ReferenceModel | null) => void;
-  isLoadingReferenceBanks: boolean;
-  getReferenceName: (item: ReferenceModel) => string;
   selectedBranch: BranchModel | null;
   onBranchChange: (branch: BranchModel) => void;
   staffCode: string;
@@ -55,11 +53,6 @@ export const MasterDataFields: React.FC<MasterDataFieldsProps> = ({
   setSelectedOccupation,
   isLoadingOccupations,
   getOccupationName,
-  referenceBanks,
-  selectedReferenceBank,
-  setSelectedReferenceBank,
-  isLoadingReferenceBanks,
-  getReferenceName,
   selectedBranch,
   onBranchChange,
   staffCode,
@@ -79,10 +72,64 @@ export const MasterDataFields: React.FC<MasterDataFieldsProps> = ({
     translate,
     translateSelect,
     validateField,
+    handleValidationChange,
   } = useFormState();
 
+  const [isVerifyingStaff, setIsVerifyingStaff] = useState(false);
+  const lookupTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lookupSeq = useRef(0);
+  const prefillDone = useRef(false);
+
+  async function verifyStaffCode(code: string) {
+    const seq = ++lookupSeq.current;
+    setIsVerifyingStaff(true);
+    try {
+      await findStaffByIdCardService(code);
+      if (seq !== lookupSeq.current) return;
+      handleValidationChange("staffCode", null);
+    } catch {
+      if (seq !== lookupSeq.current) return;
+      handleValidationChange("staffCode", translate("err_staffCodeNotFound"));
+    } finally {
+      if (seq === lookupSeq.current) setIsVerifyingStaff(false);
+    }
+  }
+
+  function handleStaffCodeChange(value: string) {
+    if (lookupTimer.current) clearTimeout(lookupTimer.current);
+
+    const code = value.trim();
+    if (!code) {
+      lookupSeq.current++;
+      setIsVerifyingStaff(false);
+      return;
+    }
+
+    lookupTimer.current = setTimeout(
+      () => verifyStaffCode(code),
+      STAFF_LOOKUP_DEBOUNCE_MS
+    );
+  }
+
+  useEffect(() => {
+    return () => {
+      if (lookupTimer.current) clearTimeout(lookupTimer.current);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (prefillDone.current || staffCode) return;
+    const user = getUserInfo();
+    if (user?.userRole === "STAFF" && user.idCard) {
+      prefillDone.current = true;
+      setStaffCode(user.idCard);
+      verifyStaffCode(user.idCard);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const renderLabel = (labelKey: string) => (
-    <Label htmlFor={labelKey} className="text-sm sm:text-base mb-1 block">
+    <Label htmlFor={labelKey} className="text-base sm:text-lg font-medium mb-1 block">
       {translate(labelKey)}
       {isVerified && (
         <span className="float-right text-green-600 text-sm flex items-center gap-1">
@@ -110,7 +157,7 @@ export const MasterDataFields: React.FC<MasterDataFieldsProps> = ({
           disabled={isLoading || isValidating || isLoadingMarital}
         >
           <SelectTrigger
-            className={`w-full h-10 text-sm ${validationErrors.maritalStatus ? "border-red-500" : ""}`}
+            className={`w-full h-12 text-base ${validationErrors.maritalStatus ? "border-red-500" : ""}`}
           >
             <SelectValue
               placeholder={
@@ -129,7 +176,7 @@ export const MasterDataFields: React.FC<MasterDataFieldsProps> = ({
           </SelectContent>
         </Select>
         {validationErrors.maritalStatus && (
-          <p className="text-xs text-red-500">
+          <p className="text-sm text-red-500">
             {translate("err_maritalStatus")}
           </p>
         )}
@@ -150,7 +197,7 @@ export const MasterDataFields: React.FC<MasterDataFieldsProps> = ({
           disabled={isLoading || isValidating || isLoadingOccupations}
         >
           <SelectTrigger
-            className={`w-full h-10 text-sm ${validationErrors.occupation ? "border-red-500" : ""}`}
+            className={`w-full h-12 text-base ${validationErrors.occupation ? "border-red-500" : ""}`}
           >
             <SelectValue
               placeholder={
@@ -172,7 +219,7 @@ export const MasterDataFields: React.FC<MasterDataFieldsProps> = ({
           </SelectContent>
         </Select>
         {validationErrors.occupation && (
-          <p className="text-xs text-red-500">{translate("err_occupation")}</p>
+          <p className="text-sm text-red-500">{translate("err_occupation")}</p>
         )}
       </div>
 
@@ -191,13 +238,13 @@ export const MasterDataFields: React.FC<MasterDataFieldsProps> = ({
           />
         </div>
         {validationErrors.branch && (
-          <p className="text-xs text-red-500">{translate("err_branch")}</p>
+          <p className="text-sm text-red-500">{translate("err_branch")}</p>
         )}
       </div>
 
-      {/* Account Product */}
+      {/* Account Type */}
       <div className="space-y-1">
-        {renderLabel("accountProduct")}
+        {renderLabel("accountType")}
         <Select
           value={selectedCategory?.id.toString() || ""}
           onValueChange={(value) => {
@@ -208,7 +255,7 @@ export const MasterDataFields: React.FC<MasterDataFieldsProps> = ({
           disabled={isLoading || isValidating || isLoadingCategories}
         >
           <SelectTrigger
-            className={`w-full h-10 text-sm ${validationErrors.accountProduct ? "border-red-500" : ""}`}
+            className={`w-full h-12 text-base ${validationErrors.accountProduct ? "border-red-500" : ""}`}
           >
             <SelectValue
               placeholder={isLoadingCategories ? translate("loading") : translateSelect("selectAccount")}
@@ -223,62 +270,36 @@ export const MasterDataFields: React.FC<MasterDataFieldsProps> = ({
           </SelectContent>
         </Select>
         {validationErrors.accountProduct && (
-          <p className="text-xs text-red-500">{translate("err_accountProduct")}</p>
+          <p className="text-sm text-red-500">{translate("err_accountProduct")}</p>
         )}
       </div>
 
-      {/* Reference */}
+      {/* Relationship Manager — Staff ID (required) */}
       <div className="md:col-span-2 space-y-1">
-        {renderLabel("reference")}
-        <div className="flex">
-          <Select
-            value={selectedReferenceBank?.id.toString() || ""}
-            onValueChange={(value) => {
-              const reference = referenceBanks.find(
-                (r) => r.id.toString() === value
-              );
-              setSelectedReferenceBank(reference || null);
-              validateField("referenceBank", value);
-            }}
-            disabled={isLoading || isValidating || isLoadingReferenceBanks}
-          >
-            <SelectTrigger
-              className={`w-40 h-10 rounded-r-none ${validationErrors.referenceBank ? "border-red-500" : ""}`}
-            >
-              <SelectValue
-                placeholder={
-                  isLoadingReferenceBanks
-                    ? translate("loading")
-                    : translateSelect("selectRef")
-                }
-              />
-            </SelectTrigger>
-            <SelectContent>
-              {referenceBanks.map((reference) => (
-                <SelectItem key={reference.id} value={reference.id.toString()}>
-                  {getReferenceName(reference)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+        {renderLabel("relationshipManager")}
+        <div className="relative">
           <Input
             placeholder={translate("staffCode")}
             value={staffCode}
             onChange={(e) => {
               setStaffCode(e.target.value);
               validateField("staffCode", e.target.value);
+              handleStaffCodeChange(e.target.value);
             }}
-            className="flex-1 h-10 !rounded-l-none text-sm"
+            className={`w-full h-12 text-base pr-10 ${validationErrors.staffCode ? "border-red-500" : ""}`}
             disabled={isLoading || isValidating || isSubmitting}
           />
+          {isVerifyingStaff && (
+            <Loader2 className="absolute right-3.5 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />
+          )}
         </div>
-        {validationErrors.referenceBank && (
-          <p className="text-xs text-red-500">
-            {validationErrors.referenceBank}
+        {isVerifyingStaff && (
+          <p className="text-xs text-muted-foreground">
+            {translate("verifyingStaffCode")}
           </p>
         )}
         {validationErrors.staffCode && (
-          <p className="text-xs text-red-500">{validationErrors.staffCode}</p>
+          <p className="text-sm text-red-500">{validationErrors.staffCode}</p>
         )}
       </div>
     </div>

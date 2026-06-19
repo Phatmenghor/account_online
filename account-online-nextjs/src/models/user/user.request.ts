@@ -12,7 +12,6 @@ export interface UpdateUserReq {
   status?: string;
   position?: string;
   profileUrl?: string;
-  staffId?: string;
   phoneNumber?: string;
   branch?: string;
   department?: string;
@@ -26,7 +25,6 @@ export interface CreateUserReq {
   fullName?: string;
   role?: string;
   position?: string;
-  staffId?: string;
   phoneNumber?: string;
   branch?: string;
   department?: string;

@@ -2,12 +2,11 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import Link from "next/link";
 import z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginService } from "@/services/auth/login.service";
 import { useForm } from "react-hook-form";
-import { Eye, EyeOff, Lock, Mail, ShieldCheck, Loader2 } from "lucide-react";
+import { Eye, EyeOff, Lock, IdCard, ShieldCheck, Loader2 } from "lucide-react";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -18,7 +17,7 @@ import { AppToast } from "@/components/shared/toast/app-toast";
 import ForceChangePasswordModal from "@/components/shared/modal/force-change-password-modal";
 
 const schema = z.object({
-  username: z.string().min(1, "Please enter your email"),
+  username: z.string().min(1, "Please enter your ID Card"),
   password: z.string().min(1, "Please enter your password"),
 });
 
@@ -87,7 +86,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex h-screen w-screen overflow-hidden">
+    <div className="flex h-[100dvh] w-screen overflow-hidden">
       <ForceChangePasswordModal
         isOpen={showForceChange}
         reason={forceChangeReason}
@@ -101,7 +100,7 @@ export default function LoginPage() {
         <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/30 to-black/10" />
         <div className="absolute bottom-10 left-10 right-10 text-white">
           <p className="text-xs font-semibold uppercase tracking-widest text-white/50 mb-3">Cambodia Post Bank</p>
-          <h2 className="text-3xl font-bold leading-snug">Account Online</h2>
+          <h2 className="text-3xl font-bold leading-snug">Portal Account Opening</h2>
           <p className="text-sm text-white/50 mt-2 max-w-xs leading-relaxed">
             Secure access to the Cambodia Post Bank account opening and review platform.
           </p>
@@ -109,26 +108,26 @@ export default function LoginPage() {
       </div>
 
       {/* Right form panel — on mobile becomes full-width with hero bg behind form */}
-      <div className="relative flex flex-1 items-center justify-center p-6 lg:bg-muted/40">
+      <div className="relative flex flex-1 items-center justify-center p-4 pb-safe sm:p-6 lg:bg-muted/40">
         {/* Mobile-only background: fills the panel when the left hero is hidden */}
         <div className="absolute inset-0 lg:hidden">
           <Image src="/assets/cpbank.png" alt="" fill sizes="100vw" className="object-cover" priority />
           <div className="absolute inset-0 bg-gradient-to-br from-black/80 via-black/60 to-black/40" />
         </div>
 
-        <Card className="relative z-10 w-full max-w-lg shadow-2xl border border-border/60 rounded-2xl overflow-hidden">
-          <div className="bg-primary/5 border-b border-border/50 px-8 pt-8 pb-6">
+        <Card className="animate-fade-in-up relative z-10 w-full max-w-lg overflow-hidden rounded-2xl border border-border/60 shadow-2xl sm:rounded-2xl">
+          <div className="bg-primary/5 border-b border-border/50 px-6 pt-8 pb-6 sm:px-8">
             <div className="flex items-center gap-3 mb-5">
-              <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-sm">
+              <div className="w-11 h-11 rounded-xl bg-primary flex items-center justify-center shadow-sm">
                 <ShieldCheck className="h-5 w-5 text-primary-foreground" />
               </div>
-              <span className="text-xs font-semibold uppercase tracking-widest text-primary">Account Online</span>
+              <span className="text-xs font-semibold uppercase tracking-widest text-primary">Portal Account Opening</span>
             </div>
             <h1 className="text-2xl font-bold text-foreground">Welcome back</h1>
             <p className="text-sm text-muted-foreground mt-1">Sign in to your account to continue</p>
           </div>
 
-          <CardContent className="px-8 py-7">
+          <CardContent className="px-6 py-7 sm:px-8">
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4" autoComplete="off">
                 <FormField
@@ -136,11 +135,11 @@ export default function LoginPage() {
                   name="username"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Email <span className="text-destructive">*</span></FormLabel>
+                      <FormLabel>ID Card <span className="text-destructive">*</span></FormLabel>
                       <FormControl>
                         <div className="relative">
-                          <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                          <Input {...field} type="text" placeholder="Please enter your email" disabled={isLoading} autoComplete="off" readOnly onFocus={(e) => e.target.removeAttribute("readonly")} className="pl-10 h-11" />
+                          <IdCard className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                          <Input {...field} type="text" placeholder="Please enter your ID Card" disabled={isLoading} autoComplete="off" readOnly onFocus={(e) => e.target.removeAttribute("readonly")} className="h-12 pl-11" />
                         </div>
                       </FormControl>
                       <FormMessage />
@@ -156,7 +155,7 @@ export default function LoginPage() {
                       <FormLabel>Password <span className="text-destructive">*</span></FormLabel>
                       <FormControl>
                         <div className="relative">
-                          <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                          <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                           <Input
                             {...field}
                             type={showPassword ? "text" : "password"}
@@ -165,12 +164,12 @@ export default function LoginPage() {
                             autoComplete="new-password"
                             readOnly
                             onFocus={(e) => e.target.removeAttribute("readonly")}
-                            className="pl-10 pr-10 h-11"
+                            className="h-12 pl-11 pr-11"
                           />
                           <button
                             type="button"
                             onClick={() => setShowPassword((v) => !v)}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                            className="absolute right-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full text-muted-foreground transition-colors active:bg-accent"
                             disabled={isLoading}
                           >
                             {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -182,16 +181,11 @@ export default function LoginPage() {
                   )}
                 />
 
-                <Button type="submit" className="w-full h-11 font-semibold mt-6" disabled={isLoading}>
+                <Button type="submit" size="lg" className="w-full font-semibold mt-6 shadow-md" disabled={isLoading}>
                   {isLoading ? (
                     <><Loader2 className="h-4 w-4 animate-spin" /><span className="ml-2">Logging in...</span></>
                   ) : "Login"}
                 </Button>
-
-                <p className="text-center text-sm text-muted-foreground pt-3">
-                  Don&apos;t have an account?{" "}
-                  <Link href="/register" className="text-primary font-semibold hover:underline">Register</Link>
-                </p>
               </form>
             </Form>
           </CardContent>

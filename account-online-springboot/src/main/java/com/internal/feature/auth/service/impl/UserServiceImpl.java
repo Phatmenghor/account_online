@@ -216,7 +216,6 @@ public class UserServiceImpl implements UserService {
         if (request.getFullName() != null) user.setFullName(request.getFullName());
         if (request.getProfileUrl() != null) user.setProfileUrl(request.getProfileUrl());
         if (request.getPosition() != null) user.setPosition(request.getPosition());
-        if (request.getStaffId() != null) user.setStaffId(request.getStaffId());
         if (request.getPhoneNumber() != null) user.setPhoneNumber(request.getPhoneNumber());
         if (request.getBranch() != null) user.setBranch(request.getBranch());
         if (request.getDepartment() != null) user.setDepartment(request.getDepartment());
