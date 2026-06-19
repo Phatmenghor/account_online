@@ -6,7 +6,6 @@ import {
   LogOut,
   User,
   ChevronDown,
-  Briefcase,
   KeyRound,
   Loader2,
 } from "lucide-react";
@@ -18,9 +17,11 @@ import { UserModel } from "@/models/user/user.response";
 import LanguageSwitcher from "@/components/shared/common/language-switcher";
 import { ROUTES } from "@/constants/AppRoutes/routes";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 export const PageHeader = () => {
   const router = useRouter();
+  const translate = useTranslations("common");
   const [user, setUser] = useState<UserModel | null>(null);
   const [open, setOpen] = useState(false);
   const [showLogout, setShowLogout] = useState(false);
@@ -96,28 +97,9 @@ export const PageHeader = () => {
                         </div>
                         <div className="min-w-0">
                           <p className="text-sm font-semibold text-gray-900 truncate">{user.fullName || user.idCard}</p>
-                          <p className="text-xs text-gray-500 truncate">{user.email || user.idCard}</p>
                         </div>
                       </div>
                     </div>
-
-                    {/* User details */}
-                    {(user.position || user.idCard) && (
-                      <div className="px-4 py-3 space-y-2 border-b border-gray-100">
-                        {user.position && (
-                          <div className="flex items-center gap-2 text-xs text-gray-500">
-                            <Briefcase className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
-                            <span className="truncate">{user.position}</span>
-                          </div>
-                        )}
-                        {user.idCard && (
-                          <div className="flex items-center gap-2 text-xs text-gray-500">
-                            <User className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
-                            <span className="truncate">{user.idCard}</span>
-                          </div>
-                        )}
-                      </div>
-                    )}
 
                     {/* Navigation items */}
                     <div className="p-2 border-b border-gray-100 space-y-0.5">
@@ -127,7 +109,7 @@ export const PageHeader = () => {
                         className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors duration-150 font-medium"
                       >
                         <User className="w-4 h-4 text-gray-400" />
-                        My Profile
+                        {translate("myProfile")}
                       </Link>
                       <Link
                         href={`${ROUTES.MY_PROFILE}?tab=password`}
@@ -135,7 +117,7 @@ export const PageHeader = () => {
                         className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors duration-150 font-medium"
                       >
                         <KeyRound className="w-4 h-4 text-gray-400" />
-                        Change Password
+                        {translate("changePassword")}
                       </Link>
                     </div>
 
@@ -146,7 +128,7 @@ export const PageHeader = () => {
                         className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors duration-150 font-medium"
                       >
                         <LogOut className="w-4 h-4" />
-                        Sign Out
+                        {translate("signOut")}
                       </button>
                     </div>
                   </div>
@@ -173,9 +155,9 @@ export const PageHeader = () => {
                 <LogOut className="w-7 h-7 text-red-600" />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-gray-900">Logout Confirmation</h3>
+                <h3 className="text-lg font-bold text-gray-900">{translate("logoutConfirmTitle")}</h3>
                 <p className="text-sm text-gray-500 mt-1.5 leading-relaxed">
-                  Are you sure you want to sign out? You will need to log in again to access your account.
+                  {translate("logoutConfirmMessage")}
                 </p>
               </div>
 
@@ -185,7 +167,7 @@ export const PageHeader = () => {
                   disabled={isLoggingOut}
                   className="flex-1 h-10 rounded-xl border border-gray-200 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50"
                 >
-                  Cancel
+                  {translate("cancel")}
                 </button>
                 <button
                   onClick={handleLogout}
@@ -195,12 +177,12 @@ export const PageHeader = () => {
                   {isLoggingOut ? (
                     <>
                       <Loader2 className="w-4 h-4 animate-spin" />
-                      Signing out...
+                      {translate("signingOut")}
                     </>
                   ) : (
                     <>
                       <LogOut className="w-4 h-4" />
-                      Yes, Sign Out
+                      {translate("yesSignOut")}
                     </>
                   )}
                 </button>
