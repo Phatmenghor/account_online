@@ -187,6 +187,7 @@ export const useAccountSubmission = ({
         companyName: selectedReferenceBank?.nameEn || "",
         referralId: staffCode || "",
         releasedBy: staffCode || "",
+        relationManager: staffCode || "",
         branchCode: selectedBranch!.branchID,
         customerCurrentProvince: locationData.currentAddress.province?.provinceCode || "",
         customerCurrentDistrict: locationData.currentAddress.district?.districtCode || "",

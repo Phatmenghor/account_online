@@ -145,7 +145,7 @@ public class OpenAccountXmlBuilder {
 
                 // Ownership and staff
                 + "<cus:Ownership>" + defaultProperties.getOwnership() + "</cus:Ownership>"
-                + "<cus:RelationManager></cus:RelationManager>"
+                + "<cus:RelationManager>" + getOrDefault(request.getRelationManager(), "") + "</cus:RelationManager>"
                 + "<cus:LoanOfficer></cus:LoanOfficer>"
                 + "<cus:Staff></cus:Staff>"
                 + "<cus:ReferralBy></cus:ReferralBy>"
