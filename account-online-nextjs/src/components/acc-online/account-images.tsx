@@ -43,7 +43,7 @@ export const AccountImages: React.FC<AccountImagesProps> = ({
         <div className="w-6 h-6 rounded-md bg-primary/10 flex items-center justify-center flex-shrink-0">
           <Icon className="w-3.5 h-3.5 text-primary" />
         </div>
-        <p className="text-sm font-semibold text-gray-700">{label}</p>
+        <p className="text-base font-semibold text-gray-700">{label}</p>
       </div>
 
       <label
@@ -84,7 +84,7 @@ export const AccountImages: React.FC<AccountImagesProps> = ({
             <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-colors ${hasError ? "bg-red-100" : "bg-gray-100 group-hover:bg-primary/10"}`}>
               <Icon className={`w-7 h-7 transition-colors ${hasError ? "text-red-400" : "text-gray-300 group-hover:text-primary/60"}`} />
             </div>
-            <p className={`text-sm font-medium ${hasError ? "text-red-500" : "text-gray-400"}`}>{hint}</p>
+            <p className={`text-base font-medium ${hasError ? "text-red-500" : "text-gray-400"}`}>{hint}</p>
           </div>
         )}
         <Input
@@ -98,7 +98,7 @@ export const AccountImages: React.FC<AccountImagesProps> = ({
       </label>
 
       {hasError && (
-        <p className="text-xs text-red-500 mt-1.5 flex items-center gap-1.5">
+        <p className="text-sm text-red-500 mt-1.5 flex items-center gap-1.5">
           <span className="w-1 h-1 rounded-full bg-red-400 flex-shrink-0 inline-block" />
           {translate(id === "nid-upload" ? "err_idImage" : "err_selfieImage")}
         </p>
@@ -108,9 +108,6 @@ export const AccountImages: React.FC<AccountImagesProps> = ({
 
   return (
     <div className="mb-0">
-      <p className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-4">
-        Document Upload
-      </p>
       <div className="flex flex-col sm:flex-row gap-4 sm:gap-6">
         <UploadCard
           id="nid-upload"
