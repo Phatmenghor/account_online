@@ -35,12 +35,12 @@ const kantumruyPro = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Account Online",
-  description: "Account Online application",
+  title: "Portal Account Opening",
+  description: "Portal Account Opening application",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "Account Online",
+    title: "Portal Account Opening",
   },
 };
 

@@ -100,7 +100,7 @@ export default function LoginPage() {
         <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/30 to-black/10" />
         <div className="absolute bottom-10 left-10 right-10 text-white">
           <p className="text-xs font-semibold uppercase tracking-widest text-white/50 mb-3">Cambodia Post Bank</p>
-          <h2 className="text-3xl font-bold leading-snug">Account Online</h2>
+          <h2 className="text-3xl font-bold leading-snug">Portal Account Opening</h2>
           <p className="text-sm text-white/50 mt-2 max-w-xs leading-relaxed">
             Secure access to the Cambodia Post Bank account opening and review platform.
           </p>
@@ -121,7 +121,7 @@ export default function LoginPage() {
               <div className="w-11 h-11 rounded-xl bg-primary flex items-center justify-center shadow-sm">
                 <ShieldCheck className="h-5 w-5 text-primary-foreground" />
               </div>
-              <span className="text-xs font-semibold uppercase tracking-widest text-primary">Account Online</span>
+              <span className="text-xs font-semibold uppercase tracking-widest text-primary">Portal Account Opening</span>
             </div>
             <h1 className="text-2xl font-bold text-foreground">Welcome back</h1>
             <p className="text-sm text-muted-foreground mt-1">Sign in to your account to continue</p>

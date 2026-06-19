@@ -90,7 +90,6 @@ export const AccountImages: React.FC<AccountImagesProps> = ({
         <Input
           type="file"
           accept="image/*"
-          capture="environment"
           id={id}
           onChange={onChange}
           className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"

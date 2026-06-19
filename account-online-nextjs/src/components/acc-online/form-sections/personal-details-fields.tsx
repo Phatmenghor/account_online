@@ -80,7 +80,7 @@ export const PersonalDetailsFields: React.FC<PersonalDetailsFieldsProps> = ({
           placeholder={translate("firstNameKh")}
           value={formData.lastNameKh}
           onChange={(e) => handleInputChange("lastNameKh", e.target.value)}
-          className={`w-full h-10 text-sm ${validationErrors.lastNameKh ? "border-red-500" : ""}`}
+          className={`w-full h-12 text-base ${validationErrors.lastNameKh ? "border-red-500" : ""}`}
           disabled={isLoading || isValidating || isSubmitting}
         />
         {validationErrors.lastNameKh && (
@@ -96,7 +96,7 @@ export const PersonalDetailsFields: React.FC<PersonalDetailsFieldsProps> = ({
           placeholder={translate("lastNameKH")}
           value={formData.firstNameKh}
           onChange={(e) => handleInputChange("firstNameKh", e.target.value)}
-          className={`w-full h-10 text-sm ${validationErrors.firstNameKh ? "border-red-500" : ""}`}
+          className={`w-full h-12 text-base ${validationErrors.firstNameKh ? "border-red-500" : ""}`}
           disabled={isLoading || isValidating || isSubmitting}
         />
         {validationErrors.firstNameKh && (
@@ -112,7 +112,7 @@ export const PersonalDetailsFields: React.FC<PersonalDetailsFieldsProps> = ({
           placeholder={translate("familyNameEn")}
           value={formData.lastNameEn}
           onChange={(e) => handleInputChange("lastNameEn", e.target.value)}
-          className={`w-full h-10 text-sm ${validationErrors.lastNameEn ? "border-red-500" : ""}`}
+          className={`w-full h-12 text-base ${validationErrors.lastNameEn ? "border-red-500" : ""}`}
           disabled={isLoading || isValidating || isSubmitting}
         />
         {validationErrors.lastNameEn && (
@@ -128,7 +128,7 @@ export const PersonalDetailsFields: React.FC<PersonalDetailsFieldsProps> = ({
           placeholder={translate("givenNameEn")}
           value={formData.firstNameEn}
           onChange={(e) => handleInputChange("firstNameEn", e.target.value)}
-          className={`w-full h-10 text-sm ${validationErrors.firstNameEn ? "border-red-500" : ""}`}
+          className={`w-full h-12 text-base ${validationErrors.firstNameEn ? "border-red-500" : ""}`}
           disabled={isLoading || isValidating || isSubmitting}
         />
         {validationErrors.firstNameEn && (
@@ -160,7 +160,7 @@ export const PersonalDetailsFields: React.FC<PersonalDetailsFieldsProps> = ({
           disabled={isLoading || isValidating || isSubmitting}
         >
           <SelectTrigger
-            className={`h-10 ${validationErrors.gender ? "border-red-500" : ""}`}
+            className={`h-12 ${validationErrors.gender ? "border-red-500" : ""}`}
           >
             <SelectValue placeholder={translateSelect("selectGender")} />
           </SelectTrigger>
@@ -189,7 +189,7 @@ export const PersonalDetailsFields: React.FC<PersonalDetailsFieldsProps> = ({
           disabled={isLoading || isValidating || isLegalTypeLoading}
         >
           <SelectTrigger
-            className={`w-full h-10 text-sm ${validationErrors.legalType ? "border-red-500" : ""}`}
+            className={`w-full h-12 text-base ${validationErrors.legalType ? "border-red-500" : ""}`}
           >
             <SelectValue
               placeholder={
@@ -220,7 +220,7 @@ export const PersonalDetailsFields: React.FC<PersonalDetailsFieldsProps> = ({
           placeholder={translate("legalId")}
           value={formData.idNumber}
           onChange={(e) => handleInputChange("idNumber", e.target.value)}
-          className={`w-full h-10 text-sm ${validationErrors.idNumber ? "border-red-500" : ""}`}
+          className={`w-full h-12 text-base ${validationErrors.idNumber ? "border-red-500" : ""}`}
           disabled={isLoading || isValidating || isSubmitting || isNidExtracted}
         />
         {validationErrors.idNumber && (
@@ -236,7 +236,7 @@ export const PersonalDetailsFields: React.FC<PersonalDetailsFieldsProps> = ({
           placeholder={translate("address")}
           value={formData.address}
           onChange={(e) => handleInputChange("address", e.target.value)}
-          className={`w-full h-10 text-sm ${validationErrors.address ? "border-red-500" : ""}`}
+          className={`w-full h-12 text-base ${validationErrors.address ? "border-red-500" : ""}`}
           disabled={isLoading || isValidating || isSubmitting}
         />
         {validationErrors.address && (
@@ -252,7 +252,7 @@ export const PersonalDetailsFields: React.FC<PersonalDetailsFieldsProps> = ({
           placeholder={translate("pob")}
           value={formData.pob}
           onChange={(e) => handleInputChange("pob", e.target.value)}
-          className={`w-full h-10 text-sm ${validationErrors.pob ? "border-red-500" : ""}`}
+          className={`w-full h-12 text-base ${validationErrors.pob ? "border-red-500" : ""}`}
           disabled={isLoading || isValidating || isSubmitting}
         />
         {validationErrors.pob && (

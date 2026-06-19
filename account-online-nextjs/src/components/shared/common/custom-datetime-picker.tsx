@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useTranslations, useLocale } from "next-intl";
 import { Button } from "@/components/ui/button";
 import {
   Popover,
@@ -40,12 +41,15 @@ export function CustomDateTimePicker({
   value,
   onChange,
   disabled = false,
-  placeholder = "Select date",
+  placeholder,
   className,
   error = false,
   mode = "date",
   id,
 }: DateTimePickerProps) {
+  const translate = useTranslations("common");
+  const locale = useLocale();
+  const datePlaceholder = placeholder ?? translate("selectDatePlaceholder");
   const [isOpen, setIsOpen] = useState(false);
   // confirmed date (from value prop)
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
@@ -85,8 +89,10 @@ export function CustomDateTimePicker({
     setIsOpen(open);
   };
 
+  const intlLocale = locale === "kh" ? "km-KH" : "en-US";
+
   const formatDate = (date: Date): string => {
-    const dateStr = date.toLocaleDateString("en-US", {
+    const dateStr = date.toLocaleDateString(intlLocale, {
       year: "numeric",
       month: "short",
       day: "numeric",
@@ -220,7 +226,7 @@ export function CustomDateTimePicker({
           id={id}
           variant="outline"
           className={cn(
-            "w-full justify-start text-left font-normal h-10 px-3 text-sm transition-all duration-200 border-input",
+            "w-full justify-start text-left font-normal h-12 px-3.5 text-base sm:text-sm border-input",
             !selectedDate && "text-muted-foreground",
             "hover:bg-primary/10 hover:border-primary hover:text-primary",
             "focus:bg-primary/10 focus:border-primary focus:text-primary focus:ring-2 focus:ring-primary/30",
@@ -237,7 +243,7 @@ export function CustomDateTimePicker({
             <Calendar className="mr-2 h-4 w-4" />
           )}
           <span className="flex-1">
-            {selectedDate ? formatDate(selectedDate) : placeholder}
+            {selectedDate ? formatDate(selectedDate) : datePlaceholder}
           </span>
           {selectedDate && !disabled && (
             <div
@@ -395,9 +401,9 @@ export function CustomDateTimePicker({
             variant="outline"
             size="sm"
             onClick={handleNow}
-            className="flex-1 h-8 text-xs hover:bg-primary/10 hover:border-primary hover:text-primary transition-colors"
+            className="flex-1 h-8 text-xs hover:bg-primary/10 hover:border-primary hover:text-primary"
           >
-            {mode === "datetime" ? "Now" : "Today"}
+            {mode === "datetime" ? "Now" : translate("today")}
           </Button>
           <Button
             variant="default"
@@ -406,7 +412,7 @@ export function CustomDateTimePicker({
             disabled={!pendingDate}
             className="flex-1 h-8 text-xs bg-primary hover:bg-primary/90"
           >
-            Apply
+            {translate("apply")}
           </Button>
         </div>
       </PopoverContent>

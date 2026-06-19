@@ -88,7 +88,7 @@ export function DashboardSidebar({ isOpen = true, onToggle }: DashboardSidebarPr
             <Link href={ROUTES.DASHBOARD.INDEX} className="flex items-center gap-2">
               <img src={AppIcons.APP.APP_LOGO} alt="Logo" className="w-10 h-10" />
               <span className="text-lg font-bold tracking-tight text-gray-900 dark:text-white whitespace-nowrap">
-                Account Online
+                Portal Account Opening
               </span>
             </Link>
           ) : (
