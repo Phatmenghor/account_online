@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { Check, ChevronsUpDown, Loader2 } from "lucide-react";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { VillageModel } from "@/models/address/address.response";
 import { useTranslations } from "next-intl";
 
@@ -38,6 +38,14 @@ export function ComboboxSelectVillage({
   locale = "en",
 }: ComboboxSelectVillageProps) {
   const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    if (open) {
+      requestAnimationFrame(() => {
+        (document.activeElement as HTMLElement)?.blur();
+      });
+    }
+  }, [open]);
   const [searchTerm, setSearchTerm] = useState("");
 
   // change language

@@ -35,6 +35,14 @@ export function ComboboxSelectBranch({
   disabled = false,
 }: ComboboxSelectBranchProps) {
   const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    if (open) {
+      requestAnimationFrame(() => {
+        (document.activeElement as HTMLElement)?.blur();
+      });
+    }
+  }, [open]);
   const [searchTerm, setSearchTerm] = useState("");
   const [data, setData] = useState<BranchModel[]>([]);
   const [page, setPage] = useState(1);
