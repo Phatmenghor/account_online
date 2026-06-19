@@ -5,7 +5,6 @@ import com.internal.enumation.StatusData;
 import com.internal.exceptions.error.custom.*;
 import com.internal.feature.auth.dto.request.*;
 import com.internal.feature.auth.dto.response.AuthResponseDTO;
-import com.internal.feature.auth.dto.response.RegisterInitiateResponse;
 import com.internal.feature.auth.dto.response.UserResponseDto;
 import com.internal.feature.auth.mapper.AuthMapper;
 import com.internal.feature.auth.mapper.UserMapper;
@@ -15,13 +14,7 @@ import com.internal.feature.auth.repository.RoleRepository;
 import com.internal.feature.auth.repository.UserRepository;
 import com.internal.feature.auth.security.JWTGenerator;
 import com.internal.feature.auth.service.AuthService;
-import com.internal.feature.auth.service.EmailService;
-import com.internal.feature.auth.service.PendingRegistrationStore;
-import com.internal.feature.email_otp.models.EmailOtp;
-import com.internal.feature.email_otp.repository.EmailOtpRepository;
 import com.internal.feature.telegram_alerts.config.TelegramService;
-import com.internal.utils.OtpGenerator;
-import com.internal.utils.constants.AppConstants;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
@@ -50,10 +43,6 @@ public class AuthServiceImpl implements AuthService {
     private final JWTGenerator jwtGenerator;
     private final AuthMapper authMapper;
     private final UserMapper userMapper;
-    private final EmailOtpRepository emailOtpRepository;
-    private final OtpGenerator otpGenerator;
-    private final EmailService emailService;
-    private final PendingRegistrationStore pendingRegistrationStore;
     private final TelegramService telegramService;
 
     private static final DateTimeFormatter DT_FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
@@ -126,8 +115,8 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public RegisterInitiateResponse registerInitiate(RegisterInitiateDto dto) {
-        log.info("Processing registration initiation for email: {}", dto.getEmail());
+    public AuthResponseDTO register(RegisterInitiateDto dto) {
+        log.info("Processing registration for ID Card: {}", dto.getIdCard());
 
         if (!dto.getPassword().equals(dto.getConfirmPassword())) {
             throw new BadRequestException(
@@ -135,127 +124,43 @@ public class AuthServiceImpl implements AuthService {
                     + "Please make sure both fields contain the same password.");
         }
 
-        if (userRepository.existsByEmail(dto.getEmail()) || userRepository.existsByUsername(dto.getUsername())) {
+        if (userRepository.existsByUsername(dto.getIdCard())) {
+            throw new DuplicateNameException(
+                    "An account with the ID Card \"" + dto.getIdCard() + "\" already exists. "
+                    + "Please sign in to your existing account instead.");
+        }
+
+        if (dto.getEmail() != null && userRepository.existsByEmail(dto.getEmail())) {
             throw new DuplicateNameException(
                     "An account with the email address \"" + dto.getEmail() + "\" already exists. "
                     + "Please sign in to your existing account instead.");
         }
 
-        // Store pending registration data keyed by email (used for OTP)
-        pendingRegistrationStore.put(dto.getEmail(), dto);
-
-        // Expire existing OTPs and generate a new one
-        emailOtpRepository.expireAllActiveOtpsByEmail(dto.getEmail());
-
-        String otpCode = otpGenerator.generate();
-        LocalDateTime expiresAt = LocalDateTime.now().plusMinutes(5);
-
-        EmailOtp emailOtp = EmailOtp.builder()
-                .email(dto.getEmail())
-                .otpCode(otpCode)
-                .attempt(0)
-                .status(0)
-                .expiresAt(expiresAt)
-                .build();
-        emailOtpRepository.save(emailOtp);
-
-        // Skip email for default dev OTP (same pattern as SMS OTP)
-        if (AppConstants.DEFAULT_DEV_OTP.equals(otpCode)) {
-            log.info("Dev environment: skipping email send, OTP is default code for: {}", dto.getEmail());
-        } else {
-            try {
-                emailService.sendOtpEmail(dto.getEmail(), otpCode);
-            } catch (Exception e) {
-                log.error("Failed to send OTP email to {}: {}", dto.getEmail(), e.getMessage());
-            }
-        }
-
-        log.info("Registration OTP sent to email: {}", dto.getEmail());
-        return RegisterInitiateResponse.builder()
-                .message("A 6-digit verification code has been sent to \"" + dto.getEmail() + "\". "
-                        + "Please check your inbox and enter the code within 5 minutes to complete your registration.")
-                .email(dto.getEmail())
-                .expiresAt(expiresAt.toString())
-                .build();
-    }
-
-    @Override
-    public AuthResponseDTO registerVerify(RegisterVerifyDto dto) {
-        log.info("Processing registration verification for email: {}", dto.getEmail());
-
-        // Find active OTP
-        EmailOtp latestOtp = emailOtpRepository.findLatestActiveOtpByEmail(dto.getEmail())
-                .orElseThrow(() -> new BadRequestException(
-                        "No active verification code was found for \"" + dto.getEmail() + "\". "
-                        + "Please go back and request a new code."));
-
-        // Validate OTP
-        boolean isValid = latestOtp.getOtpCode().equals(dto.getOtpCode())
-                && latestOtp.getExpiresAt().isAfter(LocalDateTime.now());
-
-        if (!isValid) {
-            int attempts = latestOtp.getAttempt() + 1;
-            latestOtp.setAttempt(attempts);
-            latestOtp.setLastAttempt(LocalDateTime.now());
-            emailOtpRepository.save(latestOtp);
-
-            int remaining = Math.max(0, AppConstants.MAX_ATTEMPTS - attempts);
-            if (remaining <= 0) {
-                throw new UnauthorizedException(
-                        "Too many incorrect attempts. Your verification code has been invalidated. "
-                        + "Please go back and request a new code to continue.");
-            }
-            throw new UnauthorizedException(
-                    "That verification code is incorrect. "
-                    + "You have " + remaining + " attempt" + (remaining == 1 ? "" : "s") + " remaining.");
-        }
-
-        // Mark OTP verified
-        latestOtp.setStatus(1);
-        latestOtp.setVerifiedAt(LocalDateTime.now());
-        emailOtpRepository.save(latestOtp);
-
-        // Get pending registration data
-        RegisterInitiateDto pendingData = pendingRegistrationStore.get(dto.getEmail())
-                .orElseThrow(() -> new BadRequestException(
-                        "Your registration session has expired. "
-                        + "Please start the registration process again."));
-
-        // Re-check in case taken while waiting for OTP
-        if (userRepository.existsByUsername(pendingData.getUsername())) {
-            pendingRegistrationStore.remove(dto.getEmail());
-            throw new DuplicateNameException(
-                    "The email address \"" + dto.getEmail() + "\" was registered by someone else while you were verifying. "
-                    + "Please start the registration process again.");
-        }
-
-        // Create user with STAFF role
         Role role = roleRepository.findByName(RoleEnum.STAFF)
                 .orElseThrow(() -> new BadRequestException("STAFF role not found."));
 
         UserEntity user = new UserEntity();
-        user.setUsername(pendingData.getUsername());
-        user.setEmail(pendingData.getEmail());
-        user.setFullName(pendingData.getFullName());
-        user.setPosition(pendingData.getPosition());
-        user.setStaffId(pendingData.getStaffId());
-        user.setPhoneNumber(pendingData.getPhoneNumber());
-        user.setBranch(pendingData.getBranch());
-        user.setPassword(passwordEncoder.encode(pendingData.getPassword()));
+        user.setUsername(dto.getIdCard());
+        user.setEmail(dto.getEmail());
+        user.setFullName(dto.getFullName());
+        user.setPosition(dto.getPosition());
+        user.setStaffId(dto.getIdCard());
+        user.setPhoneNumber(dto.getPhoneNumber());
+        user.setBranch(dto.getBranch());
+        user.setDepartment(dto.getDepartment());
+        user.setPassword(passwordEncoder.encode(dto.getPassword()));
         user.setStatus(StatusData.ACTIVE);
         user.setRoles(Collections.singletonList(role));
         user.setPasswordChangedAt(LocalDateTime.now(ZoneId.of("Asia/Phnom_Penh")));
         user.setLastLogin(LocalDateTime.now(ZoneId.of("Asia/Phnom_Penh")));
         userRepository.save(user);
 
-        pendingRegistrationStore.remove(dto.getEmail());
-
         List<String> roles = Collections.singletonList(RoleEnum.STAFF.name());
         String token = jwtGenerator.generateTokenForUser(user.getUsername(), roles);
 
         UserResponseDto userDto = authMapper.userToUserResponseDto(user);
         userDto.setLastLogin(user.getLastLogin());
-        log.info("Registration completed and user created: {}", dto.getEmail());
+        log.info("Registration completed and user created for ID Card: {}", dto.getIdCard());
         return new AuthResponseDTO(token, userDto);
     }
 

@@ -3,10 +3,8 @@ package com.internal.feature.auth.service;
 import com.internal.feature.auth.dto.request.LoginRequestDto;
 import com.internal.feature.auth.dto.request.RegisterInitiateDto;
 import com.internal.feature.auth.dto.request.RegisterRequestDto;
-import com.internal.feature.auth.dto.request.RegisterVerifyDto;
 import com.internal.feature.auth.dto.request.UpdateUserRequestDto;
 import com.internal.feature.auth.dto.response.AuthResponseDTO;
-import com.internal.feature.auth.dto.response.RegisterInitiateResponse;
 import com.internal.feature.auth.dto.response.UserResponseDto;
 
 import java.util.List;
@@ -15,8 +13,7 @@ import java.util.Map;
 public interface AuthService {
     AuthResponseDTO login(LoginRequestDto loginDto);
     void logout(String username);
-    RegisterInitiateResponse registerInitiate(RegisterInitiateDto dto);
-    AuthResponseDTO registerVerify(RegisterVerifyDto dto);
+    AuthResponseDTO register(RegisterInitiateDto dto);
     UserResponseDto createUserByAdmin(RegisterRequestDto registerDto);
     UserResponseDto updateUserProfile(UpdateUserRequestDto registerDto, String name);
     List<Map<String, Object>> getAvailableRoles();
