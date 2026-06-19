@@ -527,7 +527,7 @@
 
 @layer base {
   html {
-    font-size: 75%;
+    font-size: 100%;
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
   }
@@ -670,8 +670,6 @@
   }
 
   /* ========== MOBILE ZOOM-ON-FOCUS FIX ==========
-     `html { font-size: 75% }` above shrinks every rem-based size, so a
-     Tailwind text-base (1rem) input was rendering at ~12px on screen.
      iOS Safari zooms the viewport on focus for any input under 16px,
      so force real 16px on every form control regardless of rem scale. */
   input,
