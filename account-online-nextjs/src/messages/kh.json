@@ -187,6 +187,8 @@
     "reference": "អ្នកគ្រប់គ្រងទំនាក់ទំនង",
     "relationshipManager": "អ្នកគ្រប់គ្រងទំនាក់ទំនង",
     "staffCode": "អត្តលេខបុគ្គលិក",
+    "verifyingStaffCode": "កំពុងផ្ទៀងផ្ទាត់...",
+    "err_staffCodeNotFound": "រកមិនឃើញអត្តលេខបុគ្គលិកនេះទេ។ សូមពិនិត្យឡើងវិញ។",
     "contactNumber": "លេខទូរស័ព្ទរបស់អ្នក",
     "otpCode": "លេខ PIN សម្ងាត់",
     "reSendOtp": "ផ្ញើរម្តងទៀត",

@@ -187,6 +187,8 @@
     "reference": "Relationship Manager",
     "relationshipManager": "Relationship Manager",
     "staffCode": "Staff ID",
+    "verifyingStaffCode": "Verifying...",
+    "err_staffCodeNotFound": "Staff ID not found. Please check and try again.",
     "contactNumber": "Contact Number",
     "otpCode": "OTP Code",
     "reSendOtp": "Resend OTP",

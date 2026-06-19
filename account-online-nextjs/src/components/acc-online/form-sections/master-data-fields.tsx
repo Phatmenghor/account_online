@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -14,7 +14,11 @@ import { OccupationModel } from "@/models/static/occupation/occupation.response"
 import { BranchModel } from "@/models/branch/branch.response";
 import { AccOnlineCategoryModel } from "@/models/static/acc-online-category/acc-online-category.response";
 import { useFormState } from "@/contexts/form-state-context";
-import { CheckCircle } from "lucide-react";
+import { CheckCircle, Loader2 } from "lucide-react";
+import { findStaffByIdCardService } from "@/services/auth/register.service";
+import { getUserInfo } from "@/utils/local-storage/userInfo";
+
+const STAFF_LOOKUP_DEBOUNCE_MS = 450;
 
 interface MasterDataFieldsProps {
   maritalStatuses: MaritalModel[];
@@ -68,7 +72,61 @@ export const MasterDataFields: React.FC<MasterDataFieldsProps> = ({
     translate,
     translateSelect,
     validateField,
+    handleValidationChange,
   } = useFormState();
+
+  const [isVerifyingStaff, setIsVerifyingStaff] = useState(false);
+  const lookupTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lookupSeq = useRef(0);
+  const prefillDone = useRef(false);
+
+  async function verifyStaffCode(code: string) {
+    const seq = ++lookupSeq.current;
+    setIsVerifyingStaff(true);
+    try {
+      await findStaffByIdCardService(code);
+      if (seq !== lookupSeq.current) return;
+      handleValidationChange("staffCode", null);
+    } catch {
+      if (seq !== lookupSeq.current) return;
+      handleValidationChange("staffCode", translate("err_staffCodeNotFound"));
+    } finally {
+      if (seq === lookupSeq.current) setIsVerifyingStaff(false);
+    }
+  }
+
+  function handleStaffCodeChange(value: string) {
+    if (lookupTimer.current) clearTimeout(lookupTimer.current);
+
+    const code = value.trim();
+    if (!code) {
+      lookupSeq.current++;
+      setIsVerifyingStaff(false);
+      return;
+    }
+
+    lookupTimer.current = setTimeout(
+      () => verifyStaffCode(code),
+      STAFF_LOOKUP_DEBOUNCE_MS
+    );
+  }
+
+  useEffect(() => {
+    return () => {
+      if (lookupTimer.current) clearTimeout(lookupTimer.current);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (prefillDone.current || staffCode) return;
+    const user = getUserInfo();
+    if (user?.userRole === "STAFF" && user.idCard) {
+      prefillDone.current = true;
+      setStaffCode(user.idCard);
+      verifyStaffCode(user.idCard);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const renderLabel = (labelKey: string) => (
     <Label htmlFor={labelKey} className="text-sm sm:text-base mb-1 block">
@@ -219,16 +277,27 @@ export const MasterDataFields: React.FC<MasterDataFieldsProps> = ({
       {/* Relationship Manager — Staff ID (required) */}
       <div className="md:col-span-2 space-y-1">
         {renderLabel("relationshipManager")}
-        <Input
-          placeholder={translate("staffCode")}
-          value={staffCode}
-          onChange={(e) => {
-            setStaffCode(e.target.value);
-            validateField("staffCode", e.target.value);
-          }}
-          className={`w-full h-12 text-base ${validationErrors.staffCode ? "border-red-500" : ""}`}
-          disabled={isLoading || isValidating || isSubmitting}
-        />
+        <div className="relative">
+          <Input
+            placeholder={translate("staffCode")}
+            value={staffCode}
+            onChange={(e) => {
+              setStaffCode(e.target.value);
+              validateField("staffCode", e.target.value);
+              handleStaffCodeChange(e.target.value);
+            }}
+            className={`w-full h-12 text-base pr-10 ${validationErrors.staffCode ? "border-red-500" : ""}`}
+            disabled={isLoading || isValidating || isSubmitting}
+          />
+          {isVerifyingStaff && (
+            <Loader2 className="absolute right-3.5 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />
+          )}
+        </div>
+        {isVerifyingStaff && (
+          <p className="text-xs text-muted-foreground">
+            {translate("verifyingStaffCode")}
+          </p>
+        )}
         {validationErrors.staffCode && (
           <p className="text-xs text-red-500">{validationErrors.staffCode}</p>
         )}
