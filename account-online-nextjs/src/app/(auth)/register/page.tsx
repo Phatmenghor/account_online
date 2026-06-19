@@ -116,20 +116,20 @@ export default function RegisterPage() {
 
   return (
     <div className="flex h-[100dvh] w-screen overflow-hidden">
-      {/* Left hero — desktop only, 50% */}
-      <div className="hidden lg:flex flex-1 relative overflow-hidden">
-        <Image src="/assets/cpbank.png" alt="CP Bank" fill sizes="50vw" className="object-cover" priority />
+      {/* Left hero — desktop only, 30% */}
+      <div className="hidden lg:flex lg:w-[30%] relative overflow-hidden shrink-0">
+        <Image src="/assets/cpbank.png" alt="CP Bank" fill sizes="30vw" className="object-cover" priority />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/10" />
-        <div className="absolute bottom-10 left-10 right-10 text-white">
+        <div className="absolute bottom-10 left-8 right-8 text-white">
           <p className="text-xs font-semibold uppercase tracking-widest text-white/50 mb-3">Cambodia Post Bank</p>
-          <h2 className="text-3xl font-bold leading-snug">Create Your Account</h2>
-          <p className="text-sm text-white/50 mt-2 max-w-xs leading-relaxed">
+          <h2 className="text-2xl font-bold leading-snug">Create Your Account</h2>
+          <p className="text-sm text-white/50 mt-2 leading-relaxed">
             Enter your ID Card to auto-fill your staff details and get started.
           </p>
         </div>
       </div>
 
-      {/* Right form panel — 50% on desktop, full width on mobile */}
+      {/* Right form panel — fills remaining width on desktop, full width on mobile */}
       <div className="relative flex flex-1 flex-col h-full overflow-hidden lg:bg-muted/40">
         {/* Mobile-only background */}
         <div className="absolute inset-0 lg:hidden -z-10">
@@ -143,23 +143,17 @@ export default function RegisterPage() {
             autoComplete="off"
             className="flex h-full w-full flex-col items-center"
           >
-            <div className="flex h-full w-full max-w-lg flex-col">
+            <div className="flex h-full w-full max-w-5xl flex-col">
               {/* Header */}
-              <div className="flex-shrink-0 px-4 pt-6 pb-4 sm:px-8 sm:pt-10">
-                <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-2 lg:text-muted-foreground">
-                  Account Online
-                </p>
-                <h1 className="text-2xl font-bold text-foreground lg:text-foreground text-white lg:text-2xl">
-                  Create your account
+              <div className="flex-shrink-0 px-4 pt-6 pb-4 sm:px-10 sm:pt-10">
+                <h1 className="text-2xl font-bold text-white lg:text-foreground lg:text-3xl">
+                  Create account
                 </h1>
-                <p className="text-sm mt-1 text-white/80 lg:text-muted-foreground">
-                  Enter your ID Card number to fetch your staff details, then review and edit before submitting.
-                </p>
               </div>
 
               {/* Body — scrollable */}
-              <div className="flex-1 overflow-y-auto px-4 sm:px-8">
-                <div className="rounded-2xl border border-border/60 bg-background shadow-sm p-5 space-y-4 mb-4">
+              <div className="flex-1 overflow-y-auto px-4 sm:px-10">
+                <div className="rounded-2xl border border-border/60 bg-background shadow-sm p-5 sm:p-8 space-y-5 mb-4">
 
                   {/* ID Card + auto-lookup */}
                   <FormField control={form.control} name="idCard" render={({ field }) => (
@@ -191,41 +185,33 @@ export default function RegisterPage() {
                     </FormItem>
                   )} />
 
-                  {staffFound && (
-                    <p className="text-xs font-medium text-emerald-600 -mt-1">
-                      Staff record found — fields below have been auto-filled, you can still edit them.
-                    </p>
-                  )}
-
                   <div className="border-t border-border/60 pt-2" />
 
-                  {/* Full Name */}
-                  <FormField control={form.control} name="fullName" render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Full Name <span className="text-destructive">*</span></FormLabel>
-                      <FormControl>
-                        <Input {...field} placeholder="Your full name" disabled={isBusy} className="h-12" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )} />
+                  {/* Full Name / Email / Phone */}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <FormField control={form.control} name="fullName" render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Full Name <span className="text-destructive">*</span></FormLabel>
+                        <FormControl>
+                          <Input {...field} placeholder="Your full name" disabled={isBusy} className="h-12" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )} />
 
-                  {/* Email */}
-                  <FormField control={form.control} name="email" render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Email <span className="text-destructive">*</span></FormLabel>
-                      <FormControl>
-                        <div className="relative">
-                          <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                          <Input {...field} type="email" placeholder="Your email" disabled={isBusy} className="h-12 pl-11" />
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )} />
+                    <FormField control={form.control} name="email" render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Email <span className="text-destructive">*</span></FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                            <Input {...field} type="email" placeholder="Your email" disabled={isBusy} className="h-12 pl-11" />
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )} />
 
-                  {/* Phone / Position */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <FormField control={form.control} name="phoneNumber" render={({ field }) => (
                       <FormItem>
                         <FormLabel>Phone Number</FormLabel>
@@ -238,7 +224,10 @@ export default function RegisterPage() {
                         <FormMessage />
                       </FormItem>
                     )} />
+                  </div>
 
+                  {/* Position / Department / Branch */}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <FormField control={form.control} name="position" render={({ field }) => (
                       <FormItem>
                         <FormLabel>Position</FormLabel>
@@ -251,10 +240,7 @@ export default function RegisterPage() {
                         <FormMessage />
                       </FormItem>
                     )} />
-                  </div>
 
-                  {/* Department / Branch */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <FormField control={form.control} name="department" render={({ field }) => (
                       <FormItem>
                         <FormLabel>Department</FormLabel>
@@ -282,7 +268,7 @@ export default function RegisterPage() {
                   <div className="border-t border-border/60 pt-2" />
 
                   {/* Password row */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <FormField control={form.control} name="password" render={({ field }) => (
                       <FormItem>
                         <FormLabel>Password <span className="text-destructive">*</span></FormLabel>
@@ -341,7 +327,7 @@ export default function RegisterPage() {
               </div>
 
               {/* Footer */}
-              <div className="flex-shrink-0 px-4 pb-safe pt-3 pb-4 sm:px-8 sm:pb-6 bg-background/95 lg:bg-transparent border-t border-border/60 lg:border-t-0">
+              <div className="flex-shrink-0 px-4 pb-safe pt-3 pb-4 sm:px-10 sm:pb-6 bg-background/95 lg:bg-transparent border-t border-border/60 lg:border-t-0">
                 <Button type="submit" size="lg" className="w-full font-semibold shadow-md" disabled={isBusy}>
                   {isSubmitting ? (
                     <><Loader2 className="h-4 w-4 animate-spin" /><span className="ml-2">Creating account...</span></>
