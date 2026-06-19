@@ -495,7 +495,7 @@ const LocationModal = ({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 80 }}
             transition={{ type: "spring", damping: 28, stiffness: 300 }}
-            className="relative bg-white w-full sm:max-w-2xl lg:max-w-3xl rounded-t-2xl sm:rounded-2xl shadow-2xl z-10 flex flex-col"
+            className="relative bg-white w-full sm:max-w-2xl lg:max-w-3xl rounded-t-2xl sm:rounded-2xl shadow-2xl z-10 flex flex-col overflow-hidden"
             style={{ maxHeight: "92vh" }}
           >
             {/* Primary top accent bar */}
@@ -545,7 +545,7 @@ const LocationModal = ({
             </AnimatePresence>
 
             {/* Scrollable Content */}
-            <div className="flex-1 overflow-y-auto overscroll-contain px-4 sm:px-6 py-4 space-y-5">
+            <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-4 sm:px-6 py-4 space-y-5">
               {/* === SECTION 1: Current Address === */}
               <div className="bg-primary/5 border border-primary/20 rounded-2xl p-4 sm:p-5">
                 <div className="flex items-center gap-2.5 mb-4">
