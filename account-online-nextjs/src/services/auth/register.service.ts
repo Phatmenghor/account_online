@@ -24,7 +24,7 @@ export interface RegisterData {
   password: string;
   confirmPassword: string;
   fullName: string;
-  position: string;
+  position?: string;
   department?: string;
   phoneNumber?: string;
   branch?: string;

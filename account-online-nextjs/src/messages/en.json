@@ -63,7 +63,7 @@
     "search-user": "Search users...",
     "table-header-user": {
       "id": "ID",
-      "idCard": "Username",
+      "idCard": "ID Card",
       "profile": "Profile",
       "fullName": "Full Name",
       "email": "Email",

@@ -80,7 +80,7 @@ export function UserViewModal({ user, isOpen, onClose }: UserViewModalProps) {
                   <SectionHeader color="bg-blue-600" title="Personal Information" />
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <InfoRow label="Full Name" value={user.fullName} />
-                    <InfoRow label="Username (ID Card)" value={user.idCard?.split("@")[0]} />
+                    <InfoRow label="ID Card" value={user.idCard?.split("@")[0]} />
                     <InfoRow label="Email" value={user.email} />
                     <InfoRow label="Phone Number" value={user.phoneNumber} />
                     <InfoRow label="Position" value={user.position} />

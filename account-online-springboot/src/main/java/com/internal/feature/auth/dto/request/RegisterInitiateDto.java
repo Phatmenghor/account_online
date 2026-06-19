@@ -25,7 +25,6 @@ public class RegisterInitiateDto {
     @NotBlank(message = "Full name is required.")
     private String fullName;
 
-    @NotBlank(message = "Position is required.")
     private String position;
 
     private String department;

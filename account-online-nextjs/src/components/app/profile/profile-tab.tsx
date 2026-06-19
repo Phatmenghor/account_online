@@ -76,7 +76,7 @@ export default function ProfileTab({
   const readOnlyFields = ["username", "status"];
 
   const formFields: { name: keyof UpdateUserProfileForm; label: string }[] = [
-    { name: "username", label: "Username" },
+    { name: "username", label: "ID Card" },
     { name: "email", label: "Email" },
     { name: "fullName", label: "Full Name" },
     { name: "position", label: "Position" },

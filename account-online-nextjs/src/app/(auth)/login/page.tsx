@@ -2,12 +2,11 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import Link from "next/link";
 import z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginService } from "@/services/auth/login.service";
 import { useForm } from "react-hook-form";
-import { Eye, EyeOff, Lock, Mail, ShieldCheck, Loader2 } from "lucide-react";
+import { Eye, EyeOff, Lock, IdCard, ShieldCheck, Loader2 } from "lucide-react";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -18,7 +17,7 @@ import { AppToast } from "@/components/shared/toast/app-toast";
 import ForceChangePasswordModal from "@/components/shared/modal/force-change-password-modal";
 
 const schema = z.object({
-  username: z.string().min(1, "Please enter your email"),
+  username: z.string().min(1, "Please enter your ID Card"),
   password: z.string().min(1, "Please enter your password"),
 });
 
@@ -136,11 +135,11 @@ export default function LoginPage() {
                   name="username"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Email <span className="text-destructive">*</span></FormLabel>
+                      <FormLabel>ID Card <span className="text-destructive">*</span></FormLabel>
                       <FormControl>
                         <div className="relative">
-                          <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                          <Input {...field} type="text" placeholder="Please enter your email" disabled={isLoading} autoComplete="off" readOnly onFocus={(e) => e.target.removeAttribute("readonly")} className="h-12 pl-11" />
+                          <IdCard className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                          <Input {...field} type="text" placeholder="Please enter your ID Card" disabled={isLoading} autoComplete="off" readOnly onFocus={(e) => e.target.removeAttribute("readonly")} className="h-12 pl-11" />
                         </div>
                       </FormControl>
                       <FormMessage />
@@ -187,11 +186,6 @@ export default function LoginPage() {
                     <><Loader2 className="h-4 w-4 animate-spin" /><span className="ml-2">Logging in...</span></>
                   ) : "Login"}
                 </Button>
-
-                <p className="text-center text-sm text-muted-foreground pt-3">
-                  Don&apos;t have an account?{" "}
-                  <Link href="/register" className="text-primary font-semibold active:underline">Register</Link>
-                </p>
               </form>
             </Form>
           </CardContent>
