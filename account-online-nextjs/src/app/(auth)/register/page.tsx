@@ -10,6 +10,7 @@ import { Eye, EyeOff, Loader2, Search, IdCard, Lock, Mail, Phone, Briefcase, Bui
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 import { useRouter } from "next/navigation";
 import { AppToast } from "@/components/shared/toast/app-toast";
 import { findStaffByIdCardService, registerService } from "@/services/auth/register.service";
@@ -34,6 +35,18 @@ const schema = z.object({
 });
 
 type FormData = z.infer<typeof schema>;
+
+function SectionHeader({ color, title }: { color: string; title: string }) {
+  return (
+    <div className="flex items-center gap-2">
+      <div className={`w-1 h-5 rounded-full ${color}`} />
+      <h3 className="text-sm font-semibold text-foreground">{title}</h3>
+    </div>
+  );
+}
+
+const inputClass =
+  "h-12 border-border/70 bg-muted/20 focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:border-primary";
 
 export default function RegisterPage() {
   const [isLookingUp, setIsLookingUp] = useState(false);
@@ -153,175 +166,187 @@ export default function RegisterPage() {
 
               {/* Body — scrollable */}
               <div className="flex-1 overflow-y-auto px-4 sm:px-10">
-                <div className="rounded-2xl border border-border/60 bg-background shadow-sm p-5 sm:p-8 space-y-5 mb-4">
+                <div className="rounded-2xl border border-border bg-background shadow-md p-5 sm:p-8 space-y-6 mb-4">
 
                   {/* ID Card + auto-lookup */}
-                  <FormField control={form.control} name="idCard" render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>ID Card <span className="text-destructive">*</span></FormLabel>
-                      <FormControl>
-                        <div className="relative">
-                          <IdCard className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                          <Input
-                            {...field}
-                            placeholder="Enter your ID Card number"
-                            disabled={isBusy}
-                            autoComplete="off"
-                            className="h-12 pl-11 pr-10"
-                            onChange={(e) => {
-                              field.onChange(e);
-                              handleIdCardChange(e.target.value);
-                            }}
-                          />
-                          {isLookingUp && (
-                            <Loader2 className="absolute right-3.5 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />
-                          )}
-                          {!isLookingUp && staffFound && (
-                            <Search className="absolute right-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-emerald-600" />
-                          )}
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )} />
+                  <div className="space-y-4">
+                    <SectionHeader color="bg-primary" title="ID Card Lookup" />
+                    <FormField control={form.control} name="idCard" render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>ID Card <span className="text-destructive">*</span></FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <IdCard className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                            <Input
+                              {...field}
+                              placeholder="Enter your ID Card number"
+                              disabled={isBusy}
+                              autoComplete="off"
+                              className={`${inputClass} pl-11 pr-10`}
+                              onChange={(e) => {
+                                field.onChange(e);
+                                handleIdCardChange(e.target.value);
+                              }}
+                            />
+                            {isLookingUp && (
+                              <Loader2 className="absolute right-3.5 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />
+                            )}
+                            {!isLookingUp && staffFound && (
+                              <Search className="absolute right-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-emerald-600" />
+                            )}
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )} />
+                  </div>
 
-                  <div className="border-t border-border/60 pt-2" />
+                  <Separator />
 
                   {/* Full Name / Email / Phone */}
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <FormField control={form.control} name="fullName" render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Full Name <span className="text-destructive">*</span></FormLabel>
-                        <FormControl>
-                          <Input {...field} placeholder="Your full name" disabled={isBusy} className="h-12" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )} />
+                  <div className="space-y-4">
+                    <SectionHeader color="bg-blue-600" title="Personal Information" />
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      <FormField control={form.control} name="fullName" render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Full Name <span className="text-destructive">*</span></FormLabel>
+                          <FormControl>
+                            <Input {...field} placeholder="Your full name" disabled={isBusy} className={inputClass} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
 
-                    <FormField control={form.control} name="email" render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Email <span className="text-destructive">*</span></FormLabel>
-                        <FormControl>
-                          <div className="relative">
-                            <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                            <Input {...field} type="email" placeholder="Your email" disabled={isBusy} className="h-12 pl-11" />
-                          </div>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )} />
+                      <FormField control={form.control} name="email" render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Email <span className="text-destructive">*</span></FormLabel>
+                          <FormControl>
+                            <div className="relative">
+                              <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                              <Input {...field} type="email" placeholder="Your email" disabled={isBusy} className={`${inputClass} pl-11`} />
+                            </div>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
 
-                    <FormField control={form.control} name="phoneNumber" render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Phone Number</FormLabel>
-                        <FormControl>
-                          <div className="relative">
-                            <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                            <Input {...field} type="tel" placeholder="Phone number" disabled={isBusy} className="h-12 pl-11" />
-                          </div>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )} />
+                      <FormField control={form.control} name="phoneNumber" render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Phone Number</FormLabel>
+                          <FormControl>
+                            <div className="relative">
+                              <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                              <Input {...field} type="tel" placeholder="Phone number" disabled={isBusy} className={`${inputClass} pl-11`} />
+                            </div>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
+                    </div>
                   </div>
 
                   {/* Position / Department / Branch */}
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <FormField control={form.control} name="position" render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Position</FormLabel>
-                        <FormControl>
-                          <div className="relative">
-                            <Briefcase className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                            <Input {...field} placeholder="Position" disabled={isBusy} className="h-12 pl-11" />
-                          </div>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )} />
+                  <div className="space-y-4">
+                    <SectionHeader color="bg-purple-600" title="Work Information" />
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      <FormField control={form.control} name="position" render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Position</FormLabel>
+                          <FormControl>
+                            <div className="relative">
+                              <Briefcase className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                              <Input {...field} placeholder="Position" disabled={isBusy} className={`${inputClass} pl-11`} />
+                            </div>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
 
-                    <FormField control={form.control} name="department" render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Department</FormLabel>
-                        <FormControl>
-                          <div className="relative">
-                            <Building2 className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                            <Input {...field} placeholder="Department" disabled={isBusy} className="h-12 pl-11" />
-                          </div>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )} />
+                      <FormField control={form.control} name="department" render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Department</FormLabel>
+                          <FormControl>
+                            <div className="relative">
+                              <Building2 className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                              <Input {...field} placeholder="Department" disabled={isBusy} className={`${inputClass} pl-11`} />
+                            </div>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
 
-                    <FormField control={form.control} name="branch" render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Branch</FormLabel>
-                        <FormControl>
-                          <Input {...field} placeholder="Branch" disabled={isBusy} className="h-12" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )} />
+                      <FormField control={form.control} name="branch" render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Branch</FormLabel>
+                          <FormControl>
+                            <Input {...field} placeholder="Branch" disabled={isBusy} className={inputClass} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
+                    </div>
                   </div>
 
-                  <div className="border-t border-border/60 pt-2" />
+                  <Separator />
 
                   {/* Password row */}
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <FormField control={form.control} name="password" render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Password <span className="text-destructive">*</span></FormLabel>
-                        <FormControl>
-                          <div className="relative">
-                            <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                            <Input
-                              {...field}
-                              type={showPassword ? "text" : "password"}
-                              placeholder="Create a password"
-                              disabled={isBusy}
-                              autoComplete="new-password"
-                              className="h-12 pl-11 pr-11"
-                            />
-                            <button
-                              type="button"
-                              onClick={() => setShowPassword((v) => !v)}
-                              className="absolute right-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full text-muted-foreground active:bg-accent"
-                            >
-                              {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                            </button>
-                          </div>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )} />
+                  <div className="space-y-4">
+                    <SectionHeader color="bg-amber-600" title="Security" />
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <FormField control={form.control} name="password" render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Password <span className="text-destructive">*</span></FormLabel>
+                          <FormControl>
+                            <div className="relative">
+                              <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                              <Input
+                                {...field}
+                                type={showPassword ? "text" : "password"}
+                                placeholder="Create a password"
+                                disabled={isBusy}
+                                autoComplete="new-password"
+                                className={`${inputClass} pl-11 pr-11`}
+                              />
+                              <button
+                                type="button"
+                                onClick={() => setShowPassword((v) => !v)}
+                                className="absolute right-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full text-muted-foreground active:bg-accent"
+                              >
+                                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                              </button>
+                            </div>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
 
-                    <FormField control={form.control} name="confirmPassword" render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Confirm Password <span className="text-destructive">*</span></FormLabel>
-                        <FormControl>
-                          <div className="relative">
-                            <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                            <Input
-                              {...field}
-                              type={showConfirm ? "text" : "password"}
-                              placeholder="Confirm password"
-                              disabled={isBusy}
-                              autoComplete="new-password"
-                              className="h-12 pl-11 pr-11"
-                            />
-                            <button
-                              type="button"
-                              onClick={() => setShowConfirm((v) => !v)}
-                              className="absolute right-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full text-muted-foreground active:bg-accent"
-                            >
-                              {showConfirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                            </button>
-                          </div>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )} />
+                      <FormField control={form.control} name="confirmPassword" render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Confirm Password <span className="text-destructive">*</span></FormLabel>
+                          <FormControl>
+                            <div className="relative">
+                              <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                              <Input
+                                {...field}
+                                type={showConfirm ? "text" : "password"}
+                                placeholder="Confirm password"
+                                disabled={isBusy}
+                                autoComplete="new-password"
+                                className={`${inputClass} pl-11 pr-11`}
+                              />
+                              <button
+                                type="button"
+                                onClick={() => setShowConfirm((v) => !v)}
+                                className="absolute right-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full text-muted-foreground active:bg-accent"
+                              >
+                                {showConfirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                              </button>
+                            </div>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
+                    </div>
                   </div>
                 </div>
               </div>
