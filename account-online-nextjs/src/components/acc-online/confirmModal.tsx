@@ -41,7 +41,7 @@ const ConfirmationModal = ({
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
             className="relative bg-white w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden z-10"
           >
-            <div className="h-1.5 w-full bg-gradient-to-r from-orange-400 via-orange-500 to-amber-500" />
+            <div className="h-1.5 w-full bg-primary" />
 
             <div className="px-6 pt-8 pb-6 flex flex-col items-center text-center">
               {/* Icon */}
@@ -49,16 +49,16 @@ const ConfirmationModal = ({
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 transition={{ type: "spring", damping: 15, stiffness: 200, delay: 0.1 }}
-                className="w-16 h-16 rounded-lg bg-gradient-to-br from-orange-100 to-amber-100 border-2 border-orange-200 flex items-center justify-center mb-5 shadow-sm"
+                className="w-16 h-16 rounded-lg bg-primary/10 border-2 border-primary/20 flex items-center justify-center mb-5 shadow-sm"
               >
-                <ShieldCheck className="text-orange-500" style={{ width: 30, height: 30 }} />
+                <ShieldCheck className="text-primary" style={{ width: 30, height: 30 }} />
               </motion.div>
 
               <motion.h2
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
-                className="text-lg sm:text-xl font-bold text-gray-800 mb-3"
+                className="text-xl sm:text-2xl font-bold text-gray-800 mb-3"
               >
                 {title}
               </motion.h2>
@@ -67,7 +67,7 @@ const ConfirmationModal = ({
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.25 }}
-                className="text-sm sm:text-base text-gray-500 leading-relaxed mb-7"
+                className="text-base sm:text-base text-gray-500 leading-relaxed mb-7"
               >
                 {message}
               </motion.p>
@@ -80,14 +80,14 @@ const ConfirmationModal = ({
               >
                 <Button
                   onClick={onCancel}
-                  className="flex-1 flex items-center justify-center gap-2 bg-white border-2 border-gray-200 text-gray-600 font-semibold py-2.5 rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-all shadow-sm"
+                  className="flex-1 h-12 flex items-center justify-center gap-2 bg-white border-2 border-gray-200 text-gray-600 font-semibold text-base rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-all shadow-sm"
                 >
                   <XCircle className="w-4 h-4" />
                   {translate("noIneed")}
                 </Button>
                 <Button
                   onClick={onConfirm}
-                  className="flex-1 flex items-center justify-center gap-2 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-semibold py-2.5 rounded-lg transition-all shadow-sm"
+                  className="flex-1 h-12 flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-base rounded-lg transition-all shadow-sm"
                 >
                   <CheckCircle className="w-4 h-4" />
                   {translate("yesIhave")}

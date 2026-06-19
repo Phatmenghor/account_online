@@ -59,7 +59,7 @@ export const PersonalDetailsFields: React.FC<PersonalDetailsFieldsProps> = ({
   }, [legalTypes, selectedLegalType]);
 
   const renderLabel = (labelKey: string) => (
-    <Label htmlFor={labelKey} className="text-sm sm:text-base mb-1 block">
+    <Label htmlFor={labelKey} className="text-base sm:text-lg font-medium mb-1 block">
       {translate(labelKey)}
       {isVerified && (
         <span className="float-right text-green-600 text-sm flex items-center gap-1">
@@ -84,7 +84,7 @@ export const PersonalDetailsFields: React.FC<PersonalDetailsFieldsProps> = ({
           disabled={isLoading || isValidating || isSubmitting}
         />
         {validationErrors.lastNameKh && (
-          <p className="text-xs text-red-500">{translate("err_firstNameKh")}</p>
+          <p className="text-sm text-red-500">{translate("err_firstNameKh")}</p>
         )}
       </div>
 
@@ -100,7 +100,7 @@ export const PersonalDetailsFields: React.FC<PersonalDetailsFieldsProps> = ({
           disabled={isLoading || isValidating || isSubmitting}
         />
         {validationErrors.firstNameKh && (
-          <p className="text-xs text-red-500">{translate("err_lastNameKh")}</p>
+          <p className="text-sm text-red-500">{translate("err_lastNameKh")}</p>
         )}
       </div>
 
@@ -116,7 +116,7 @@ export const PersonalDetailsFields: React.FC<PersonalDetailsFieldsProps> = ({
           disabled={isLoading || isValidating || isSubmitting}
         />
         {validationErrors.lastNameEn && (
-          <p className="text-xs text-red-500">{translate("err_lastNameEn")}</p>
+          <p className="text-sm text-red-500">{translate("err_lastNameEn")}</p>
         )}
       </div>
 
@@ -132,7 +132,7 @@ export const PersonalDetailsFields: React.FC<PersonalDetailsFieldsProps> = ({
           disabled={isLoading || isValidating || isSubmitting}
         />
         {validationErrors.firstNameEn && (
-          <p className="text-xs text-red-500">{translate("err_firstNameEn")}</p>
+          <p className="text-sm text-red-500">{translate("err_firstNameEn")}</p>
         )}
       </div>
 
@@ -147,7 +147,7 @@ export const PersonalDetailsFields: React.FC<PersonalDetailsFieldsProps> = ({
           error={!!validationErrors.dob}
         />
         {validationErrors.dob && (
-          <p className="text-xs text-red-500">{translate("err_dob")}</p>
+          <p className="text-sm text-red-500">{translate("err_dob")}</p>
         )}
       </div>
 
@@ -160,7 +160,7 @@ export const PersonalDetailsFields: React.FC<PersonalDetailsFieldsProps> = ({
           disabled={isLoading || isValidating || isSubmitting}
         >
           <SelectTrigger
-            className={`h-12 ${validationErrors.gender ? "border-red-500" : ""}`}
+            className={`w-full h-12 text-base ${validationErrors.gender ? "border-red-500" : ""}`}
           >
             <SelectValue placeholder={translateSelect("selectGender")} />
           </SelectTrigger>
@@ -170,7 +170,7 @@ export const PersonalDetailsFields: React.FC<PersonalDetailsFieldsProps> = ({
           </SelectContent>
         </Select>
         {validationErrors.gender && (
-          <p className="text-xs text-red-500">{translate("err_gender")}</p>
+          <p className="text-sm text-red-500">{translate("err_gender")}</p>
         )}
       </div>
 
@@ -208,7 +208,7 @@ export const PersonalDetailsFields: React.FC<PersonalDetailsFieldsProps> = ({
           </SelectContent>
         </Select>
         {validationErrors.legalType && (
-          <p className="text-xs text-red-500">{translate("err_legalType")}</p>
+          <p className="text-sm text-red-500">{translate("err_legalType")}</p>
         )}
       </div>
 
@@ -224,7 +224,7 @@ export const PersonalDetailsFields: React.FC<PersonalDetailsFieldsProps> = ({
           disabled={isLoading || isValidating || isSubmitting || isNidExtracted}
         />
         {validationErrors.idNumber && (
-          <p className="text-xs text-red-500">{translate("err_idNumber")}</p>
+          <p className="text-sm text-red-500">{translate("err_idNumber")}</p>
         )}
       </div>
 
@@ -240,7 +240,7 @@ export const PersonalDetailsFields: React.FC<PersonalDetailsFieldsProps> = ({
           disabled={isLoading || isValidating || isSubmitting}
         />
         {validationErrors.address && (
-          <p className="text-xs text-red-500">{translate("err_address")}</p>
+          <p className="text-sm text-red-500">{translate("err_address")}</p>
         )}
       </div>
 
@@ -256,7 +256,7 @@ export const PersonalDetailsFields: React.FC<PersonalDetailsFieldsProps> = ({
           disabled={isLoading || isValidating || isSubmitting}
         />
         {validationErrors.pob && (
-          <p className="text-xs text-red-500">{translate("err_pob")}</p>
+          <p className="text-sm text-red-500">{translate("err_pob")}</p>
         )}
       </div>
     </div>

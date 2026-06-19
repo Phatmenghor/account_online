@@ -55,7 +55,7 @@ export default function OpenAccountPage() {
 const SectionLabel = ({ label }: { label: string }) => (
   <div className="flex items-center gap-2 mb-5">
     <div className="w-1 h-4 rounded-full bg-primary flex-shrink-0" />
-    <p className="text-xs font-semibold uppercase tracking-wider text-gray-400">{label}</p>
+    <p className="text-sm font-semibold uppercase tracking-wider text-gray-400">{label}</p>
   </div>
 );
 

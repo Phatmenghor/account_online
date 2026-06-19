@@ -42,7 +42,7 @@ export const HeaderSection = ({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.22, duration: 0.35 }}
-            className="text-xs sm:text-sm text-gray-400"
+            className="text-sm sm:text-base text-gray-400"
           >
             {translate("sub_header_acc")}
           </motion.p>

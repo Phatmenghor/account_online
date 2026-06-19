@@ -129,7 +129,7 @@ export const MasterDataFields: React.FC<MasterDataFieldsProps> = ({
   }, []);
 
   const renderLabel = (labelKey: string) => (
-    <Label htmlFor={labelKey} className="text-sm sm:text-base mb-1 block">
+    <Label htmlFor={labelKey} className="text-base sm:text-lg font-medium mb-1 block">
       {translate(labelKey)}
       {isVerified && (
         <span className="float-right text-green-600 text-sm flex items-center gap-1">
@@ -176,7 +176,7 @@ export const MasterDataFields: React.FC<MasterDataFieldsProps> = ({
           </SelectContent>
         </Select>
         {validationErrors.maritalStatus && (
-          <p className="text-xs text-red-500">
+          <p className="text-sm text-red-500">
             {translate("err_maritalStatus")}
           </p>
         )}
@@ -219,7 +219,7 @@ export const MasterDataFields: React.FC<MasterDataFieldsProps> = ({
           </SelectContent>
         </Select>
         {validationErrors.occupation && (
-          <p className="text-xs text-red-500">{translate("err_occupation")}</p>
+          <p className="text-sm text-red-500">{translate("err_occupation")}</p>
         )}
       </div>
 
@@ -238,7 +238,7 @@ export const MasterDataFields: React.FC<MasterDataFieldsProps> = ({
           />
         </div>
         {validationErrors.branch && (
-          <p className="text-xs text-red-500">{translate("err_branch")}</p>
+          <p className="text-sm text-red-500">{translate("err_branch")}</p>
         )}
       </div>
 
@@ -270,7 +270,7 @@ export const MasterDataFields: React.FC<MasterDataFieldsProps> = ({
           </SelectContent>
         </Select>
         {validationErrors.accountProduct && (
-          <p className="text-xs text-red-500">{translate("err_accountProduct")}</p>
+          <p className="text-sm text-red-500">{translate("err_accountProduct")}</p>
         )}
       </div>
 
@@ -299,7 +299,7 @@ export const MasterDataFields: React.FC<MasterDataFieldsProps> = ({
           </p>
         )}
         {validationErrors.staffCode && (
-          <p className="text-xs text-red-500">{validationErrors.staffCode}</p>
+          <p className="text-sm text-red-500">{validationErrors.staffCode}</p>
         )}
       </div>
     </div>
