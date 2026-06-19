@@ -21,8 +21,6 @@ public class RegisterRequestDto {
 
     private String fullName;
 
-    private String staffId;
-
     private String phoneNumber;
 
     private String branch;

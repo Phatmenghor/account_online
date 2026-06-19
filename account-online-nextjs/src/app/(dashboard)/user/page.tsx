@@ -166,7 +166,6 @@ function UserPageContent() {
           role: createData.role,
           username: createData.username,
           position: createData.position,
-          staffId: createData.staffId,
           phoneNumber: createData.phoneNumber,
           branch: createData.branch,
           department: createData.department,

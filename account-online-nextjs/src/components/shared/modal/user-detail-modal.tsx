@@ -84,7 +84,6 @@ export function UserViewModal({ user, isOpen, onClose }: UserViewModalProps) {
                     <InfoRow label="Email" value={user.email} />
                     <InfoRow label="Phone Number" value={user.phoneNumber} />
                     <InfoRow label="Position" value={user.position} />
-                    <InfoRow label="Staff ID" value={user.staffId} />
                     <InfoRow label="Branch" value={user.branch} />
                     <InfoRow label="Department" value={user.department} />
                     <div className="flex justify-between border-b pb-2 gap-4">

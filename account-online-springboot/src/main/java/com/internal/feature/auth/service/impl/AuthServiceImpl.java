@@ -144,7 +144,6 @@ public class AuthServiceImpl implements AuthService {
         user.setEmail(dto.getEmail());
         user.setFullName(dto.getFullName());
         user.setPosition(dto.getPosition());
-        user.setStaffId(dto.getIdCard());
         user.setPhoneNumber(dto.getPhoneNumber());
         user.setBranch(dto.getBranch());
         user.setDepartment(dto.getDepartment());
@@ -183,7 +182,6 @@ public class AuthServiceImpl implements AuthService {
         user.setEmail(registerDto.getEmail());
         user.setFullName(registerDto.getFullName());
         user.setPosition(registerDto.getPosition());
-        user.setStaffId(registerDto.getStaffId());
         user.setPhoneNumber(registerDto.getPhoneNumber());
         user.setBranch(registerDto.getBranch());
         user.setDepartment(registerDto.getDepartment());
@@ -208,7 +206,6 @@ public class AuthServiceImpl implements AuthService {
         if (requestDto.getFullName() != null) user.setFullName(requestDto.getFullName());
         if (requestDto.getProfileUrl() != null) user.setProfileUrl(requestDto.getProfileUrl());
         if (requestDto.getPosition() != null) user.setPosition(requestDto.getPosition());
-        if (requestDto.getStaffId() != null) user.setStaffId(requestDto.getStaffId());
         if (requestDto.getPhoneNumber() != null) user.setPhoneNumber(requestDto.getPhoneNumber());
         if (requestDto.getBranch() != null) user.setBranch(requestDto.getBranch());
         if (requestDto.getDepartment() != null) user.setDepartment(requestDto.getDepartment());

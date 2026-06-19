@@ -81,7 +81,6 @@ export default function ModalUser({
           fullName: "",
           role: ROLE_FILTER[0]?.value || "",
           position: "",
-          staffId: "",
           phoneNumber: "",
           branch: "",
           department: "",
@@ -104,7 +103,6 @@ export default function ModalUser({
         status: user.userStatus || Status.ACTIVE,
         position: user.position || "",
         profileUrl: user.profileUrl || "",
-        staffId: user.staffId || "",
         phoneNumber: user.phoneNumber || "",
         branch: user.branch || "",
         department: user.department || "",
@@ -129,7 +127,6 @@ export default function ModalUser({
         fullName: "",
         role: ROLE_FILTER[0]?.value || "",
         position: "",
-        staffId: "",
         phoneNumber: "",
         branch: "",
         department: "",
@@ -149,7 +146,6 @@ export default function ModalUser({
         fullName: u.fullName?.trim(),
         status: u.status,
         position: u.position?.trim(),
-        staffId: u.staffId?.trim(),
         phoneNumber: u.phoneNumber?.trim(),
         branch: u.branch?.trim(),
         department: u.department?.trim(),
@@ -363,13 +359,6 @@ export default function ModalUser({
                       <Controller control={control} name="position"
                         render={({ field }) => (
                           <Input {...field} autoComplete="off" placeholder="Enter your position" disabled={isSubmitting} className="h-10" />
-                        )} />
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="text-sm font-medium">Staff ID</Label>
-                      <Controller control={control} name="staffId"
-                        render={({ field }) => (
-                          <Input {...field} autoComplete="off" placeholder="Enter your staff ID" disabled={isSubmitting} className="h-10" />
                         )} />
                     </div>
                     <div className="space-y-2">
