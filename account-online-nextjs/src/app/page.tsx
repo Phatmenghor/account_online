@@ -504,11 +504,11 @@ function OpenAccountContent() {
             </div>
 
             {/* Sticky action bar on mobile */}
-            <div className="fixed bottom-0 left-0 right-0 sm:hidden bg-white border-t border-gray-100 px-4 py-3 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] z-30">
-              <div className="flex gap-3">
+            <div className="fixed bottom-0 left-0 right-0 sm:hidden bg-white border-t border-gray-100 px-4 pt-3 pb-safe shadow-[0_-4px_20px_rgba(0,0,0,0.08)] z-30">
+              <div className="flex gap-3 pb-3">
                 <Button
-                  className="flex-1 h-11 font-semibold rounded-xl text-sm flex items-center justify-center gap-2
-                    border-2 border-primary text-primary bg-white hover:bg-primary/5
+                  className="flex-1 font-semibold rounded-xl text-sm flex items-center justify-center gap-2
+                    border-2 border-primary text-primary bg-white active:bg-primary/10
                     disabled:opacity-40 disabled:cursor-not-allowed"
                   onClick={handleVerificationClick}
                   disabled={isBusy || isVerified}
@@ -519,8 +519,8 @@ function OpenAccountContent() {
                   ) : translate("verification")}
                 </Button>
                 <Button
-                  className="flex-1 h-11 font-semibold rounded-xl text-sm flex items-center justify-center gap-2
-                    bg-primary hover:bg-primary/90 text-primary-foreground
+                  className="flex-1 font-semibold rounded-xl text-sm flex items-center justify-center gap-2
+                    bg-primary active:bg-primary/90 text-primary-foreground
                     disabled:opacity-40 disabled:cursor-not-allowed"
                   onClick={handleSubmitAccount}
                   disabled={isBusy || !isVerified}
@@ -533,7 +533,7 @@ function OpenAccountContent() {
             </div>
 
             {/* Mobile bottom padding so sticky bar doesn't cover content */}
-            <div className="h-20 sm:hidden" />
+            <div className="h-24 sm:hidden" />
           </div>
 
           <Footer />
