@@ -1,4 +1,4 @@
-package com.internal.feature.camdx.service.ServiceImp;
+package com.internal.feature.camdx.service.impl;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -25,7 +25,7 @@ import static com.internal.utils.constants.AppConstants.NID_ERROR_SYSTEM;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class CamdxServiceImp implements CamdxService {
+public class CamdxServiceImpl implements CamdxService {
 
     private final CamdxErrorCheckServiceImpl errorCheckService;
     private final CpbProperties cpbProperties;
@@ -111,8 +111,7 @@ public class CamdxServiceImp implements CamdxService {
             if (json.has("message") && !json.path("message").asText().isEmpty()) {
                 return json.path("message").asText() + " " + AppConstants.SUPPORT_CONTACT;
             }
-        } catch (Exception e) {
-            log.debug("Could not parse error response body", e);
+        } catch (Exception ignored) {
         }
 
         // fallback to predefined constants if API message is missing

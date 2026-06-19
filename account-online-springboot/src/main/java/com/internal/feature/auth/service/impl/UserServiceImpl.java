@@ -52,9 +52,6 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public AllUserResponseDto getAllUser(GetAllUserRequestDto requestDto) {
-        log.debug("Getting users with pageNo={}, pageSize={}, search={}, status={}",
-                requestDto.getPageNo(), requestDto.getPageSize(), requestDto.getSearch(), requestDto.getStatus());
-
         GetAllUserRequestDto userRequestDto = new GetAllUserRequestDto(Math.max(requestDto.getPageNo() - 1, 0),
                 Math.max(requestDto.getPageSize(), 1),
                 requestDto.getSearch(),
@@ -74,8 +71,6 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponseDto getUserById(Long id) {
-        log.debug("Getting user by id: {}", id);
-        
         UserEntity user = userRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("User id " + id + " could not be found"));
         
@@ -84,7 +79,6 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponseDto getUserByToken() {
-        log.debug("Getting current user by token");
         UserEntity currentUser = securityUtils.getCurrentUser();
         UserResponseDto dto = userMapper.mapToDto(currentUser);
         if (!currentUser.isForcePasswordChange()) {
@@ -114,8 +108,6 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponseDto updateUserId(Long id, UpdateUserRequestDto request) {
-        log.debug("Updating user with id: {}", id);
-        
         UserEntity user = userRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("User id " + id + " not found"));
 

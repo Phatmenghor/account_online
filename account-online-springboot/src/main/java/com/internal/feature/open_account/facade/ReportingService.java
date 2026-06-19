@@ -58,7 +58,7 @@ public class ReportingService {
     }
 
     public CustomerImageUploadResponseDto safeSaveCustomerImages(CustomerRequest request) {
-        log.info(">>> Step 10: SAVE_CUSTOMER_IMAGES (using pre-uploaded filenames)");
+        log.info("Step 10: SAVE_CUSTOMER_IMAGES");
         try {
             CustomerImageUploadResponseDto imagePaths = CustomerImageUploadResponseDto.builder()
                     .nidImagePath(request.getNidImageName())
@@ -76,7 +76,7 @@ public class ReportingService {
     public void safeSaveSuccessLog(CustomerRequest request, CustomerResponse accountInfo,
                                    AmlStatusDto amlStatusResponseDto, CustomerImageUploadResponseDto imagePaths,
                                    String mbActivationCode) {
-        log.info(">>> Step 11: SAVE_SUCCESS_LOG");
+        log.info("Step 11: SAVE_SUCCESS_LOG");
         try {
             accountOnlineOpenSuccessService.saveFinalLog(
                     request,
@@ -91,7 +91,7 @@ public class ReportingService {
     }
 
     public void safeReportLog(String legalId) {
-        log.info(">>> Step 12: SAVE_REPORT_LOG");
+        log.info("Step 12: SAVE_REPORT_LOG");
         try {
             reportLogService.saveLogReport(legalId, OpenAccStatusEnum.SUCCESS, "Open account online Successfully");
             log.info("Step 12 SUCCESS: Report log saved");

@@ -56,7 +56,7 @@ public class BankingService {
 
     // ─── Step 2: Get Customer Info ────────────────────────────────────────────
     public Map<String, String> getCustomerInfo(String legalId) {
-        log.info(">>> Step 2: GET_CUSTOMER_INFO");
+        log.info("Step 2: GET_CUSTOMER_INFO");
 
         if (simulateCamdxError) {
             throw new NidValidationException(500, "Simulated CAMDX/NID Validation Failure (SIMULATION)");
@@ -83,12 +83,12 @@ public class BankingService {
      * If one or more fields are missing, returns empty (continue normal flow).
      */
     public Optional<String> checkExistingCompleteAccountAndActivate(CustomerRequest request) {
-        log.info(">>> Step 2.5: CHECK_EXISTING_COMPLETE_ACCOUNT_RECOVERY");
+        log.info("Step 2.5: CHECK_EXISTING_COMPLETE_ACCOUNT_RECOVERY");
 
         Optional<AccountOnlineFinal> existingAccount = accountOnlineFinalRepository.findByLegalId(request.getLegalId());
 
         if (existingAccount.isEmpty()) {
-            log.info("No existing account found → Continue with normal account creation flow");
+            log.info("No existing account found, continuing with normal account creation flow");
             return Optional.empty();
         }
 
@@ -101,28 +101,28 @@ public class BankingService {
                 && account.getLegalId() != null && !account.getLegalId().isEmpty();
 
         if (!hasAllFields) {
-            log.info("Some account fields are missing → Continue with normal account creation flow");
+            log.info("Some account fields are missing, continuing with normal account creation flow");
             return Optional.empty();
         }
 
-        log.info("✓ Complete accounts found: CIF={}, KHR={}, USD={}", account.getCif(), account.getKhrAccount(), account.getUsdAccount());
+        log.info("Complete accounts found: CIF={}, KHR={}, USD={}", account.getCif(), account.getKhrAccount(), account.getUsdAccount());
 
         // Check if MB activation code is missing
         if (account.getMbActivationCode() == null || account.getMbActivationCode().isEmpty()) {
-            log.warn("MB activation code is null → Attempting activation recovery...");
+            log.warn("MB activation code is null, attempting activation recovery");
 
             try {
                 String activationCode = mobileBankingService.activate(request, account.getCif(),
                         account.getKhrAccount(), account.getUsdAccount());
 
                 if (activationCode != null && !activationCode.isEmpty()) {
-                    log.info("✓ MB activation successful → Code: {}", activationCode);
+                    log.info("MB activation successful for recovery path", activationCode);
 
                     // Update the final table with the new activation code
                     try {
                         account.setMbActivationCode(activationCode);
                         accountOnlineFinalRepository.save(account);
-                        log.info("✓ Updated acc_online_open_final table with activation code");
+                        log.info("Updated activation code in acc_online_open_final table");
                     } catch (Exception saveError) {
                         log.error("Failed to save activation code to database: {}", saveError.getMessage());
                         // Don't fail the whole recovery if DB save fails
@@ -130,16 +130,16 @@ public class BankingService {
 
                     return Optional.of(activationCode);
                 } else {
-                    log.warn("MB activation returned null code → Continue to Step 3");
+                    log.warn("MB activation returned null code, continuing to normal flow");
                     return Optional.empty();
                 }
             } catch (Exception e) {
-                log.error("MB activation recovery failed: {} → Continue to Step 3", e.getMessage());
+                log.error("MB activation recovery failed: {}, continuing to normal flow", e.getMessage());
                 return Optional.empty();
             }
         }
 
-        log.info("✓ Complete account already has activation code → Account opening complete!");
+        log.info("Complete account already has activation code, returning existing code");
         return Optional.of(account.getMbActivationCode());
     }
 
@@ -159,7 +159,7 @@ public class BankingService {
         String existingCif = customerInfo.get("CIF");
 
         if (existingCif != null && !existingCif.isEmpty()) {
-            log.info("Existing CIF found → Using existing customer");
+            log.info("Existing CIF found, using existing customer");
             String existingMnemonic = customerInfo.get("MNEMONIC");
             log.info("Existing MNEMONIC retrieved from customerInfo: {}", existingMnemonic);
             return new CustomerCreationResult(existingCif, existingMnemonic);
@@ -179,7 +179,7 @@ public class BankingService {
                 Document resp = t24Service.createCustomer(request);
                 String cif = XmlParser.extractCif(resp);
                 String mnemonic = XmlParser.extractMnemonic(resp);
-                log.info("New customer created → CIF: {}, MNEMONIC: {}", cif, mnemonic);
+                log.info("New customer created: CIF={}, MNEMONIC={}", cif, mnemonic);
                 return new CustomerCreationResult(cif, mnemonic);
             } catch (Exception e) {
                 log.warn("Attempt {} failed to create customer: {}", attempt, e.getMessage());
@@ -196,7 +196,7 @@ public class BankingService {
                         // Check if customer already exists
                         String createdCif = freshCustomerInfo != null ? freshCustomerInfo.get("CIF") : null;
                         if (createdCif != null && !createdCif.isEmpty()) {
-                            log.info("✓ Customer found in system → CIF: {}", createdCif);
+                            log.info("Customer found in system: CIF={}", createdCif);
                             String mnemonic = freshCustomerInfo.get("MNEMONIC");
                             return new CustomerCreationResult(createdCif, mnemonic);
                         }
@@ -220,17 +220,17 @@ public class BankingService {
     public String createAccountIfNeeded(CustomerRequest request, Map<String, String> customerInfo, String cif,
                                         String currency) {
         if (isTestMode.isSkipCheckAccount()) {
-            log.info("TEST MODE ENABLED — Skipping existing account check → creating new {} account", currency);
+            log.info("Test mode enabled, skipping existing account check and creating new {} account", currency);
             return createAccount(request, cif, currency);
         }
 
         if (validationService.hasAccount(customerInfo, currency)) {
-            log.info(">>> Step {}: CREATE_{}_ACCOUNT - SKIPPED (already exists)",
+            log.info("Step {}: CREATE_{}_ACCOUNT - skipped (already exists in CBS)",
                     AppConstants.CURRENCY_KHR.equals(currency) ? 6 : 7, currency);
             return null;
         }
 
-        log.info(">>> Step {}: CREATE_{}_ACCOUNT", AppConstants.CURRENCY_KHR.equals(currency) ? 6 : 7, currency);
+        log.info("Step {}: CREATE_{}_ACCOUNT", AppConstants.CURRENCY_KHR.equals(currency) ? 6 : 7, currency);
         String account = createAccountWithRetry(request, customerInfo, cif, currency);
         if (account != null) {
             log.info("Step {} SUCCESS: {} account created: {}",
@@ -265,7 +265,7 @@ public class BankingService {
                         // Check if account was actually created despite error
                         if (validationService.hasAccount(freshCustomerInfo, currency)) {
                             String existingAccount = freshCustomerInfo.get(currency);
-                            log.info("✓ {} account found in system → returning: {}", currency, existingAccount);
+                            log.info("{} account found in system: {}", currency, existingAccount);
                             return existingAccount;
                         }
 

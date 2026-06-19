@@ -44,9 +44,7 @@ public class UserController {
 
     @PostMapping("/token")
     public ResponseEntity<ApiResponse<UserResponseDto>> getUserByToken() {
-        log.debug("Fetching current user from token");
         UserResponseDto user = userService.getUserByToken();
-        log.debug("Successfully retrieved current user: {}", user.getIdCard());
         return ResponseEntity.ok(ApiResponse.success(ResponseMessage.CURRENT_USER_RETRIEVED, user));
     }
 

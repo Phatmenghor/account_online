@@ -253,16 +253,10 @@ public class OpenAccountXmlBuilder {
             LocalDate localDate = null;
             LocalDate now = LocalDate.now();
 
-            log.debug("Formatting date for T24: input='{}', today={}", date, now);
-
             if (date.matches("\\d{8}")) {
-                // Try to parse as T24 format (yyyyMMdd)
                 localDate = LocalDate.parse(date, T24_DATE_FORMATTER);
-                log.debug("Parsed date {} as T24 format (yyyyMMdd): {}", date, localDate);
             } else if (date.matches("\\d{4}-\\d{2}-\\d{2}")) {
-                // Try to parse as ISO format (yyyy-MM-dd)
                 localDate = LocalDate.parse(date, DATE_FORMATTER);
-                log.debug("Parsed date {} as ISO format (yyyy-MM-dd): {}", date, localDate);
             } else {
                 log.warn("Date {} does not match expected formats (yyyyMMdd or yyyy-MM-dd), attempting to parse anyway", date);
                 localDate = LocalDate.parse(date, DATE_FORMATTER);
@@ -277,7 +271,7 @@ public class OpenAccountXmlBuilder {
             }
 
             String formatted = localDate.format(T24_DATE_FORMATTER);
-            log.info("Date formatted successfully: {} → {} (T24 format)", date, formatted);
+            log.info("Date formatted: {} to {} (T24 format)", date, formatted);
             return formatted;
         } catch (OpenAccountException e) {
             throw e;
@@ -302,7 +296,6 @@ public class OpenAccountXmlBuilder {
     }
 
     private String formatLegalIssueDateWithDefault(String date) {
-        log.debug("formatLegalIssueDateWithDefault: input='{}'", date);
         LocalDate today = LocalDate.now(ZoneId.of("Asia/Phnom_Penh"));
         LocalDate maxAllowed = today.minusYears(1);
         if (date != null && !date.isEmpty()) {
@@ -311,18 +304,14 @@ public class OpenAccountXmlBuilder {
                         ? LocalDate.parse(date, T24_DATE_FORMATTER)
                         : LocalDate.parse(date, DATE_FORMATTER);
                 if (!localDate.isAfter(maxAllowed)) {
-                    String result = localDate.format(T24_DATE_FORMATTER);
-                    log.debug("formatLegalIssueDateWithDefault: parsed={}, result={}", localDate, result);
-                    return result;
+                    return localDate.format(T24_DATE_FORMATTER);
                 }
-                log.warn("formatLegalIssueDateWithDefault: date '{}' exceeds max allowed {} (today-1yr), capping", date, maxAllowed);
+                log.warn("Legal issue date '{}' exceeds max allowed {} (today minus 1 year), using fallback", date, maxAllowed);
             } catch (Exception e) {
                 log.warn("Could not parse legal issue date '{}', using default 1 year ago", date);
             }
         }
-        String fallback = maxAllowed.format(T24_DATE_FORMATTER);
-        log.debug("formatLegalIssueDateWithDefault: using fallback 1-year-ago={}", fallback);
-        return fallback;
+        return maxAllowed.format(T24_DATE_FORMATTER);
     }
 
     private String determineTitle(String gender) {
@@ -372,7 +361,7 @@ public class OpenAccountXmlBuilder {
                 .trim();
 
         if (!sanitized.equals(original) && !original.isEmpty()) {
-            log.warn("Address sanitization applied (SWIFT compliance). Original: [{}] → Sanitized: [{}]", original, sanitized);
+            log.warn("Address sanitized for SWIFT compliance. Original: [{}], Sanitized: [{}]", original, sanitized);
         }
 
         // Return sanitized if it has content, otherwise return safe default (not original non-ASCII)

@@ -99,7 +99,6 @@ public class MobileBankingService {
         String formattedDob = formatDateOfBirth(request.getDateOfBirth());
         String formattedPhone = formatPhoneNumber(request.getPhoneNumber());
         String signData = generateSignature(cif, formattedPhone);
-//        String branchCode = "KH0011090"; // Hardcoded for testing as requested
         String branchCode = request.getBranchCode() != null ? request.getBranchCode()
                 : defaultProperties.getBranchCode();
         String accountNumber = usdAccount != null ? usdAccount : khrAccount;

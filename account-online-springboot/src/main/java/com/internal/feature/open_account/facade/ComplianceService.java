@@ -28,7 +28,6 @@ import java.util.Optional;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-// Service to handle compliance checks
 public class ComplianceService {
 
     private final AmlService amlService;
@@ -40,7 +39,7 @@ public class ComplianceService {
     private final SecurityUtils securityUtils;
 
     public AmlStatusDto processAml(CustomerRequest request) throws Exception {
-        log.info("========== START AML Processing for Legal ID: {} ==========", request.getLegalId());
+        log.info("Processing AML for Legal ID: {}", request.getLegalId());
 
         // Always check existing AML status first before calling middleware
         Optional<AmlStatus> existingAmlOpt = amlService.findByLegalId(request.getLegalId());
@@ -83,9 +82,8 @@ public class ComplianceService {
                     request.getLegalId(), amlResponse.getRiskLevel());
         }
 
-        log.info("========== END AML Processing for Legal ID: {} | Status: {} ==========", request.getLegalId(), amlStatusEnum);
+        log.info("AML processing completed for Legal ID: {} | Status: {}", request.getLegalId(), amlStatusEnum);
 
-        // Low-risk → return mapped DTO
         return openAccountAmlStatusMapper.fromRequestAndResponse(request, amlResponse, amlStatusEnum);
     }
 
@@ -113,7 +111,7 @@ public class ComplianceService {
 
     private AmlExternalResponseDto callAmlMiddleware(CustomerAmlRequest amlRequest, String legalId)
             throws JsonProcessingException {
-        AmlExternalResponseDto response = amlMiddlewareService.CheckAml(amlRequest);
+        AmlExternalResponseDto response = amlMiddlewareService.checkAml(amlRequest);
         log.info("AML Middleware response received | RiskLevel: {} | TrxnID: {}", response.getRiskLevel(),
                 response.getTrxnID());
         return response;

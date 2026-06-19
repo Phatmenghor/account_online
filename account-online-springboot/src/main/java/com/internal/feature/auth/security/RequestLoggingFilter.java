@@ -179,8 +179,7 @@ public class RequestLoggingFilter extends OncePerRequestFilter {
                 String username = authentication.getName();
                 return truncate(username, 100);
             }
-        } catch (Exception e) {
-            log.debug("Could not extract username: {}", e.getMessage());
+        } catch (Exception ignored) {
         }
         return null;
     }

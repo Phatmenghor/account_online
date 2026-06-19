@@ -94,7 +94,7 @@ public class OpenAccountServiceImpl implements OpenAccountService {
             log.info("Step 10: Saving success log | Legal ID: {}", legalId);
             eventPublisher.publishEvent(new AccountOpenedEvent(this, context));
 
-            log.info("✓ Account opened | CIF: {} | Mnemonic: {} | KHR: {} | USD: {} | MB: {} | By: {}",
+            log.info("Account opened successfully | CIF: {} | Mnemonic: {} | KHR: {} | USD: {} | MB: {} | By: {}",
                     context.getCif(), context.getMnemonic(), context.getKhrAccount(),
                     context.getUsdAccount(), context.getMbActivationCode(), submittedBy);
 
