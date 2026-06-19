@@ -515,14 +515,14 @@
   gap: 1rem;
   font-weight: 600;
   font-size: 0.875rem;
-  grid-template-columns: repeat(var(--cols), minmax(200px, 1fr));
+  grid-template-columns: repeat(var(--cols), minmax(265px, 1fr));
 }
 
 .grid-row {
   display: grid;
   gap: 1rem;
   align-items: center;
-  grid-template-columns: repeat(var(--cols), minmax(200px, 1fr));
+  grid-template-columns: repeat(var(--cols), minmax(265px, 1fr));
 }
 
 @layer base {
@@ -930,36 +930,36 @@ body.route-changing #nprogress .peg {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 100px;
+  max-width: 133px;
 }
 
 @media (min-width: 768px) {
   .cell-truncate {
-    max-width: 120px;
+    max-width: 160px;
   }
 }
 
 @media (min-width: 1024px) {
   .cell-truncate {
-    max-width: 150px;
+    max-width: 200px;
   }
 }
 
 @media (min-width: 1280px) {
   .cell-truncate {
-    max-width: 200px;
+    max-width: 266px;
   }
 }
 
 @media (min-width: 1536px) {
   .cell-truncate {
-    max-width: 250px;
+    max-width: 333px;
   }
 }
 
 @media (min-width: 1920px) {
   .cell-truncate {
-    max-width: 300px;
+    max-width: 400px;
   }
 }
 
@@ -1021,7 +1021,7 @@ body:has([data-state="open"]) .pac-container {
 }
 
 .pac-item {
-  padding: 8px 12px !important;
+  padding: 11px 16px !important;
   cursor: pointer !important;
   border-top: 1px solid hsl(var(--border) / 0.5) !important;
   color: hsl(var(--foreground)) !important;

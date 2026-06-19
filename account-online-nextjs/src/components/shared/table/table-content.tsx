@@ -73,7 +73,7 @@ export const createUserTableColumns = ({
     {
       key: "index",
       label: "#",
-      className: "w-[60px]",
+      className: "w-[80px]",
       render: (_, index) => (
         <span className="font-medium">
           {indexDisplay(data?.pageNo || 1, data?.pageSize || 10, index)}
@@ -86,7 +86,7 @@ export const createUserTableColumns = ({
       truncate: true,
       maxWidth: "300px",
       minWidth: "150px",
-      className: "w-[80px]",
+      className: "w-[107px]",
       render: (user) => (
         <CustomAvatar
           imageUrl={user.profileUrl}

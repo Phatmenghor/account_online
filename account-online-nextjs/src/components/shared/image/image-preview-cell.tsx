@@ -151,7 +151,7 @@ export function ImagePreviewCell({
                 </Button>
               </div>
             </DialogHeader>
-            <div className="flex items-center justify-center bg-muted/30 min-h-[360px] max-h-[80vh] p-6">
+            <div className="flex items-center justify-center bg-muted/30 min-h-[480px] max-h-[80vh] p-6">
               <img
                 src={src}
                 alt={label}

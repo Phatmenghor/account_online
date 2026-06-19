@@ -134,11 +134,11 @@ export function AccountOpeningChartCard({ data, loading }: AccountOpeningChartCa
         {loading ? (
           <ChartSkeleton />
         ) : !data.length ? (
-          <div className="h-[280px] flex items-center justify-center text-muted-foreground text-sm">
+          <div className="h-[375px] flex items-center justify-center text-muted-foreground text-sm">
             No data for this period
           </div>
         ) : (
-          <div style={{ height: 280 }}>
+          <div style={{ height: 375 }}>
             <canvas ref={chartRef} />
           </div>
         )}
