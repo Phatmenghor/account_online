@@ -35,10 +35,11 @@ oracle:
       driver-class-name: oracle.jdbc.OracleDriver
       connection-test-query: SELECT 1 FROM DUAL
       maximum-pool-size: 10
-      minimum-idle: 5
+      minimum-idle: 0
       connection-timeout: 30000
       idle-timeout: 600000
       max-lifetime: 1800000
+      initialization-fail-timeout: -1
       pool-name: Oracle-DWH-Pool
   stg:
     datasource:
@@ -48,10 +49,11 @@ oracle:
       driver-class-name: oracle.jdbc.OracleDriver
       connection-test-query: SELECT 1 FROM DUAL
       maximum-pool-size: 10
-      minimum-idle: 5
+      minimum-idle: 0
       connection-timeout: 30000
       idle-timeout: 600000
       max-lifetime: 1800000
+      initialization-fail-timeout: -1
       pool-name: Oracle-STG-Pool
 
 # MSSQL — Staff (HR) lookup database
@@ -63,9 +65,11 @@ mssql:
       password: 123cp!@#
       driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
       maximum-pool-size: 10
+      minimum-idle: 0
       connection-timeout: 30000
       idle-timeout: 60000000
       max-lifetime: 1800000
+      initialization-fail-timeout: -1
       pool-name: MSSQL-Staff-Pool
 
 # Simulators — all disabled by default
