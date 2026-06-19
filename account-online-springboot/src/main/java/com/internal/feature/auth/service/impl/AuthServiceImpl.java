@@ -130,12 +130,6 @@ public class AuthServiceImpl implements AuthService {
                     + "Please sign in to your existing account instead.");
         }
 
-        if (dto.getEmail() != null && userRepository.existsByEmail(dto.getEmail())) {
-            throw new DuplicateNameException(
-                    "An account with the email address \"" + dto.getEmail() + "\" already exists. "
-                    + "Please sign in to your existing account instead.");
-        }
-
         Role role = roleRepository.findByName(RoleEnum.STAFF)
                 .orElseThrow(() -> new BadRequestException("STAFF role not found."));
 
