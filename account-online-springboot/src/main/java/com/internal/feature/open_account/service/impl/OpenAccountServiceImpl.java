@@ -52,6 +52,7 @@ public class OpenAccountServiceImpl implements OpenAccountService {
             log.info("Step 2: Retrieving customer info | Legal ID: {}", legalId);
             currentStep = AppConstants.GET_CUSTOMER_INFO;
             var customerInfo = bankingService.getCustomerInfo(legalId);
+            context.setCustomerInfo(customerInfo);
 
             log.info("Step 3: Validating existing accounts | Legal ID: {}", legalId);
             currentStep = AppConstants.VALIDATE_EXISTING_ACCOUNT;
@@ -83,7 +84,7 @@ public class OpenAccountServiceImpl implements OpenAccountService {
             log.info("Step 8: Validating accounts created | CIF: {}", context.getCif());
             currentStep = AppConstants.VALIDATE_ACCOUNT_CREATION;
             bankingService.validateAllRequiredAccountsCreated(context.getCif(),
-                    context.getKhrAccount(), context.getUsdAccount());
+                    context.getKhrAccount(), context.getUsdAccount(), context.getCustomerInfo());
 
             log.info("Step 9: Activating mobile banking | CIF: {}", context.getCif());
             currentStep = AppConstants.ACTIVATE_MOBILE_BANKING;

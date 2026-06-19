@@ -311,18 +311,26 @@ public class BankingService {
     }
 
     // ─── Step 9: Validate All Required Accounts Created ────────────────────────
-    public void validateAllRequiredAccountsCreated(String cif, String khrAccount, String usdAccount) {
-        // Validate CIF exists
+    public void validateAllRequiredAccountsCreated(String cif, String khrAccount, String usdAccount,
+                                                   Map<String, String> customerInfo) {
         if (cif == null || cif.isEmpty()) {
             throw new AccountCreationException("Customer CIF not found. Account creation failed.");
         }
 
-        // Validate both USD and KHR accounts exist
         if (khrAccount == null || khrAccount.isEmpty()) {
-            throw new AccountCreationException("KHR account not found. Account creation failed.");
+            // Allow null only if KHR account was skipped because it already exists in CBS
+            if (customerInfo == null || !validationService.hasAccount(customerInfo, AppConstants.CURRENCY_KHR)) {
+                throw new AccountCreationException("KHR account not found. Account creation failed.");
+            }
+            log.info("KHR account exists in CBS — validation passed (account was skipped)");
         }
+
         if (usdAccount == null || usdAccount.isEmpty()) {
-            throw new AccountCreationException("USD account not found. Account creation failed.");
+            // Allow null only if USD account was skipped because it already exists in CBS
+            if (customerInfo == null || !validationService.hasAccount(customerInfo, AppConstants.CURRENCY_USD)) {
+                throw new AccountCreationException("USD account not found. Account creation failed.");
+            }
+            log.info("USD account exists in CBS — validation passed (account was skipped)");
         }
     }
 
