@@ -294,7 +294,7 @@ export default function OTPInput({
             value={phoneNumber}
             onChange={(e) => handlePhoneChange(e.target.value)}
             onBlur={handlePhoneBlur}
-            className={`w-full h-12 text-base ${validationErrors.phoneNumber ? "border-red-500" : ""}`}
+            className={`w-full h-12 text-sm ${validationErrors.phoneNumber ? "border-red-500" : ""}`}
             disabled={disabled || isSendingOtp}
             maxLength={15}
           />
@@ -344,7 +344,7 @@ export default function OTPInput({
             value={otpCode}
             onChange={(e) => handleOtpChange(e.target.value)}
             maxLength={6}
-            className={`w-full h-12 text-base ${validationErrors.isPhoneVerified ? "border-red-500" : ""}`}
+            className={`w-full h-12 text-sm ${validationErrors.isPhoneVerified ? "border-red-500" : ""}`}
           />
           {isVerifyingOtp && (
             <Loader2 className="absolute right-3 top-3.5 h-5 w-5 animate-spin text-primary" />
