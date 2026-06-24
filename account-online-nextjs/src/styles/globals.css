@@ -1077,6 +1077,15 @@ select:focus-visible {
   box-shadow: 0 0 0 2px hsl(var(--primary) / 0.15) !important;
 }
 
+/* Combobox/command search input — no border/ring highlight on focus,
+   the wrapper's bottom border is enough. */
+.cmdk-search-input:focus,
+.cmdk-search-input:focus-visible {
+  outline: none !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
 /* shadcn Input component focus */
 .input:focus,
 [data-slot="input"]:focus {
