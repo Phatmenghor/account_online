@@ -6,6 +6,9 @@ export const ROUTES = {
     REGISTER: "/register",
     VERIFY_EMAIL: "/verify-email",
   },
+  STAFF: {
+    OPENING: "/staff/opening",
+  },
   MY_PROFILE: "/my-profile",
   DASHBOARD: {
     INDEX: "/dashboard",

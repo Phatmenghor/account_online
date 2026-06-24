@@ -45,6 +45,11 @@ export const NIDFormSchema = z.object({
 
 export type NIDFormData = z.infer<typeof NIDFormSchema>;
 
+// Public self-service opening: no relation manager (staff ID) required.
+export const PublicNIDFormSchema = NIDFormSchema.extend({
+  staffCode: z.string().optional(),
+});
+
 // Partial schema for verification step (before full submission)
 export const NIDVerificationSchema = NIDFormSchema.pick({
   idImage: true,

@@ -40,7 +40,7 @@ export default function LoginPage() {
   function navigateAfterLogin(role: string) {
     const callbackUrl = searchParams.get("callbackUrl");
     if (role === "STAFF") {
-      router.replace("/");
+      router.replace(ROUTES.STAFF.OPENING);
     } else if (callbackUrl) {
       router.replace(callbackUrl);
     } else {

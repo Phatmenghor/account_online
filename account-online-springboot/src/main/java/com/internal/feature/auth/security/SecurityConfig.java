@@ -48,6 +48,7 @@ public class SecurityConfig {
                 .antMatchers("/api/images/**").permitAll()
                 .antMatchers("/api/customer-images/**").permitAll()
                 .antMatchers("/api/v1/staff/**").permitAll()
+                .antMatchers("/api/v1/open-account/process").permitAll()
                 .antMatchers("/swagger-ui/**","/swagger-ui.html" , "/v3/api-docs/**").permitAll()
                 .anyRequest().authenticated()
                 .and()

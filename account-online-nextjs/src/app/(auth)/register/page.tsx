@@ -106,7 +106,7 @@ export default function RegisterPage() {
       const data = await registerService(values);
       AppToast({ type: "success", message: "Account created!", description: "Welcome to CP Bank." });
       const role: string = data?.userRole?.userRole ?? "";
-      if (role === "STAFF") router.replace("/");
+      if (role === "STAFF") router.replace(ROUTES.STAFF.OPENING);
       else router.replace(ROUTES.DASHBOARD.INDEX);
     } catch (err: any) {
       AppToast({ type: "error", message: err?.response?.data?.message || "Registration failed. Please try again." });

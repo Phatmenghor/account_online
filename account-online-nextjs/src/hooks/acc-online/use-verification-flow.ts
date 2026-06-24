@@ -17,6 +17,7 @@ import {
   NIDFormData,
   NIDFormSchema,
   NIDVerificationSchema,
+  PublicNIDFormSchema,
 } from "@/components/acc-online/form-field/form-validate-error";
 import { LegalTypeModel } from "@/models/static/legal-type/legal-type.response";
 import { AccOnlineCategoryModel } from "@/models/static/acc-online-category/acc-online-category.response";
@@ -41,6 +42,7 @@ interface UseVerificationFlowProps {
   selectedLegalType: LegalTypeModel | null;
   selectedCategory: AccOnlineCategoryModel | null;
   phoneNumber: string;
+  isPublic?: boolean;
 }
 
 export const useVerificationFlow = ({
@@ -55,6 +57,7 @@ export const useVerificationFlow = ({
   selectedLegalType,
   selectedCategory,
   phoneNumber,
+  isPublic = false,
 }: UseVerificationFlowProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isValidating, setIsValidating] = useState(false);
@@ -131,7 +134,8 @@ export const useVerificationFlow = ({
       isPhoneVerified: isPhoneVerifiedData,
     };
 
-    const result = NIDFormSchema.safeParse(fullData);
+    const schema = isPublic ? PublicNIDFormSchema : NIDFormSchema;
+    const result = schema.safeParse(fullData);
 
     if (!result.success) {
       const errors: Record<string, string> = {};

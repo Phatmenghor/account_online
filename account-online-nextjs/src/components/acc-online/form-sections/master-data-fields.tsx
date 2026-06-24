@@ -40,6 +40,7 @@ interface MasterDataFieldsProps {
   setSelectedCategory: (value: AccOnlineCategoryModel | null) => void;
   isLoadingCategories: boolean;
   isVerified?: boolean;
+  isPublic?: boolean;
 }
 
 export const MasterDataFields: React.FC<MasterDataFieldsProps> = ({
@@ -62,6 +63,7 @@ export const MasterDataFields: React.FC<MasterDataFieldsProps> = ({
   setSelectedCategory,
   isLoadingCategories,
   isVerified = false,
+  isPublic = false,
 }) => {
   // Get values from FormStateContext
   const {
@@ -118,7 +120,7 @@ export const MasterDataFields: React.FC<MasterDataFieldsProps> = ({
   }, []);
 
   useEffect(() => {
-    if (prefillDone.current || staffCode) return;
+    if (isPublic || prefillDone.current || staffCode) return;
     const user = getUserInfo();
     if (user?.userRole === "STAFF" && user.idCard) {
       prefillDone.current = true;
@@ -242,66 +244,70 @@ export const MasterDataFields: React.FC<MasterDataFieldsProps> = ({
         )}
       </div>
 
-      {/* Account Type */}
-      <div className="space-y-1">
-        {renderLabel("accountType")}
-        <Select
-          value={selectedCategory?.id.toString() || ""}
-          onValueChange={(value) => {
-            const category = accOnlineCategories.find((c) => c.id.toString() === value);
-            setSelectedCategory(category || null);
-            validateField("accountProduct", value);
-          }}
-          disabled={isLoading || isValidating || isLoadingCategories}
-        >
-          <SelectTrigger
-            className={`w-full h-12 text-base ${validationErrors.accountProduct ? "border-red-500" : ""}`}
-          >
-            <SelectValue
-              placeholder={isLoadingCategories ? translate("loading") : translateSelect("selectAccount")}
-            />
-          </SelectTrigger>
-          <SelectContent>
-            {accOnlineCategories.map((cat) => (
-              <SelectItem key={cat.id} value={cat.id.toString()}>
-                {cat.lookupId} - {cat.lookupName}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        {validationErrors.accountProduct && (
-          <p className="text-sm text-red-500">{translate("err_accountProduct")}</p>
-        )}
-      </div>
-
-      {/* Relationship Manager — Staff ID (required) */}
-      <div className="md:col-span-2 space-y-1">
-        {renderLabel("relationshipManager")}
-        <div className="relative">
-          <Input
-            placeholder={translate("staffCode")}
-            value={staffCode}
-            onChange={(e) => {
-              setStaffCode(e.target.value);
-              validateField("staffCode", e.target.value);
-              handleStaffCodeChange(e.target.value);
+      {/* Account Type — hidden for public self-service opening (fixed to 6011) */}
+      {!isPublic && (
+        <div className="space-y-1">
+          {renderLabel("accountType")}
+          <Select
+            value={selectedCategory?.id.toString() || ""}
+            onValueChange={(value) => {
+              const category = accOnlineCategories.find((c) => c.id.toString() === value);
+              setSelectedCategory(category || null);
+              validateField("accountProduct", value);
             }}
-            className={`w-full h-12 text-base pr-10 ${validationErrors.staffCode ? "border-red-500" : ""}`}
-            disabled={isLoading || isValidating || isSubmitting}
-          />
-          {isVerifyingStaff && (
-            <Loader2 className="absolute right-3.5 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />
+            disabled={isLoading || isValidating || isLoadingCategories}
+          >
+            <SelectTrigger
+              className={`w-full h-12 text-base ${validationErrors.accountProduct ? "border-red-500" : ""}`}
+            >
+              <SelectValue
+                placeholder={isLoadingCategories ? translate("loading") : translateSelect("selectAccount")}
+              />
+            </SelectTrigger>
+            <SelectContent>
+              {accOnlineCategories.map((cat) => (
+                <SelectItem key={cat.id} value={cat.id.toString()}>
+                  {cat.lookupId} - {cat.lookupName}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {validationErrors.accountProduct && (
+            <p className="text-sm text-red-500">{translate("err_accountProduct")}</p>
           )}
         </div>
-        {isVerifyingStaff && (
-          <p className="text-xs text-muted-foreground">
-            {translate("verifyingStaffCode")}
-          </p>
-        )}
-        {validationErrors.staffCode && (
-          <p className="text-sm text-red-500">{validationErrors.staffCode}</p>
-        )}
-      </div>
+      )}
+
+      {/* Relationship Manager — Staff ID (required for staff opening only) */}
+      {!isPublic && (
+        <div className="md:col-span-2 space-y-1">
+          {renderLabel("relationshipManager")}
+          <div className="relative">
+            <Input
+              placeholder={translate("staffCode")}
+              value={staffCode}
+              onChange={(e) => {
+                setStaffCode(e.target.value);
+                validateField("staffCode", e.target.value);
+                handleStaffCodeChange(e.target.value);
+              }}
+              className={`w-full h-12 text-base pr-10 ${validationErrors.staffCode ? "border-red-500" : ""}`}
+              disabled={isLoading || isValidating || isSubmitting}
+            />
+            {isVerifyingStaff && (
+              <Loader2 className="absolute right-3.5 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />
+            )}
+          </div>
+          {isVerifyingStaff && (
+            <p className="text-xs text-muted-foreground">
+              {translate("verifyingStaffCode")}
+            </p>
+          )}
+          {validationErrors.staffCode && (
+            <p className="text-sm text-red-500">{validationErrors.staffCode}</p>
+          )}
+        </div>
+      )}
     </div>
   );
 };

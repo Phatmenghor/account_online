@@ -12,16 +12,21 @@ export default function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
-  // STAFF role: only allowed on "/", redirect everything else to login
+  // Public customer self-service account opening — no auth required
+  if (pathname === "/") {
+    return NextResponse.next();
+  }
+
+  // STAFF role: only allowed on staff opening route, redirect everything else to login
   if (token && role === "STAFF") {
-    if (pathname === "/") {
+    if (pathname === ROUTES.STAFF.OPENING) {
       return NextResponse.next();
     }
     return NextResponse.redirect(new URL(ROUTES.AUTH.LOGIN, req.url));
   }
 
-  // Root "/" for non-STAFF authenticated users: redirect to dashboard
-  if (pathname === "/") {
+  // Staff opening route for non-STAFF authenticated users: redirect to dashboard
+  if (pathname === ROUTES.STAFF.OPENING) {
     if (token) {
       return NextResponse.redirect(new URL(ROUTES.DASHBOARD.INDEX, req.url));
     }

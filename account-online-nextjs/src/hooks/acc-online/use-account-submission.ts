@@ -28,6 +28,7 @@ interface UseAccountSubmissionProps {
   convertGenderToAPI: (gender: string) => string;
   getMaritalStatusString: (id: string) => string;
   translate: (key: string) => string;
+  isPublic?: boolean;
 }
 
 interface LoadingState {
@@ -64,6 +65,7 @@ export const useAccountSubmission = ({
   convertGenderToAPI,
   getMaritalStatusString,
   translate,
+  isPublic = false,
 }: UseAccountSubmissionProps) => {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [successData, setSuccessData] = useState<OpenAccountResponse | null>(null);
@@ -187,7 +189,7 @@ export const useAccountSubmission = ({
         companyName: selectedReferenceBank?.nameEn || "",
         referralId: staffCode || "",
         releasedBy: staffCode || "",
-        relationManager: staffCode || "",
+        relationManager: isPublic ? "" : (staffCode || ""),
         branchCode: selectedBranch!.branchID,
         customerCurrentProvince: locationData.currentAddress.province?.provinceCode || "",
         customerCurrentDistrict: locationData.currentAddress.district?.districtCode || "",
@@ -208,7 +210,7 @@ export const useAccountSubmission = ({
         nidImageName: nidFileName!,
         selfieImageName: selfieFileName!,
         customerRole: "OWNER",
-        accountType: selectedCategory?.lookupId || "6011",
+        accountType: isPublic ? "6011" : (selectedCategory?.lookupId || "6011"),
       };
 
       const response = await createOpenAccountService(accountData);
