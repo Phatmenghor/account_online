@@ -35,7 +35,7 @@ public class OpenAccountServiceImpl implements OpenAccountService {
         String legalId = request.getLegalId();
         String currentStep = "START";
 
-        String submittedBy = "System";
+        String submittedBy = "Customer";
         try {
             submittedBy = securityUtils.getCurrentUser().getUsername();
         } catch (Exception ignored) {}
