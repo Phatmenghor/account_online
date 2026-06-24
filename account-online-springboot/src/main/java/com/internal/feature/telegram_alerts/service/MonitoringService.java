@@ -97,6 +97,37 @@ public class MonitoringService {
         }
     }
 
+    public void sendAccountCreatedAlert(String fullName, String fullAddress, String legalId,
+                                         String cif, String usdAccount, String khrAccount, String branchName) {
+        try {
+            StringBuilder msg = new StringBuilder();
+            msg.append("*✅ Account Online - CREATED*\n")
+                    .append("--------------------\n");
+
+            appendIfNotEmpty(msg, "Full Name", fullName);
+            appendIfNotEmpty(msg, "Full Address", fullAddress);
+            appendIfNotEmpty(msg, "Legal ID", legalId);
+            appendIfNotEmpty(msg, "CIF", cif);
+            appendIfNotEmpty(msg, "Account Dollar", usdAccount);
+            appendIfNotEmpty(msg, "Account KHR", khrAccount);
+            appendIfNotEmpty(msg, "Branch", branchName);
+
+            telegramService.sendToMonitor(msg.toString());
+
+            if (legalId != null && !legalId.isBlank()) {
+                try {
+                    Resource selfieImage = customerImageService.getSelfieImageResourceForEmail(legalId);
+                    if (selfieImage != null && selfieImage.exists()) {
+                        telegramService.sendPhotoToMonitor("*NID Face Photo*\nLegal ID: `" + escape(legalId) + "`", selfieImage);
+                    }
+                } catch (Exception ignored) {
+                }
+            }
+        } catch (Exception e) {
+            log.error("Failed to send account created alert: {}", e.getMessage());
+        }
+    }
+
     public void sendAmlActionAlert(AmlStatusDto amlDto) {
         if (amlDto == null || amlDto.getStatus() == null) return;
         if (amlDto.getStatus() != AmlStatusEnum.APPROVE && amlDto.getStatus() != AmlStatusEnum.REJECT) return;

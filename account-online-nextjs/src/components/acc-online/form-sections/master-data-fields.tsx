@@ -285,10 +285,10 @@ export const MasterDataFields: React.FC<MasterDataFieldsProps> = ({
           on staff opening; on the public route it's optional, stored for logs only,
           and never verified or submitted to T24. */}
       <div className={`${isPublic ? "" : "md:col-span-2"} space-y-1`}>
-        {renderLabel("relationshipManager")}
+        {renderLabel(isPublic ? "referralId" : "relationshipManager")}
         <div className="relative">
           <Input
-            placeholder={translate("staffCode")}
+            placeholder={translate(isPublic ? "referralIdPlaceholder" : "staffCode")}
             value={staffCode}
             onChange={(e) => {
               setStaffCode(e.target.value);
