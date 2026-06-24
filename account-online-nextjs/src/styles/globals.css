@@ -669,6 +669,13 @@
     overscroll-behavior-y: none;
   }
 
+  /* Consistent placeholder color across every input/textarea/select, even
+     ones that don't apply placeholder:text-muted-foreground explicitly. */
+  ::placeholder {
+    color: hsl(var(--muted-foreground));
+    opacity: 1;
+  }
+
   /* ========== MOBILE ZOOM-ON-FOCUS FIX ==========
      `html { font-size: 75% }` above shrinks every rem-based size, so a
      Tailwind text-base (1rem) input was rendering at ~12px on screen.
@@ -684,7 +691,10 @@
     input,
     select,
     textarea {
-      font-size: 0.875rem !important;
+      /* 1rem here matches Tailwind's text-base under the 75% root scale above,
+         so native form controls line up with the text-base size used by
+         Select/Combobox triggers and labels across the app. */
+      font-size: 1rem !important;
     }
   }
 
