@@ -4,6 +4,7 @@ import com.internal.config.CpbProperties;
 import com.internal.config.DefaultProperties;
 import com.internal.exceptions.error.openaccount.OpenAccountException;
 import com.internal.feature.open_account.dto.request.CustomerRequest;
+import com.internal.utils.SecurityUtils;
 import com.internal.utils.constants.DefaultConstants;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +21,7 @@ public class OpenAccountXmlBuilder {
 
     private final CpbProperties cpbProperties;
     private final DefaultProperties defaultProperties;
+    private final SecurityUtils securityUtils;
 
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     private static final DateTimeFormatter T24_DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd");
@@ -32,6 +34,11 @@ public class OpenAccountXmlBuilder {
 
         String branchCode = getOrDefault(request.getBranchCode(), defaultProperties.getBranchCode());
         String maritalStatus = mapMaritalStatus(request.getMaritalStatus());
+
+        // Relation manager is staff-only: public self-service requests store the
+        // value for DB logs only and must never submit it to T24, even if sent.
+        boolean isStaffRequest = isAuthenticated();
+        String relationManager = isStaffRequest ? getOrDefault(request.getRelationManager(), "") : "";
 
         // Sanitize legalAddress to SWIFT-safe characters before sending to T24
         String legalAddress = toSwiftSafe(getOrDefault(request.getLegalAddress(), ""));
@@ -145,7 +152,7 @@ public class OpenAccountXmlBuilder {
 
                 // Ownership and staff
                 + "<cus:Ownership>" + defaultProperties.getOwnership() + "</cus:Ownership>"
-                + "<cus:RelationManager>" + getOrDefault(request.getRelationManager(), "") + "</cus:RelationManager>"
+                + "<cus:RelationManager>" + relationManager + "</cus:RelationManager>"
                 + "<cus:LoanOfficer></cus:LoanOfficer>"
                 + "<cus:Staff></cus:Staff>"
                 + "<cus:ReferralBy></cus:ReferralBy>"
@@ -336,6 +343,15 @@ public class OpenAccountXmlBuilder {
 
     private String getOrDefault(String value, String defaultValue) {
         return value != null && !value.isEmpty() ? value : defaultValue;
+    }
+
+    private boolean isAuthenticated() {
+        try {
+            securityUtils.getCurrentUser();
+            return true;
+        } catch (Exception ignored) {
+            return false;
+        }
     }
 
     /**

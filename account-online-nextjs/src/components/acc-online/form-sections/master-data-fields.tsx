@@ -100,6 +100,9 @@ export const MasterDataFields: React.FC<MasterDataFieldsProps> = ({
   function handleStaffCodeChange(value: string) {
     if (lookupTimer.current) clearTimeout(lookupTimer.current);
 
+    // Public route: stored for logs only, not validated against staff records.
+    if (isPublic) return;
+
     const code = value.trim();
     if (!code) {
       lookupSeq.current++;
@@ -278,36 +281,36 @@ export const MasterDataFields: React.FC<MasterDataFieldsProps> = ({
         </div>
       )}
 
-      {/* Relationship Manager — Staff ID (required for staff opening only) */}
-      {!isPublic && (
-        <div className="md:col-span-2 space-y-1">
-          {renderLabel("relationshipManager")}
-          <div className="relative">
-            <Input
-              placeholder={translate("staffCode")}
-              value={staffCode}
-              onChange={(e) => {
-                setStaffCode(e.target.value);
-                validateField("staffCode", e.target.value);
-                handleStaffCodeChange(e.target.value);
-              }}
-              className={`w-full h-12 text-base pr-10 ${validationErrors.staffCode ? "border-red-500" : ""}`}
-              disabled={isLoading || isValidating || isSubmitting}
-            />
-            {isVerifyingStaff && (
-              <Loader2 className="absolute right-3.5 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />
-            )}
-          </div>
-          {isVerifyingStaff && (
-            <p className="text-xs text-muted-foreground">
-              {translate("verifyingStaffCode")}
-            </p>
-          )}
-          {validationErrors.staffCode && (
-            <p className="text-sm text-red-500">{validationErrors.staffCode}</p>
+      {/* Relationship Manager — Staff ID. Required + verified against staff records
+          on staff opening; on the public route it's optional, stored for logs only,
+          and never verified or submitted to T24. */}
+      <div className="md:col-span-2 space-y-1">
+        {renderLabel("relationshipManager")}
+        <div className="relative">
+          <Input
+            placeholder={translate("staffCode")}
+            value={staffCode}
+            onChange={(e) => {
+              setStaffCode(e.target.value);
+              if (!isPublic) validateField("staffCode", e.target.value);
+              handleStaffCodeChange(e.target.value);
+            }}
+            className={`w-full h-12 text-base pr-10 ${validationErrors.staffCode ? "border-red-500" : ""}`}
+            disabled={isLoading || isValidating || isSubmitting}
+          />
+          {!isPublic && isVerifyingStaff && (
+            <Loader2 className="absolute right-3.5 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />
           )}
         </div>
-      )}
+        {!isPublic && isVerifyingStaff && (
+          <p className="text-xs text-muted-foreground">
+            {translate("verifyingStaffCode")}
+          </p>
+        )}
+        {!isPublic && validationErrors.staffCode && (
+          <p className="text-sm text-red-500">{validationErrors.staffCode}</p>
+        )}
+      </div>
     </div>
   );
 };
