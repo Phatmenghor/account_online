@@ -148,7 +148,11 @@ export const useReferenceBanks = (): UseFetchDataResult<ReferenceModel> => {
  */
 export const useAccOnlineCategories = (): UseFetchDataResult<AccOnlineCategoryModel> => {
   const [data, setData] = useState<AccOnlineCategoryModel[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  // Starts true: the fetch always kicks off in the effect below, and
+  // isLoading must be true for the brief window before that effect runs,
+  // otherwise Verify/Submit can be clicked while the list is still empty
+  // and the 6011-default hasn't been auto-selected yet.
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
   const fetchData = async () => {
