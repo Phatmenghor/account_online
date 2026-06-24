@@ -4,9 +4,10 @@ import { ResponseNID } from "@/models/open-acc-online/nid.response.model";
 import {
   NIDFormData,
   NIDFormSchema,
+  PublicNIDFormSchema,
 } from "@/components/acc-online/form-field/form-validate-error";
 
-export const useFormValidation = () => {
+export const useFormValidation = (isPublic: boolean = false) => {
   const [formData, setFormData] = useState<ResponseNID>({
     idNumber: "",
     lastNameKh: "",
@@ -35,7 +36,8 @@ export const useFormValidation = () => {
   // Validate a single field
   const validateField = (fieldName: keyof NIDFormData, value: any) => {
     try {
-      const fieldSchema = NIDFormSchema.shape[fieldName];
+      const schema = isPublic ? PublicNIDFormSchema : NIDFormSchema;
+      const fieldSchema = schema.shape[fieldName];
       fieldSchema.parse(value);
       setValidationErrors((prev) => {
         const newErrors = { ...prev };

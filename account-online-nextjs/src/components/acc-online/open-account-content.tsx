@@ -63,7 +63,7 @@ export function OpenAccountContent({ isPublic = false }: OpenAccountContentProps
     clearValidation,
     translate,
     translateSelect,
-  } = useFormValidation();
+  } = useFormValidation(isPublic);
 
   const {
     showLocationModal,
