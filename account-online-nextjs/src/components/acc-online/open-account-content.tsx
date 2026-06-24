@@ -204,8 +204,10 @@ export function OpenAccountContent({ isPublic = false }: OpenAccountContentProps
   // ========================================
   const [showClearConfirm, setShowClearConfirm] = useState(false);
 
-  // Combine all busy states into one flag to disable buttons consistently
-  const isBusy = isLoading || isValidating || loadingState.isLoading;
+  // Combine all busy states into one flag to disable buttons consistently.
+  // Includes isLoadingCategories so Verify/Submit can't race ahead of the
+  // 6011-default auto-select effect and falsely fail "accountProduct" validation.
+  const isBusy = isLoading || isValidating || loadingState.isLoading || isLoadingCategories;
 
   // ========================================
   // Event Handlers

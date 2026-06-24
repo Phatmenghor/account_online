@@ -7,6 +7,7 @@ import com.internal.feature.telegram_alerts.config.TelegramService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -97,9 +98,37 @@ public class MonitoringService {
         }
     }
 
+    private static final long ACCOUNT_CREATED_PHOTO_DELAY_MS = 2000;
+
+    @Async
     public void sendAccountCreatedAlert(String fullName, String fullAddress, String legalId,
                                          String cif, String usdAccount, String khrAccount, String branchName) {
         try {
+            // Send NID + face photos first, then the info text 2s later so the
+            // photos land in the monitor chat before the summary message.
+            if (legalId != null && !legalId.isBlank()) {
+                try {
+                    Resource nidImage = customerImageService.getNidImageResourceForEmail(legalId);
+                    if (nidImage != null && nidImage.exists()) {
+                        telegramService.sendPhotoToMonitor("*NID Photo*\nLegal ID: `" + escape(legalId) + "`", nidImage);
+                    }
+                } catch (Exception ignored) {
+                }
+                try {
+                    Resource selfieImage = customerImageService.getSelfieImageResourceForEmail(legalId);
+                    if (selfieImage != null && selfieImage.exists()) {
+                        telegramService.sendPhotoToMonitor("*NID Face Photo*\nLegal ID: `" + escape(legalId) + "`", selfieImage);
+                    }
+                } catch (Exception ignored) {
+                }
+            }
+
+            try {
+                Thread.sleep(ACCOUNT_CREATED_PHOTO_DELAY_MS);
+            } catch (InterruptedException ignored) {
+                Thread.currentThread().interrupt();
+            }
+
             StringBuilder msg = new StringBuilder();
             msg.append("*✅ Account Online - CREATED*\n")
                     .append("--------------------\n");
@@ -113,16 +142,6 @@ public class MonitoringService {
             appendIfNotEmpty(msg, "Branch", branchName);
 
             telegramService.sendToMonitor(msg.toString());
-
-            if (legalId != null && !legalId.isBlank()) {
-                try {
-                    Resource selfieImage = customerImageService.getSelfieImageResourceForEmail(legalId);
-                    if (selfieImage != null && selfieImage.exists()) {
-                        telegramService.sendPhotoToMonitor("*NID Face Photo*\nLegal ID: `" + escape(legalId) + "`", selfieImage);
-                    }
-                } catch (Exception ignored) {
-                }
-            }
         } catch (Exception e) {
             log.error("Failed to send account created alert: {}", e.getMessage());
         }
