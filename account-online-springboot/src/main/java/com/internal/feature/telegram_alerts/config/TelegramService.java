@@ -35,7 +35,6 @@ public class TelegramService {
     public void sendToDev(String message) {
         taskExecutor.execute(() -> {
             if (devChatId == null || devChatId.trim().isEmpty()) {
-                log.debug("Dev chat ID not configured - skipping alert");
                 return;
             }
             sendMarkdownToChat(devChatId, message);
@@ -45,7 +44,6 @@ public class TelegramService {
     public void sendToMonitor(String message) {
         taskExecutor.execute(() -> {
             if (monitorChatId == null || monitorChatId.trim().isEmpty()) {
-                log.debug("Monitor chat ID not configured - skipping Telegram alert");
                 return;
             }
             sendMarkdownToChat(monitorChatId, message);
@@ -77,7 +75,6 @@ public class TelegramService {
             HttpEntity<MultiValueMap<String, String>> requestEntity = new HttpEntity<>(body, headers);
 
             restTemplate.postForObject(url, requestEntity, String.class);
-            log.debug("Telegram message sent successfully");
         } catch (Exception e) {
             log.warn("Telegram send failed - chat_id: {}, error: {}", chatId, e.getMessage());
         }
@@ -85,7 +82,6 @@ public class TelegramService {
 
     public void sendPhotoToMonitor(String caption, Resource imageResource) {
         if (monitorChatId == null || monitorChatId.trim().isEmpty()) {
-            log.debug("Monitor chat ID not configured - skipping photo");
             return;
         }
         sendPhoto(monitorChatId, caption, imageResource);

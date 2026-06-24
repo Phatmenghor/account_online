@@ -220,8 +220,9 @@ export const PersonalDetailsFields: React.FC<PersonalDetailsFieldsProps> = ({
           placeholder={translate("legalId")}
           value={formData.idNumber}
           onChange={(e) => handleInputChange("idNumber", e.target.value)}
-          className={`w-full h-12 text-base ${validationErrors.idNumber ? "border-red-500" : ""}`}
-          disabled={isLoading || isValidating || isSubmitting || isNidExtracted}
+          className={`w-full h-12 text-base ${validationErrors.idNumber ? "border-red-500" : ""} ${isNidExtracted ? "cursor-default select-text" : ""}`}
+          readOnly={isNidExtracted}
+          disabled={isLoading || isValidating || isSubmitting}
         />
         {validationErrors.idNumber && (
           <p className="text-sm text-red-500">{translate("err_idNumber")}</p>

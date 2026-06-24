@@ -32,7 +32,7 @@ public class AmlMiddlewareService {
     @Value("${simulator.aml.high-risk:false}")
     private boolean simulateAmlHighRisk;
 
-    public AmlExternalResponseDto CheckAml(CustomerAmlRequest requestBody) {
+    public AmlExternalResponseDto checkAml(CustomerAmlRequest requestBody) {
 
         try {
             if (simulateAmlServiceError) {

@@ -72,7 +72,7 @@ export function ComboboxSelectCommune({
           role="combobox"
           aria-expanded={open}
           className={cn(
-            "w-full h-12 text-base flex-1 justify-between bg-white border-gray-300",
+            "w-full h-12 text-sm flex-1 justify-between bg-white border-gray-300",
             !dataSelect && "text-muted-foreground",
             disabled && "opacity-50 cursor-not-allowed"
           )}

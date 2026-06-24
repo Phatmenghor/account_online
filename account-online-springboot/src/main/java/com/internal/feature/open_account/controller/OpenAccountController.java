@@ -26,7 +26,7 @@ public class OpenAccountController {
 
         OpenAccountResponseDto response = openAccountService.processAccountOpening(request);
 
-        log.info("✓ Account opened successfully | Legal ID: {} | CIF: {} | By: {}",
+        log.info("Account opened successfully | Legal ID: {} | CIF: {} | By: {}",
                 response.getLegalId(), response.getCif(), response.getSubmittedBy());
 
         return ResponseEntity.ok(ApiResponse.success("Account opened successfully", response));

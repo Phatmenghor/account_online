@@ -34,8 +34,6 @@ public class ImageController {
 
     @GetMapping("/{id}")
     public ResponseEntity<byte[]> getImageData(@PathVariable UUID id) {
-        log.debug("Image retrieval request for ID: {}", id);
-        
         ImageResponse imageResponse = imageService.getImageById(id);
         
         return ResponseEntity

@@ -249,8 +249,7 @@ public class AuthServiceImpl implements AuthService {
                     + "--------------------\n"
                     + "- Time: `" + time + "`";
             telegramService.sendToDev(msg);
-        } catch (Exception e) {
-            log.debug("Failed to send login-fail alert: {}", e.getMessage());
+        } catch (Exception ignored) {
         }
     }
 

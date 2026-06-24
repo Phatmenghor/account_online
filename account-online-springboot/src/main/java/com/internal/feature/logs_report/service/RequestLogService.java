@@ -26,11 +26,6 @@ public class RequestLogService {
     public void saveLog(RequestLog requestLog) {
         try {
             requestLogRepository.save(requestLog);
-            log.debug("Saved request log: UUID={}, Endpoint={} {}, Status={}", 
-                    requestLog.getId(), 
-                    requestLog.getMethod(),
-                    requestLog.getEndpoint(),
-                    requestLog.getStatusCode());
         } catch (Exception e) {
             log.error("Failed to save request log: {}", e.getMessage());
         }

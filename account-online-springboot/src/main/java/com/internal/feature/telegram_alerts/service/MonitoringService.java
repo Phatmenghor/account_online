@@ -81,16 +81,14 @@ public class MonitoringService {
                     if (nidImage != null && nidImage.exists()) {
                         telegramService.sendPhotoToMonitor("*HIGH RISK - NID Photo*\nLegal ID: `" + escape(legalId) + "`", nidImage);
                     }
-                } catch (Exception e) {
-                    log.debug("Could not send NID photo for {}: {}", legalId, e.getMessage());
+                } catch (Exception ignored) {
                 }
                 try {
                     Resource selfieImage = customerImageService.getSelfieImageResourceForEmail(legalId);
                     if (selfieImage != null && selfieImage.exists()) {
                         telegramService.sendPhotoToMonitor("*HIGH RISK - Face Photo*\nLegal ID: `" + escape(legalId) + "`", selfieImage);
                     }
-                } catch (Exception e) {
-                    log.debug("Could not send selfie photo for {}: {}", legalId, e.getMessage());
+                } catch (Exception ignored) {
                 }
             }
 
@@ -174,9 +172,5 @@ public class MonitoringService {
     private String escape(String text) {
         if (text == null) return "";
         return text.replace("_", "\\_").replace("*", "\\*").replace("`", "\\`").replace("~", "\\~");
-    }
-
-    private String now() {
-        return LocalDateTime.now(ZoneId.of("Asia/Phnom_Penh")).format(DATE_FORMATTER);
     }
 }

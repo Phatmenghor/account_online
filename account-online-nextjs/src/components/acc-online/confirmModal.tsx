@@ -76,18 +76,18 @@ const ConfirmationModal = ({
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
-                className="flex flex-col sm:flex-row gap-3 w-full"
+                className="flex flex-col sm:flex-row sm:justify-center gap-3 w-full"
               >
                 <Button
                   onClick={onCancel}
-                  className="flex-1 h-12 flex items-center justify-center gap-2 bg-white border-2 border-gray-200 text-gray-600 font-semibold text-base rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-all shadow-sm"
+                  className="w-full sm:w-auto h-12 flex items-center justify-center gap-2 px-6 bg-white border-2 border-gray-200 text-gray-600 font-semibold text-base rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-all shadow-sm"
                 >
                   <XCircle className="w-4 h-4" />
                   {translate("noIneed")}
                 </Button>
                 <Button
                   onClick={onConfirm}
-                  className="flex-1 h-12 flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-base rounded-lg transition-all shadow-sm"
+                  className="w-full sm:w-auto h-12 flex items-center justify-center gap-2 px-6 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-base rounded-lg transition-all shadow-sm"
                 >
                   <CheckCircle className="w-4 h-4" />
                   {translate("yesIhave")}

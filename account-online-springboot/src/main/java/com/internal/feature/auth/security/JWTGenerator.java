@@ -52,7 +52,7 @@ public class JWTGenerator {
         long expirationTimeInMs = jwtExpirationInMinutes * 60 * 1000;
         Date expireDate = new Date(currentDate.getTime() + expirationTimeInMs);
 
-        log.debug("Generating token for user: {} with roles: {}", username, roles);
+        log.info("Generating token for user: {}", username);
 
         return Jwts.builder()
                 .setIssuedAt(currentDate)

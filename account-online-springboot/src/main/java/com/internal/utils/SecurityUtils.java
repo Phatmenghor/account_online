@@ -24,7 +24,6 @@ public class SecurityUtils {
         }
 
         String username = authentication.getName();
-        log.debug("Fetching user: {}", username);
 
         return userRepository.findByUsername(username)
                 .orElseThrow(() -> {

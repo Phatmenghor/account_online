@@ -66,7 +66,6 @@ public class CustomerImageServiceImpl implements CustomerImageService {
     private Path resolveWeekFolder(String subFolder) {
         Path dir = Paths.get(uploadDir, subFolder, getCurrentWeekFolder());
         dir.toFile().mkdirs();
-        log.debug("Resolved week folder: {}", dir);
         return dir;
     }
 

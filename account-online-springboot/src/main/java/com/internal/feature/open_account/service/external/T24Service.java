@@ -134,12 +134,7 @@ public class T24Service {
 
     private void checkAndAlertSecurityViolation(String responseBody, String operation) {
         if (responseBody != null && responseBody.contains(AppConstants.T24_ACCOUNT_ERROR)) {
-            String errorMessage = String.format("🚨 **T24 Security Violation Detected**\n\n" +
-                            "**Operation:** `%s`\n" +
-                            "**Error:** `SECURITY VIOLATION DURING SIGN ON PROCESS`\n" +
-                            "**Action Required:** Check T24 credentials in `application.yaml`.",
-                    operation);
-            log.error("T24 Security Violation Detected!");
+            log.error("T24 security violation detected for operation: {}", operation);
         }
     }
 }

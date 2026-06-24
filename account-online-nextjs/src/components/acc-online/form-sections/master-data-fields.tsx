@@ -228,7 +228,7 @@ export const MasterDataFields: React.FC<MasterDataFieldsProps> = ({
         {renderLabel("branch")}
         <div
           className={
-            validationErrors.branch ? "border border-red-500 rounded" : ""
+            validationErrors.branch ? "border border-red-500 rounded-xl" : ""
           }
         >
           <ComboboxSelectBranch

@@ -45,7 +45,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class AmlServiceImp implements AmlService {
+public class AmlServiceImpl implements AmlService {
 
     private final AmlStatusRepository amlStatusRepository;
     private final AmlHistoryRepository amlHistoryRepository;
@@ -57,7 +57,6 @@ public class AmlServiceImp implements AmlService {
 
     @Override
     public Optional<AmlStatus> findByLegalId(String legalId) {
-        log.debug("Finding AML status by legalId: {}", legalId);
         return amlStatusRepository.findByLegalId(legalId);
     }
 
@@ -139,7 +138,6 @@ public class AmlServiceImp implements AmlService {
 
     @Override
     public AmlStatusDto getAmlById(Long id) {
-        log.debug("Fetching AML status by id: {}", id);
         AmlStatus aml = amlStatusRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Aml not found with Id: " + id));
         return amlStatusMapper.toStatusDto(aml);
@@ -147,7 +145,6 @@ public class AmlServiceImp implements AmlService {
 
     @Override
     public AmlHistoryDto getAmlHistoryById(Long id) {
-        log.debug("Fetching AML history by id: {}", id);
         AmlHistory aml = amlHistoryRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Aml history not found with Id: " + id));
         return amlHistoryMapper.toDto(aml);
