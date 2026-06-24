@@ -165,8 +165,8 @@ export const PersonalDetailsFields: React.FC<PersonalDetailsFieldsProps> = ({
             <SelectValue placeholder={translateSelect("selectGender")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="Female">Female</SelectItem>
-            <SelectItem value="Male">Male</SelectItem>
+            <SelectItem value="Female">{translate("female")}</SelectItem>
+            <SelectItem value="Male">{translate("male")}</SelectItem>
           </SelectContent>
         </Select>
         {validationErrors.gender && (

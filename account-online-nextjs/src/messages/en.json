@@ -154,6 +154,8 @@
     "lnameEn": "Family Name",
     "fnameEn": "Given Name",
     "gender": "Gender",
+    "male": "Male",
+    "female": "Female",
     "exp": "Legal ExpDate",
     "issued": "Legal IssuedDate",
     "valid_success": "Validation Successful",
