@@ -45,9 +45,12 @@ export const NIDFormSchema = z.object({
 
 export type NIDFormData = z.infer<typeof NIDFormSchema>;
 
-// Public self-service opening: no relation manager (staff ID) required.
+// Public self-service opening: no relation manager (staff ID) required, and
+// account product/category is hidden from the UI (auto-set to 6011 server
+// side), so it must never be user-facing-validated as required either.
 export const PublicNIDFormSchema = NIDFormSchema.extend({
   staffCode: z.string().optional(),
+  accountProduct: z.string().optional(),
 });
 
 // Partial schema for verification step (before full submission)
