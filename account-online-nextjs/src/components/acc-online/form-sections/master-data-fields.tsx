@@ -284,7 +284,7 @@ export const MasterDataFields: React.FC<MasterDataFieldsProps> = ({
       {/* Relationship Manager — Staff ID. Required + verified against staff records
           on staff opening; on the public route it's optional, stored for logs only,
           and never verified or submitted to T24. */}
-      <div className="md:col-span-2 space-y-1">
+      <div className={`${isPublic ? "" : "md:col-span-2"} space-y-1`}>
         {renderLabel("relationshipManager")}
         <div className="relative">
           <Input
