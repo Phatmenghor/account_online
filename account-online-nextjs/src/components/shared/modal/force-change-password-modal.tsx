@@ -124,7 +124,7 @@ export default function ForceChangePasswordModal({
   return (
     <Dialog open={isOpen} onOpenChange={(open) => { if (!open) onClose?.(); }}>
       <DialogContent
-        className="w-full max-w-lg mx-auto p-0 gap-0 overflow-hidden rounded-2xl shadow-2xl"
+        className="w-full sm:max-w-[520px] mx-auto p-0 gap-0 overflow-hidden rounded-2xl shadow-2xl"
         onPointerDownOutside={(e) => e.preventDefault()}
         onEscapeKeyDown={(e) => e.preventDefault()}
       >

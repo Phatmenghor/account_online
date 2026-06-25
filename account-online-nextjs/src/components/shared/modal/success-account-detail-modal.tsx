@@ -51,7 +51,7 @@ export default function SuccessAccountViewModal({
 }: SuccessAccountViewModalProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-5xl h-[92vh] overflow-hidden p-0 gap-0 flex flex-col">
+      <DialogContent className="sm:max-w-[850px] h-[92vh] overflow-hidden p-0 gap-0 flex flex-col">
         {/* Header */}
         <DialogHeader className="px-6 py-4 border-b bg-muted/30 flex-shrink-0">
           <div className="flex items-center gap-4 pr-8">
@@ -123,6 +123,7 @@ export default function SuccessAccountViewModal({
                     <InfoRow label="KHR Account" value={account.khrAccount} />
                     <InfoRow label="USD Account" value={account.usdAccount} />
                     <InfoRow label="Mnemonic" value={account.mnemonic} />
+                    <InfoRow label="Category Account" value={account.categoryAccount} />
                     <InfoRow label="MB Activation Code" value={account.mbActivationCode} />
                     <InfoRow
                       label="MB App Download"

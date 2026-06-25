@@ -108,7 +108,7 @@ export default function OTPInput({
       AppToast({
         type: "warning",
         message: translate("otp_please_wait"),
-        description: translate("otp_resend_wait").replace("{n}", String(countdown)),
+        description: translate("otp_resend_wait", { n: countdown }),
       });
       return;
     }
@@ -127,7 +127,7 @@ export default function OTPInput({
       AppToast({
         type: "success",
         message: translate("otp_sent_success"),
-        description: translate("otp_sent_success_desc").replace("{phone}", phoneNumber),
+        description: translate("otp_sent_success_desc", { phone: phoneNumber }),
       });
     } catch (error: any) {
       console.error("Failed to send OTP:", error);

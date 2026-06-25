@@ -29,7 +29,7 @@ export default function LoadingModal({
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.88 }}
             transition={{ type: "spring", damping: 22, stiffness: 260 }}
-            className="relative bg-white w-full max-w-xs sm:max-w-sm rounded-2xl shadow-2xl overflow-hidden z-10"
+            className="relative bg-white w-full max-w-sm sm:max-w-md rounded-2xl shadow-2xl overflow-hidden z-10"
           >
             <div className="h-1.5 w-full bg-primary" />
 

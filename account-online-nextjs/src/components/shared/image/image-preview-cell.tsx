@@ -133,7 +133,7 @@ export function ImagePreviewCell({
 
       {open && (
         <Dialog open={open} onOpenChange={setOpen}>
-          <DialogContent className="max-w-3xl p-0 gap-0 overflow-hidden">
+          <DialogContent className="sm:max-w-[1000px] w-[95vw] p-0 gap-0 overflow-hidden">
             <DialogHeader className="px-4 py-3 border-b flex-row items-center justify-between">
               <DialogTitle className="text-base font-semibold">{label}</DialogTitle>
               <div className="flex items-center gap-2 pr-8">

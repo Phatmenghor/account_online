@@ -463,7 +463,7 @@ export function OpenAccountContent({ isPublic = false }: OpenAccountContentProps
               <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-5 border-t border-gray-100 bg-gray-50/50 rounded-b-2xl">
                 <div className="flex flex-col sm:flex-row sm:justify-end gap-3">
                   <Button
-                    className="w-full sm:w-auto sm:min-w-[160px] h-12 font-semibold rounded-xl text-base sm:text-sm flex items-center justify-center gap-2 transition-all
+                    className="w-full sm:w-auto sm:min-w-[160px] h-auto min-h-12 py-3 font-semibold rounded-xl text-base sm:text-sm flex items-center justify-center gap-2 transition-all
                       border-2 border-primary text-primary bg-white hover:bg-primary/5 active:bg-primary/10
                       disabled:opacity-40 disabled:cursor-not-allowed"
                     onClick={handleVerificationClick}
@@ -471,19 +471,19 @@ export function OpenAccountContent({ isPublic = false }: OpenAccountContentProps
                     variant="outline"
                   >
                     {isValidating ? (
-                      <><span className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />{translate("processing")}</>
-                    ) : translate("verification")}
+                      <><span className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin flex-shrink-0" /><span className="whitespace-normal leading-tight text-center">{translate("processing")}</span></>
+                    ) : <span className="whitespace-normal leading-tight text-center">{translate("verification")}</span>}
                   </Button>
                   <Button
-                    className="w-full sm:w-auto sm:min-w-[160px] h-12 font-semibold rounded-xl text-base sm:text-sm flex items-center justify-center gap-2 transition-all
+                    className="w-full sm:w-auto sm:min-w-[160px] h-auto min-h-12 py-3 font-semibold rounded-xl text-base sm:text-sm flex items-center justify-center gap-2 transition-all
                       bg-primary hover:bg-primary/90 active:bg-primary/90 text-primary-foreground shadow-sm
                       disabled:opacity-40 disabled:cursor-not-allowed"
                     onClick={handleSubmitAccount}
                     disabled={isBusy || !isVerified}
                   >
                     {loadingState.isLoading ? (
-                      <><span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />{translate("submitting") || "Submitting"}</>
-                    ) : translate("submit")}
+                      <><span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin flex-shrink-0" /><span className="whitespace-normal leading-tight text-center">{translate("submitting") || "Submitting"}</span></>
+                    ) : <span className="whitespace-normal leading-tight text-center">{translate("submit")}</span>}
                   </Button>
                 </div>
               </div>

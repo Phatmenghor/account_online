@@ -91,16 +91,6 @@ export const createSuccessAccountTableColumns = ({
       ),
     },
     {
-      key: "phoneNumber",
-      label: "Phone Number",
-      truncate: true,
-      maxWidth: "180px",
-      minWidth: "140px",
-      render: (account) => (
-        <span className="font-medium">{account.phoneNumber || "---"}</span>
-      ),
-    },
-    {
       key: "branchNameKh",
       label: "Branch",
       truncate: true,
@@ -108,16 +98,6 @@ export const createSuccessAccountTableColumns = ({
       minWidth: "150px",
       render: (account) => (
         <span className="font-medium">{account.branchNameKh || "---"}</span>
-      ),
-    },
-    {
-      key: "submittedBy",
-      label: "Created By",
-      truncate: true,
-      maxWidth: "200px",
-      minWidth: "150px",
-      render: (account) => (
-        <span className="font-medium">{account.submittedBy || "---"}</span>
       ),
     },
     {

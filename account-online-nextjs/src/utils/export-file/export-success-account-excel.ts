@@ -6,8 +6,8 @@ import { SuccessAccountOnlineExcelModel } from "@/models/open-acc-success/succes
 const IMAGE_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL_IMAGE ?? "";
 const CUSTOMER_IMAGES_PATH = "/api/customer-images";
 
-const HEADERS = ["#", "Legal ID", "CIF", "KHR Account", "USD Account", "Mnemonic", "Branch NameKh", "NID Image", "Selfie Image", "Created At"];
-const COLUMN_WIDTHS = [5, 18, 18, 22, 22, 18, 30, 20, 20, 20];
+const HEADERS = ["#", "Legal ID", "CIF", "KHR Account", "USD Account", "Mnemonic", "Branch NameKh", "Category Account", "NID Image", "Selfie Image", "Created At"];
+const COLUMN_WIDTHS = [5, 18, 18, 22, 22, 18, 30, 20, 20, 20, 20];
 const IMAGE_ROW_HEIGHT = 90;
 
 async function fetchImageAsBase64(imageName: string): Promise<{ base64: string; extension: string } | null> {
@@ -84,6 +84,7 @@ async function addDataRow(
         item.usdAccount || "---",
         item.mnemonic || "---",
         item.branchNameKh || "---",
+        item.categoryAccount || "---",
         "",
         "",
         item.createdAt || "---",
@@ -103,9 +104,9 @@ async function addDataRow(
         const img = await fetchImageAsBase64(item.nidImageName);
         if (img) {
             const id = workbook.addImage({ base64: img.base64, extension: img.extension as "jpeg" | "png" | "gif" });
-            worksheet.addImage(id, { tl: { col: 7, row: excelRowNumber - 1 } as any, ext: { width: 120, height: 80 }, editAs: "oneCell" } as any);
+            worksheet.addImage(id, { tl: { col: 8, row: excelRowNumber - 1 } as any, ext: { width: 120, height: 80 }, editAs: "oneCell" } as any);
         } else {
-            worksheet.getCell(excelRowNumber, 8).value = "Image N/A";
+            worksheet.getCell(excelRowNumber, 9).value = "Image N/A";
         }
     }
 
@@ -113,9 +114,9 @@ async function addDataRow(
         const img = await fetchImageAsBase64(item.selfieImageName);
         if (img) {
             const id = workbook.addImage({ base64: img.base64, extension: img.extension as "jpeg" | "png" | "gif" });
-            worksheet.addImage(id, { tl: { col: 8, row: excelRowNumber - 1 } as any, ext: { width: 120, height: 80 }, editAs: "oneCell" } as any);
+            worksheet.addImage(id, { tl: { col: 9, row: excelRowNumber - 1 } as any, ext: { width: 120, height: 80 }, editAs: "oneCell" } as any);
         } else {
-            worksheet.getCell(excelRowNumber, 9).value = "Image N/A";
+            worksheet.getCell(excelRowNumber, 10).value = "Image N/A";
         }
     }
 }
@@ -158,7 +159,7 @@ export async function exportSuccessAccountToExcel({
         await addDataRow(workbook, worksheet, rows[i], i);
     }
 
-    formatDateColumn(worksheet, 10);
+    formatDateColumn(worksheet, 11);
 
     const buffer = await workbook.xlsx.writeBuffer();
     const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });

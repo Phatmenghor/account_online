@@ -6,6 +6,7 @@ import "@/styles/globals.css";
 import { type Locale } from "@/i18n/request";
 import { LocaleProvider } from "@/context/provider/local-provider";
 import { ClientProviders } from "@/context/provider/client-provider";
+import { Suspense } from "react";
 
 // Define Kantumruy Pro font
 const kantumruyPro = localFont({
@@ -35,12 +36,15 @@ const kantumruyPro = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Portal Account Opening",
-  description: "Portal Account Opening application",
+  title: "Account Online Opening",
+  description: "Account Online Opening application",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "Portal Account Opening",
+    title: "Account Online Opening",
+  },
+  other: {
+    "mobile-web-app-capable": "yes",
   },
 };
 
@@ -65,18 +69,20 @@ export default async function RootLayout({
   const serverMessages = await getMessages();
 
   return (
-    <html lang={serverLocale} className={kantumruyPro.variable}>
+    <html lang={serverLocale} className={kantumruyPro.variable} suppressHydrationWarning>
       <head>
         <link rel="icon" href="/assets/cp.png" />
       </head>
-      <body className="font-kantumruy antialiased overscroll-y-none">
+      <body className="font-kantumruy antialiased overscroll-y-none" suppressHydrationWarning>
         <LocaleProvider
           initialLocale={serverLocale}
           initialMessages={serverMessages}
         >
           <ClientProviders>
             <PageProgressBar />
-            {children}
+            <Suspense fallback={null}>
+              {children}
+            </Suspense>
           </ClientProviders>
         </LocaleProvider>
       </body>

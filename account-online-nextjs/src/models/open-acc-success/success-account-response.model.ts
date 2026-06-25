@@ -23,6 +23,7 @@ export interface SuccessAccountOnlineExcelModel {
   branchNameKh: string;
   nidImageName: string;
   selfieImageName: string;
+  categoryAccount?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -94,6 +95,7 @@ export interface SuccessAccountOnlineModel {
   phoneNumber: string;
   nidImageName: string;
   selfieImageName: string;
+  categoryAccount?: string;
   mbActivationCode: string;
   mbAppDownloadLink: string;
   submittedBy: string;

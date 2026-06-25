@@ -202,68 +202,70 @@ const LocationModal = ({
 
           const addressData = await getAddressSelectService(request);
 
-          if (addressData.province) {
-            setSelectedProvince(addressData.province);
-            setFormData((prev) => ({
-              ...prev,
-              currentAddress: {
-                ...prev.currentAddress,
-                province: addressData.province,
-              },
-            }));
-            validateField(
-              "currentAddress",
-              "province",
-              addressData.province.provinceCode,
-            );
-          }
+          if (addressData) {
+            if (addressData.province) {
+              setSelectedProvince(addressData.province);
+              setFormData((prev) => ({
+                ...prev,
+                currentAddress: {
+                  ...prev.currentAddress,
+                  province: addressData.province,
+                },
+              }));
+              validateField(
+                "currentAddress",
+                "province",
+                addressData.province.provinceCode,
+              );
+            }
 
-          if (addressData.district) {
-            setSelectedDistrict(addressData.district);
-            setFormData((prev) => ({
-              ...prev,
-              currentAddress: {
-                ...prev.currentAddress,
-                district: addressData.district,
-              },
-            }));
-            validateField(
-              "currentAddress",
-              "district",
-              addressData.district.districtCode,
-            );
-          }
+            if (addressData.district) {
+              setSelectedDistrict(addressData.district);
+              setFormData((prev) => ({
+                ...prev,
+                currentAddress: {
+                  ...prev.currentAddress,
+                  district: addressData.district,
+                },
+              }));
+              validateField(
+                "currentAddress",
+                "district",
+                addressData.district.districtCode,
+              );
+            }
 
-          if (addressData.commune) {
-            setSelectedCommune(addressData.commune);
-            setFormData((prev) => ({
-              ...prev,
-              currentAddress: {
-                ...prev.currentAddress,
-                commune: addressData.commune,
-              },
-            }));
-            validateField(
-              "currentAddress",
-              "commune",
-              addressData.commune.communeCode,
-            );
-          }
+            if (addressData.commune) {
+              setSelectedCommune(addressData.commune);
+              setFormData((prev) => ({
+                ...prev,
+                currentAddress: {
+                  ...prev.currentAddress,
+                  commune: addressData.commune,
+                },
+              }));
+              validateField(
+                "currentAddress",
+                "commune",
+                addressData.commune.communeCode,
+              );
+            }
 
-          if (addressData.village) {
-            setSelectedVillage(addressData.village);
-            setFormData((prev) => ({
-              ...prev,
-              currentAddress: {
-                ...prev.currentAddress,
-                village: addressData.village,
-              },
-            }));
-            validateField(
-              "currentAddress",
-              "village",
-              addressData.village.villageCode,
-            );
+            if (addressData.village) {
+              setSelectedVillage(addressData.village);
+              setFormData((prev) => ({
+                ...prev,
+                currentAddress: {
+                  ...prev.currentAddress,
+                  village: addressData.village,
+                },
+              }));
+              validateField(
+                "currentAddress",
+                "village",
+                addressData.village.villageCode,
+              );
+            }
           }
         } catch (error: any) {
           console.error("Error fetching address data:", error);
@@ -292,40 +294,42 @@ const LocationModal = ({
 
           const pobData = await getPosSelectService(request);
 
-          if (pobData.province) {
-            setPobProvince(pobData.province);
-            validateField(
-              "placeOfBirth",
-              "province",
-              pobData.province.provinceCode,
-            );
-          }
+          if (pobData) {
+            if (pobData.province) {
+              setPobProvince(pobData.province);
+              validateField(
+                "placeOfBirth",
+                "province",
+                pobData.province.provinceCode,
+              );
+            }
 
-          if (pobData.district) {
-            setPobDistrict(pobData.district);
-            validateField(
-              "placeOfBirth",
-              "district",
-              pobData.district.districtCode,
-            );
-          }
+            if (pobData.district) {
+              setPobDistrict(pobData.district);
+              validateField(
+                "placeOfBirth",
+                "district",
+                pobData.district.districtCode,
+              );
+            }
 
-          if (pobData.commune) {
-            setPobCommune(pobData.commune);
-            validateField(
-              "placeOfBirth",
-              "commune",
-              pobData.commune.communeCode,
-            );
-          }
+            if (pobData.commune) {
+              setPobCommune(pobData.commune);
+              validateField(
+                "placeOfBirth",
+                "commune",
+                pobData.commune.communeCode,
+              );
+            }
 
-          if (pobData.village) {
-            setPobVillage(pobData.village);
-            validateField(
-              "placeOfBirth",
-              "village",
-              pobData.village.villageCode,
-            );
+            if (pobData.village) {
+              setPobVillage(pobData.village);
+              validateField(
+                "placeOfBirth",
+                "village",
+                pobData.village.villageCode,
+              );
+            }
           }
         } catch (error: any) {
           console.error("Error fetching place of birth data:", error);
@@ -495,7 +499,7 @@ const LocationModal = ({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 80 }}
             transition={{ type: "spring", damping: 28, stiffness: 300 }}
-            className="relative bg-white w-full sm:max-w-2xl lg:max-w-3xl rounded-t-2xl sm:rounded-2xl shadow-2xl z-10 flex flex-col overflow-hidden"
+            className="relative bg-white w-full sm:max-w-[900px] lg:max-w-[1050px] rounded-t-2xl sm:rounded-2xl shadow-2xl z-10 flex flex-col overflow-hidden"
             style={{ maxHeight: "92vh" }}
           >
             {/* Primary top accent bar */}
@@ -825,15 +829,15 @@ const LocationModal = ({
             <div className="flex flex-col sm:flex-row sm:justify-end gap-3 px-4 sm:px-6 py-4 bg-gray-50/80 border-t border-gray-100 rounded-b-none sm:rounded-b-2xl flex-shrink-0">
               <Button
                 onClick={onClose}
-                className="w-full sm:w-auto h-12 sm:h-11 sm:px-6 text-base bg-white border-2 border-gray-200 text-gray-600 font-semibold rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-all shadow-sm"
+                className="w-full sm:w-auto h-auto min-h-12 py-3 px-6 text-base bg-white border-2 border-gray-200 text-gray-600 font-semibold rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-all shadow-sm"
               >
-                {translate("close")}
+                <span className="whitespace-normal leading-tight text-center">{translate("close")}</span>
               </Button>
               <Button
                 onClick={handleSubmit}
-                className="w-full sm:w-auto h-12 sm:h-11 sm:px-8 text-base bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-lg transition-all shadow-sm"
+                className="w-full sm:w-auto h-auto min-h-12 py-3 px-8 text-base bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-lg transition-all shadow-sm"
               >
-                {translate("submit")}
+                <span className="whitespace-normal leading-tight text-center">{translate("submit")}</span>
               </Button>
             </div>
           </motion.div>

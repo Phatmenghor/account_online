@@ -18,7 +18,7 @@ function AmlUserRow({ user, rank }: { user: TopAmlActionUser; rank: number }) {
         <span className="text-sm font-semibold text-muted-foreground">#{rank}</span>
       </td>
       <td className="py-3 pr-4">
-        <p className="text-sm font-medium text-foreground truncate">{user.fullName}</p>
+        <p className="text-sm font-medium text-foreground truncate">{user.fullName || "Customer"}</p>
         <p className="text-xs text-muted-foreground truncate">{user.position || "—"}</p>
       </td>
       <td className="py-3 pr-3">

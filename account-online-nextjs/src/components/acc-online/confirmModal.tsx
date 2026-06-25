@@ -39,7 +39,7 @@ const ConfirmationModal = ({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 60, scale: 0.97 }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className="relative bg-white w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden z-10"
+            className="relative bg-white w-full sm:max-w-[520px] rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden z-10"
           >
             <div className="h-1.5 w-full bg-primary" />
 
@@ -80,17 +80,17 @@ const ConfirmationModal = ({
               >
                 <Button
                   onClick={onCancel}
-                  className="w-full sm:w-auto h-12 flex items-center justify-center gap-2 px-6 bg-white border-2 border-gray-200 text-gray-600 font-semibold text-base rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-all shadow-sm"
+                  className="w-full sm:flex-1 h-auto min-h-12 flex items-center justify-center gap-2 px-4 py-3 bg-white border-2 border-gray-200 text-gray-600 font-semibold text-base rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-all shadow-sm"
                 >
-                  <XCircle className="w-4 h-4" />
-                  {translate("noIneed")}
+                  <XCircle className="w-4 h-4 flex-shrink-0" />
+                  <span className="whitespace-normal leading-tight text-center">{translate("noIneed")}</span>
                 </Button>
                 <Button
                   onClick={onConfirm}
-                  className="w-full sm:w-auto h-12 flex items-center justify-center gap-2 px-6 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-base rounded-lg transition-all shadow-sm"
+                  className="w-full sm:flex-1 h-auto min-h-12 flex items-center justify-center gap-2 px-4 py-3 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-base rounded-lg transition-all shadow-sm"
                 >
-                  <CheckCircle className="w-4 h-4" />
-                  {translate("yesIhave")}
+                  <CheckCircle className="w-4 h-4 flex-shrink-0" />
+                  <span className="whitespace-normal leading-tight text-center">{translate("yesIhave")}</span>
                 </Button>
               </motion.div>
             </div>

@@ -160,7 +160,7 @@ export function TopBar({ onMenuClick }: TopBarProps) {
 
       {/* ── Logout Confirmation Dialog ── */}
       <Dialog open={showLogoutDialog} onOpenChange={(open) => { if (!isLoggingOut) setShowLogoutDialog(open); }}>
-        <DialogContent className="max-w-sm p-0 gap-0 overflow-hidden rounded-2xl">
+        <DialogContent className="sm:max-w-[420px] w-[95vw] p-0 gap-0 overflow-hidden rounded-2xl">
           {/* Top accent */}
           <div className="h-1.5 w-full bg-destructive" />
 

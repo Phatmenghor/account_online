@@ -138,7 +138,7 @@ const AmlConfirmDialog = ({
         >
           {/* Dialog Box */}
           <motion.div
-            className="bg-white rounded-2xl shadow-xl max-w-lg w-full p-6 relative"
+            className="bg-white rounded-2xl shadow-xl max-w-[520px] w-full p-6 relative"
             initial={{ opacity: 0, scale: 0.8, y: 50 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.8, y: 50 }}

@@ -97,8 +97,13 @@ export const useAccountSubmission = ({
     selfieFileName: null,
   });
 
-  const showError = (override?: Partial<typeof GENERIC_ERROR>) => {
-    setSubmitErrorData({ ...GENERIC_ERROR, ...override });
+  const showError = (override?: Partial<{ title: string; message: string; variant?: "error" | "warning" }>) => {
+    setSubmitErrorData({
+      title: translate("err_generic_title") || GENERIC_ERROR.title,
+      message: translate("err_generic_message") || GENERIC_ERROR.message,
+      variant: "error" as const,
+      ...override,
+    });
     setShowSubmitErrorModal(true);
   };
 
@@ -112,24 +117,24 @@ export const useAccountSubmission = ({
 
     if (!nidBase64Full) {
       showError({
-        title: "រូបភាព NID បាត់",
-        message: "រូបភាព NID បាត់។ សូមថតរូបម្ដងទៀត រួចព្យាយាមម្ដងទៀត។",
+        title: translate("err_nid_missing_title"),
+        message: translate("err_nid_missing_message"),
       });
       return;
     }
 
     if (!selfieBase64Full) {
       showError({
-        title: "រូបថតខ្លួនបាត់",
-        message: "រូបថតខ្លួនបាត់។ សូមថតរូបម្ដងទៀត រួចព្យាយាមម្ដងទៀត។",
+        title: translate("err_selfie_missing_title"),
+        message: translate("err_selfie_missing_message"),
       });
       return;
     }
 
     setLoadingState({
       isLoading: true,
-      title: "កំពុងបង្កើតគណនី",
-      message: "កំពុងផ្ទុករូបភាព...",
+      title: translate("submitting_title"),
+      message: translate("loading_images"),
     });
 
     try {
@@ -162,7 +167,7 @@ export const useAccountSubmission = ({
 
       setLoadingState((prev) => ({
         ...prev,
-        message: "កំពុងបង្កើតគណនី... សូមរង់ចាំ",
+        message: translate("submitting_wait"),
       }));
 
       const accountData = {
@@ -239,12 +244,12 @@ export const useAccountSubmission = ({
           cif: errorResponse?.data?.cif,
           accountNumber: errorResponse?.data?.accountNumber || errorResponse?.data?.khrAccount,
           accountName: errorResponse?.data?.accountName || errorResponse?.data?.legalHolderName,
-          message: errorMessage || "គណនីធនាគារលក់ដ៏ងរបស់អ្នកបានបង្កើតរួចរាល់។",
+          message: errorMessage || translate("account_exists_message"),
         });
         setShowAccountExistsModal(true);
       } else if (errorMessage) {
         showError({
-          title: "មានបញ្ហាកើតឡើង",
+          title: translate("err_generic_title"),
           message: errorMessage,
         });
       } else {

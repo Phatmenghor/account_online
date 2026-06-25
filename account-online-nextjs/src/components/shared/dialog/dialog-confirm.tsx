@@ -96,17 +96,17 @@ const ConfirmDialog = ({
   const getSizeClass = () => {
     switch (size) {
       case "sm":
-        return "max-w-sm";
+        return "max-w-[400px]";
       case "md":
-        return "max-w-md";
+        return "max-w-[480px]";
       case "lg":
-        return "max-w-lg";
+        return "max-w-[560px]";
       case "xl":
-        return "max-w-xl";
+        return "max-w-[720px]";
       case "full":
         return "max-w-[95vw] min-h-[95vh] md:max-w-[90vw] md:max-h-[90vh]";
       default:
-        return "max-w-md";
+        return "max-w-[480px]";
     }
   };
 

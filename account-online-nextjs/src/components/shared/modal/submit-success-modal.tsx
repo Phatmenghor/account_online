@@ -29,7 +29,7 @@ export default function SubmitSuccessModal({ isOpen, onClose }: SuccessModalProp
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ type: "spring", damping: 20, stiffness: 300 }}
-            className="relative bg-white w-full sm:max-w-md rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden z-10"
+            className="relative bg-white w-full sm:max-w-[520px] rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden z-10"
           >
             <div className="h-1.5 bg-primary" />
 
