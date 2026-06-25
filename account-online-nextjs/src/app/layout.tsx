@@ -1,3 +1,4 @@
+import "./polyfills";
 import type { Metadata, Viewport } from "next";
 import { getMessages, getLocale } from "next-intl/server";
 import PageProgressBar from "@/components/shared/progressbar/Nprogressbar/global-n-progress";
