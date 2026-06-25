@@ -220,6 +220,9 @@ public class AccountOnlineFinal extends BaseNoIdEntity {
     @JoinColumn(name = "submitted_by_user_id")
     private UserEntity submittedByUser;
 
+    @Column(name = "category_account")
+    private String categoryAccount;
+
     // === SMS NOTIFICATION HISTORY ===
     @Column(name = "sms_sent_phone")
     private String smsSentPhone;

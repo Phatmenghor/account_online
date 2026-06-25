@@ -85,6 +85,8 @@ public class AccountOnlineFinalResponseDto {
     private String mbActivationCode;
     private String mbAppDownloadLink;
 
+    private String categoryAccount;
+
     // === SUBMITTED BY ===
     private String submittedBy;
     private UserResponseDto submittedByUser;

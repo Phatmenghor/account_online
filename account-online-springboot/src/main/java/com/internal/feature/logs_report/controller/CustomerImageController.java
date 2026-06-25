@@ -26,8 +26,6 @@ public class CustomerImageController {
             @PathVariable String type,
             @PathVariable String legalId) {
 
-        log.info("Request to get customer image. Type: {}, LegalID: {}", type, legalId);
-
         Resource resource = null;
         if ("nid".equalsIgnoreCase(type)) {
             resource = customerImageService.getNidImageResourceForEmail(legalId);

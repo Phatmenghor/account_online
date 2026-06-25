@@ -92,7 +92,7 @@ cpb:
 
 aml:
   dashboard:
-    url: http://192.168.100.5:7070/aml-management?pageNo=1
+    url: http://localservice.cambodiapostbank/aml-management?pageNo=1
 
 jwt:
   expiration-min: 43200   # 30 days (30 * 24 * 60)

@@ -8,10 +8,14 @@ import com.internal.feature.open_account.dto.request.CustomerRequest;
 import com.internal.feature.open_account.dto.response.CustomerResponse;
 import com.internal.feature.open_account.facade.ReportingService;
 import com.internal.feature.telegram_alerts.service.MonitoringService;
+import com.internal.feature.open_account.mapper.MasterDataServiceHelper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -21,6 +25,7 @@ public class AccountOpenedEventListener {
     private final ReportingService reportingService;
     private final MonitoringService monitoringService;
     private final BranchRepository branchRepository;
+    private final MasterDataServiceHelper masterDataServiceHelper;
 
     @EventListener
     public void handleAccountOpenedEvent(AccountOpenedEvent event) {
@@ -66,9 +71,49 @@ public class AccountOpenedEventListener {
                     .map(Branch::getBranchKh)
                     .orElse(request.getBranchCode());
 
+            String fullAddress = "";
+            if (masterDataServiceHelper != null) {
+                var loc = masterDataServiceHelper.resolveAddress(
+                        request.getCustomerCurrentProvince(),
+                        request.getCustomerCurrentDistrict(),
+                        request.getCustomerCurrentCommune(),
+                        request.getCustomerCurrentVillage()
+                );
+                
+                List<String> parts = new ArrayList<>();
+                if (loc.getVillage() != null) {
+                    parts.add(loc.getVillage().getVillageEn() + " (" + loc.getVillage().getVillageKh() + ")");
+                } else if (!isBlank(request.getCustomerVillageKh())) {
+                    parts.add(request.getCustomerVillageKh());
+                }
+                
+                if (loc.getCommune() != null) {
+                    parts.add(loc.getCommune().getCommuneEn() + " (" + loc.getCommune().getCommuneKh() + ")");
+                } else if (!isBlank(request.getCustomerCommuneKh())) {
+                    parts.add(request.getCustomerCommuneKh());
+                }
+                
+                if (loc.getDistrict() != null) {
+                    parts.add(loc.getDistrict().getDistrictEn() + " (" + loc.getDistrict().getDistrictKh() + ")");
+                } else if (!isBlank(request.getCustomerDistrictKh())) {
+                    parts.add(request.getCustomerDistrictKh());
+                }
+                
+                if (loc.getProvince() != null) {
+                    parts.add(loc.getProvince().getProvinceEn() + " (" + loc.getProvince().getProvinceKh() + ")");
+                } else if (!isBlank(request.getCustomerProvinceKh())) {
+                    parts.add(request.getCustomerProvinceKh());
+                }
+                
+                fullAddress = String.join(", ", parts);
+            }
+            if (isBlank(fullAddress)) {
+                fullAddress = request.getLegalAddress();
+            }
+
             monitoringService.sendAccountCreatedAlert(
                     fullName,
-                    request.getLegalAddress(),
+                    fullAddress,
                     request.getLegalId(),
                     context.getCif(),
                     context.getUsdAccount(),

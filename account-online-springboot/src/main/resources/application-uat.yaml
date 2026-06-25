@@ -14,7 +14,7 @@ ad:
     password: admin123
 
 server:
-  port: 7070
+  port: 8080
   max-http-header-size: 65536
   tomcat:
     connection-timeout: 90000
@@ -114,6 +114,6 @@ telegram:
   bot:
     token: "8227113200:AAGq1I7Hs0CjkSW99M9rgrIdlHpgM8r6NMY"
     dev-chat-id: "-1002740302492"
-    monitor-chat-id: "-1003115792160"
+    monitor-chat-id: "-1002740302492"
     compliance-mention: "@PHAT_MENGHOR"
     enabled: true

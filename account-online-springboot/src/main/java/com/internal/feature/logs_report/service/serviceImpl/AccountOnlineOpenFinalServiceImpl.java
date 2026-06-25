@@ -169,6 +169,7 @@ public class AccountOnlineOpenFinalServiceImpl implements AccountOnlineOpenFinal
                     .usdAccount(accountInfo.getUsdAccount())
                     .khrAccount(accountInfo.getKhrAccount())
                     .cif(accountInfo.getCif())
+                    .categoryAccount(request.getAccountType())
 
                     // === SMS HISTORY ===
                     .smsSentPhone(request.getPhoneNumber())

@@ -36,16 +36,12 @@ public class CustomerImageFileController {
             Optional<Path> found = customerImageService.findFileByName(subFolder, filename);
 
             if (found.isEmpty()) {
-                log.warn("Customer image not found: {} in subFolder: {}", filename, subFolder);
                 return ResponseEntity.notFound().build();
             }
 
             Path filePath = found.get();
             byte[] bytes = Files.readAllBytes(filePath);
             MediaType mediaType = resolveMediaType(filename);
-
-            log.info("Serving customer image: {} ({} bytes) from week: {}",
-                    filename, bytes.length, filePath.getParent().getFileName());
 
             return ResponseEntity.ok()
                     .contentType(mediaType)
