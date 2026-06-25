@@ -243,3 +243,7 @@ management:
     export:
       simple:
         enabled: true
+
+telegram:
+  bot:
+    message-retention-days: 30

@@ -117,3 +117,5 @@ telegram:
     monitor-chat-id: "-1002740302492"
     compliance-mention: "@PHAT_MENGHOR"
     enabled: true
+    message-retention-days: 30
+

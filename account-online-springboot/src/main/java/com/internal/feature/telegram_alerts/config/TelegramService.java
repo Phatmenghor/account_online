@@ -1,5 +1,9 @@
 package com.internal.feature.telegram_alerts.config;
 
+import com.internal.feature.telegram_alerts.model.TelegramMessageLog;
+import com.internal.feature.telegram_alerts.repository.TelegramMessageLogRepository;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.http.HttpEntity;
@@ -27,9 +31,12 @@ public class TelegramService {
 
     private final RestTemplate restTemplate = new RestTemplate();
     private final TaskExecutor taskExecutor;
+    private final TelegramMessageLogRepository telegramMessageLogRepository;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
-    public TelegramService(TaskExecutor taskExecutor) {
+    public TelegramService(TaskExecutor taskExecutor, TelegramMessageLogRepository telegramMessageLogRepository) {
         this.taskExecutor = taskExecutor;
+        this.telegramMessageLogRepository = telegramMessageLogRepository;
     }
 
     public void sendToDev(String message) {
@@ -74,7 +81,8 @@ public class TelegramService {
 
             HttpEntity<MultiValueMap<String, String>> requestEntity = new HttpEntity<>(body, headers);
 
-            restTemplate.postForObject(url, requestEntity, String.class);
+            String response = restTemplate.postForObject(url, requestEntity, String.class);
+            saveLog(response, chatId);
         } catch (Exception e) {
             log.warn("Telegram send failed - chat_id: {}, error: {}", chatId, e.getMessage());
         }
@@ -106,10 +114,60 @@ public class TelegramService {
 
                 HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
 
-                restTemplate.postForObject(url, requestEntity, String.class);
+                String response = restTemplate.postForObject(url, requestEntity, String.class);
+                saveLog(response, chatId);
             } catch (Exception e) {
                 log.warn("Failed to send Telegram photo: {}", e.getMessage());
             }
         });
+    }
+
+    private void saveLog(String responseStr, String defaultChatId) {
+        if (responseStr == null || responseStr.trim().isEmpty()) {
+            return;
+        }
+        try {
+            JsonNode node = objectMapper.readTree(responseStr);
+            if (node.has("ok") && node.get("ok").asBoolean() && node.has("result")) {
+                JsonNode result = node.get("result");
+                if (result.has("message_id")) {
+                    long messageId = result.get("message_id").asLong();
+                    String chatId = defaultChatId;
+                    if (result.has("chat") && result.get("chat").has("id")) {
+                        chatId = String.valueOf(result.get("chat").get("id").asLong());
+                    }
+                    // Save only messages sent to the monitor chat ID
+                    if (monitorChatId != null && !monitorChatId.trim().isEmpty() && chatId.equals(monitorChatId.trim())) {
+                        TelegramMessageLog logEntity = TelegramMessageLog.builder()
+                                .chatId(chatId)
+                                .messageId(messageId)
+                                .build();
+                        telegramMessageLogRepository.save(logEntity);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.error("Failed to parse Telegram send response or save log: {}", e.getMessage(), e);
+        }
+    }
+
+    public void deleteMessage(String chatId, long messageId) {
+        try {
+            String url = String.format("https://api.telegram.org/bot%s/deleteMessage", botToken);
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+
+            MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
+            body.add("chat_id", chatId);
+            body.add("message_id", String.valueOf(messageId));
+
+            HttpEntity<MultiValueMap<String, String>> requestEntity = new HttpEntity<>(body, headers);
+
+            restTemplate.postForObject(url, requestEntity, String.class);
+            log.info("Successfully requested deletion of Telegram message_id: {} in chat_id: {}", messageId, chatId);
+        } catch (Exception e) {
+            log.warn("Failed to delete Telegram message_id: {} in chat_id: {}. Error: {}", messageId, chatId, e.getMessage());
+        }
     }
 }
