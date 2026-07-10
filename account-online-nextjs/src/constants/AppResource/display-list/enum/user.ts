@@ -3,6 +3,7 @@ export enum Role {
   BUSINESS = "BUSINESS",
   COMPLIANCE = "COMPLIANCE",
   STAFF = "STAFF",
+  CALLCENTER = "CALLCENTER",
 }
 
 export enum UserPermission {

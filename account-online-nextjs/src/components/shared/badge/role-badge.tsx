@@ -1,5 +1,5 @@
 import { Badge } from "@/components/ui/badge";
-import { Crown, User, Briefcase, Users, Building2 } from "lucide-react";
+import { Crown, User, Briefcase, Users, Building2, Headset } from "lucide-react";
 import { getRoleDisplayName } from "@/utils/role-display";
 
 interface RoleBadgeProps {
@@ -26,7 +26,10 @@ const ROLE_CONFIG: Record<string, {
     icon: Users,
     className: "bg-teal-100 text-teal-700 border-teal-200 hover:bg-teal-200 dark:bg-teal-900/30 dark:text-teal-400 dark:border-teal-800",
   },
-
+  CALLCENTER: {
+    icon: Headset,
+    className: "bg-orange-100 text-orange-700 border-orange-200 hover:bg-orange-200 dark:bg-orange-900/30 dark:text-orange-400 dark:border-orange-800",
+  },
 };
 
 const DEFAULT_CONFIG = {

@@ -6,7 +6,8 @@
     "dev": "node --max-old-space-size=4096 node_modules/next/dist/bin/next dev",
     "build": "node --max-old-space-size=4096 node_modules/next/dist/bin/next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "deploy": "npm run build && rm -rf .next/standalone/.next/static && mkdir -p .next/standalone/.next && cp -r .next/static .next/standalone/.next/static && rm -rf .next/standalone/public && cp -r public .next/standalone/public && pm2 restart 21 --update-env"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.1.1",

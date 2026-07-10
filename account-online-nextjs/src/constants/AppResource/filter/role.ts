@@ -5,6 +5,7 @@ export const ROLE_FILTER = [
   { value: Role.BUSINESS, label: "Business" },
   { value: Role.COMPLIANCE, label: "Compliance" },
   { value: Role.STAFF, label: "Staff" },
+  { value: Role.CALLCENTER, label: "Call Center" },
 ];
 
 export const ROLE_FILTER_WITH_ALL = [

@@ -29,6 +29,7 @@ interface userTableOptions {
 const ROLE_POWER: Record<string, number> = {
   BUSINESS: 1,
   DEVELOPER: 2,
+  CALLCENTER: 2,
 };
 
 function canDelete(
@@ -45,13 +46,13 @@ function canDelete(
   // cannot delete yourself
   if (currentUser.email === targetUser.email) return false;
 
-  // DEVELOPER rules
-  if (curRole === "DEVELOPER") {
+  // DEVELOPER and CALLCENTER rules
+  if (curRole === "DEVELOPER" || curRole === "CALLCENTER") {
     if (currentUser.email === "phatmenghor19@gmail.com") {
       return true; // can delete anyone except self
     }
-    // other developers: can delete only BUSINESS
-    return ROLE_POWER[tarRole] < ROLE_POWER["DEVELOPER"];
+    // other developers / callcenters: can delete only BUSINESS
+    return ROLE_POWER[tarRole] < ROLE_POWER[curRole];
   }
 
   return false;

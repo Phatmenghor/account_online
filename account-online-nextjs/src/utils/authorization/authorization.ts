@@ -3,11 +3,13 @@ export enum UserRole {
   DEVELOPER = "DEVELOPER",
   BUSINESS = "BUSINESS",
   ADMIN = "ADMIN",
+  CALLCENTER = "CALLCENTER",
 }
 
 export const rolePriority: Record<UserRole, number> = {
   [UserRole.DEVELOPER]: 3,
   [UserRole.BUSINESS]: 2,
+  [UserRole.CALLCENTER]: 2,
   [UserRole.ADMIN]: 1,
 };
 

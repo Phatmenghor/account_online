@@ -4,6 +4,7 @@ export const getRoleDisplayName = (role: string): string => {
     BUSINESS: "Business",
     COMPLIANCE: "Compliance",
     STAFF: "Staff",
+    CALLCENTER: "Call Center",
   };
   return roleMap[role?.toUpperCase()] || role;
 };
