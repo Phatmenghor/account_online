@@ -8,11 +8,8 @@ public class AuthResponseDTO {
     private String tokenType = "Bearer ";
     private UserResponseDto userRole;
 
-    private String refreshToken;
-
-    public AuthResponseDTO(String accessToken, String refreshToken, UserResponseDto userRole) {
+    public AuthResponseDTO(String accessToken, UserResponseDto userRole) {
         this.accessToken = accessToken;
-        this.refreshToken = refreshToken;
         this.userRole = userRole;
     }
 

@@ -108,6 +108,16 @@ export const createSuccessAccountExcelTableColumns = ({
       ),
     },
     {
+      key: "categoryAccount",
+      label: "Category",
+      truncate: true,
+      maxWidth: "150px",
+      minWidth: "120px",
+      render: (account) => (
+        <span className="font-medium">{account.categoryAccount || "---"}</span>
+      ),
+    },
+    {
       key: "createdAt",
       label: "Created At",
       truncate: true,

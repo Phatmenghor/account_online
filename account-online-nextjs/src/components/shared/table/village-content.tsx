@@ -48,6 +48,26 @@ export const createVillageTableColumns = ({
       ),
     },
     {
+      key: "villageEn",
+      label: "Village (EN)",
+      truncate: true,
+      maxWidth: "300px",
+      minWidth: "150px",
+      render: (village) => (
+        <span className="font-medium">{village.villageEn || "---"}</span>
+      ),
+    },
+    {
+      key: "villageKh",
+      label: "Village (KH)",
+      truncate: true,
+      maxWidth: "200px",
+      minWidth: "120px",
+      render: (village) => (
+        <span className="font-medium">{village.villageKh || "---"}</span>
+      ),
+    },
+    {
       key: "villageCode",
       label: "Village Code",
       truncate: true,
@@ -58,40 +78,8 @@ export const createVillageTableColumns = ({
       ),
     },
     {
-      key: "villageEn",
-      label: "Village (English)",
-      truncate: true,
-      maxWidth: "300px",
-      minWidth: "150px",
-      render: (village) => (
-        <span className="font-medium">{village.villageEn || "---"}</span>
-      ),
-    },
-    {
-      key: "villageKh",
-      label: "Village (Khmer)",
-      truncate: true,
-      maxWidth: "300px",
-      minWidth: "150px",
-      render: (village) => (
-        <span className="font-medium">{village.villageKh || "---"}</span>
-      ),
-    },
-    {
-      key: "communeCode",
-      label: "Commune Code",
-      truncate: true,
-      maxWidth: "150px",
-      minWidth: "100px",
-      render: (village) => (
-        <span className="font-medium">
-          {village.commune?.communeCode || "---"}
-        </span>
-      ),
-    },
-    {
       key: "communeEn",
-      label: "Commune (English)",
+      label: "Commune (EN)",
       truncate: true,
       maxWidth: "200px",
       minWidth: "150px",
@@ -102,20 +90,8 @@ export const createVillageTableColumns = ({
       ),
     },
     {
-      key: "districtCode",
-      label: "District Code",
-      truncate: true,
-      maxWidth: "200px",
-      minWidth: "150px",
-      render: (village) => (
-        <span className="font-medium">
-          {village.commune?.district?.districtCode || "---"}
-        </span>
-      ),
-    },
-    {
       key: "districtEn",
-      label: "District (English)",
+      label: "District (EN)",
       truncate: true,
       maxWidth: "200px",
       minWidth: "150px",
@@ -126,20 +102,8 @@ export const createVillageTableColumns = ({
       ),
     },
     {
-      key: "provinceCode",
-      label: "Province Code",
-      truncate: true,
-      maxWidth: "200px",
-      minWidth: "150px",
-      render: (village) => (
-        <span className="font-medium">
-          {village.commune?.district?.province?.provinceCode || "---"}
-        </span>
-      ),
-    },
-    {
       key: "provinceEn",
-      label: "Province (English)",
+      label: "Province (EN)",
       truncate: true,
       maxWidth: "200px",
       minWidth: "150px",

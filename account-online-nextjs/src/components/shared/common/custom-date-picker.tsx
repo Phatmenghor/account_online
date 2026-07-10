@@ -26,21 +26,7 @@ interface DatePickerProps {
   error?: boolean;
 }
 
-const MONTHS = [
-  "Jan",
-  "Feb",
-  "Mar",
-  "Apr",
-  "May",
-  "Jun",
-  "Jul",
-  "Aug",
-  "Sep",
-  "Oct",
-  "Nov",
-  "Dec",
-];
-
+const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 const DAYS = ["S", "M", "T", "W", "T", "F", "S"];
 
 export function CustomDatePicker({
@@ -52,10 +38,12 @@ export function CustomDatePicker({
   error = false,
 }: DatePickerProps) {
   const [isOpen, setIsOpen] = useState(false);
+  // confirmed date (from value prop)
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  // pending date — highlighted in calendar but not yet applied
+  const [pendingDate, setPendingDate] = useState<Date | null>(null);
   const [viewDate, setViewDate] = useState<Date>(new Date());
 
-  // Initialize selected date from value prop
   useEffect(() => {
     if (value) {
       const date = new Date(value);
@@ -63,23 +51,26 @@ export function CustomDatePicker({
         setSelectedDate(date);
         setViewDate(date);
       } else {
-        // Clear the selected date when value is empty
         setSelectedDate(null);
         setViewDate(new Date());
       }
+    } else {
+      setSelectedDate(null);
     }
   }, [value]);
 
-  // Format date for display
-  const formatDate = (date: Date): string => {
-    return date.toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
+  // When popover opens, start pending from current confirmed date
+  const handleOpenChange = (open: boolean) => {
+    if (open) {
+      setPendingDate(selectedDate);
+      if (selectedDate) setViewDate(selectedDate);
+    }
+    setIsOpen(open);
   };
 
-  // Format date for form submission (YYYY-MM-DD)
+  const formatDate = (date: Date): string =>
+    date.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
+
   const formatDateForForm = (date: Date): string => {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -87,69 +78,75 @@ export function CustomDatePicker({
     return `${year}-${month}-${day}`;
   };
 
-  // Handle date selection
+  // Clicking a day only sets pending — does NOT fire onChange or close
   const handleDateSelect = (day: number) => {
     const newDate = new Date(viewDate.getFullYear(), viewDate.getMonth(), day);
-    setSelectedDate(newDate);
-    onChange(formatDateForForm(newDate));
+    setPendingDate(newDate);
+  };
+
+  // Apply confirms pending date
+  const handleApply = () => {
+    if (!pendingDate) return;
+    setSelectedDate(pendingDate);
+    onChange(formatDateForForm(pendingDate));
     setIsOpen(false);
   };
 
-  // Handle month change
   const handleMonthChange = (month: string) => {
     const monthIndex = MONTHS.indexOf(month);
-    const newDate = new Date(viewDate.getFullYear(), monthIndex, 1);
-    setViewDate(newDate);
+    setViewDate(new Date(viewDate.getFullYear(), monthIndex, 1));
   };
 
-  // Handle year change
   const handleYearChange = (year: string) => {
-    const newDate = new Date(parseInt(year), viewDate.getMonth(), 1);
-    setViewDate(newDate);
+    setViewDate(new Date(parseInt(year), viewDate.getMonth(), 1));
   };
 
-  // Navigate months
   const navigateMonth = (direction: "prev" | "next") => {
     const newDate = new Date(viewDate);
-    if (direction === "prev") {
-      newDate.setMonth(newDate.getMonth() - 1);
-    } else {
-      newDate.setMonth(newDate.getMonth() + 1);
-    }
+    newDate.setMonth(newDate.getMonth() + (direction === "next" ? 1 : -1));
     setViewDate(newDate);
   };
 
-  // Generate calendar days
+  const handleToday = () => {
+    const today = new Date();
+    setSelectedDate(today);
+    setPendingDate(today);
+    setViewDate(today);
+    onChange(formatDateForForm(today));
+    setIsOpen(false);
+  };
+
+  const clearSelection = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    setSelectedDate(null);
+    setPendingDate(null);
+    onChange("");
+  };
+
   const generateCalendarDays = () => {
     const year = viewDate.getFullYear();
     const month = viewDate.getMonth();
-
-    const firstDayOfMonth = new Date(year, month, 1);
-    const startDate = new Date(firstDayOfMonth);
-    startDate.setDate(startDate.getDate() - firstDayOfMonth.getDay());
+    const firstDay = new Date(year, month, 1);
+    const start = new Date(firstDay);
+    start.setDate(start.getDate() - firstDay.getDay());
 
     const days = [];
-    const currentDate = new Date(startDate);
-
-    // Generate 5 weeks of days (35 days total) for compact view
+    const cur = new Date(start);
     for (let i = 0; i < 35; i++) {
-      const dayObj = {
-        date: new Date(currentDate),
-        day: currentDate.getDate(),
-        isCurrentMonth: currentDate.getMonth() === month,
-        isSelected: selectedDate
-          ? currentDate.toDateString() === selectedDate.toDateString()
-          : false,
-        isToday: currentDate.toDateString() === new Date().toDateString(),
-      };
-      days.push(dayObj);
-      currentDate.setDate(currentDate.getDate() + 1);
+      days.push({
+        date: new Date(cur),
+        day: cur.getDate(),
+        isCurrentMonth: cur.getMonth() === month,
+        isPending: pendingDate ? cur.toDateString() === pendingDate.toDateString() : false,
+        isConfirmed: selectedDate ? cur.toDateString() === selectedDate.toDateString() : false,
+        isToday: cur.toDateString() === new Date().toDateString(),
+      });
+      cur.setDate(cur.getDate() + 1);
     }
-
     return days;
   };
 
-  // Generate year options
   const generateYearOptions = () => {
     const currentYear = new Date().getFullYear();
     const years = [];
@@ -159,19 +156,11 @@ export function CustomDatePicker({
     return years;
   };
 
-  // Clear selection
-  const clearSelection = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    e.preventDefault();
-    setSelectedDate(null);
-    onChange("");
-  };
-
   const calendarDays = generateCalendarDays();
   const yearOptions = generateYearOptions();
 
   return (
-    <Popover open={isOpen} onOpenChange={setIsOpen}>
+    <Popover open={isOpen} onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild>
         <Button
           variant="outline"
@@ -217,34 +206,24 @@ export function CustomDatePicker({
             </Button>
 
             <div className="flex gap-1">
-              <Select
-                value={MONTHS[viewDate.getMonth()]}
-                onValueChange={handleMonthChange}
-              >
+              <Select value={MONTHS[viewDate.getMonth()]} onValueChange={handleMonthChange}>
                 <SelectTrigger className="h-8 text-sm w-auto min-w-[60px] border-0 bg-transparent hover:bg-accent">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   {MONTHS.map((month) => (
-                    <SelectItem key={month} value={month}>
-                      {month}
-                    </SelectItem>
+                    <SelectItem key={month} value={month}>{month}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
 
-              <Select
-                value={viewDate.getFullYear().toString()}
-                onValueChange={handleYearChange}
-              >
+              <Select value={viewDate.getFullYear().toString()} onValueChange={handleYearChange}>
                 <SelectTrigger className="h-8 text-sm w-auto min-w-[80px] border-0 bg-transparent hover:bg-accent">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   {yearOptions.map((year) => (
-                    <SelectItem key={year} value={year}>
-                      {year}
-                    </SelectItem>
+                    <SelectItem key={year} value={year}>{year}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -272,7 +251,6 @@ export function CustomDatePicker({
 
         {/* Calendar Grid */}
         <div className="p-3">
-          {/* Days header */}
           <div className="grid grid-cols-7 gap-1 mb-2">
             {DAYS.map((day, index) => (
               <div
@@ -284,7 +262,6 @@ export function CustomDatePicker({
             ))}
           </div>
 
-          {/* Calendar days */}
           <div className="grid grid-cols-7 gap-1">
             {calendarDays.map((dayObj, index) => (
               <Button
@@ -297,10 +274,14 @@ export function CustomDatePicker({
                   "h-8 w-8 p-0 text-xs font-normal transition-all hover:bg-accent hover:text-accent-foreground",
                   !dayObj.isCurrentMonth &&
                     "text-muted-foreground/30 hover:text-muted-foreground/30 hover:bg-transparent cursor-not-allowed",
-                  dayObj.isSelected &&
-                    "bg-primary text-primary-foreground hover:bg-primary/90 font-medium",
-                  dayObj.isToday &&
-                    !dayObj.isSelected &&
+                  // Pending (selected but not yet applied) — solid primary
+                  dayObj.isPending &&
+                    "bg-primary text-primary-foreground hover:bg-primary/90 font-medium ring-2 ring-primary/40",
+                  // Confirmed but not pending (previous confirmed, browsing away)
+                  dayObj.isConfirmed && !dayObj.isPending &&
+                    "ring-1 ring-primary/50 text-primary font-medium",
+                  // Today marker
+                  dayObj.isToday && !dayObj.isPending &&
                     "bg-accent text-accent-foreground font-semibold ring-1 ring-border"
                 )}
               >
@@ -311,23 +292,28 @@ export function CustomDatePicker({
         </div>
 
         {/* Footer */}
-        <div className="p-3 border-t bg-muted/30">
+        <div className="p-3 border-t bg-muted/30 flex items-center gap-2">
           <Button
             variant="outline"
             size="sm"
-            onClick={() => {
-              const today = new Date();
-              setSelectedDate(today);
-              setViewDate(today);
-              onChange(formatDateForForm(today));
-              setIsOpen(false);
-            }}
-            className="w-full h-8 text-xs hover:bg-accent"
+            onClick={handleToday}
+            className="flex-1 h-8 text-xs hover:bg-accent"
           >
             Today
+          </Button>
+          <Button
+            size="sm"
+            onClick={handleApply}
+            disabled={!pendingDate}
+            className="flex-1 h-8 text-xs"
+          >
+            Apply
           </Button>
         </div>
       </PopoverContent>
     </Popover>
   );
 }
+
+// Re-export so DateTimePickerField can import CustomDateTimePicker from this file
+export { CustomDateTimePicker } from "./custom-datetime-picker";

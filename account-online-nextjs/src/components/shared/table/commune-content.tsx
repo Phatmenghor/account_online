@@ -48,6 +48,26 @@ export const createCommuneTableColumns = ({
       ),
     },
     {
+      key: "communeEn",
+      label: "Commune (EN)",
+      truncate: true,
+      maxWidth: "300px",
+      minWidth: "150px",
+      render: (commune) => (
+        <span className="font-medium">{commune.communeEn || "---"}</span>
+      ),
+    },
+    {
+      key: "communeKh",
+      label: "Commune (KH)",
+      truncate: true,
+      maxWidth: "200px",
+      minWidth: "120px",
+      render: (commune) => (
+        <span className="font-medium">{commune.communeKh || "---"}</span>
+      ),
+    },
+    {
       key: "communeCode",
       label: "Commune Code",
       truncate: true,
@@ -58,40 +78,8 @@ export const createCommuneTableColumns = ({
       ),
     },
     {
-      key: "communeEn",
-      label: "Commune (English)",
-      truncate: true,
-      maxWidth: "300px",
-      minWidth: "150px",
-      render: (commune) => (
-        <span className="font-medium">{commune.communeEn || "---"}</span>
-      ),
-    },
-    {
-      key: "communeKh",
-      label: "Commune (Khmer)",
-      truncate: true,
-      maxWidth: "300px",
-      minWidth: "150px",
-      render: (commune) => (
-        <span className="font-medium">{commune.communeKh || "---"}</span>
-      ),
-    },
-    {
-      key: "districtCode",
-      label: "District Code",
-      truncate: true,
-      maxWidth: "150px",
-      minWidth: "100px",
-      render: (commune) => (
-        <span className="font-medium">
-          {commune.district?.districtCode || "---"}
-        </span>
-      ),
-    },
-    {
       key: "districtEn",
-      label: "District (English)",
+      label: "District (EN)",
       truncate: true,
       maxWidth: "200px",
       minWidth: "150px",
@@ -102,20 +90,8 @@ export const createCommuneTableColumns = ({
       ),
     },
     {
-      key: "provinceCode",
-      label: "Province Code",
-      truncate: true,
-      maxWidth: "200px",
-      minWidth: "150px",
-      render: (commune) => (
-        <span className="font-medium">
-          {commune.district?.province?.provinceCode || "---"}
-        </span>
-      ),
-    },
-    {
       key: "provinceEn",
-      label: "Province (English)",
+      label: "Province (EN)",
       truncate: true,
       maxWidth: "200px",
       minWidth: "150px",

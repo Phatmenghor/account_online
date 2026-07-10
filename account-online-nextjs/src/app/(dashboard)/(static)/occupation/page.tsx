@@ -16,7 +16,6 @@ import { Search } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { startTransition, useCallback, useEffect, useState } from "react";
-import { toast } from "sonner";
 import {
   AllOccupationModel,
   OccupationModel,
@@ -187,7 +186,6 @@ function OccupationPageContent() {
       setSelectedOccupation(null);
       loadOccupations();
     } catch (err: any) {
-      toast.error(err?.errorMessage || "Failed to save occupation");
       AppToast({
         type: "error",
         message: "Failed to save occupation",
@@ -251,9 +249,10 @@ function OccupationPageContent() {
   return (
     <Card className="h-full flex flex-col">
       <CardContent className="space-y-6 p-6 flex flex-col h-full">
-        <div className="flex justify-between">
-          <div className="flex flex-wrap items-center justify-start gap-4 w-full">
-            <div className="relative w-full md:w-[350px]">
+        <div className="flex justify-between items-center gap-4">
+          <div />
+          <div className="flex items-center gap-3">
+            <div className="relative w-full sm:w-[280px]">
               <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 aria-label="search-occupation"
@@ -262,27 +261,10 @@ function OccupationPageContent() {
                 placeholder="Search occupations..."
                 value={searchQuery}
                 onChange={handleSearchChange}
-                className="pl-8 w-full min-w-[200px] text-xs md:min-w-[300px] h-9"
+                className="pl-8 w-full text-xs h-9"
                 disabled={isSubmitting}
               />
             </div>
-
-            {/* Status Filter Dropdown */}
-            <Select value={statusFilter} onValueChange={handleStatusChange}>
-              <SelectTrigger className="w-[180px] h-9">
-                <SelectValue placeholder="All Status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Status</SelectItem>
-                {STATUS_USER_OPTIONS.map((status) => (
-                  <SelectItem key={status.value} value={status.value}>
-                    {status.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div>
             <Button onClick={handleAddOccupation}>New</Button>
           </div>
         </div>

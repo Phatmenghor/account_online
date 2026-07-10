@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { indexDisplay } from "@/utils/common/common";
+import { indexDisplay, toProperCase } from "@/utils/common/common";
 import { Eye } from "lucide-react";
 import {
   Tooltip,
@@ -13,7 +13,7 @@ import {
   SuccessAccountOnlineModel,
 } from "@/models/open-acc-success/success-account-response.model";
 import { DateTimeFormat } from "@/utils/date/date-time-format";
-import AmlStatusBadge from "../badge/aml-badge";
+import { ImagePreviewCell } from "@/components/shared/image/image-preview-cell";
 
 interface SuccessAccountTableHandlers {
   handleViewAccountDetail: (account: SuccessAccountOnlineModel) => void;
@@ -43,6 +43,24 @@ export const createSuccessAccountTableColumns = ({
       ),
     },
     {
+      key: "nidImage",
+      label: "NID Image",
+      maxWidth: "120px",
+      minWidth: "110px",
+      render: (account) => (
+        <ImagePreviewCell imageId={account.nidImageName} label="NID / ID Card" />
+      ),
+    },
+    {
+      key: "selfieImage",
+      label: "Selfie",
+      maxWidth: "120px",
+      minWidth: "110px",
+      render: (account) => (
+        <ImagePreviewCell imageId={account.selfieImageName} label="Selfie Photo" />
+      ),
+    },
+    {
       key: "cif",
       label: "CIF",
       truncate: true,
@@ -69,17 +87,7 @@ export const createSuccessAccountTableColumns = ({
       maxWidth: "250px",
       minWidth: "180px",
       render: (account) => (
-        <span className="font-medium">{account.legalHolderName || "---"}</span>
-      ),
-    },
-    {
-      key: "phoneNumber",
-      label: "Phone Number",
-      truncate: true,
-      maxWidth: "180px",
-      minWidth: "140px",
-      render: (account) => (
-        <span className="font-medium">{account.phoneNumber || "---"}</span>
+        <span className="font-medium">{toProperCase(account.legalHolderName)}</span>
       ),
     },
     {
@@ -91,14 +99,6 @@ export const createSuccessAccountTableColumns = ({
       render: (account) => (
         <span className="font-medium">{account.branchNameKh || "---"}</span>
       ),
-    },
-    {
-      key: "amlStatus",
-      label: "AML Status",
-      truncate: true,
-      maxWidth: "150px",
-      minWidth: "120px",
-      render: (account) => <AmlStatusBadge status={account.amlStatus || "---"} />,
     },
     {
       key: "createdAt",

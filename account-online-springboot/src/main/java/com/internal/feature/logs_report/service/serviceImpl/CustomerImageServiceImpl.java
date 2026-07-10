@@ -66,7 +66,6 @@ public class CustomerImageServiceImpl implements CustomerImageService {
     private Path resolveWeekFolder(String subFolder) {
         Path dir = Paths.get(uploadDir, subFolder, getCurrentWeekFolder());
         dir.toFile().mkdirs();
-        log.debug("Resolved week folder: {}", dir);
         return dir;
     }
 
@@ -219,10 +218,8 @@ public class CustomerImageServiceImpl implements CustomerImageService {
             Path imagePath = findLatestFileRecursive(
                     Paths.get(uploadDir, "nid"), "nid_" + customerId + "_");
             if (imagePath == null) {
-                log.warn("NID image not found for customer: {}", customerId);
                 return null;
             }
-            log.info("Retrieved NID image for email: {}", imagePath);
             return new FileSystemResource(imagePath.toFile());
         } catch (Exception e) {
             log.error("Failed to get NID image resource: {}", e.getMessage(), e);
@@ -236,13 +233,9 @@ public class CustomerImageServiceImpl implements CustomerImageService {
             Path imagePath = findLatestFileRecursive(
                     Paths.get(uploadDir, "nid"), "nid_" + customerId + "_");
             if (imagePath == null) {
-                log.warn("NID image not found for customer: {} in dir: {}",
-                        customerId, Paths.get(uploadDir, "nid").toAbsolutePath());
                 return null;
             }
             byte[] bytes = Files.readAllBytes(imagePath);
-            log.info("Retrieved NID image bytes for customer: {} ({} bytes) from {}",
-                    customerId, bytes.length, imagePath.getFileName());
             return bytes;
         } catch (IOException e) {
             log.error("Failed to read NID image bytes: {}", e.getMessage(), e);
@@ -256,10 +249,8 @@ public class CustomerImageServiceImpl implements CustomerImageService {
             Path imagePath = findLatestFileRecursive(
                     Paths.get(uploadDir, "selfie"), "selfie_" + customerId + "_");
             if (imagePath == null) {
-                log.warn("Selfie image not found for customer: {}", customerId);
                 return null;
             }
-            log.info("Retrieved Selfie image for email: {}", imagePath);
             return new FileSystemResource(imagePath.toFile());
         } catch (Exception e) {
             log.error("Failed to get Selfie image resource: {}", e.getMessage(), e);
@@ -273,13 +264,9 @@ public class CustomerImageServiceImpl implements CustomerImageService {
             Path imagePath = findLatestFileRecursive(
                     Paths.get(uploadDir, "selfie"), "selfie_" + customerId + "_");
             if (imagePath == null) {
-                log.warn("Selfie image not found for customer: {} in dir: {}",
-                        customerId, Paths.get(uploadDir, "selfie").toAbsolutePath());
                 return null;
             }
             byte[] bytes = Files.readAllBytes(imagePath);
-            log.info("Retrieved Selfie image bytes for customer: {} ({} bytes) from {}",
-                    customerId, bytes.length, imagePath.getFileName());
             return bytes;
         } catch (IOException e) {
             log.error("Failed to read Selfie image bytes: {}", e.getMessage(), e);

@@ -1,218 +1,236 @@
 package com.internal.feature.telegram_alerts.service;
 
+import com.internal.enumation.AmlStatusEnum;
+import com.internal.feature.aml.dto.response.AmlStatusDto;
+import com.internal.feature.logs_report.service.CustomerImageService;
 import com.internal.feature.telegram_alerts.config.TelegramService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.Resource;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
-/**
- * Centralized monitoring service for all critical operations in the Account Opening system.
- * Sends detailed alerts to Dev Team Telegram channel for easy tracking and debugging.
- */
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class MonitoringService {
 
     private final TelegramService telegramService;
+    private final CustomerImageService customerImageService;
 
-    private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm:ss.SSS");
-    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
-    /**
-     * Account Opening Flow Events
-     */
-    public void logAccountOpeningStarted(String legalId, String nidImage, String selfieImage) {
-        // Success logs disabled - only errors sent to dev team
-    }
-
-    public void logAccountOpeningStepProgress(String legalId, String stepName, boolean success, String details) {
-        if (success) {
-            return; // Only send errors to dev team
-        }
-        StringBuilder msg = new StringBuilder();
-        msg.append("*Account Online - Step Failed: ").append(stepName).append("*\n")
-                .append("--------------------\n")
-                .append("- Legal ID: `").append(escapeMarkdown(legalId)).append("`\n");
-
-        if (details != null && !details.isEmpty()) {
-            msg.append("- Details: `").append(escapeMarkdown(details)).append("`\n");
-        }
-
-        msg.append("- Time: `").append(getCurrentTime()).append("`");
-
-        sendToDevTeam(msg.toString());
-    }
-
-    public void logAccountOpeningFailed(String legalId, String stepName, String errorMessage, Exception exception) {
-        StringBuilder msg = new StringBuilder();
-        msg.append("*Account Online - FAILED*\n")
-                .append("--------------------\n")
-                .append("- Legal ID: `").append(escapeMarkdown(legalId)).append("`\n")
-                .append("- Failed Step: `").append(escapeMarkdown(stepName)).append("`\n")
-                .append("- Error Type: `").append(exception.getClass().getSimpleName()).append("`\n")
-                .append("- Error Message: `").append(escapeMarkdown(errorMessage)).append("`\n");
-
-        if (exception.getCause() != null) {
-            msg.append("- Root Cause: `").append(escapeMarkdown(exception.getCause().getMessage())).append("`\n");
-        }
-
-        msg.append("- Time: `").append(getCurrentDateTime()).append("`\n")
-                .append("--------------------");
-
-        sendToDevTeam(msg.toString());
-    }
-
-    /**
-     * T24 Banking Service Events
-     */
-    public void logT24ServiceCall(String operation, String customerId, long durationMs, boolean success) {
-        if (success) {
-            return; // Only send errors to dev team
-        }
-        StringBuilder msg = new StringBuilder();
-        msg.append("*T24 SERVICE CALL FAILED*\n")
-                .append("├─ Operation: `").append(escapeMarkdown(operation)).append("`\n")
-                .append("├─ Customer ID: `").append(escapeMarkdown(customerId)).append("`\n")
-                .append("├─ Duration: `").append(durationMs).append("ms`\n")
-                .append("└─ Time: `").append(getCurrentTime()).append("`");
-
-        sendToDevTeam(msg.toString());
-    }
-
-    public void logT24Error(String operation, String customerId, String errorMessage) {
-        StringBuilder msg = new StringBuilder();
-        msg.append("*T24 SERVICE ERROR*\n")
-                .append("─────────────────────────────────\n")
-                .append("├─ Operation: `").append(escapeMarkdown(operation)).append("`\n")
-                .append("├─ Customer ID: `").append(escapeMarkdown(customerId)).append("`\n")
-                .append("├─ Error: `").append(escapeMarkdown(errorMessage)).append("`\n")
-                .append("├─ Service: `T24 Banking`\n")
-                .append("└─ Time: `").append(getCurrentTime()).append("`");
-
-        sendToDevTeam(msg.toString());
-    }
-
-    /**
-     * AML Processing Events
-     */
-    public void logAmlCheckStarted(String legalId, String customerName) {
-        // Success logs disabled - only errors sent to dev team
-    }
-
-    public void logAmlCheckCompleted(String legalId, String riskLevel, double score, long durationMs) {
-        // Success logs disabled - only errors sent to dev team
-    }
-
-    /**
-     * Database Events
-     */
-    public void logDatabaseConnection(String datasource, boolean success, long durationMs) {
-        if (success) {
-            return; // Only send errors to dev team
-        }
-        StringBuilder msg = new StringBuilder();
-        msg.append("*DATABASE CONNECTION FAILED*\n")
-                .append("├─ Datasource: `").append(escapeMarkdown(datasource)).append("`\n")
-                .append("├─ Duration: `").append(durationMs).append("ms`\n")
-                .append("└─ Time: `").append(getCurrentTime()).append("`");
-
-        sendToDevTeam(msg.toString());
-    }
-
-    public void logDatabaseError(String datasource, String operation, String errorMessage) {
-        StringBuilder msg = new StringBuilder();
-        msg.append("*DATABASE ERROR*\n")
-                .append("─────────────────────────────────\n")
-                .append("├─ Datasource: `").append(escapeMarkdown(datasource)).append("`\n")
-                .append("├─ Operation: `").append(escapeMarkdown(operation)).append("`\n")
-                .append("├─ Error: `").append(escapeMarkdown(errorMessage)).append("`\n")
-                .append("└─ Time: `").append(getCurrentTime()).append("`");
-
-        sendToDevTeam(msg.toString());
-    }
-
-    /**
-     * Authentication/Access Events
-     */
-    public void logUserAuthentication(String username, String ipAddress, boolean success) {
-        if (success) {
-            return; // Only send errors to dev team
-        }
-        StringBuilder msg = new StringBuilder();
-        msg.append("*USER AUTHENTICATION FAILED*\n")
-                .append("├─ Username: `").append(escapeMarkdown(username)).append("`\n")
-                .append("├─ IP Address: `").append(escapeMarkdown(ipAddress)).append("`\n")
-                .append("└─ Time: `").append(getCurrentTime()).append("`");
-
-        sendToDevTeam(msg.toString());
-    }
-
-    public void logSuspiciousActivity(String username, String ipAddress, String activityType, String description) {
-        StringBuilder msg = new StringBuilder();
-        msg.append("*SUSPICIOUS ACTIVITY DETECTED*\n")
-                .append("═══════════════════════════════════════\n")
-                .append("├─ Username: `").append(escapeMarkdown(username)).append("`\n")
-                .append("├─ IP Address: `").append(escapeMarkdown(ipAddress)).append("`\n")
-                .append("├─ Activity Type: `").append(escapeMarkdown(activityType)).append("`\n")
-                .append("├─ Description: `").append(escapeMarkdown(description)).append("`\n")
-                .append("└─ Time: `").append(getCurrentDateTime()).append("`\n")
-                .append("═══════════════════════════════════════");
-
-        sendToDevTeam(msg.toString());
-    }
-
-    /**
-     * General System Events
-     */
-    public void logExternalApiCall(String apiName, String endpoint, long durationMs, int statusCode, boolean success) {
-        if (success) {
-            return; // Only send errors to dev team
-        }
-        StringBuilder msg = new StringBuilder();
-        msg.append("*EXTERNAL API CALL FAILED*\n")
-                .append("├─ API: `").append(escapeMarkdown(apiName)).append("`\n")
-                .append("├─ Endpoint: `").append(escapeMarkdown(endpoint)).append("`\n")
-                .append("├─ Status Code: `").append(statusCode).append("`\n")
-                .append("├─ Duration: `").append(durationMs).append("ms`\n")
-                .append("└─ Time: `").append(getCurrentTime()).append("`");
-
-        sendToDevTeam(msg.toString());
-    }
-
-    public void logPerformanceAlert(String componentName, long durationMs, long thresholdMs) {
-        // Performance alerts disabled - prevents API slowdown from Telegram sends
-    }
-
-    /**
-     * Helper Methods
-     */
-    private void sendToDevTeam(String message) {
+    public void sendHighRiskAmlAlert(AmlStatusDto amlDto) {
+        if (amlDto == null)
+            return;
         try {
-            telegramService.sendDetailedErrorToDevTeam(message);
+            DateTimeFormatter formatter = DATE_FORMATTER;
+            String timeFormatted = amlDto.getCreatedAt() != null
+                    ? amlDto.getCreatedAt().format(formatter)
+                    : LocalDateTime.now(ZoneId.of("Asia/Phnom_Penh")).format(formatter);
+
+            String legalId = amlDto.getCustomerInfo() != null ? amlDto.getCustomerInfo().getLegalId() : null;
+
+            StringBuilder msg = new StringBuilder();
+            msg.append("*AML Account Online - HIGH RISK*\n")
+                    .append("--------------------\n");
+
+            if (amlDto.getCustomerInfo() != null) {
+                appendIfNotEmpty(msg, "Name", buildName(amlDto));
+                appendIfNotEmpty(msg, "Legal ID", legalId);
+                appendIfNotEmpty(msg, "Gender", amlDto.getCustomerInfo().getGender());
+                appendIfNotEmpty(msg, "DOB", amlDto.getCustomerInfo().getDateOfBirth());
+                appendIfNotEmpty(msg, "Nationality", amlDto.getCustomerInfo().getNationality());
+                appendIfNotEmpty(msg, "Phone Number", amlDto.getCustomerInfo().getPhoneNumber());
+                appendIfNotEmpty(msg, "ID Issued", amlDto.getCustomerInfo().getIssuedDate());
+                appendIfNotEmpty(msg, "ID Expired", amlDto.getCustomerInfo().getExpiredDate());
+            }
+
+            appendIfNotEmpty(msg, "Current Address", amlDto.getCurrentAddressName());
+            appendIfNotEmpty(msg, "Place of Birth", amlDto.getPlaceOfBirthName());
+            appendIfNotEmpty(msg, "Marital Status", amlDto.getMaritalStatus());
+            appendIfNotEmpty(msg, "Occupation", amlDto.getOccupationStatus());
+            appendIfNotEmpty(msg, "Risk Level", amlDto.getRiskLevel());
+            appendIfNotEmpty(msg, "Service Name", amlDto.getServiceName());
+
+            if (amlDto.getTotalRulesScore() > 0) {
+                msg.append("- Total Rules Score: `").append(amlDto.getTotalRulesScore()).append("`\n");
+            }
+
+            String rulesTriggered = amlDto.getRulesTriggered();
+            if (rulesTriggered != null && !rulesTriggered.isEmpty()) {
+                msg.append("- Rules Triggered: `").append(escape(rulesTriggered)).append("`\n");
+            }
+
+            appendIfNotEmpty(msg, "Transaction ID", amlDto.getTrxnID());
+            appendIfNotEmpty(msg, "Remarks", amlDto.getRemarks());
+            appendIfNotEmpty(msg, "Created By", amlDto.getSubmittedBy());
+
+            msg.append("--------------------\n")
+                    .append("Status: `PENDING`\n")
+                    .append("Time: `").append(timeFormatted).append("`");
+
+            telegramService.sendToMonitor(msg.toString());
+
+            // Send NID and selfie photos if available
+            if (legalId != null) {
+                try {
+                    Resource nidImage = customerImageService.getNidImageResourceForEmail(legalId);
+                    if (nidImage != null && nidImage.exists()) {
+                        telegramService.sendPhotoToMonitor(
+                                "*HIGH RISK - NID Photo*\nLegal ID: `" + escape(legalId) + "`", nidImage);
+                    }
+                } catch (Exception ignored) {
+                }
+                try {
+                    Resource selfieImage = customerImageService.getSelfieImageResourceForEmail(legalId);
+                    if (selfieImage != null && selfieImage.exists()) {
+                        telegramService.sendPhotoToMonitor(
+                                "*HIGH RISK - Face Photo*\nLegal ID: `" + escape(legalId) + "`", selfieImage);
+                    }
+                } catch (Exception ignored) {
+                }
+            }
+
         } catch (Exception e) {
-            log.debug("Monitoring alert not sent: {}", e.getMessage());
+            log.error("Failed to send HIGH RISK AML alert: {}", e.getMessage());
         }
     }
 
-    private String getCurrentTime() {
-        return LocalDateTime.now(ZoneId.of("Asia/Phnom_Penh")).format(TIME_FORMATTER);
+    private static final long ACCOUNT_CREATED_PHOTO_DELAY_MS = 2000;
+
+    @Async
+    public void sendAccountCreatedAlert(String fullName, String fullAddress, String legalId,
+            String cif, String usdAccount, String khrAccount, String branchName) {
+        try {
+            StringBuilder msg = new StringBuilder();
+            msg.append("*Account Online - Customer CREATED*\n")
+                    .append("--------------------\n");
+
+            appendIfNotEmpty(msg, "Full Name", fullName);
+            appendIfNotEmpty(msg, "Full Address", fullAddress);
+            appendIfNotEmpty(msg, "Legal ID", legalId);
+            appendIfNotEmpty(msg, "CIF", cif);
+            appendIfNotEmpty(msg, "Account USD", usdAccount);
+            appendIfNotEmpty(msg, "Account KHR", khrAccount);
+            appendIfNotEmpty(msg, "Branch", branchName);
+
+            telegramService.sendToMonitor(msg.toString());
+
+            // Send NID + face photos after the info text has been sent
+            if (legalId != null && !legalId.isBlank()) {
+                try {
+                    Thread.sleep(ACCOUNT_CREATED_PHOTO_DELAY_MS);
+                } catch (InterruptedException ignored) {
+                    Thread.currentThread().interrupt();
+                }
+
+                try {
+                    Resource nidImage = customerImageService.getNidImageResourceForEmail(legalId);
+                    if (nidImage != null && nidImage.exists()) {
+                        telegramService.sendPhotoToMonitor("*NID Photo*\nLegal ID: `" + escape(legalId) + "`",
+                                nidImage);
+                    }
+                } catch (Exception ignored) {
+                }
+                try {
+                    Resource selfieImage = customerImageService.getSelfieImageResourceForEmail(legalId);
+                    if (selfieImage != null && selfieImage.exists()) {
+                        telegramService.sendPhotoToMonitor("*NID Face Photo*\nLegal ID: `" + escape(legalId) + "`",
+                                selfieImage);
+                    }
+                } catch (Exception ignored) {
+                }
+            }
+        } catch (Exception e) {
+            log.error("Failed to send account created alert: {}", e.getMessage());
+        }
     }
 
-    private String getCurrentDateTime() {
-        return LocalDateTime.now(ZoneId.of("Asia/Phnom_Penh")).format(DATE_FORMATTER);
+    public void sendAmlActionAlert(AmlStatusDto amlDto) {
+        if (amlDto == null || amlDto.getStatus() == null)
+            return;
+        if (amlDto.getStatus() != AmlStatusEnum.APPROVE && amlDto.getStatus() != AmlStatusEnum.REJECT)
+            return;
+        try {
+            String legalId = amlDto.getCustomerInfo() != null ? amlDto.getCustomerInfo().getLegalId() : null;
+            String name = amlDto.getCustomerInfo() != null ? buildName(amlDto) : "";
+            String status = amlDto.getStatus().name();
+            String actionBy = resolveActionBy(amlDto);
+            String timeFormatted = amlDto.getUpdatedAt() != null
+                    ? amlDto.getUpdatedAt().format(DATE_FORMATTER)
+                    : LocalDateTime.now(ZoneId.of("Asia/Phnom_Penh")).format(DATE_FORMATTER);
+
+            StringBuilder msg = new StringBuilder();
+            msg.append(amlDto.getStatus() == AmlStatusEnum.APPROVE
+                    ? "*AML Account Online - APPROVED*\n"
+                    : "*AML Account Online - REJECTED*\n")
+                    .append("--------------------\n");
+
+            appendIfNotEmpty(msg, "Name", name);
+            appendIfNotEmpty(msg, "Legal ID", legalId);
+            if (amlDto.getCustomerInfo() != null) {
+                appendIfNotEmpty(msg, "Phone Number", amlDto.getCustomerInfo().getPhoneNumber());
+            }
+            appendIfNotEmpty(msg, "Risk Level", amlDto.getRiskLevel());
+            appendIfNotEmpty(msg, "Remarks", amlDto.getRemarks());
+
+            msg.append("--------------------\n")
+                    .append("Status: `").append(status).append("`\n")
+                    .append("By: `").append(escape(actionBy)).append("`\n")
+                    .append("Time: `").append(timeFormatted).append("`");
+
+            telegramService.sendToMonitor(msg.toString());
+        } catch (Exception e) {
+            log.error("Failed to send AML action alert: {}", e.getMessage());
+        }
     }
 
-    private String escapeMarkdown(String text) {
-        if (text == null) return "";
-        return text.replace("\\", "\\\\")
-                .replace("_", "\\_")
-                .replace("*", "\\*")
-                .replace("[", "\\[")
-                .replace("`", "\\`");
+    private String resolveActionBy(AmlStatusDto amlDto) {
+        if (amlDto.getStatus() == AmlStatusEnum.APPROVE && amlDto.getApprovedBy() != null) {
+            String name = amlDto.getApprovedBy().getFullName();
+            return (name != null && !name.isBlank()) ? name : amlDto.getApprovedBy().getIdCard();
+        }
+        if (amlDto.getStatus() == AmlStatusEnum.REJECT && amlDto.getRejectedBy() != null) {
+            String name = amlDto.getRejectedBy().getFullName();
+            return (name != null && !name.isBlank()) ? name : amlDto.getRejectedBy().getIdCard();
+        }
+        return "Unknown";
+    }
+
+    private String buildName(AmlStatusDto amlDto) {
+        var info = amlDto.getCustomerInfo();
+        String name = joinNonNull(info.getGivenName(), info.getFamilyName());
+        if (name.isEmpty())
+            name = joinNonNull(info.getFirstNameKh(), info.getLastNameKh());
+        return name;
+    }
+
+    private String joinNonNull(String a, String b) {
+        StringBuilder sb = new StringBuilder();
+        if (a != null && !a.isBlank())
+            sb.append(a.trim());
+        if (b != null && !b.isBlank()) {
+            if (!sb.isEmpty())
+                sb.append(" ");
+            sb.append(b.trim());
+        }
+        return sb.toString();
+    }
+
+    private void appendIfNotEmpty(StringBuilder sb, String label, String value) {
+        if (value != null && !value.isBlank()) {
+            sb.append("- ").append(label).append(": `").append(escape(value)).append("`\n");
+        }
+    }
+
+    private String escape(String text) {
+        if (text == null)
+            return "";
+        return text.replace("_", "\\_").replace("*", "\\*").replace("`", "\\`").replace("~", "\\~");
     }
 }

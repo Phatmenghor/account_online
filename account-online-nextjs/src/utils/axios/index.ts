@@ -7,12 +7,8 @@ import axios, {
 import {
   getToken,
   logoutToken,
-  storeRefreshToken,
   storeToken,
 } from "../local-storage/token";
-import { toast } from "sonner";
-import { refreshTokenService } from "@/services/auth/refresh-token.service";
-
 // Define types
 type RequestMetadata = {
   startTime: number;
@@ -449,31 +445,12 @@ const createAxiosInstance = (requiresAuth = false): AxiosInstance => {
     async (error: unknown) => {
       const err = error as AxiosError;
 
-      const originalRequest = err.config as InternalAxiosRequestConfig & {
-        _retry?: boolean;
-      };
-
-      if (err.response?.status === 401 && !originalRequest._retry) {
-        originalRequest._retry = true;
-
-        try {
-          const newData = await refreshTokenService();
-          if (newData) {
-            storeToken(newData.accessToken);
-            storeRefreshToken(newData.refreshToken);
-
-            // Update header for the retry
-            originalRequest.headers["Authorization"] =
-              `Bearer ${newData.accessToken}`;
-
-            return axiosInstance(originalRequest);
-          }
-        } catch (refreshError) {
-          logoutToken();
-          window.location.href = "/login";
-          return Promise.reject(refreshError);
-        }
+      if (err.response?.status === 401) {
+        logoutToken();
+        window.location.href = "/login";
+        return Promise.reject(error);
       }
+
       // Get request ID from metadata
       const requestId = err.config?.metadata?.requestId || "unknown";
 

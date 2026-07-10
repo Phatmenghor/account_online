@@ -130,11 +130,17 @@ export const useToast = (): ToastContextType => {
 let globalToastFunction: ((options: ToastOptions) => void) | null = null;
 
 export const AppToast = (options: ToastOptions): void => {
-  if (globalToastFunction) {
-    globalToastFunction(options);
-  } else {
-    console.warn("AppToast called before ToastProvider is mounted");
-  }
+  // Delegate to sonner
+  import("sonner").then(({ toast }) => {
+    const msg = options.message;
+    const desc = options.description;
+    switch (options.type) {
+      case "success": toast.success(msg, { description: desc }); break;
+      case "error":   toast.error(msg,   { description: desc }); break;
+      case "warning": toast.warning(msg, { description: desc }); break;
+      default:        toast.info(msg,    { description: desc }); break;
+    }
+  });
 };
 
 // Individual Toast Component

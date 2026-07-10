@@ -18,4 +18,5 @@ public class OpenAccountContext {
     private String khrAccount;
     private String usdAccount;
     private String mbActivationCode;
+    private String submittedBy;
 }

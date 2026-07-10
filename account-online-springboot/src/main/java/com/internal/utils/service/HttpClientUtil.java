@@ -80,9 +80,6 @@ public class HttpClientUtil {
             // Create entity
             HttpEntity<T> entity = new HttpEntity<>(request, headers);
 
-            // Log request
-            log.debug("{} API Request - Method: {}, URL: {}", apiName, method, url);
-
             // Make API call
             ResponseEntity<R> response = restTemplate.exchange(
                     url,
@@ -173,7 +170,6 @@ public class HttpClientUtil {
     private <R> R handleUnauthorized(HttpClientErrorException.Unauthorized ex, String apiName, long startTime) {
         log.error("{} API Unauthorized (401) - Duration: {}ms",
                 apiName, System.currentTimeMillis() - startTime);
-        log.debug("Response body: {}", ex.getResponseBodyAsString());
         throw new ValidateServiceException(
                 String.format("%s API authentication failed", apiName),
                 ex);
@@ -182,7 +178,6 @@ public class HttpClientUtil {
     private <R> R handleForbidden(HttpClientErrorException.Forbidden ex, String apiName, long startTime) {
         log.error("{} API Forbidden (403) - Duration: {}ms",
                 apiName, System.currentTimeMillis() - startTime);
-        log.debug("Response body: {}", ex.getResponseBodyAsString());
         throw new ValidateServiceException(
                 String.format("%s API access denied", apiName),
                 ex);

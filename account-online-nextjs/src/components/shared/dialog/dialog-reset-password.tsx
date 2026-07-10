@@ -62,7 +62,7 @@ export default function ResetPasswordModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-md w-[95vw] mx-auto rounded-2xl shadow-xl bg-white p-0 overflow-hidden border border-slate-200">
+      <DialogContent className="sm:max-w-[460px] w-[95vw] mx-auto rounded-2xl shadow-xl bg-white p-0 overflow-hidden border border-slate-200">
         {showSuccess ? (
           <div className="flex flex-col">
             {/* Success Header */}

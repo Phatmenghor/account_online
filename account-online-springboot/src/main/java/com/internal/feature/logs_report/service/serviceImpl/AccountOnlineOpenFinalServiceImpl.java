@@ -56,6 +56,13 @@ public class AccountOnlineOpenFinalServiceImpl implements AccountOnlineOpenFinal
         try {
             log.info("Attempting to save AccountOnlineFinal for Legal ID: {}", request.getLegalId());
 
+            String submittedBy = "System";
+            com.internal.feature.auth.models.UserEntity submittedByUser = null;
+            try {
+                submittedByUser = securityUtils.getCurrentUser();
+                submittedBy = submittedByUser.getUsername();
+            } catch (Exception ignored) {}
+
             LocalDate dob = parseDate(request.getDateOfBirth());
             LocalDate issueDate = parseDate(request.getLegalIssueDate());
             LocalDate expireDate = parseDate(request.getLegalExpireDate());
@@ -105,7 +112,7 @@ public class AccountOnlineOpenFinalServiceImpl implements AccountOnlineOpenFinal
                     .occupation(request.getOccupation())
                     .averageIncome("0")
                     .referralId(request.getReferralId())
-                    .releasedBy("")
+                    .releasedBy(request.getReleasedBy())
 
                     // Branch
                     .branchCode(request.getBranchCode())
@@ -162,6 +169,7 @@ public class AccountOnlineOpenFinalServiceImpl implements AccountOnlineOpenFinal
                     .usdAccount(accountInfo.getUsdAccount())
                     .khrAccount(accountInfo.getKhrAccount())
                     .cif(accountInfo.getCif())
+                    .categoryAccount(request.getAccountType())
 
                     // === SMS HISTORY ===
                     .smsSentPhone(request.getPhoneNumber())
@@ -173,6 +181,8 @@ public class AccountOnlineOpenFinalServiceImpl implements AccountOnlineOpenFinal
                     // Images
                     .nidImageName(imagePaths != null ? imagePaths.getNidImagePath() : request.getNidImageName())
                     .selfieImageName(imagePaths != null ? imagePaths.getSelfieImagePath() : request.getSelfieImageName())
+                    .submittedBy(submittedBy)
+                    .submittedByUser(submittedByUser)
                     .build();
 
             AccountOnlineFinal savedLog = accountOnlineFinalRepository.save(finalLog);
@@ -194,7 +204,10 @@ public class AccountOnlineOpenFinalServiceImpl implements AccountOnlineOpenFinal
 
         Pageable pageable = PageRequest.of(request.getPageNo() - 1, request.getPageSize(), Sort.by(Sort.Direction.DESC, "createdAt"));
 
-        Page<AccountOnlineFinal> page = accountOnlineFinalRepository.findBySearch(request.getSearch(), pageable);
+        LocalDateTime fromDateTime = request.getFromDate() != null ? request.getFromDate().atStartOfDay() : null;
+        LocalDateTime toDateTime = request.getToDate() != null ? request.getToDate().plusDays(1).atStartOfDay() : null;
+
+        Page<AccountOnlineFinal> page = accountOnlineFinalRepository.findBySearch(request.getSearch(), fromDateTime, toDateTime, pageable);
 
         log.info("Found {} accounts on page {} of {}", page.getNumberOfElements(),
                 request.getPageNo(), page.getTotalPages());

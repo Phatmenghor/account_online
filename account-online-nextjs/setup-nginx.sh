@@ -18,6 +18,11 @@ FRONTEND_API_URL="http://192.168.103.106:8282"
 BACKEND_API_URL="http://192.168.103.106:7070"
 SERVER_IP="192.168.103.106"
 
+# SSL Configuration (Wildcard Certificates)
+USE_SSL=false # Set to true to enable HTTPS / SSL
+SSL_CERT_PATH="/etc/nginx/ssl/star_cambodiapostbank_com_kh.pem"
+SSL_KEY_PATH="/etc/nginx/ssl/wildcard_cambodiapostbank_com_kh.key"
+
 # Nginx Performance Settings
 NGINX_CLIENT_MAX_BODY_SIZE="50M"
 NGINX_PROXY_TIMEOUT="90s"
@@ -103,6 +108,23 @@ if [ ! -z "$EXISTING_PORTS" ]; then
     fi
 fi
 
+# Generate the listen and SSL configuration block
+SSL_LISTEN_BLOCK=""
+if [ "$USE_SSL" = true ]; then
+    SSL_LISTEN_BLOCK="listen ${EXTERNAL_PORT} ssl;
+    listen [::]:${EXTERNAL_PORT} ssl;
+    ssl_certificate ${SSL_CERT_PATH};
+    ssl_certificate_key ${SSL_KEY_PATH};
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers HIGH:!aNULL:!MD5;
+    ssl_prefer_server_ciphers on;
+    ssl_session_cache shared:SSL:10m;
+    ssl_session_timeout 10m;"
+else
+    SSL_LISTEN_BLOCK="listen ${EXTERNAL_PORT};
+    listen [::]:${EXTERNAL_PORT};"
+fi
+
 # Create production config using script variables with unique naming
 cat > /etc/nginx/conf.d/${APP_NAME}.conf << EOF
 # ${PROJECT_DISPLAY_NAME} - Frontend + API Proxy (Port: ${EXTERNAL_PORT})
@@ -120,8 +142,7 @@ upstream ${APP_NAME}_frontend_${EXTERNAL_PORT} {
 }
 
 server {
-    listen ${EXTERNAL_PORT};
-    listen [::]:${EXTERNAL_PORT};
+    ${SSL_LISTEN_BLOCK}
     server_name _;
     client_max_body_size ${NGINX_CLIENT_MAX_BODY_SIZE};
 

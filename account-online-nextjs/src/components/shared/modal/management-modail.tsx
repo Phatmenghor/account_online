@@ -26,7 +26,6 @@ import {
   CreateMaritalForm,
   UpdateMaritalForm,
 } from "@/models/static/marital/marital.schema";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { FileText, FilePenLine, Loader2 } from "lucide-react";
 import Loading from "@/components/shared/common/loading";
 import { ModalMode } from "@/constants/AppResource/display-list/enum/mode";
@@ -142,7 +141,7 @@ export default function ModalMarital({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-2xl h-[90vh] p-0 gap-0 flex flex-col">
+      <DialogContent className="sm:max-w-[750px] h-[90vh] overflow-hidden p-0 gap-0 flex flex-col">
         {/* Header */}
         <DialogHeader className="px-6 py-4 border-b bg-muted/30 flex-shrink-0">
           <div className="flex items-center gap-4 pr-8">
@@ -175,7 +174,7 @@ export default function ModalMarital({
         </DialogHeader>
 
         {/* Content */}
-        <ScrollArea className="flex-1 min-h-0">
+        <div className="flex-1 min-h-0 overflow-y-auto">
           <div className="p-6">
             {/* Loading State */}
             {isLoadingData ? (
@@ -351,7 +350,7 @@ export default function ModalMarital({
               </div>
             )}
           </div>
-        </ScrollArea>
+        </div>
 
         {/* Footer */}
         <div className="flex justify-between items-center p-6 border-t bg-muted/30 flex-shrink-0">

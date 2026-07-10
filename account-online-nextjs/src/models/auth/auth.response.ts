@@ -9,7 +9,6 @@ export interface AuthModel {
   tokenType: string;
   userRole: UserRole;
   fullToken: string;
-  refreshToken: string;
 }
 
 export interface UserRole {
@@ -24,4 +23,6 @@ export interface UserRole {
   createdAt: string;
   updatedAt: string;
   lastLogin: string;
+  forcePasswordChange: boolean;
+  passwordExpired: boolean;
 }

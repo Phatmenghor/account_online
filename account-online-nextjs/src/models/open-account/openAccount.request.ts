@@ -30,4 +30,6 @@ export interface CreateOpenAccountReq {
   phoneNumber: string;
   nidImageName: string;
   selfieImageName: string;
+  accountType: string;
+  relationManager: string;
 }

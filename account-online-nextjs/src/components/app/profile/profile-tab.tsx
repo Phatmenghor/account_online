@@ -75,6 +75,17 @@ export default function ProfileTab({
 
   const readOnlyFields = ["username", "status"];
 
+  const formFields: { name: keyof UpdateUserProfileForm; label: string }[] = [
+    { name: "username", label: "ID Card" },
+    { name: "email", label: "Email" },
+    { name: "fullName", label: "Full Name" },
+    { name: "position", label: "Position" },
+    { name: "phoneNumber", label: "Phone Number" },
+    { name: "branch", label: "Branch" },
+    { name: "department", label: "Department" },
+    { name: "status", label: "Status" },
+  ];
+
   const profileImageUrl =
     imagePreview ||
     (user?.profileUrl
@@ -124,6 +135,9 @@ export default function ProfileTab({
         status: user.userStatus || Status.ACTIVE,
         position: user.position || "",
         profileUrl: user.profileUrl || "",
+        phoneNumber: user.phoneNumber || "",
+        branch: user.branch || "",
+        department: user.department || "",
         id: user.id || 0,
       },
       { keepDefaultValues: true }
@@ -141,16 +155,7 @@ export default function ProfileTab({
 
   const submitForm = async (values: UpdateUserProfileForm) => {
     try {
-      await onProfileSubmit({
-        ...values,
-        username: values.username || undefined,
-        email: values.email || undefined,
-        fullName: values.fullName || undefined,
-        position: values.position || undefined,
-        profileUrl: values.profileUrl || undefined,
-        status: values.status || undefined,
-        id: values.id || undefined,
-      });
+      await onProfileSubmit(values);
       setEditMode(false);
     } catch (error) {
       console.error("Error updating profile:", error);
@@ -280,35 +285,24 @@ export default function ProfileTab({
               <Form {...form}>
                 <form onSubmit={handleSubmit(submitForm)} className="space-y-6">
                   <div className="grid gap-4 md:grid-cols-2">
-                    {[
-                      "username",
-                      "email",
-                      "fullName",
-                      "position",
-                      "status",
-                    ].map((fieldName) => (
+                    {formFields.map(({ name, label }) => (
                       <FormField
-                        key={fieldName}
+                        key={name}
                         control={control}
-                        name={fieldName as keyof UpdateUserProfileForm}
+                        name={name}
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>
-                              {fieldName === "username"
-                                ? "Username"
-                                : fieldName.charAt(0).toUpperCase() +
-                                  fieldName.slice(1)}
-                            </FormLabel>
+                            <FormLabel>{label}</FormLabel>
                             <FormControl>
                               <Input
                                 {...field}
+                                value={field.value as string ?? ""}
                                 readOnly={
-                                  !editMode ||
-                                  readOnlyFields.includes(fieldName)
+                                  !editMode || readOnlyFields.includes(name)
                                 }
                                 disabled={isSubmitting}
                                 className={
-                                  readOnlyFields.includes(fieldName)
+                                  readOnlyFields.includes(name)
                                     ? "bg-muted/50"
                                     : ""
                                 }

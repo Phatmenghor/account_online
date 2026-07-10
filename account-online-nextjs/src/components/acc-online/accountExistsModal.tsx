@@ -1,6 +1,6 @@
 "use client";
 
-import { Wallet, X, ArrowRight } from "lucide-react";
+import { Wallet, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTranslations } from "next-intl";
 import { motion, AnimatePresence } from "framer-motion";
@@ -14,21 +14,14 @@ interface AccountExistsModalProps {
     accountName?: string;
     message?: string;
   } | null;
-  onContinue?: () => void;
 }
 
 const AccountExistsModal = ({
   isOpen,
   onClose,
   data,
-  onContinue,
 }: AccountExistsModalProps) => {
   const translate = useTranslations("common");
-
-  const handleContinue = () => {
-    onContinue?.();
-    onClose();
-  };
 
   return (
     <AnimatePresence>
@@ -47,22 +40,22 @@ const AccountExistsModal = ({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 60, scale: 0.97 }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className="relative bg-white w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden z-10 max-h-[90vh] flex flex-col"
+            className="relative bg-white w-full sm:max-w-[520px] rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden z-10 max-h-[90vh] flex flex-col"
           >
             {/* Top accent bar - Primary color */}
-            <div className="h-1.5 w-full bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 flex-shrink-0" />
+            <div className="h-1.5 w-full bg-primary flex-shrink-0" />
 
             {/* Header */}
             <div className="flex items-center justify-between px-5 pt-5 pb-3 flex-shrink-0">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-blue-600 rounded-lg flex items-center justify-center shadow-sm flex-shrink-0">
-                  <Wallet style={{ width: 20, height: 20 }} className="text-white" />
+                <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center shadow-sm flex-shrink-0">
+                  <Wallet style={{ width: 20, height: 20 }} className="text-primary-foreground" />
                 </div>
                 <div>
                   <h2 className="text-base sm:text-lg font-bold text-gray-800">
                     គណនីរបស់អ្នកមាន
                   </h2>
-                  <p className="text-xs text-blue-600 font-medium">Account Exists</p>
+                  <p className="text-xs text-primary font-medium">Account Exists</p>
                 </div>
               </div>
               <button
@@ -80,29 +73,32 @@ const AccountExistsModal = ({
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
-                className="bg-blue-50 border border-blue-200 rounded-xl p-4"
+                className="bg-primary/5 border border-primary/20 rounded-xl p-4"
               >
-                <p className="text-sm text-gray-700 leading-relaxed">
+                <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
                   {data?.message ||
                     "គណនីធនាគារលក់ដ៏ងរបស់អ្នកបានបង្កើតរួចរាល់។ អ្នកអាចបង្ហាញលេខគណនីរបស់អ្នក ឬបន្តប្រើប្រាស់វា។"}
                 </p>
               </motion.div>
 
               {/* Account Details Card */}
-              {(data?.cif || data?.accountNumber) && (
+              {(data?.cif || data?.accountNumber || data?.accountName) && (
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.2 }}
-                  className="bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-300 rounded-xl p-4 space-y-3"
+                  className="bg-primary/5 border border-primary/20 rounded-xl p-4 space-y-3"
                 >
+                  <h4 className="text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    ព័ត៌មានលម្អិតគណនី
+                  </h4>
                   <div className="space-y-2">
                     {data?.cif && (
                       <div>
                         <label className="text-xs font-semibold text-gray-600 uppercase tracking-wider">
                           លេខក្រុមហ៊ុន (CIF)
                         </label>
-                        <p className="text-sm font-bold text-blue-700 mt-1 bg-white rounded px-3 py-2">
+                        <p className="text-sm font-bold text-primary mt-1 bg-white rounded px-3 py-2">
                           {data.cif}
                         </p>
                       </div>
@@ -112,7 +108,7 @@ const AccountExistsModal = ({
                         <label className="text-xs font-semibold text-gray-600 uppercase tracking-wider">
                           លេខគណនី
                         </label>
-                        <p className="text-sm font-bold text-blue-700 mt-1 bg-white rounded px-3 py-2">
+                        <p className="text-sm font-bold text-primary mt-1 bg-white rounded px-3 py-2">
                           {data.accountNumber}
                         </p>
                       </div>
@@ -131,52 +127,25 @@ const AccountExistsModal = ({
                 </motion.div>
               )}
 
-              {/* Benefits/Info */}
+              {/* Support Contact Info */}
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
-                className="space-y-2"
+                className="bg-blue-50 border border-blue-200 rounded-xl p-4 space-y-2"
               >
-                <p className="text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                  អ្វីដែលអ្នកអាចធ្វើ៖
+                <p className="text-sm font-semibold text-gray-700">
+                  070 200 002&nbsp;&nbsp;|&nbsp;&nbsp;1800 200 888 <span className="font-normal text-gray-500">(ឥតគិតថ្លៃ)</span>
                 </p>
-                <div className="space-y-2">
-                  <div className="flex items-start gap-3 bg-gray-50 rounded-lg p-3">
-                    <ArrowRight className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
-                    <span className="text-sm text-gray-700">
-                      ដាក់ប្រាក់ទៅក្នុងគណនីលក់របស់អ្នក
-                    </span>
-                  </div>
-                  <div className="flex items-start gap-3 bg-gray-50 rounded-lg p-3">
-                    <ArrowRight className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
-                    <span className="text-sm text-gray-700">
-                      ផ្ទេរប្រាក់ដោយលឿនរវាងគណនី
-                    </span>
-                  </div>
-                  <div className="flex items-start gap-3 bg-gray-50 rounded-lg p-3">
-                    <ArrowRight className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
-                    <span className="text-sm text-gray-700">
-                      ជ្រើសរើស ឬគ្រប់គ្រងលក្ខណៈពិសេសផ្សេងទៀត
-                    </span>
-                  </div>
-                </div>
+                <p className="text-sm text-gray-600">info@cambodiapostbank.com.kh</p>
               </motion.div>
             </div>
 
             {/* Buttons */}
-            <div className="px-5 pb-5 space-y-2.5 flex-shrink-0 bg-white">
-              <Button
-                onClick={handleContinue}
-                className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold py-2.5 rounded-lg shadow-sm transition-all flex items-center justify-center gap-2"
-              >
-                <Wallet className="w-4 h-4" />
-                បន្តប្រើប្រាស់គណនី
-              </Button>
+            <div className="px-5 pb-5 flex-shrink-0 bg-white">
               <Button
                 onClick={onClose}
-                variant="outline"
-                className="w-full font-semibold py-2.5 rounded-lg border-gray-300 text-gray-700 hover:bg-gray-50"
+                className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-2.5 rounded-lg shadow-sm transition-all"
               >
                 បិទ
               </Button>

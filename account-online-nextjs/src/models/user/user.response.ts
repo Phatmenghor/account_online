@@ -14,10 +14,14 @@ export interface UserModel {
   userRole: string;
   userStatus: string;
   fullName: string;
-  userPermission: string;
   position: string;
   profileUrl: string;
+  phoneNumber: string;
+  branch: string;
+  department: string;
   createdAt: string;
   updatedAt: string;
   lastLogin: string;
+  forcePasswordChange: boolean;
+  passwordExpired: boolean;
 }

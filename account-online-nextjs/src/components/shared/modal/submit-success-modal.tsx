@@ -1,27 +1,17 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { CheckCircle2, Sparkles, CreditCard } from "lucide-react";
-import { useTranslations } from "next-intl";
-import { motion, AnimatePresence } from "framer-motion";
+import { CheckCircle } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
+import { OpenAccountResponse } from "@/models/open-account/openAccount.response";
 
 interface SuccessModalProps {
   isOpen: boolean;
   onClose: () => void;
-  title?: string;
-  message?: string;
-  description?: string;
+  data?: OpenAccountResponse | null;
 }
 
-export default function SubmitSuccessModal({
-  isOpen,
-  onClose,
-  title,
-  message,
-  description,
-}: SuccessModalProps) {
-  const translate = useTranslations("NIDPage");
-
+export default function SubmitSuccessModal({ isOpen, onClose }: SuccessModalProps) {
   return (
     <AnimatePresence>
       {isOpen && (
@@ -30,95 +20,76 @@ export default function SubmitSuccessModal({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onClick={onClose}
           />
 
           <motion.div
-            initial={{ opacity: 0, y: 60, scale: 0.97 }}
+            initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 60, scale: 0.97 }}
-            transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className="relative bg-white w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden z-10"
+            exit={{ opacity: 0, y: 20, scale: 0.95 }}
+            transition={{ type: "spring", damping: 20, stiffness: 300 }}
+            className="relative bg-white w-full sm:max-w-[520px] rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden z-10"
           >
-            <div className="h-1.5 w-full bg-gradient-to-r from-emerald-400 via-green-500 to-teal-500" />
+            <div className="h-1.5 bg-primary" />
 
-            <div className="px-6 pt-8 pb-6 flex flex-col items-center text-center">
-              {/* Success icon */}
-              <div className="relative mb-5">
-                <motion.div
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ type: "spring", damping: 12, stiffness: 200, delay: 0.1 }}
-                  className="w-16 h-16 rounded-lg bg-gradient-to-br from-emerald-100 to-green-200 flex items-center justify-center shadow-sm"
-                >
-                  <CheckCircle2 className="text-emerald-600" style={{ width: 34, height: 34 }} />
-                </motion.div>
-                <motion.div
-                  initial={{ opacity: 0, scale: 0 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 0.4 }}
-                  className="absolute -top-1 -right-1"
-                >
-                  <Sparkles className="w-4 h-4 text-amber-400" />
-                </motion.div>
-                <motion.div
-                  initial={{ opacity: 0, scale: 0 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 0.5 }}
-                  className="absolute -bottom-1 -left-1"
-                >
-                  <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
-                </motion.div>
-              </div>
+            <div className="px-6 sm:px-8 py-8 sm:py-10 flex flex-col items-center">
+              <motion.div
+                initial={{ scale: 0, rotate: -180 }}
+                animate={{ scale: 1, rotate: 0 }}
+                transition={{ type: "spring", damping: 12, stiffness: 200, delay: 0.1 }}
+                className="relative mb-5"
+              >
+                <div className="absolute inset-0 bg-primary rounded-full blur-2xl opacity-30 animate-pulse" />
+                <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-primary flex items-center justify-center shadow-xl">
+                  <CheckCircle className="text-white" style={{ width: 32, height: 32 }} />
+                </div>
+              </motion.div>
 
               <motion.h2
-                initial={{ opacity: 0, y: 8 }}
+                initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-                className="text-lg sm:text-xl font-bold text-gray-800 mb-2"
+                transition={{ delay: 0.2, duration: 0.4 }}
+                className="text-xl sm:text-2xl font-bold text-gray-900 text-center"
               >
-                {title}
+                សូមស្វាគមន៍មកកាន់ Cambodia Post Bank!
               </motion.h2>
 
-              <motion.p
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.25 }}
-                className="text-sm sm:text-base text-gray-500 leading-relaxed mb-4"
-              >
-                {message}
-              </motion.p>
-
-              {description && (
-                <motion.div
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.35 }}
-                  className="w-full bg-gradient-to-br from-emerald-50 to-green-50 border border-emerald-200 rounded-2xl p-4 mb-5"
-                >
-                  <div className="flex items-center justify-center gap-2 mb-1">
-                    <CreditCard className="w-4 h-4 text-emerald-600" />
-                    <p className="text-xs font-semibold text-emerald-600 uppercase tracking-wider">
-                      {translate("account_number") || "Account Number"}
-                    </p>
-                  </div>
-                  <p className="text-xl sm:text-2xl font-bold text-gray-800 tracking-widest">
-                    {description}
-                  </p>
-                </motion.div>
-              )}
+              <motion.div
+                initial={{ scaleX: 0 }}
+                animate={{ scaleX: 1 }}
+                transition={{ delay: 0.25, duration: 0.4 }}
+                className="h-1 w-10 bg-primary rounded-full mt-2 mb-5"
+              />
 
               <motion.div
-                initial={{ opacity: 0, y: 8 }}
+                initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4 }}
+                transition={{ delay: 0.3, duration: 0.4 }}
+                className="w-full bg-primary/5 border border-primary/15 rounded-2xl px-5 py-4 mb-8 text-center space-y-2"
+              >
+                <p className="text-sm sm:text-base text-gray-700 leading-relaxed">
+                  គណនីធនាគាររបស់លោក/លោកស្រី
+                  <span className="font-semibold text-primary"> ត្រូវបានបង្កើតដោយជោគជ័យ</span> រួចរាល់ហើយ។
+                </p>
+                <p className="text-sm text-gray-500 leading-relaxed">
+                  ព័ត៌មានលម្អិតគណនីត្រូវបានផ្ញើទៅកាន់
+                  លេខទូរស័ព្ទរបស់លោក/លោកស្រីតាមរយៈ
+                  <span className="font-medium text-gray-600"> សារ SMS </span>រួចរាល់ហើយ។
+                </p>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4, duration: 0.4 }}
                 className="w-full"
               >
                 <Button
                   onClick={onClose}
-                  className="w-full bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white font-semibold py-2.5 rounded-lg shadow-sm transition-all"
+                  className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-3 rounded-xl font-semibold text-base shadow-lg hover:shadow-xl transition-all duration-300 active:scale-95"
                 >
-                  {translate("close") || "Close"}
+                  យល់ព្រម
                 </Button>
               </motion.div>
             </div>

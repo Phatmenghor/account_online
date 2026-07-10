@@ -1,45 +1,34 @@
-// Normalize timestamp: if no timezone, treat as UTC
-function normalizeTimestamp(timestamp: string): string {
-  // If timestamp already has Z or +07:00 or any offset → return as-is
-  if (timestamp.includes("Z") || timestamp.includes("+")) {
-    return timestamp;
-  }
-  // Else: force UTC
-  return timestamp + "Z";
+// Parse a timestamp that is already in Khmer time (ICT, UTC+7) — no conversion needed.
+// Bare strings like "2026-06-01T14:05:21.721387" are treated as local Khmer time.
+function parseAsKhmerTime(timestamp: string): Date {
+  // Strip trailing Z or offset so the browser doesn't shift the time
+  const bare = timestamp.replace(/Z$/, "").replace(/[+-]\d{2}:\d{2}$/, "");
+  return new Date(bare);
 }
 
-// Format date + time (AM/PM) in Cambodia Time
+// Format date + time (AM/PM) — data is already stored in Khmer time, display as-is
 export function DateTimeFormat(timestamp: string | null | undefined): string {
   if (!timestamp) return "";
 
-  const normalized = normalizeTimestamp(timestamp);
-  const date = new Date(normalized);
+  const date = parseAsKhmerTime(timestamp);
 
   return date.toLocaleString("en-US", {
-    timeZone: "Asia/Phnom_Penh",
     month: "numeric",
     day: "numeric",
     year: "numeric",
     hour: "numeric",
     minute: "2-digit",
-    second: "2-digit",
     hour12: true,
   });
 }
 
-// Format only date (DD-MM-YYYY) in Cambodia Time
+// Format only date (DD-MM-YYYY) — data is already stored in Khmer time, display as-is
 export function formatDate(dateStr: string): string {
-  const normalized = normalizeTimestamp(dateStr);
-  const date = new Date(normalized);
+  const date = parseAsKhmerTime(dateStr);
 
-  const options: Intl.DateTimeFormatOptions = {
-    timeZone: "Asia/Phnom_Penh",
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-  };
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const year = date.getFullYear();
 
-  const formatted = date.toLocaleDateString("en-GB", options); // DD/MM/YYYY
-
-  return formatted.replace(/\//g, "-"); // Convert to DD-MM-YYYY
+  return `${day}-${month}-${year}`;
 }

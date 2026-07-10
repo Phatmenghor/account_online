@@ -49,10 +49,10 @@ export const createHistoryTableColumns = ({
       render: (h) => <span>{h.customerInfo?.legalId || "---"}</span>,
     },
 
-    /** Full Name */
+    /** Customer Name */
     {
       key: "fullName",
-      label: "Full Name",
+      label: "Customer Name",
       minWidth: "200px",
       truncate: true,
       render: (h) => (
@@ -67,24 +67,7 @@ export const createHistoryTableColumns = ({
       key: "riskLevel",
       label: "Risk Level",
       minWidth: "150px",
-      render: (h) => <RiskBadge riskLevel={h.riskLevel ||"---"} />,
-    },
-
-    /** Status */
-    {
-      key: "status",
-      label: "Status",
-      minWidth: "150px",
-      render: (h) => <AmlStatusBadge status={h.status || "---"} />,
-    },
-
-    /** Service Name */
-    {
-      key: "serviceName",
-      label: "Service Name",
-      minWidth: "180px",
-      truncate: true,
-      render: (h) => <span>{h.serviceName || "---"}</span>,
+      render: (h) => <RiskBadge riskLevel={h.riskLevel || "---"} />,
     },
 
     /** Total Rules Score */
@@ -105,6 +88,14 @@ export const createHistoryTableColumns = ({
       truncate: true,
       render: (h) =>
         h.createdAt ? <span>{DateTimeFormat(h.createdAt) || "---"}</span> : "-",
+    },
+
+    /** Status */
+    {
+      key: "status",
+      label: "Status",
+      minWidth: "150px",
+      render: (h) => <AmlStatusBadge status={h.status || "---"} />,
     },
 
     /** Actions */

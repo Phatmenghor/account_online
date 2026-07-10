@@ -10,7 +10,8 @@ public enum RoleEnum {
     BUSINESS("Business", "Technical access for all full system"),
     COMPLIANCE("Compliance", "Access to audit, aml, reporting, and regulatory compliance features"),
     DEVELOPER("Developer", "Full system access"),
-    ADMIN("Admin", "Full system access");
+    STAFF("Staff", "Standard staff access for account opening operations"),
+    CALLCENTER("CallCenter", "Full system access for Call Center users");
 
     /**
      * -- GETTER --

@@ -1,15 +1,17 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { useClientLocale } from "@/context/provider/local-provider";
 import { MaritalModel } from "@/models/static/marital/marital.response";
 import { OccupationModel } from "@/models/static/occupation/occupation.response";
 import { ReferenceModel } from "@/models/static/reference/reference.response";
 import { LegalTypeModel } from "@/models/static/legal-type/legal-type.response";
+import { AccOnlineCategoryModel } from "@/models/static/acc-online-category/acc-online-category.response";
 import {
   useLegalTypes,
   useMaritalStatuses,
   useOccupations,
   useReferenceBanks,
+  useAccOnlineCategories,
 } from "@/hooks/fetch-master";
 
 export const useMasterData = () => {
@@ -34,6 +36,17 @@ export const useMasterData = () => {
   const { data: legalTypes, isLoading: isLegalTypeLoading } = useLegalTypes();
   const [selectedLegalType, setSelectedLegalType] =
     useState<LegalTypeModel | null>(null);
+
+  const { data: accOnlineCategories, isLoading: isLoadingCategories } = useAccOnlineCategories();
+  const [selectedCategory, setSelectedCategory] = useState<AccOnlineCategoryModel | null>(null);
+
+  // Default to first item with lookupId === "6011" once list loads
+  useEffect(() => {
+    if (accOnlineCategories.length > 0 && !selectedCategory) {
+      const defaultItem = accOnlineCategories.find((c) => c.lookupId === "6011");
+      if (defaultItem) setSelectedCategory(defaultItem);
+    }
+  }, [accOnlineCategories]);
 
   // Helper function to get marital name based on locale
   const getMaritalName = (marital: MaritalModel) => {
@@ -68,6 +81,7 @@ export const useMasterData = () => {
     setSelectedOccupation(null);
     setSelectedReferenceBank(null);
     setSelectedLegalType(null);
+    setSelectedCategory(null);
   };
 
   return {
@@ -87,6 +101,10 @@ export const useMasterData = () => {
     isLegalTypeLoading,
     selectedLegalType,
     setSelectedLegalType,
+    accOnlineCategories,
+    isLoadingCategories,
+    selectedCategory,
+    setSelectedCategory,
     getMaritalName,
     getOccupationName,
     getReferenceName,

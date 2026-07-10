@@ -51,7 +51,7 @@ const ErrorModal = ({ isOpen, onClose, data }: ErrorModalProps) => {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 60, scale: 0.97 }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className="relative bg-white w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden z-10 max-h-[90vh] flex flex-col"
+            className="relative bg-white w-full sm:max-w-[520px] rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden z-10 max-h-[90vh] flex flex-col"
           >
             <div className="h-1.5 w-full bg-gradient-to-r from-red-400 via-red-500 to-rose-500 flex-shrink-0" />
 

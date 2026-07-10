@@ -4,6 +4,7 @@ import com.internal.config.RequiresRole;
 import com.internal.exceptions.response.ApiResponse;
 import com.internal.feature.auth.dto.request.*;
 import com.internal.feature.auth.dto.response.AllUserResponseDto;
+import com.internal.feature.auth.dto.response.AuthResponseDTO;
 import com.internal.feature.auth.dto.response.UserResponseDto;
 import com.internal.feature.auth.service.AuthService;
 import com.internal.feature.auth.service.UserService;
@@ -43,9 +44,7 @@ public class UserController {
 
     @PostMapping("/token")
     public ResponseEntity<ApiResponse<UserResponseDto>> getUserByToken() {
-        log.debug("Fetching current user from token");
         UserResponseDto user = userService.getUserByToken();
-        log.debug("Successfully retrieved current user: {}", user.getIdCard());
         return ResponseEntity.ok(ApiResponse.success(ResponseMessage.CURRENT_USER_RETRIEVED, user));
     }
 
@@ -88,5 +87,13 @@ public class UserController {
         UserResponseDto userDto = userService.changePasswordByAdmin(changePasswordDto);
         log.info("Admin successfully changed password for user ID: {}, username: {}", changePasswordDto.getId(), userDto.getIdCard());
         return ResponseEntity.ok(ApiResponse.success(ResponseMessage.PASSWORD_CHANGED_BY_ADMIN, userDto));
+    }
+
+    @PostMapping("/force-change-password")
+    public ResponseEntity<ApiResponse<AuthResponseDTO>> forceChangePassword(@Valid @RequestBody ForceChangePasswordRequestDto dto) {
+        log.info("Force password change request");
+        AuthResponseDTO authResponse = userService.forceChangePassword(dto.getNewPassword(), dto.getConfirmNewPassword());
+        log.info("Force password change completed successfully");
+        return ResponseEntity.ok(ApiResponse.success("Password updated successfully.", authResponse));
     }
 }

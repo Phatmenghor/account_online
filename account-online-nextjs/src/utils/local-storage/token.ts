@@ -1,7 +1,7 @@
 import { deleteCookie, getCookie, setCookie } from "cookies-next";
 
-// Token expiration time in seconds (1 hour = 3600 seconds)
-const DEFAULT_TOKEN_EXPIRY = 3600;
+// Token expiration time in seconds (30 days = 30 * 24 * 60 * 60 seconds)
+const DEFAULT_TOKEN_EXPIRY = 30 * 24 * 60 * 60;
 
 interface TokenData {
   token: string;
@@ -13,8 +13,8 @@ export function storeTokenRemember(token: string | undefined): void {
     return;
   }
 
-  // Remember token for 365 days
-  const rememberMaxAge = 365 * 24 * 60 * 60;
+  // Remember token for 30 days
+  const rememberMaxAge = 30 * 24 * 60 * 60;
   setCookie("auth-token", token, { maxAge: rememberMaxAge });
   setCookie("auth-token-expires", String(Date.now() + rememberMaxAge * 1000));
 }
@@ -42,30 +42,6 @@ export function storeToken(token: string | undefined, expiresIn?: number): void 
   setCookie("auth-token-expires", String(Date.now() + maxAge * 1000));
 }
 
-export function storeRefreshToken(token: string | undefined, expiresIn?: number): void {
-  if (typeof window === "undefined") {
-    return;
-  }
-
-  // Refresh token typically lasts longer (7 days)
-  const maxAge = expiresIn || 7 * 24 * 60 * 60;
-  setCookie("refresh-token", token, { maxAge });
-  setCookie("refresh-token-expires", String(Date.now() + maxAge * 1000));
-}
-
-export function getRefreshToken() {
-  const token = getCookie("refresh-token");
-  if (!token) return null;
-
-  // Check if refresh token has expired
-  if (isRefreshTokenExpired()) {
-    logoutToken();
-    return null;
-  }
-
-  return token;
-}
-
 /**
  * Check if access token is expired
  */
@@ -75,20 +51,6 @@ export function isTokenExpired(): boolean {
   }
 
   const expiresAt = getCookie("auth-token-expires");
-  if (!expiresAt) return true;
-
-  return Date.now() > parseInt(expiresAt as string);
-}
-
-/**
- * Check if refresh token is expired
- */
-export function isRefreshTokenExpired(): boolean {
-  if (typeof window === "undefined") {
-    return true;
-  }
-
-  const expiresAt = getCookie("refresh-token-expires");
   if (!expiresAt) return true;
 
   return Date.now() > parseInt(expiresAt as string);
@@ -109,8 +71,6 @@ export function logoutToken(): void {
   // Delete auth cookies
   deleteCookie("auth-token");
   deleteCookie("auth-token-expires");
-  deleteCookie("refresh-token");
-  deleteCookie("refresh-token-expires");
 }
 
 /**

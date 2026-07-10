@@ -1,99 +1,75 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import AmlStatisticsChart from "@/components/app/aml/aml-chart";
-import { AllAmlStatisticsModel } from "@/models/aml/chart/aml-chart.response";
-import { getAccountOnlineReportService } from "@/services/dashboard/aml/aml.service";
-import { Button } from "@/components/ui/button";
-import { Search, XCircle } from "lucide-react";
-import { CustomDatePicker } from "@/components/shared/common/custom-date-picker";
-import Loading from "@/components/shared/common/loading";
+import { useCallback, useEffect, useState } from "react";
+import { DailyCountItem, TopUserOpenAccount, TopAmlActionUser } from "@/models/dashboard/dashboard.model";
+import {
+  getAccountOpeningChartService,
+  getAmlHitsChartService,
+  getTopUsersOpenAccountService,
+  getTopAmlActionUsersService,
+} from "@/services/dashboard/report/report.service";
+import { AccountOpeningChartCard } from "./_components/account-opening-chart-card";
+import { AmlHitsChartCard } from "./_components/aml-hits-chart-card";
+import { TopUsersOpenAccountCard } from "./_components/top-users-open-account-card";
+import { TopAmlActionsCard } from "./_components/top-aml-actions-card";
 
-// Helper to format date as YYYY-MM-DD
-const formatDate = (date: Date) => {
-  const yyyy = date.getFullYear();
-  const mm = String(date.getMonth() + 1).padStart(2, "0");
-  const dd = String(date.getDate()).padStart(2, "0");
-  return `${yyyy}-${mm}-${dd}`;
-};
+function dateStr(d: Date) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
 
-const Dashboard = () => {
-  const [data, setData] = useState<AllAmlStatisticsModel>([]);
-  const [loading, setLoading] = useState(false);
+export default function Dashboard() {
+  const toDate = dateStr(new Date());
+  const fromDateObj = new Date();
+  fromDateObj.setMonth(fromDateObj.getMonth() - 1);
+  const fromDate = dateStr(fromDateObj);
 
-  // Previous month → Same day last month until today
-  const today = new Date();
+  const [accountChart, setAccountChart] = useState<DailyCountItem[]>([]);
+  const [amlChart, setAmlChart] = useState<DailyCountItem[]>([]);
+  const [topUsers, setTopUsers] = useState<TopUserOpenAccount[]>([]);
+  const [topAmlUsers, setTopAmlUsers] = useState<TopAmlActionUser[]>([]);
 
-  // Get same day last month
-  const lastMonth = new Date(today);
-  lastMonth.setMonth(today.getMonth() - 1);
+  const [loadingAccountChart, setLoadingAccountChart] = useState(false);
+  const [loadingAmlChart, setLoadingAmlChart] = useState(false);
+  const [loadingTopUsers, setLoadingTopUsers] = useState(false);
+  const [loadingAmlUsers, setLoadingAmlUsers] = useState(false);
 
-  const defaultFromDate = formatDate(lastMonth);
-  const defaultToDate = formatDate(today);
+  const fetchAll = useCallback(async () => {
+    setLoadingAccountChart(true);
+    setLoadingAmlChart(true);
+    setLoadingTopUsers(true);
+    setLoadingAmlUsers(true);
 
-  const [fromDate, setFromDate] = useState<string>(defaultFromDate);
-  const [toDate, setToDate] = useState<string>(defaultToDate);
+    const [accChart, amlHits, users, amlUsers] = await Promise.allSettled([
+      getAccountOpeningChartService(fromDate, toDate),
+      getAmlHitsChartService(fromDate, toDate),
+      getTopUsersOpenAccountService(),
+      getTopAmlActionUsersService(),
+    ]);
 
-  const fetchData = async (from?: string, to?: string) => {
-    setLoading(true);
-    try {
-      const response = await getAccountOnlineReportService({
-        fromDate: from || defaultFromDate,
-        toDate: to || defaultToDate,
-      });
-      setData(response);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
+    setAccountChart(accChart.status === "fulfilled" ? accChart.value : []);
+    setAmlChart(amlHits.status === "fulfilled" ? amlHits.value : []);
+    setTopUsers(users.status === "fulfilled" ? users.value : []);
+    setTopAmlUsers(amlUsers.status === "fulfilled" ? amlUsers.value : []);
 
-  useEffect(() => {
-    fetchData(fromDate, toDate);
-  }, []);
+    setLoadingAccountChart(false);
+    setLoadingAmlChart(false);
+    setLoadingTopUsers(false);
+    setLoadingAmlUsers(false);
+  }, [fromDate, toDate]);
 
-  const handleSearch = () => {
-    if (!fromDate || !toDate) return;
-    fetchData(fromDate, toDate);
-  };
-
-  const handleClear = () => {
-    setFromDate(defaultFromDate);
-    setToDate(defaultToDate);
-    fetchData(defaultFromDate, defaultToDate);
-  };
-
-  const totalAml = data.reduce((acc, curr) => acc + curr.amlCount, 0);
-  const totalSuccess = data.reduce((acc, curr) => acc + curr.successCount, 0);
-  const totalFailure = data.reduce((acc, curr) => acc + curr.failureCount, 0);
+  useEffect(() => { fetchAll(); }, [fetchAll]);
 
   return (
-    <div className="flex flex-col h-[calc(100vh-5rem)]">
-      {/* Chart Container */}
-      <div className="flex-1 min-h-0 border rounded-lg p-4">
-        <div className="w-full h-full">
-          {loading && data.length === 0 ? (
-            <div className="flex items-center justify-center h-full">
-              <Loading />
-            </div>
-          ) : (
-            <AmlStatisticsChart
-              data={data}
-              fromDate={fromDate}
-              toDate={toDate}
-              onFromDateChange={setFromDate}
-              onToDateChange={setToDate}
-              onSearch={handleSearch}
-              onClear={handleClear}
-              defaultFromDate={defaultFromDate}
-              defaultToDate={defaultToDate}
-            />
-          )}
-        </div>
+    <div className="flex flex-col gap-6 p-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <AccountOpeningChartCard data={accountChart} loading={loadingAccountChart} />
+        <AmlHitsChartCard data={amlChart} loading={loadingAmlChart} />
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <TopUsersOpenAccountCard users={topUsers} loading={loadingTopUsers} />
+        <TopAmlActionsCard users={topAmlUsers} loading={loadingAmlUsers} />
       </div>
     </div>
   );
-};
-
-export default Dashboard;
+}

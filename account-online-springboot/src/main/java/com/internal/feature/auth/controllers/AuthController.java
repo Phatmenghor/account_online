@@ -1,8 +1,7 @@
 package com.internal.feature.auth.controllers;
 
 import com.internal.exceptions.response.ApiResponse;
-import com.internal.feature.auth.dto.request.LoginRequestDto;
-import com.internal.feature.auth.dto.request.UpdateUserRequestDto;
+import com.internal.feature.auth.dto.request.*;
 import com.internal.feature.auth.dto.response.AuthResponseDTO;
 import com.internal.feature.auth.dto.response.UserResponseDto;
 import com.internal.feature.auth.service.AuthService;
@@ -30,34 +29,40 @@ public class AuthController {
     public ResponseEntity<ApiResponse<AuthResponseDTO>> login(@Valid @RequestBody LoginRequestDto loginDto) {
         log.info("Authentication attempt for user: {}", loginDto.getUsername());
         AuthResponseDTO authResponse = authService.login(loginDto);
-        log.info("Authentication successful for user: {}", loginDto.getUsername());
         return ResponseEntity.ok(ApiResponse.success(ResponseMessage.LOGIN_SUCCESS, authResponse));
     }
 
-    @PostMapping("/refresh-token")
-    public ResponseEntity<ApiResponse<com.internal.feature.auth.dto.response.TokenRefreshResponseDto>> refreshToken(@Valid @RequestBody com.internal.feature.auth.dto.request.TokenRefreshRequestDto requestDto) {
-        return ResponseEntity.ok(ApiResponse.success(ResponseMessage.TOKEN_REFRESHED, authService.refreshToken(requestDto)));
+    @PostMapping("/register/public")
+    public ResponseEntity<ApiResponse<AuthResponseDTO>> register(
+            @Valid @RequestBody RegisterInitiateDto dto) {
+        log.info("Registration request for ID Card: {}", dto.getIdCard());
+        AuthResponseDTO authResponse = authService.register(dto);
+        return ResponseEntity.ok(ApiResponse.success("Registration completed successfully.", authResponse));
+    }
+
+    /** Admin-only: create user with any role */
+    @PostMapping("/register")
+    public ResponseEntity<ApiResponse<UserResponseDto>> createUserByAdmin(
+            @Valid @RequestBody RegisterRequestDto registerDto) {
+        log.info("Admin user creation for: {}", registerDto.getUsername());
+        UserResponseDto userResponse = authService.createUserByAdmin(registerDto);
+        return ResponseEntity.ok(ApiResponse.success("User created successfully.", userResponse));
     }
 
     @PostMapping("/logout")
     public ResponseEntity<ApiResponse<String>> logout() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String username = auth.getName();
-        authService.logout(username); 
+        authService.logout(auth.getName());
         return ResponseEntity.ok(ApiResponse.success(ResponseMessage.LOGOUT_SUCCESS, null));
     }
 
     @PostMapping("/roles")
     public ResponseEntity<ApiResponse<List<Map<String, Object>>>> getAvailableRoles() {
-        log.debug("Fetching available roles");
-        List<Map<String, Object>> roles = authService.getAvailableRoles();
-        log.debug("Retrieved {} available roles", roles.size());
-        return ResponseEntity.ok(ApiResponse.success(ResponseMessage.ROLES_RETRIEVED, roles));
+        return ResponseEntity.ok(ApiResponse.success(ResponseMessage.ROLES_RETRIEVED, authService.getAvailableRoles()));
     }
 
     @PostMapping("/validate-token")
     public ResponseEntity<ApiResponse<Boolean>> validateToken() {
-        log.debug("Token validation request");
         boolean isValid = authService.validateToken();
         return ResponseEntity.ok(isValid
                 ? ApiResponse.success(ResponseMessage.TOKEN_VALID, true)
@@ -65,11 +70,10 @@ public class AuthController {
     }
 
     @PostMapping("/token/update-profile")
-    public ResponseEntity<ApiResponse<UserResponseDto>> updateUserProfile(@Valid @RequestBody UpdateUserRequestDto registerDto) {
-        log.info("Admin update profile request for ID card: {}", registerDto.getUsername());
+    public ResponseEntity<ApiResponse<UserResponseDto>> updateUserProfile(
+            @Valid @RequestBody UpdateUserRequestDto requestDto) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        UserResponseDto userResponse = authService.updateUserProfile(registerDto, authentication.getName());
-        log.info("Admin update profile successful for: {}", registerDto.getUsername());
+        UserResponseDto userResponse = authService.updateUserProfile(requestDto, authentication.getName());
         return ResponseEntity.ok(ApiResponse.success(ResponseMessage.PROFILE_UPDATED, userResponse));
     }
 }

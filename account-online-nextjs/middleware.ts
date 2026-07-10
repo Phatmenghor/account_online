@@ -4,21 +4,36 @@ import { ROUTES } from "./src/constants/AppRoutes/routes";
 
 export default function middleware(req: NextRequest) {
   const token = req.cookies.get("auth-token")?.value;
+  const role = req.cookies.get("auth-roles")?.value;
   const pathname = req.nextUrl.pathname;
 
+  // Always allow login page
   if (pathname === "/login") {
     return NextResponse.next();
   }
 
-  // Redirect root to dashboard or login
+  // Public customer self-service account opening — no auth required
   if (pathname === "/") {
+    return NextResponse.next();
+  }
+
+  // STAFF role: only allowed on staff opening route, redirect everything else to login
+  if (token && role === "STAFF") {
+    if (pathname === ROUTES.STAFF.OPENING) {
+      return NextResponse.next();
+    }
+    return NextResponse.redirect(new URL(ROUTES.AUTH.LOGIN, req.url));
+  }
+
+  // Staff opening route for non-STAFF authenticated users: redirect to dashboard
+  if (pathname === ROUTES.STAFF.OPENING) {
     if (token) {
       return NextResponse.redirect(new URL(ROUTES.DASHBOARD.INDEX, req.url));
     }
     return NextResponse.redirect(new URL(ROUTES.AUTH.LOGIN, req.url));
   }
 
-  // Protect all other routes
+  // Protect all other routes: require token
   if (!token) {
     const loginUrl = new URL(ROUTES.AUTH.LOGIN, req.url);
     loginUrl.searchParams.set("callbackUrl", pathname + req.nextUrl.search);

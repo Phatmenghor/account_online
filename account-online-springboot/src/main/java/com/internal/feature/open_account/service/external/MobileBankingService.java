@@ -97,8 +97,8 @@ public class MobileBankingService {
     private MobileBankingRequest buildRequest(CustomerRequest request, String cif,
                                               String khrAccount, String usdAccount) {
         String formattedDob = formatDateOfBirth(request.getDateOfBirth());
-        String signData = generateSignature(cif, request.getPhoneNumber());
-//        String branchCode = "KH0011090"; // Hardcoded for testing as requested
+        String formattedPhone = formatPhoneNumber(request.getPhoneNumber());
+        String signData = generateSignature(cif, formattedPhone);
         String branchCode = request.getBranchCode() != null ? request.getBranchCode()
                 : defaultProperties.getBranchCode();
         String accountNumber = usdAccount != null ? usdAccount : khrAccount;
@@ -115,16 +115,17 @@ public class MobileBankingService {
                 .posCodeCreatedUser("POS01")
                 .createdUser(request.getGivenName())
                 .dateOfBirth(formattedDob)
-                .telephone(request.getPhoneNumber())
+                .telephone(formattedPhone)
                 .cifBranchCode(branchCode)
                 .gender(request.getGender())
                 .residence(request.getResidence() != null ? request.getResidence() : "1")
                 .accountNumber(accountNumber)
-                .accountType("6011")
+                .accountType(request.getAccountType() != null && !request.getAccountType().isBlank()
+                        ? request.getAccountType() : "6011")
                 .currency(currency)
                 .branchCode(branchCode)
                 .packageCode("BASIC")
-                .telephoneOtp(request.getPhoneNumber())
+                .telephoneOtp(formattedPhone)
                 .staffCode(request.getReferralId() != null ? request.getReferralId() : "")
                 .signData(signData)
                 .channel("INTERNET BANKING")
@@ -243,6 +244,13 @@ public class MobileBankingService {
 
             cifActivationLogService.saveLog(activationLog);
         }
+    }
+
+    private String formatPhoneNumber(String phone) {
+        if (phone == null || phone.isEmpty())
+            return phone;
+
+        return phone.replaceAll("[^0-9]", "").trim();
     }
 
     private String formatDateOfBirth(String dob) {

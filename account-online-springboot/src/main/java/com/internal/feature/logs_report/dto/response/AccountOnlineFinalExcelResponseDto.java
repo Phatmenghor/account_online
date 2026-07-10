@@ -33,6 +33,8 @@ public class AccountOnlineFinalExcelResponseDto {
     private String nidImageName;
     private String selfieImageName;
 
+    private String categoryAccount;
+
     // === TRACE FIELDS FROM BaseNoIdEntity ===
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

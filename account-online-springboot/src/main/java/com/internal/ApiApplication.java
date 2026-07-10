@@ -7,6 +7,8 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
+import java.util.TimeZone;
+
 @SpringBootApplication
 @ComponentScan(basePackages = "com.internal")
 @EnableScheduling
@@ -15,6 +17,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 public class ApiApplication {
 
     public static void main(String[] args) {
+        TimeZone.setDefault(TimeZone.getTimeZone("Asia/Phnom_Penh"));
         SpringApplication.run(ApiApplication.class, args);
     }
 }

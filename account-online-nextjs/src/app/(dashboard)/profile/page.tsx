@@ -18,14 +18,24 @@ import {
   UpdateUserProfileSchema,
 } from "@/models/auth/profile.schema";
 import { Status } from "@/constants/AppResource/display-list/enum/status";
+import { useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 
 export interface Image {
   type: string;
   base64: string;
 }
 
-export default function ProfilePage() {
+function ProfilePageContent() {
+  const searchParams = useSearchParams();
+  const [activeTab, setActiveTab] = useState(
+    searchParams.get("tab") === "password" ? "password" : "account"
+  );
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    setActiveTab(searchParams.get("tab") === "password" ? "password" : "account");
+  }, [searchParams]);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [imageData, setImageData] = useState<Image | null>(null);
   const [user, setUser] = useState<UserModel | null>(null);
@@ -40,6 +50,9 @@ export default function ProfilePage() {
       status: Status.ACTIVE,
       position: "",
       profileUrl: "",
+      phoneNumber: "",
+      branch: "",
+      department: "",
       id: 0,
     },
   });
@@ -63,6 +76,9 @@ export default function ProfilePage() {
             status: response.userStatus || Status.ACTIVE,
             position: response.position || "",
             profileUrl: response.profileUrl || "",
+            phoneNumber: response.phoneNumber || "",
+            branch: response.branch || "",
+            department: response.department || "",
             id: response.id,
           },
           { keepDefaultValues: true }
@@ -122,12 +138,14 @@ export default function ProfilePage() {
       }
 
       const payload = {
-        username: values.username,
         email: values.email,
         fullName: values.fullName,
         position: values.position,
         status: values.status,
         profileUrl: uploadedProfileUrl,
+        phoneNumber: values.phoneNumber,
+        branch: values.branch,
+        department: values.department,
       };
 
       const response = await updateUserProfileService(payload);
@@ -135,7 +153,7 @@ export default function ProfilePage() {
       if (response) {
         AppToast({ type: "success", message: "Profile updated successfully!" });
         setUser({ ...user!, ...response, profileUrl: uploadedProfileUrl });
-        reset({ ...payload, id: user?.id }, { keepDefaultValues: true });
+        reset({ ...payload, username: values.username, id: user?.id }, { keepDefaultValues: true });
         setImageData(null);
         setImagePreview(null);
       }
@@ -159,7 +177,7 @@ export default function ProfilePage() {
       <div className="flex flex-col gap-4">
         <h1 className="text-2xl font-bold tracking-tight">My Profile</h1>
 
-        <Tabs defaultValue="account" className="space-y-4">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
           <TabsList>
             <TabsTrigger value="account" className="flex items-center gap-2">
               <User className="h-4 w-4" /> Account
@@ -185,5 +203,13 @@ export default function ProfilePage() {
         </Tabs>
       </div>
     </div>
+  );
+}
+
+export default function ProfilePage() {
+  return (
+    <Suspense fallback={<Loading />}>
+      <ProfilePageContent />
+    </Suspense>
   );
 }

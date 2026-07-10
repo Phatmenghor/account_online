@@ -8,7 +8,6 @@ import com.internal.feature.logs_report.service.AccountOnlineOpenFinalService;
 import com.internal.feature.logs_report.service.AccountOnlineReportLogService;
 import com.internal.feature.open_account.dto.request.CustomerRequest;
 import com.internal.feature.open_account.dto.response.CustomerResponse;
-import com.internal.feature.telegram_alerts.service.serviceImpl.OpenAccountTelegramAlertServiceImpl;
 import com.internal.utils.constants.AppConstants;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,7 +22,6 @@ public class ReportingService {
 
     private final AccountOnlineReportLogService reportLogService;
     private final AccountOnlineOpenFinalService accountOnlineOpenSuccessService;
-    private final OpenAccountTelegramAlertServiceImpl alertTelegramService;
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void saveFailureLogs(CustomerRequest request, Exception e, String currentStep, String failureRemark,
@@ -35,27 +33,6 @@ public class ReportingService {
 
         reportLogService.createAccountOpeningLog(request.getLegalId(), status, failureRemark, e);
 
-        if (skipTelegramAlert) {
-            log.info("Skipping generic Telegram alert for step {} as strictly handled by specific logic.", currentStep);
-            return;
-        }
-
-        StringBuilder remarkBuilder = new StringBuilder(failureRemark);
-        remarkBuilder.append(" | Error: ").append(e.getMessage());
-
-        boolean isAccountExistsError = e.getMessage() != null && e.getMessage().contains("Account already exists");
-
-        if (isMonitorAlertStep(currentStep) && !isAccountExistsError) {
-            if (!AppConstants.PROCESS_AML.equals(currentStep)) {
-                alertTelegramService.sendTelegramAccountOnlineError(request.getLegalId(), status, remarkBuilder);
-            }
-        } else {
-            alertTelegramService.sendTelegramInternalError(request.getLegalId(), status, remarkBuilder);
-        }
-    }
-
-    private boolean isMonitorAlertStep(String step) {
-        return AppConstants.PROCESS_AML.equals(step) || AppConstants.GET_CUSTOMER_INFO.equals(step);
     }
 
     public String buildFailureRemark(String failedStep, String cif, String khrAccount, String usdAccount,
@@ -81,7 +58,7 @@ public class ReportingService {
     }
 
     public CustomerImageUploadResponseDto safeSaveCustomerImages(CustomerRequest request) {
-        log.info(">>> Step 10: SAVE_CUSTOMER_IMAGES (using pre-uploaded filenames)");
+        log.info("Step 10: SAVE_CUSTOMER_IMAGES");
         try {
             CustomerImageUploadResponseDto imagePaths = CustomerImageUploadResponseDto.builder()
                     .nidImagePath(request.getNidImageName())
@@ -99,7 +76,7 @@ public class ReportingService {
     public void safeSaveSuccessLog(CustomerRequest request, CustomerResponse accountInfo,
                                    AmlStatusDto amlStatusResponseDto, CustomerImageUploadResponseDto imagePaths,
                                    String mbActivationCode) {
-        log.info(">>> Step 11: SAVE_SUCCESS_LOG");
+        log.info("Step 11: SAVE_SUCCESS_LOG");
         try {
             accountOnlineOpenSuccessService.saveFinalLog(
                     request,
@@ -114,7 +91,7 @@ public class ReportingService {
     }
 
     public void safeReportLog(String legalId) {
-        log.info(">>> Step 12: SAVE_REPORT_LOG");
+        log.info("Step 12: SAVE_REPORT_LOG");
         try {
             reportLogService.saveLogReport(legalId, OpenAccStatusEnum.SUCCESS, "Open account online Successfully");
             log.info("Step 12 SUCCESS: Report log saved");

@@ -6,6 +6,10 @@ import {
   UpdateUserReq,
 } from "@/models/user/user.request";
 import { axiosClientWithAuth } from "@/utils/axios";
+import { storePermission } from "@/utils/local-storage/permission";
+import { storeRole } from "@/utils/local-storage/roles";
+import { storeToken } from "@/utils/local-storage/token";
+import { storeUserInfo } from "@/utils/local-storage/userInfo";
 import axios from "axios";
 
 export async function getUsersService(request: AllUserReq) {
@@ -180,6 +184,29 @@ export async function ChangeUserPasswordByAdminService(
         rawError: error,
       };
     }
+  }
+}
+
+export async function forceChangePasswordService(newPassword: string, confirmNewPassword: string) {
+  try {
+    const response = await axiosClientWithAuth.post(`/api/v1/user/force-change-password`, {
+      newPassword,
+      confirmNewPassword,
+    });
+    const data = response.data.data;
+    // Store fresh token and updated user info (response mirrors login structure)
+    const expiresIn = data.expiresIn || 365 * 24 * 60 * 60;
+    storeToken(data.accessToken, expiresIn);
+    storeRole(data.userRole?.userRole);
+    storeUserInfo(data.userRole);
+    storePermission(data.userRole?.userPermission);
+    return data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      const raw = error.response?.data;
+      throw new Error(raw?.message || "Failed to update password.");
+    }
+    throw new Error("An unexpected error occurred.");
   }
 }
 

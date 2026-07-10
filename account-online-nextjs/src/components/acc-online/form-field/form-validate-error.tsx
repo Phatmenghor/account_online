@@ -29,8 +29,9 @@ export const NIDFormSchema = z.object({
   occupation: z.string().min(1, "Occupation is required"),
   branch: z.string().min(1, "Branch is required"),
   legalType: z.string().min(1, "Legal type is required"),
+  accountProduct: z.string().min(1, "Account product is required"),
   referenceBank: z.string().optional(),
-  staffCode: z.string().optional(),
+  staffCode: z.string().min(1, "Staff ID is required"),
   
   // Phone and OTP
   phoneNumber: z.string()
@@ -43,6 +44,14 @@ export const NIDFormSchema = z.object({
 });
 
 export type NIDFormData = z.infer<typeof NIDFormSchema>;
+
+// Public self-service opening: no relation manager (staff ID) required, and
+// account product/category is hidden from the UI (auto-set to 6011 server
+// side), so it must never be user-facing-validated as required either.
+export const PublicNIDFormSchema = NIDFormSchema.extend({
+  staffCode: z.string().optional(),
+  accountProduct: z.string().optional(),
+});
 
 // Partial schema for verification step (before full submission)
 export const NIDVerificationSchema = NIDFormSchema.pick({

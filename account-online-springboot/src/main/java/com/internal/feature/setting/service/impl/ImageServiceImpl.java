@@ -26,8 +26,6 @@ public class ImageServiceImpl implements ImageService {
     @Override
     @Transactional
     public ImageDto uploadImage(ImageUploadRequest request) {
-        log.debug("Processing image upload");
-        
         normalizeImageType(request);
         
         ImageEntity image = imageMapper.toEntity(request);
@@ -39,8 +37,6 @@ public class ImageServiceImpl implements ImageService {
     
     @Override
     public ImageResponse getImageById(UUID id) {
-        log.debug("Retrieving image with ID: {}", id);
-        
         ImageEntity image = imageRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Image not found with id: " + id));
                 
@@ -50,8 +46,6 @@ public class ImageServiceImpl implements ImageService {
     @Override
     @Transactional
     public void deleteImage(UUID id) {
-        log.debug("Deleting image with ID: {}", id);
-        
         if (!imageRepository.existsById(id)) {
             throw new NotFoundException("Image not found with id: " + id);
         }

@@ -16,15 +16,16 @@ public class ReportSimulator {
 
     private final RequestLogCleanupScheduler parent;
 
-    @Scheduled(cron = "0 * * * * ?", zone = "Asia/Phnom_Penh")
+    // @Scheduled(cron = "0 * * * * ?", zone = "Asia/Phnom_Penh")
     public void triggerDailyReport() {
         log.info("SIMULATION: Triggering Daily Account Report for TODAY");
         parent.sendDailyAccountReport(LocalDate.now(ZoneId.of("Asia/Phnom_Penh")));
     }
 
-    @Scheduled(cron = "0 * * * * ?", zone = "Asia/Phnom_Penh")
+    // @Scheduled(cron = "0 * * * * ?", zone = "Asia/Phnom_Penh")
     public void triggerAmlReport() {
         log.info("SIMULATION: Triggering AML Pending Report");
         parent.sendAmlPendingReport();
     }
+
 }

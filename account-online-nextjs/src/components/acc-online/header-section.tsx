@@ -15,7 +15,7 @@ export const HeaderSection = ({
   translate,
 }: HeaderSectionProps) => {
   return (
-    <div className="mb-6 sm:mb-8">
+    <div className="mb-4 sm:mb-6">
       <motion.div
         initial={{ opacity: 0, x: -12 }}
         animate={{ opacity: 1, x: 0 }}
@@ -42,7 +42,7 @@ export const HeaderSection = ({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.22, duration: 0.35 }}
-            className="text-xs sm:text-sm text-gray-400"
+            className="text-sm sm:text-base text-gray-400"
           >
             {translate("sub_header_acc")}
           </motion.p>
@@ -65,7 +65,7 @@ export const HeaderSection = ({
         initial={{ scaleX: 0, opacity: 0 }}
         animate={{ scaleX: 1, opacity: 1 }}
         transition={{ delay: 0.28, duration: 0.45, ease: "easeOut" }}
-        className="origin-left h-px bg-gradient-to-r from-orange-400 via-orange-200 to-transparent mt-4 mb-6 sm:mb-8"
+        className="origin-left h-px bg-gradient-to-r from-orange-400 via-orange-200 to-transparent mt-3 mb-0"
       />
     </div>
   );

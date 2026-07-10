@@ -2,6 +2,7 @@ package com.internal.exceptions.error;
 
 import com.internal.exceptions.error.custom.*;
 import com.internal.exceptions.error.openaccount.AccountCreationException;
+import com.internal.exceptions.error.openaccount.OpenAccountException;
 import com.internal.exceptions.response.ErrorResponse;
 import com.internal.utils.constants.AppConstants;
 import lombok.extern.slf4j.Slf4j;
@@ -148,6 +149,12 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleTimeoutException(Exception ex) {
         log.warn("Timeout/Connection error: {}", ex.getMessage());
         return buildErrorResponse(HttpStatus.REQUEST_TIMEOUT, AppConstants.MSG_CONNECTION_TIMEOUT);
+    }
+
+    @ExceptionHandler(OpenAccountException.class)
+    public ResponseEntity<ErrorResponse> handleOpenAccountException(OpenAccountException ex) {
+        log.warn("Open account exception - Code: {}, Message: {}", ex.getErrorCode(), ex.getMessage());
+        return buildErrorResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
 
     // FIXED: Single Exception handler that excludes OTP exceptions

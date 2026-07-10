@@ -1,7 +1,7 @@
 import { CommuneModel, DistrictModel, ProvinceModel, VillageModel } from "@/models/address/address.response";
 import { getAllCommuneService, getAllDistrictService, getAllProvinceService, getAllVillageService } from "@/services/address/address.service";
 import { useEffect, useState } from "react";
-import { toast } from "sonner";
+import { AppToast } from "@/components/shared/toast/app-toast";
 
 // Add these interfaces at the top if not already present
 interface UseFetchDataResult<T> {
@@ -30,7 +30,7 @@ export const useProvinces = (): UseFetchDataResult<ProvinceModel> => {
     } catch (err: any) {
       console.error("Failed to fetch provinces:", err);
       setError(err);
-      toast.error("Failed to load provinces");
+      AppToast({ type: "error", message: "Failed to load provinces" });
     } finally {
       setIsLoading(false);
     }
@@ -67,7 +67,7 @@ export const useDistricts = (provinceCode: string): UseFetchDataResult<DistrictM
     } catch (err: any) {
       console.error("Failed to fetch districts:", err);
       setError(err);
-      toast.error("Failed to load districts");
+      AppToast({ type: "error", message: "Failed to load districts" });
     } finally {
       setIsLoading(false);
     }
@@ -104,7 +104,7 @@ export const useCommunes = (districtCode: string): UseFetchDataResult<CommuneMod
     } catch (err: any) {
       console.error("Failed to fetch communes:", err);
       setError(err);
-      toast.error("Failed to load communes");
+      AppToast({ type: "error", message: "Failed to load communes" });
     } finally {
       setIsLoading(false);
     }
@@ -141,7 +141,7 @@ export const useVillages = (communeCode: string): UseFetchDataResult<VillageMode
     } catch (err: any) {
       console.error("Failed to fetch villages:", err);
       setError(err);
-      toast.error("Failed to load villages");
+      AppToast({ type: "error", message: "Failed to load villages" });
     } finally {
       setIsLoading(false);
     }

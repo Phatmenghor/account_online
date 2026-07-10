@@ -28,6 +28,7 @@ spring:
       hibernate:
         format_sql: false
         jdbc:
+          time_zone: Asia/Phnom_Penh
           lob:
             non_contextual_creation: true
           batch_size: 50
@@ -88,6 +89,7 @@ spring:
 email:
   sender:
     address: ithelpdesk@cambodiapostbank.com.kh
+    enabled: true
 
 file:
   upload:
@@ -241,3 +243,7 @@ management:
     export:
       simple:
         enabled: true
+
+telegram:
+  bot:
+    message-retention-days: 30

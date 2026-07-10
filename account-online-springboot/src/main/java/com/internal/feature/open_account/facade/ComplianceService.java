@@ -16,7 +16,8 @@ import com.internal.feature.open_account.dto.response.AmlExternalResponseDto;
 import com.internal.feature.open_account.dto.response.CustomerResponse;
 import com.internal.feature.open_account.mapper.OpenAccountAmlStatusMapper;
 import com.internal.feature.open_account.service.external.AmlMiddlewareService;
-import com.internal.feature.telegram_alerts.service.serviceImpl.OpenAccountTelegramAlertServiceImpl;
+import com.internal.feature.telegram_alerts.service.MonitoringService;
+import com.internal.utils.SecurityUtils;
 import com.internal.utils.constants.AppConstants;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,7 +28,6 @@ import java.util.Optional;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-// Service to handle compliance checks
 public class ComplianceService {
 
     private final AmlService amlService;
@@ -35,10 +35,11 @@ public class ComplianceService {
     private final OccupationService occupationService;
     private final OpenAccountAmlStatusMapper openAccountAmlStatusMapper;
     private final ObjectMapper objectMapper;
-    private final OpenAccountTelegramAlertServiceImpl alertTelegramService;
+    private final MonitoringService monitoringService;
+    private final SecurityUtils securityUtils;
 
     public AmlStatusDto processAml(CustomerRequest request) throws Exception {
-        log.info("========== START AML Processing for Legal ID: {} ==========", request.getLegalId());
+        log.info("Processing AML for Legal ID: {}", request.getLegalId());
 
         // Always check existing AML status first before calling middleware
         Optional<AmlStatus> existingAmlOpt = amlService.findByLegalId(request.getLegalId());
@@ -67,15 +68,22 @@ public class ComplianceService {
             log.warn("HIGH RISK customer detected | Legal ID: {} | RiskLevel: {} | Rules: {}",
                     request.getLegalId(), amlResponse.getRiskLevel(), amlResponse.getRulesTriggered());
             amlService.createAmlStatus(createRequest);
-            sendAmlNotification(amlRequestDto, amlResponse, request);
+            try {
+                String submittedBy = "System";
+                try { submittedBy = securityUtils.getCurrentUser().getUsername(); } catch (Exception ignored) {}
+                AmlStatusDto amlDto = openAccountAmlStatusMapper.fromRequestAndResponse(request, amlResponse, AmlStatusEnum.PENDING);
+                amlDto.setSubmittedBy(submittedBy);
+                monitoringService.sendHighRiskAmlAlert(amlDto);
+            } catch (Exception e) {
+                log.error("Failed to send HIGH RISK Telegram alert: {}", e.getMessage());
+            }
         } else {
             log.info("LOW RISK customer approved | Legal ID: {} | RiskLevel: {}",
                     request.getLegalId(), amlResponse.getRiskLevel());
         }
 
-        log.info("========== END AML Processing for Legal ID: {} | Status: {} ==========", request.getLegalId(), amlStatusEnum);
+        log.info("AML processing completed for Legal ID: {} | Status: {}", request.getLegalId(), amlStatusEnum);
 
-        // Low-risk → return mapped DTO
         return openAccountAmlStatusMapper.fromRequestAndResponse(request, amlResponse, amlStatusEnum);
     }
 
@@ -103,7 +111,7 @@ public class ComplianceService {
 
     private AmlExternalResponseDto callAmlMiddleware(CustomerAmlRequest amlRequest, String legalId)
             throws JsonProcessingException {
-        AmlExternalResponseDto response = amlMiddlewareService.CheckAml(amlRequest);
+        AmlExternalResponseDto response = amlMiddlewareService.checkAml(amlRequest);
         log.info("AML Middleware response received | RiskLevel: {} | TrxnID: {}", response.getRiskLevel(),
                 response.getTrxnID());
         return response;
@@ -125,22 +133,4 @@ public class ComplianceService {
                 });
     }
 
-    private void sendAmlNotification(CustomerAmlRequest amlRequest, AmlExternalResponseDto amlResponse,
-            CustomerRequest request) {
-        log.info(">>> ENTER sendAmlNotification() for Legal ID: {}", request.getLegalId());
-        try {
-            AmlStatusDto amlDto = openAccountAmlStatusMapper.fromRequestAndResponse(request, amlResponse,
-                    AmlStatusEnum.PENDING);
-
-            try {
-                alertTelegramService.sendTelegramAmlProcess(amlDto);
-                log.info("Telegram AML notification sent successfully.");
-            } catch (Exception e) {
-                log.error("Telegram notification failed: {}", e.getMessage());
-            }
-
-        } catch (Exception e) {
-            log.error("Notification logic failed for Legal ID {}: {}", request.getLegalId(), e.getMessage());
-        }
-    }
 }

@@ -15,7 +15,6 @@ import { useDebounce } from "@/utils/debounce/debounce";
 import { Search } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { startTransition, useCallback, useEffect, useState } from "react";
-import { toast } from "sonner";
 import Loading from "@/components/shared/common/loading";
 import { ModalMode } from "@/constants/AppResource/display-list/enum/mode";
 import { createBranchTableColumns } from "@/components/shared/table/branch-content";
@@ -168,7 +167,6 @@ function BranchPageContent() {
       setSelectedBranch(null);
       loadBranch();
     } catch (err: any) {
-      toast.error(err?.errorMessage || "Failed to save branch");
       AppToast({
         type: "error",
         message: "Failed to save branch",
@@ -225,9 +223,10 @@ function BranchPageContent() {
   return (
     <Card className="h-full flex flex-col">
       <CardContent className="space-y-6 p-6 flex flex-col h-full">
-        <div className="flex justify-between">
-          <div className="flex flex-wrap items-center justify-start gap-4 w-full">
-            <div className="relative w-full md:w-[350px]">
+        <div className="flex justify-between items-center gap-4">
+          <div />
+          <div className="flex items-center gap-3">
+            <div className="relative w-full sm:w-[280px]">
               <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 aria-label="search-branch"
@@ -236,12 +235,10 @@ function BranchPageContent() {
                 placeholder="Search branch..."
                 value={searchQuery}
                 onChange={handleSearchChange}
-                className="pl-8 w-full min-w-[200px] text-xs md:min-w-[300px] h-9"
+                className="pl-8 w-full text-xs h-9"
                 disabled={isSubmitting}
               />
             </div>
-          </div>
-          <div>
             <Button onClick={handleAddBranch}>New</Button>
           </div>
         </div>

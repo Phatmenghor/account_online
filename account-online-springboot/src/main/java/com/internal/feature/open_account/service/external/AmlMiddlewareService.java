@@ -32,7 +32,7 @@ public class AmlMiddlewareService {
     @Value("${simulator.aml.high-risk:false}")
     private boolean simulateAmlHighRisk;
 
-    public AmlExternalResponseDto CheckAml(CustomerAmlRequest requestBody) {
+    public AmlExternalResponseDto checkAml(CustomerAmlRequest requestBody) {
 
         try {
             if (simulateAmlServiceError) {
@@ -56,7 +56,7 @@ public class AmlMiddlewareService {
 
             String url = properties.getAml().getUrl();
             String jsonRequest = objectMapper.writeValueAsString(requestBody);
-            log.debug("AML Request to URL: {} | Customer: {}", url, requestBody.getCustomerId());
+            log.info("AML Request to URL: {} | Customer: {}", url, requestBody.getCustomerId());
 
             String credentials = properties.getAml().getUsername() + ":" + properties.getAml().getPassword();
             String encodedCredentials = Base64.getEncoder()
@@ -75,7 +75,7 @@ public class AmlMiddlewareService {
             long duration = System.currentTimeMillis() - startTime;
 
             String rawBody = response.getBody();
-            log.debug("AML API Response ({}ms): {}", duration, rawBody);
+            log.info("AML API Response ({}ms) received", duration);
 
             if (rawBody == null || rawBody.trim().isEmpty()) {
                 throw new RuntimeException("AML Service returned empty response");

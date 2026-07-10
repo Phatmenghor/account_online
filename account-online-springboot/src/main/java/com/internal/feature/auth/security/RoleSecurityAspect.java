@@ -32,8 +32,6 @@ public class RoleSecurityAspect {
     @Around("@annotation(com.internal.config.RequiresRole) || " +
             "@within(com.internal.config.RequiresRole)")
     public Object checkRole(ProceedingJoinPoint joinPoint) throws Throwable {
-        log.debug("Checking role permissions for {}", joinPoint.getSignature().toShortString());
-
         // Get method signature
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
         Method method = signature.getMethod();
@@ -50,8 +48,6 @@ public class RoleSecurityAspect {
             boolean anyRole = annotation.anyRole();
             String customMessage = annotation.message();
 
-            log.debug("Required roles: {}, anyRole: {}", Arrays.toString(requiredRoles), anyRole);
-
             // Get current authentication
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             if (authentication == null || !authentication.isAuthenticated()) {
@@ -64,8 +60,6 @@ public class RoleSecurityAspect {
             Set<String> userRoles = authorities.stream()
                     .map(GrantedAuthority::getAuthority)
                     .collect(Collectors.toSet());
-
-            log.debug("User roles: {}", userRoles);
 
             // Convert requiredRoles to RoleEnum format if needed
             Set<String> formattedRequiredRoles = Arrays.stream(requiredRoles)
@@ -101,7 +95,6 @@ public class RoleSecurityAspect {
                 }
             }
 
-            log.debug("Access granted for {}", joinPoint.getSignature().toShortString());
         }
 
         // If annotation is null or access is granted, proceed with method execution

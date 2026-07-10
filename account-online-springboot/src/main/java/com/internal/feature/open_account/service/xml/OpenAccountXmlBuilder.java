@@ -2,13 +2,16 @@ package com.internal.feature.open_account.service.xml;
 
 import com.internal.config.CpbProperties;
 import com.internal.config.DefaultProperties;
+import com.internal.exceptions.error.openaccount.OpenAccountException;
 import com.internal.feature.open_account.dto.request.CustomerRequest;
+import com.internal.utils.SecurityUtils;
 import com.internal.utils.constants.DefaultConstants;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
 @Component
@@ -18,18 +21,24 @@ public class OpenAccountXmlBuilder {
 
     private final CpbProperties cpbProperties;
     private final DefaultProperties defaultProperties;
+    private final SecurityUtils securityUtils;
 
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     private static final DateTimeFormatter T24_DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd");
 
     public String buildCustomerCreationXml(CustomerRequest request) {
-        log.debug("Building customer creation XML for Legal ID: {}", request.getLegalId());
+        log.info("Building customer creation XML for Legal ID: {}", request.getLegalId());
 
         String username = cpbProperties.getT24().getUsername();
         String password = cpbProperties.getT24().getPassword();
 
         String branchCode = getOrDefault(request.getBranchCode(), defaultProperties.getBranchCode());
         String maritalStatus = mapMaritalStatus(request.getMaritalStatus());
+
+        // Relation manager is staff-only: public self-service requests store the
+        // value for DB logs only and must never submit it to T24, even if sent.
+        boolean isStaffRequest = isAuthenticated();
+        String relationManager = isStaffRequest ? getOrDefault(request.getRelationManager(), "") : "";
 
         // Sanitize legalAddress to SWIFT-safe characters before sending to T24
         String legalAddress = toSwiftSafe(getOrDefault(request.getLegalAddress(), ""));
@@ -46,13 +55,11 @@ public class OpenAccountXmlBuilder {
         String pobCommune = getOrDefault(request.getCustomerPobCommune(), "");
         String pobVillage = getOrDefault(request.getCustomerPobVillage(), "");
 
-        String referralId = getOrDefault(request.getReferralId(), "");
-        String releasedBy = getOrDefault(request.getReleasedBy(), "");
-
         // Format dates to T24 format (YYYYMMDD)
         String dateOfBirth = formatDateForT24(request.getDateOfBirth());
-        String legalIssueDate = formatDateForT24(request.getLegalIssueDate());
-        String legalExpDate = formatDateForT24(request.getLegalExpireDate());
+        String legalIssueDate = formatLegalIssueDateWithDefault(request.getLegalIssueDate());
+        String legalExpDate = formatDateForT24NoFutureCheck(request.getLegalExpireDate());
+        log.info("T24 date fields | DOB={} | IssDate={} (raw='{}') | ExpDate={}", dateOfBirth, legalIssueDate, request.getLegalIssueDate(), legalExpDate);
 
         // Determine title from gender (use request title if provided)
         String title = getOrDefault(request.getTitle(), determineTitle(request.getGender()));
@@ -109,7 +116,7 @@ public class OpenAccountXmlBuilder {
                 + "<cus:LegalIssAuth>" + getOrDefault(request.getLegalIssAuth(), request.getGivenName())
                 + "</cus:LegalIssAuth>"
                 + "<cus:LegalIssDate>" + legalIssueDate + "</cus:LegalIssDate>"
-                + "<cus:LegalExpDate>" + legalExpDate + "</cus:LegalExpDate>"
+                + "<cus:LegalExpDate>" + request.getLegalExpireDate() + "</cus:LegalExpDate>"
                 + "</cus:mLEGALID></cus:gLEGALID>"
 
                 // Language
@@ -145,10 +152,10 @@ public class OpenAccountXmlBuilder {
 
                 // Ownership and staff
                 + "<cus:Ownership>" + defaultProperties.getOwnership() + "</cus:Ownership>"
-                + "<cus:RelationManager></cus:RelationManager>"
+                + "<cus:RelationManager>" + relationManager + "</cus:RelationManager>"
                 + "<cus:LoanOfficer></cus:LoanOfficer>"
                 + "<cus:Staff></cus:Staff>"
-                + "<cus:ReferralBy>" + releasedBy + "</cus:ReferralBy>"
+                + "<cus:ReferralBy></cus:ReferralBy>"
 
                 // Place of birth address (Primary P fields)
                 + "<cus:CUSTPROVINCEP>" + pobProvince + "</cus:CUSTPROVINCEP>"
@@ -250,15 +257,68 @@ public class OpenAccountXmlBuilder {
             return "";
         }
         try {
+            LocalDate localDate = null;
+            LocalDate now = LocalDate.now();
+
             if (date.matches("\\d{8}")) {
-                return date;
+                localDate = LocalDate.parse(date, T24_DATE_FORMATTER);
+            } else if (date.matches("\\d{4}-\\d{2}-\\d{2}")) {
+                localDate = LocalDate.parse(date, DATE_FORMATTER);
+            } else {
+                log.warn("Date {} does not match expected formats (yyyyMMdd or yyyy-MM-dd), attempting to parse anyway", date);
+                localDate = LocalDate.parse(date, DATE_FORMATTER);
             }
-            LocalDate localDate = LocalDate.parse(date, DATE_FORMATTER);
-            return localDate.format(T24_DATE_FORMATTER);
+
+            // Validate date is not in the future
+            if (localDate.isAfter(now)) {
+                String currentDate = now.format(DATE_FORMATTER);
+                log.error("Date validation FAILED: parsed_date={} is AFTER current_date={}. NID issued dates cannot be in future.", localDate, currentDate);
+                throw new OpenAccountException("INVALID_DATE",
+                    "The date " + localDate.format(DATE_FORMATTER) + " is in the future (current date: " + currentDate + "). Issued dates and birth dates must be in the past. Please verify the NID data.");
+            }
+
+            String formatted = localDate.format(T24_DATE_FORMATTER);
+            log.info("Date formatted: {} to {} (T24 format)", date, formatted);
+            return formatted;
+        } catch (OpenAccountException e) {
+            throw e;
         } catch (Exception e) {
-            log.warn("Could not format date {}, using as-is: {}", date, e.getMessage());
+            log.error("Failed to parse date {} with message: {}. Defaulting to original value.", date, e.getMessage());
             return date;
         }
+    }
+
+    private String formatDateForT24NoFutureCheck(String date) {
+        if (date != null && !date.isEmpty()) {
+            try {
+                LocalDate localDate = date.matches("\\d{8}")
+                        ? LocalDate.parse(date, T24_DATE_FORMATTER)
+                        : LocalDate.parse(date, DATE_FORMATTER);
+                return localDate.format(T24_DATE_FORMATTER);
+            } catch (Exception e) {
+                log.warn("Could not format expiration date '{}', using default +10 years", date);
+            }
+        }
+        return LocalDate.now().plusYears(10).format(T24_DATE_FORMATTER);
+    }
+
+    private String formatLegalIssueDateWithDefault(String date) {
+        LocalDate today = LocalDate.now(ZoneId.of("Asia/Phnom_Penh"));
+        LocalDate maxAllowed = today.minusYears(1);
+        if (date != null && !date.isEmpty()) {
+            try {
+                LocalDate localDate = date.matches("\\d{8}")
+                        ? LocalDate.parse(date, T24_DATE_FORMATTER)
+                        : LocalDate.parse(date, DATE_FORMATTER);
+                if (!localDate.isAfter(maxAllowed)) {
+                    return localDate.format(T24_DATE_FORMATTER);
+                }
+                log.warn("Legal issue date '{}' exceeds max allowed {} (today minus 1 year), using fallback", date, maxAllowed);
+            } catch (Exception e) {
+                log.warn("Could not parse legal issue date '{}', using default 1 year ago", date);
+            }
+        }
+        return maxAllowed.format(T24_DATE_FORMATTER);
     }
 
     private String determineTitle(String gender) {
@@ -285,24 +345,43 @@ public class OpenAccountXmlBuilder {
         return value != null && !value.isEmpty() ? value : defaultValue;
     }
 
+    private boolean isAuthenticated() {
+        try {
+            securityUtils.getCurrentUser();
+            return true;
+        } catch (Exception ignored) {
+            return false;
+        }
+    }
+
     /**
-     * Sanitizes a string to contain SWIFT-allowed characters while preserving Unicode (Khmer).
-     * SWIFT charset: A-Z a-z 0-9 / - ? : ( ) . , ' + space
-     * Unicode characters (including Khmer) are preserved as they are valid in XML UTF-8.
-     * Only control characters and certain symbols are removed.
-     * Used for fields like STREET that T24 validates against SWIFT rules.
+     * Sanitizes a string to handle both Latin and Unicode (Khmer) characters.
+     * Since XML UTF-8 supports Unicode, Khmer characters are preserved.
+     * Only removes dangerous control characters and HTML-like tags.
+     * T24 accepts Unicode characters in address fields.
      */
     private String toSwiftSafe(String input) {
         if (input == null) return "";
-        // T24 STREET field: ONLY accepts A-Z, 0-9, space, and dash
-        // All other characters (including Khmer, special symbols) are removed
-        String sanitized = input.replaceAll("[^A-Za-z0-9 \\-]", " ").trim();
-        // Collapse multiple spaces into one
-        sanitized = sanitized.replaceAll(" {2,}", " ");
-        if (!sanitized.equals(input.trim())) {
-            log.warn("SWIFT sanitization applied to address. Original: [{}] → Sanitized: [{}]", input, sanitized);
+
+        // Keep original for comparison
+        String original = input.trim();
+        if (original.isEmpty()) return "";
+
+        // T24 SWIFT format requires ASCII-only characters (A-Z, a-z, 0-9, space, and common punctuation)
+        // Remove all non-ASCII characters (including Khmer and other Unicode characters)
+        String sanitized = original
+                .replaceAll("[^\\p{ASCII}]", " ")       // Remove all non-ASCII characters (including Khmer)
+                .replaceAll("[\\x00-\\x1F\\x7F]", " ") // Remove control characters
+                .replaceAll("[<>\"'&]", " ")            // Remove HTML-like characters
+                .replaceAll(" {2,}", " ")               // Collapse multiple spaces
+                .trim();
+
+        if (!sanitized.equals(original) && !original.isEmpty()) {
+            log.warn("Address sanitized for SWIFT compliance. Original: [{}], Sanitized: [{}]", original, sanitized);
         }
-        return sanitized;
+
+        // Return sanitized if it has content, otherwise return safe default (not original non-ASCII)
+        return sanitized.isEmpty() ? "Address" : sanitized;
     }
 
     /**

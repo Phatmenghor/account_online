@@ -38,11 +38,6 @@ public class JWTGenerator {
         return new SecretKeySpec(secretKey.getBytes(), SignatureAlgorithm.HS512.getJcaName());
     }
 
-    /**
-     * Generate JWT token with user roles and additional claims.
-     * @param authentication The authenticated user
-     * @return JWT token string
-     */
     public String generateToken(Authentication authentication) {
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         String username = userDetails.getUsername();
@@ -57,8 +52,23 @@ public class JWTGenerator {
         long expirationTimeInMs = jwtExpirationInMinutes * 60 * 1000;
         Date expireDate = new Date(currentDate.getTime() + expirationTimeInMs);
 
-        log.debug("Generating token for user: {} with roles: {}", username, roles);
+        log.info("Generating token for user: {}", username);
 
+        return Jwts.builder()
+                .setIssuedAt(currentDate)
+                .setExpiration(expireDate)
+                .setSubject(username)
+                .setIssuer(issuer)
+                .claim("roles", roles)
+                .claim("created", currentDate.getTime())
+                .signWith(getSigningKey(), SignatureAlgorithm.HS512)
+                .compact();
+    }
+
+    public String generateTokenForUser(String username, List<String> roles) {
+        Date currentDate = new Date();
+        long expirationTimeInMs = jwtExpirationInMinutes * 60 * 1000;
+        Date expireDate = new Date(currentDate.getTime() + expirationTimeInMs);
         return Jwts.builder()
                 .setIssuedAt(currentDate)
                 .setExpiration(expireDate)

@@ -17,5 +17,6 @@ public class GetAllLegalTypeRequest {
     @Builder.Default
     private int pageSize = 10;
     private String search;
+    @Builder.Default
     private StatusData status = StatusData.ACTIVE;
 }

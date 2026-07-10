@@ -95,7 +95,7 @@ public class CamdxErrorCheckServiceImpl implements ErrorAlertsCamdxService {
                 log.info("Sending Telegram alert for validation failure - requires human review");
                 sendValidationFailureAlert(request, score, incorrectFields);
             } else {
-                log.info("✓ CAMDX VALIDATION SUCCESS for ID {} - no alert sent", idNumber);
+                log.info("CAMDX validation success for ID {}", idNumber);
             }
 
         } catch (Exception e) {
@@ -154,7 +154,7 @@ public class CamdxErrorCheckServiceImpl implements ErrorAlertsCamdxService {
                 .append("Time: ").append(now.format(formatter)).append("\n")
                 .append("Please recheck NID / submission.");
 
-        telegramService.sendMarkdownAccountOnlineMonitorMessage(simpleMsg.toString());
+        telegramService.sendToMonitor(simpleMsg.toString());
     }
 
     // =====================================================

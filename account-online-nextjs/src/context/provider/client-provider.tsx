@@ -3,7 +3,6 @@
 import { ReactNode } from "react";
 import { Provider } from "react-redux";
 import store from "@/store/store";
-import { ThemeProvider } from "./theme-provider";
 import { Toaster } from "sonner";
 
 interface ClientProvidersProps {
@@ -15,14 +14,12 @@ export function ClientProviders({ children }: ClientProvidersProps) {
     <Provider store={store}>
       {children}
       <Toaster
-        position="top-center"
+        position="top-right"
         richColors
         closeButton
         expand={false}
         visibleToasts={3}
-        toastOptions={{
-          style: { fontSize: "14px" },
-        }}
+        toastOptions={{ style: { fontSize: "14px" } }}
       />
     </Provider>
   );

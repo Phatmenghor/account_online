@@ -33,7 +33,7 @@ export function DeleteConfirmationDialog({
 }: DeleteConfirmationDialogProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-[420px]">
         <DialogHeader>
           <DialogTitle className="mb-4">{title}</DialogTitle>
           <DialogDescription>

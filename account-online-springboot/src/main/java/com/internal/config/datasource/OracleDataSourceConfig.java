@@ -39,7 +39,13 @@ public class OracleDataSourceConfig {
         log.info("   Driver: {}", config.getDriverClassName());
         log.info("   Pool: {}", config.getPoolName());
 
-        return new HikariDataSource(config);
+        try {
+            return new HikariDataSource(config);
+        } catch (Exception e) {
+            log.warn("⚠ Failed to initialize DWH datasource: {}", e.getMessage());
+            log.warn("Application will continue without DWH database connection. Please check database connectivity.");
+            return new org.springframework.jdbc.datasource.SimpleDriverDataSource();
+        }
     }
 
     @Bean(name = "dwhJdbcTemplate")
@@ -70,7 +76,13 @@ public class OracleDataSourceConfig {
         log.info("   Driver: {}", config.getDriverClassName());
         log.info("   Pool: {}", config.getPoolName());
 
-        return new HikariDataSource(config);
+        try {
+            return new HikariDataSource(config);
+        } catch (Exception e) {
+            log.warn("⚠ Failed to initialize STG datasource: {}", e.getMessage());
+            log.warn("Application will continue without STG database connection. Please check database connectivity.");
+            return new org.springframework.jdbc.datasource.SimpleDriverDataSource();
+        }
     }
 
     @Bean(name = "stgJdbcTemplate")

@@ -9,7 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { CustomDatePicker } from "@/components/shared/common/custom-date-picker";
+import { CustomDateTimePicker } from "@/components/shared/common/custom-datetime-picker";
 import { ResponseNID } from "@/models/open-acc-online/nid.response.model";
 import { LegalTypeModel } from "@/models/static/legal-type/legal-type.response";
 import { useFormState } from "@/contexts/form-state-context";
@@ -59,7 +59,7 @@ export const PersonalDetailsFields: React.FC<PersonalDetailsFieldsProps> = ({
   }, [legalTypes, selectedLegalType]);
 
   const renderLabel = (labelKey: string) => (
-    <Label htmlFor={labelKey} className="text-sm sm:text-base mb-1 block">
+    <Label htmlFor={labelKey} className="text-base sm:text-lg font-medium mb-1 block">
       {translate(labelKey)}
       {isVerified && (
         <span className="float-right text-green-600 text-sm flex items-center gap-1">
@@ -70,248 +70,194 @@ export const PersonalDetailsFields: React.FC<PersonalDetailsFieldsProps> = ({
     </Label>
   );
 
-  const renderVerifiedIcon = () =>
-    isVerified && (
-      <CheckCircle className="absolute right-3 top-2.5 h-5 w-5 text-green-600 pointer-events-none" />
-    );
-
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       {/* First Name (KH) */}
       <div className="space-y-1">
         {renderLabel("firstNameKh")}
-        <div className="relative">
-          <Input
-            id="lastNameKh"
-            placeholder={translate("firstNameKh")}
-            value={formData.lastNameKh}
-            onChange={(e) => handleInputChange("lastNameKh", e.target.value)}
-            className={`w-full h-10 text-sm ${validationErrors.lastNameKh ? "border-red-500" : ""
-              }`}
-            disabled={isLoading || isValidating || isSubmitting}
-          />
-          {renderVerifiedIcon()}
-        </div>
+        <Input
+          id="lastNameKh"
+          placeholder={translate("firstNameKh")}
+          value={formData.lastNameKh}
+          onChange={(e) => handleInputChange("lastNameKh", e.target.value)}
+          className={`w-full h-12 text-base ${validationErrors.lastNameKh ? "border-red-500" : ""}`}
+          disabled={isLoading || isValidating || isSubmitting}
+        />
         {validationErrors.lastNameKh && (
-          <p className="text-xs text-red-500">{translate("err_firstNameKh")}</p>
+          <p className="text-sm text-red-500">{translate("err_firstNameKh")}</p>
         )}
       </div>
 
       {/* Last Name (KH) */}
       <div className="space-y-1">
         {renderLabel("lastNameKH")}
-        <div className="relative">
-          <Input
-            id="firstNameKh"
-            placeholder={translate("lastNameKH")}
-            value={formData.firstNameKh}
-            onChange={(e) => handleInputChange("firstNameKh", e.target.value)}
-            className={`w-full h-10 text-sm ${validationErrors.firstNameKh ? "border-red-500" : ""
-              }`}
-            disabled={isLoading || isValidating || isSubmitting}
-          />
-          {renderVerifiedIcon()}
-        </div>
+        <Input
+          id="firstNameKh"
+          placeholder={translate("lastNameKH")}
+          value={formData.firstNameKh}
+          onChange={(e) => handleInputChange("firstNameKh", e.target.value)}
+          className={`w-full h-12 text-base ${validationErrors.firstNameKh ? "border-red-500" : ""}`}
+          disabled={isLoading || isValidating || isSubmitting}
+        />
         {validationErrors.firstNameKh && (
-          <p className="text-xs text-red-500">{translate("err_lastNameKh")}</p>
+          <p className="text-sm text-red-500">{translate("err_lastNameKh")}</p>
         )}
       </div>
 
       {/* Family Name */}
       <div className="space-y-1">
         {renderLabel("familyNameEn")}
-        <div className="relative">
-          <Input
-            id="lastNameEn"
-            placeholder={translate("familyNameEn")}
-            value={formData.lastNameEn}
-            onChange={(e) => handleInputChange("lastNameEn", e.target.value)}
-            className={`w-full h-10 text-sm ${validationErrors.lastNameEn ? "border-red-500" : ""
-              }`}
-            disabled={isLoading || isValidating || isSubmitting}
-          />
-          {renderVerifiedIcon()}
-        </div>
+        <Input
+          id="lastNameEn"
+          placeholder={translate("familyNameEn")}
+          value={formData.lastNameEn}
+          onChange={(e) => handleInputChange("lastNameEn", e.target.value)}
+          className={`w-full h-12 text-base ${validationErrors.lastNameEn ? "border-red-500" : ""}`}
+          disabled={isLoading || isValidating || isSubmitting}
+        />
         {validationErrors.lastNameEn && (
-          <p className="text-xs text-red-500">{translate("err_lastNameEn")}</p>
+          <p className="text-sm text-red-500">{translate("err_lastNameEn")}</p>
         )}
       </div>
 
       {/* Given Name */}
       <div className="space-y-1">
         {renderLabel("givenNameEn")}
-        <div className="relative">
-          <Input
-            id="firstNameEn"
-            placeholder={translate("givenNameEn")}
-            value={formData.firstNameEn}
-            onChange={(e) => handleInputChange("firstNameEn", e.target.value)}
-            className={`w-full h-10 text-sm ${validationErrors.firstNameEn ? "border-red-500" : ""
-              }`}
-            disabled={isLoading || isValidating || isSubmitting}
-          />
-          {renderVerifiedIcon()}
-        </div>
+        <Input
+          id="firstNameEn"
+          placeholder={translate("givenNameEn")}
+          value={formData.firstNameEn}
+          onChange={(e) => handleInputChange("firstNameEn", e.target.value)}
+          className={`w-full h-12 text-base ${validationErrors.firstNameEn ? "border-red-500" : ""}`}
+          disabled={isLoading || isValidating || isSubmitting}
+        />
         {validationErrors.firstNameEn && (
-          <p className="text-xs text-red-500">{translate("err_firstNameEn")}</p>
+          <p className="text-sm text-red-500">{translate("err_firstNameEn")}</p>
         )}
       </div>
 
       {/* Date Of Birth */}
       <div className="space-y-1">
         {renderLabel("dateOfBirth")}
-        <div className="relative">
-          <div
-            className={
-              validationErrors.dob ? "border border-red-500 rounded" : ""
-            }
-          >
-            <CustomDatePicker
-              className="h-10 w-full"
-              key={datePickerKey}
-              value={formData.dob}
-              onChange={(value) => handleInputChange("dob", value)}
-              disabled={isLoading || isValidating || isSubmitting}
-              placeholder={translate("dateOfBirth")}
-            />
-          </div>
-          {renderVerifiedIcon()}
-        </div>
+        <CustomDateTimePicker
+          key={datePickerKey}
+          value={formData.dob}
+          onChange={(value) => handleInputChange("dob", value)}
+          disabled={isLoading || isValidating || isSubmitting}
+          error={!!validationErrors.dob}
+        />
         {validationErrors.dob && (
-          <p className="text-xs text-red-500">{translate("err_dob")}</p>
+          <p className="text-sm text-red-500">{translate("err_dob")}</p>
         )}
       </div>
 
       {/* Gender */}
       <div className="space-y-1">
         {renderLabel("gender")}
-        <div className="relative">
-          <Select
-            value={formData.gender || ""}
-            onValueChange={(value) => handleInputChange("gender", value)}
-            disabled={isLoading || isValidating || isSubmitting}
+        <Select
+          value={formData.gender || ""}
+          onValueChange={(value) => handleInputChange("gender", value)}
+          disabled={isLoading || isValidating || isSubmitting}
+        >
+          <SelectTrigger
+            className={`w-full h-12 text-base ${validationErrors.gender ? "border-red-500" : ""}`}
           >
-            <SelectTrigger
-              className={`h-10 ${validationErrors.gender ? "border-red-500" : ""
-                }`}
-            >
-              <SelectValue placeholder={translateSelect("selectGender")} />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="Female">Female</SelectItem>
-              <SelectItem value="Male">Male</SelectItem>
-            </SelectContent>
-          </Select>
-          {isVerified && (
-            <CheckCircle className="absolute right-8 top-2.5 h-5 w-5 text-green-600 pointer-events-none" />
-          )}
-        </div>
+            <SelectValue placeholder={translateSelect("selectGender")} />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="Female">{translate("female")}</SelectItem>
+            <SelectItem value="Male">{translate("male")}</SelectItem>
+          </SelectContent>
+        </Select>
         {validationErrors.gender && (
-          <p className="text-xs text-red-500">{translate("err_gender")}</p>
+          <p className="text-sm text-red-500">{translate("err_gender")}</p>
         )}
       </div>
 
       {/* Legal Type new*/}
       <div className="space-y-1">
         {renderLabel("legalType")}
-        <div className="relative">
-          <Select
-            value={selectedLegalType?.id.toString() || ""}
-            onValueChange={(value) => {
-              const legalType = legalTypes.find(
-                (l) => l.id.toString() === value
-              );
-              setSelectedLegalType(legalType || null);
-              validateField("legalType", value);
-            }}
-            disabled={isLoading || isValidating || isLegalTypeLoading}
+        <Select
+          value={selectedLegalType?.id.toString() || ""}
+          onValueChange={(value) => {
+            const legalType = legalTypes.find(
+              (l) => l.id.toString() === value
+            );
+            setSelectedLegalType(legalType || null);
+            validateField("legalType", value);
+          }}
+          disabled={isLoading || isValidating || isLegalTypeLoading}
+        >
+          <SelectTrigger
+            className={`w-full h-12 text-base ${validationErrors.legalType ? "border-red-500" : ""}`}
           >
-            <SelectTrigger
-              className={`w-full h-10 text-sm ${validationErrors.legalType ? "border-red-500" : ""
-                }`}
-            >
-              <SelectValue
-                placeholder={
-                  isLegalTypeLoading
-                    ? translate("loading")
-                    : translateSelect("selectLegalType")
-                }
-              />
-            </SelectTrigger>
-            <SelectContent>
-              {legalTypes.map((legalType) => (
-                <SelectItem key={legalType.id} value={legalType.id.toString()}>
-                  {getLegalTypeName(legalType)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          {isVerified && (
-            <CheckCircle className="absolute right-8 top-2.5 h-5 w-5 text-green-600 pointer-events-none" />
-          )}
-        </div>
+            <SelectValue
+              placeholder={
+                isLegalTypeLoading
+                  ? translate("loading")
+                  : translateSelect("selectLegalType")
+              }
+            />
+          </SelectTrigger>
+          <SelectContent>
+            {legalTypes.map((legalType) => (
+              <SelectItem key={legalType.id} value={legalType.id.toString()}>
+                {getLegalTypeName(legalType)}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
         {validationErrors.legalType && (
-          <p className="text-xs text-red-500">{translate("err_legalType")}</p>
+          <p className="text-sm text-red-500">{translate("err_legalType")}</p>
         )}
       </div>
 
       {/* Legal ID */}
       <div className="space-y-1">
         {renderLabel("legalId")}
-        <div className="relative">
-          <Input
-            id="idNumber"
-            placeholder={translate("legalId")}
-            value={formData.idNumber}
-            onChange={(e) => handleInputChange("idNumber", e.target.value)}
-            className={`w-full h-10 text-sm ${validationErrors.idNumber ? "border-red-500" : ""
-              }`}
-            disabled={isLoading || isValidating || isSubmitting || isNidExtracted}
-          />
-          {renderVerifiedIcon()}
-        </div>
+        <Input
+          id="idNumber"
+          placeholder={translate("legalId")}
+          value={formData.idNumber}
+          onChange={(e) => handleInputChange("idNumber", e.target.value)}
+          className={`w-full h-12 text-base ${validationErrors.idNumber ? "border-red-500" : ""} ${isNidExtracted ? "cursor-default select-text" : ""}`}
+          readOnly={isNidExtracted}
+          disabled={isLoading || isValidating || isSubmitting}
+        />
         {validationErrors.idNumber && (
-          <p className="text-xs text-red-500">{translate("err_idNumber")}</p>
+          <p className="text-sm text-red-500">{translate("err_idNumber")}</p>
         )}
       </div>
 
       {/* Address */}
       <div className="space-y-1">
         {renderLabel("address")}
-        <div className="relative">
-          <Input
-            id="address"
-            placeholder={translate("address")}
-            value={formData.address}
-            onChange={(e) => handleInputChange("address", e.target.value)}
-            className={`w-full h-10 text-sm ${validationErrors.address ? "border-red-500" : ""
-              }`}
-            disabled={isLoading || isValidating || isSubmitting}
-          />
-          {renderVerifiedIcon()}
-        </div>
+        <Input
+          id="address"
+          placeholder={translate("address")}
+          value={formData.address}
+          onChange={(e) => handleInputChange("address", e.target.value)}
+          className={`w-full h-12 text-base ${validationErrors.address ? "border-red-500" : ""}`}
+          disabled={isLoading || isValidating || isSubmitting}
+        />
         {validationErrors.address && (
-          <p className="text-xs text-red-500">{translate("err_address")}</p>
+          <p className="text-sm text-red-500">{translate("err_address")}</p>
         )}
       </div>
 
       {/* Place Of Birth */}
       <div className="space-y-1">
         {renderLabel("pob")}
-        <div className="relative">
-          <Input
-            id="pob"
-            placeholder={translate("pob")}
-            value={formData.pob}
-            onChange={(e) => handleInputChange("pob", e.target.value)}
-            className={`w-full h-10 text-sm ${validationErrors.pob ? "border-red-500" : ""
-              }`}
-            disabled={isLoading || isValidating || isSubmitting}
-          />
-          {renderVerifiedIcon()}
-        </div>
+        <Input
+          id="pob"
+          placeholder={translate("pob")}
+          value={formData.pob}
+          onChange={(e) => handleInputChange("pob", e.target.value)}
+          className={`w-full h-12 text-base ${validationErrors.pob ? "border-red-500" : ""}`}
+          disabled={isLoading || isValidating || isSubmitting}
+        />
         {validationErrors.pob && (
-          <p className="text-xs text-red-500">{translate("err_pob")}</p>
+          <p className="text-sm text-red-500">{translate("err_pob")}</p>
         )}
       </div>
     </div>

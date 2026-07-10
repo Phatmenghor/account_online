@@ -13,6 +13,7 @@ import {
   Phone,
   HelpCircle,
   Shield,
+  Hourglass,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { motion, AnimatePresence } from "framer-motion";
@@ -36,6 +37,7 @@ type ErrorType =
   | "connection-error"
   | "system-busy"
   | "request-limit"
+  | "pending-request"
   | "generic-error";
 
 const detectErrorType = (message?: string): ErrorType => {
@@ -44,6 +46,11 @@ const detectErrorType = (message?: string): ErrorType => {
   const lowerMsg = message.toLowerCase();
 
   if (
+    lowerMsg.includes("ដាក់ស្នើសុំបង្កើតគណនីរួចហើយ") ||
+    lowerMsg.includes("pending request")
+  ) {
+    return "pending-request";
+  } else if (
     lowerMsg.includes("សំណើរបស់អ្នក (AML High Risk)") ||
     lowerMsg.includes("aml") ||
     lowerMsg.includes("high risk")
@@ -162,6 +169,14 @@ const getErrorConfig = (errorType: ErrorType) => {
       primaryBtn: "from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700",
       accentText: "text-orange-600",
     },
+    "pending-request": {
+      Icon: Hourglass,
+      accent: "from-blue-400 via-blue-500 to-cyan-400",
+      iconBg: "from-blue-400 to-cyan-500",
+      titleColor: "text-blue-700",
+      primaryBtn: "from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600",
+      accentText: "text-blue-600",
+    },
     "generic-error": {
       Icon: XCircle,
       accent: "from-red-400 via-red-500 to-rose-500",
@@ -208,7 +223,7 @@ export default function SubmitErrorModal({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 60, scale: 0.97 }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className="relative bg-white w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden z-10"
+            className="relative bg-white w-full sm:max-w-[520px] rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden z-10"
           >
             <div className={`h-1.5 w-full bg-gradient-to-r ${config.accent}`} />
 

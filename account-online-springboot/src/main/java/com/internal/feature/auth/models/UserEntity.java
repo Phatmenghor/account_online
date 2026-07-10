@@ -2,12 +2,12 @@ package com.internal.feature.auth.models;
 
 import com.internal.config.entity.BaseEntity;
 import com.internal.enumation.StatusData;
-import com.internal.enumation.UserPermission;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,11 +31,14 @@ public class UserEntity extends BaseEntity {
 
     private String profileUrl;
 
-    @Enumerated(EnumType.STRING)
-    private StatusData status;
+    private String phoneNumber;
+
+    private String department;
+
+    private String branch;
 
     @Enumerated(EnumType.STRING)
-    private UserPermission userPermission;
+    private StatusData status;
 
     @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.MERGE})
     @JoinTable(name = "acc_online_user_roles",
@@ -43,6 +46,11 @@ public class UserEntity extends BaseEntity {
             inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id"))
     private List<Role> roles = new ArrayList<>();
 
-    private java.time.LocalDateTime lastLogin;
+    private LocalDateTime lastLogin;
 
+    @Column(name = "force_password_change", nullable = false, columnDefinition = "boolean default false")
+    private boolean forcePasswordChange = false;
+
+    @Column(name = "password_changed_at")
+    private LocalDateTime passwordChangedAt;
 }

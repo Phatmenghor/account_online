@@ -1,4 +1,5 @@
-import type { Metadata } from "next";
+import "./polyfills";
+import type { Metadata, Viewport } from "next";
 import { getMessages, getLocale } from "next-intl/server";
 import PageProgressBar from "@/components/shared/progressbar/Nprogressbar/global-n-progress";
 import localFont from "next/font/local";
@@ -6,7 +7,7 @@ import "@/styles/globals.css";
 import { type Locale } from "@/i18n/request";
 import { LocaleProvider } from "@/context/provider/local-provider";
 import { ClientProviders } from "@/context/provider/client-provider";
-import { ToastProvider } from "@/components/shared/toast/app-toast";
+import { Suspense } from "react";
 
 // Define Kantumruy Pro font
 const kantumruyPro = localFont({
@@ -36,8 +37,27 @@ const kantumruyPro = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Account Online",
-  description: "Account Online application",
+  title: "Account Online Opening",
+  description: "Account Online Opening application",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Account Online Opening",
+  },
+  other: {
+    "mobile-web-app-capable": "yes",
+  },
+};
+
+// Locking the viewport (no pinch-zoom, scale 1) plus 16px+ form font-sizes
+// (see globals.css) is what stops iOS Safari from auto-zooming on input focus.
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: "cover",
+  themeColor: "#ffffff",
 };
 
 export default async function RootLayout({
@@ -50,18 +70,20 @@ export default async function RootLayout({
   const serverMessages = await getMessages();
 
   return (
-    <html lang={serverLocale} className={kantumruyPro.variable}>
+    <html lang={serverLocale} className={kantumruyPro.variable} suppressHydrationWarning>
       <head>
         <link rel="icon" href="/assets/cp.png" />
       </head>
-      <body className="font-kantumruy antialiased">
+      <body className="font-kantumruy antialiased overscroll-y-none" suppressHydrationWarning>
         <LocaleProvider
           initialLocale={serverLocale}
           initialMessages={serverMessages}
         >
           <ClientProviders>
             <PageProgressBar />
-            <ToastProvider>{children}</ToastProvider>
+            <Suspense fallback={null}>
+              {children}
+            </Suspense>
           </ClientProviders>
         </LocaleProvider>
       </body>

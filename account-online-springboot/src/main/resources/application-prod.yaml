@@ -1,9 +1,21 @@
 # ==============================================================
 # PRODUCTION PROFILE
+# Active when: spring.profiles.active=prod
 # ==============================================================
+
+email:
+  sender:
+    enabled: true     # prod: real email OTP sent to user
+
+ad:
+  login:
+    url: http://192.168.101.5:5050/api/v1/auth/login
+    username: admin
+    password: admin123
 
 server:
   port: 7070
+  max-http-header-size: 65536
   tomcat:
     connection-timeout: 90000 # match nginx 90s
     max-http-form-post-size: 200MB
@@ -22,10 +34,11 @@ oracle:
       driver-class-name: oracle.jdbc.OracleDriver
       connection-test-query: SELECT 1 FROM DUAL
       maximum-pool-size: 10
-      minimum-idle: 5
+      minimum-idle: 0
       connection-timeout: 30000
       idle-timeout: 600000
       max-lifetime: 1800000
+      initialization-fail-timeout: -1
       pool-name: Oracle-DWH-Pool
   stg:
     datasource:
@@ -35,11 +48,28 @@ oracle:
       driver-class-name: oracle.jdbc.OracleDriver
       connection-test-query: SELECT 1 FROM DUAL
       maximum-pool-size: 10
-      minimum-idle: 5
+      minimum-idle: 0
       connection-timeout: 30000
       idle-timeout: 600000
       max-lifetime: 1800000
+      initialization-fail-timeout: -1
       pool-name: Oracle-STG-Pool
+
+# MSSQL — Staff (HR) lookup database
+mssql:
+  staff:
+    datasource:
+      jdbc-url: jdbc:sqlserver://192.168.103.71:1433;databaseName=CPBHD;encrypt=true;trustServerCertificate=true
+      username: cpb_int
+      password: 123cp!@#
+      driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+      maximum-pool-size: 10
+      minimum-idle: 0
+      connection-timeout: 30000
+      idle-timeout: 60000000
+      max-lifetime: 1800000
+      initialization-fail-timeout: -1
+      pool-name: MSSQL-Staff-Pool
 
 cpb:
   environment: production
@@ -50,7 +80,7 @@ cpb:
     username: cpbaml
     password: aml123!@#
   t24:
-    url: http://192.168.101.21:7003
+    url: http://tap.cambodiapostbank.com.kh:7003
     username: APPLOS
     password: CPlos@123!@#
   mb:
@@ -62,17 +92,18 @@ cpb:
 
 aml:
   dashboard:
-    url: http://192.168.100.5:7070/aml-management?pageNo=1
+    url: http://localservice.cambodiapostbank/aml-management?pageNo=1
 
 jwt:
-  expiration-min: 525600
+  expiration-min: 43200   # 30 days (30 * 24 * 60)
   issuer: account-online-api
 
 telegram:
   bot:
     token: "8227113200:AAGq1I7Hs0CjkSW99M9rgrIdlHpgM8r6NMY"
-    uat-acl-chat-id: "-1002740302492"
-    uat-monitor-chat-id: "-1003115792160"
-    uat-dev-team-chat-id: "-1002740302492"
+    dev-chat-id: "-1002740302492"
+    monitor-chat-id: "-1003115792160"
     compliance-mention: "@COMPLIANCE_TEAM"
     enabled: true
+    message-retention-days: 30
+

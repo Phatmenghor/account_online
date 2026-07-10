@@ -48,6 +48,26 @@ export const createDistrictTableColumns = ({
       ),
     },
     {
+      key: "districtEn",
+      label: "District (EN)",
+      truncate: true,
+      maxWidth: "300px",
+      minWidth: "150px",
+      render: (district) => (
+        <span className="font-medium">{district.districtEn || "---"}</span>
+      ),
+    },
+    {
+      key: "districtKh",
+      label: "District (KH)",
+      truncate: true,
+      maxWidth: "200px",
+      minWidth: "120px",
+      render: (district) => (
+        <span className="font-medium">{district.districtKh || "---"}</span>
+      ),
+    },
+    {
       key: "districtCode",
       label: "District Code",
       truncate: true,
@@ -58,58 +78,14 @@ export const createDistrictTableColumns = ({
       ),
     },
     {
-      key: "districtEn",
-      label: "District (English)",
-      truncate: true,
-      maxWidth: "300px",
-      minWidth: "150px",
-      render: (district) => (
-        <span className="font-medium">{district.districtEn || "---"}</span>
-      ),
-    },
-    {
-      key: "districtKh",
-      label: "District (Khmer)",
-      truncate: true,
-      maxWidth: "300px",
-      minWidth: "150px",
-      render: (district) => (
-        <span className="font-medium">{district.districtKh || "---"}</span>
-      ),
-    },
-    {
-      key: "provinceCode",
-      label: "Province Code",
-      truncate: true,
-      maxWidth: "200px",
-      minWidth: "150px",
-      render: (district) => (
-        <span className="font-medium">
-          {district.province?.provinceCode || "---"}
-        </span>
-      ),
-    },
-    {
       key: "provinceEn",
-      label: "Province (English)",
+      label: "Province (EN)",
       truncate: true,
       maxWidth: "200px",
       minWidth: "150px",
       render: (district) => (
         <span className="font-medium">
           {district.province?.provinceEn || "---"}
-        </span>
-      ),
-    },
-    {
-      key: "provinceKh",
-      label: "Province (Khmer)",
-      truncate: true,
-      maxWidth: "200px",
-      minWidth: "150px",
-      render: (district) => (
-        <span className="font-medium">
-          {district.province?.provinceKh || "---"}
         </span>
       ),
     },

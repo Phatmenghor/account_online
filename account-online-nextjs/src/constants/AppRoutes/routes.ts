@@ -3,7 +3,13 @@ import { Calendar, Code, Dock, User2 } from "lucide-react";
 export const ROUTES = {
   AUTH: {
     LOGIN: "/login",
+    REGISTER: "/register",
+    VERIFY_EMAIL: "/verify-email",
   },
+  STAFF: {
+    OPENING: "/staff/opening",
+  },
+  MY_PROFILE: "/my-profile",
   DASHBOARD: {
     INDEX: "/dashboard",
     USER: "/user",
@@ -25,8 +31,6 @@ export const ROUTES = {
       MANAGEMENT: "/aml-management",
       HISTORY: "/aml-history",
     },
-    ACCOUNT_ONLINE: "/account-online",
-    REPORT: "/report",
     MENU_CONFIG: "/menu-config"
   },
 };

@@ -2,7 +2,6 @@
 "use client";
 
 import { ReactNode } from "react";
-import { Toaster } from "sonner";
 import { Provider } from "react-redux";
 import store from "@/store/store";
 import { NextIntlClientProvider } from "next-intl";
@@ -18,7 +17,6 @@ export async function AppProviders({ children }: AppProvidersProps) {
     <NextIntlClientProvider messages={messages}>
       <Provider store={store}>
         {children}
-        <Toaster />
       </Provider>
     </NextIntlClientProvider>
   );

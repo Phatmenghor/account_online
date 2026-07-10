@@ -2,8 +2,7 @@ module.exports = {
   apps: [
     {
       name: "account_online_frontend",
-      script: "npm",
-      args: "start",
+      script: ".next/standalone/server.js",
       instances: 1,
       exec_mode: "fork",
       watch: false,
@@ -24,6 +23,7 @@ module.exports = {
       env: {
         NODE_ENV: "production",
         PORT: "7069",
+        HOSTNAME: "0.0.0.0",
         EXTERNAL_PORT: "7070",
         NEXT_PUBLIC_API_BASE_URL: "",
       },

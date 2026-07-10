@@ -12,11 +12,11 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { SuccessAccountOnlineModel } from "@/models/open-acc-success/success-account-response.model";
 import { DateTimeFormat } from "@/utils/date/date-time-format";
 import { Separator } from "@/components/ui/separator";
-import AmlStatusBadge from "../badge/aml-badge";
+import { toProperCase } from "@/utils/common/common";
+import { ImagePreviewCell } from "@/components/shared/image/image-preview-cell";
 
 interface SuccessAccountViewModalProps {
   account?: SuccessAccountOnlineModel;
@@ -24,18 +24,34 @@ interface SuccessAccountViewModalProps {
   onClose: () => void;
 }
 
+function InfoRow({ label, value }: { label: string; value?: React.ReactNode }) {
+  return (
+    <div className="flex justify-between border-b pb-2 gap-4">
+      <Label className="text-sm font-medium text-muted-foreground shrink-0">
+        {label}:
+      </Label>
+      <span className="text-sm font-semibold text-right">{value || "N/A"}</span>
+    </div>
+  );
+}
+
+function SectionHeader({ color, title }: { color: string; title: string }) {
+  return (
+    <div className="flex items-center gap-2">
+      <div className={`w-1 h-6 ${color} rounded-full`} />
+      <h3 className="text-lg font-semibold">{title}</h3>
+    </div>
+  );
+}
+
 export default function SuccessAccountViewModal({
   account,
   isOpen,
   onClose,
 }: SuccessAccountViewModalProps) {
-  const handleClose = () => {
-    onClose();
-  };
-
   return (
-    <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-2xl h-[90vh] p-0 gap-0 flex flex-col">
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[850px] h-[92vh] overflow-hidden p-0 gap-0 flex flex-col">
         {/* Header */}
         <DialogHeader className="px-6 py-4 border-b bg-muted/30 flex-shrink-0">
           <div className="flex items-center gap-4 pr-8">
@@ -48,7 +64,7 @@ export default function SuccessAccountViewModal({
               </DialogTitle>
               <DialogDescription className="text-base text-muted-foreground">
                 {account?.legalHolderName
-                  ? `Details for "${account.legalHolderName}"`
+                  ? `Details for "${toProperCase(account.legalHolderName)}"`
                   : account?.cif
                   ? `CIF: ${account.cif}`
                   : "Account information"}
@@ -58,470 +74,151 @@ export default function SuccessAccountViewModal({
         </DialogHeader>
 
         {/* Content */}
-        <ScrollArea className="flex-1 min-h-0">
+        <div className="flex-1 min-h-0 overflow-y-auto">
           <div className="p-6">
             {account ? (
               <div className="space-y-6">
-                {/* Account Information */}
-                <div className="space-y-4">
-                  <div className="flex items-center gap-2">
-                    <div className="w-1 h-6 bg-blue-600 rounded-full"></div>
-                    <h3 className="text-lg font-semibold">
-                      Account Information
-                    </h3>
-                  </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="flex justify-between border-b pb-2">
-                      <Label className="text-sm font-medium text-muted-foreground">
-                        CIF:
-                      </Label>
-                      <span className="text-sm font-semibold">
-                        {account.cif || "N/A"}
-                      </span>
-                    </div>
-
-                    <div className="flex justify-between border-b pb-2">
-                      <Label className="text-sm font-medium text-muted-foreground">
-                        KHR Account:
-                      </Label>
-                      <span className="text-sm font-semibold">
-                        {account.khrAccount || "N/A"}
-                      </span>
-                    </div>
-
-                    <div className="flex justify-between border-b pb-2">
-                      <Label className="text-sm font-medium text-muted-foreground">
-                        USD Account:
-                      </Label>
-                      <span className="text-sm font-semibold">
-                        {account.usdAccount || "N/A"}
-                      </span>
-                    </div>
-
-                    <div className="flex justify-between border-b pb-2">
-                      <Label className="text-sm font-medium text-muted-foreground">
-                        Mnemonic:
-                      </Label>
-                      <span className="text-sm font-semibold">
-                        {account.mnemonic || "N/A"}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                <Separator />
-
-                {/* Personal Information */}
-                <div className="space-y-4">
-                  <div className="flex items-center gap-2">
-                    <div className="w-1 h-6 bg-purple-600 rounded-full"></div>
-                    <h3 className="text-lg font-semibold">
-                      Personal Information
-                    </h3>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="flex justify-between border-b pb-2">
-                      <Label className="text-sm font-medium text-muted-foreground">
-                        Holder Name:
-                      </Label>
-                      <span className="text-sm font-semibold">
-                        {account.legalHolderName || "N/A"}
-                      </span>
-                    </div>
-
-                    <div className="flex justify-between border-b pb-2">
-                      <Label className="text-sm font-medium text-muted-foreground">
-                        Legal ID:
-                      </Label>
-                      <span className="text-sm font-semibold">
-                        {account.legalId || "N/A"}
-                      </span>
-                    </div>
-
-                    <div className="flex justify-between border-b pb-2">
-                      <Label className="text-sm font-medium text-muted-foreground">
-                        First Name (EN):
-                      </Label>
-                      <span className="text-sm">
-                        {account.legalFirstNameEn || "N/A"}
-                      </span>
-                    </div>
-
-                    <div className="flex justify-between border-b pb-2">
-                      <Label className="text-sm font-medium text-muted-foreground">
-                        Last Name (EN):
-                      </Label>
-                      <span className="text-sm">
-                        {account.legalLastNameEn || "N/A"}
-                      </span>
-                    </div>
-
-                    <div className="flex justify-between border-b pb-2">
-                      <Label className="text-sm font-medium text-muted-foreground">
-                        First Name (KH):
-                      </Label>
-                      <span className="text-sm">
-                        {account.legalFirstNameKh || "N/A"}
-                      </span>
-                    </div>
-
-                    <div className="flex justify-between border-b pb-2">
-                      <Label className="text-sm font-medium text-muted-foreground">
-                        Last Name (KH):
-                      </Label>
-                      <span className="text-sm">
-                        {account.legalLastNameKh || "N/A"}
-                      </span>
-                    </div>
-
-                    <div className="flex justify-between border-b pb-2">
-                      <Label className="text-sm font-medium text-muted-foreground">
-                        Date of Birth:
-                      </Label>
-                      <span className="text-sm">
-                        {account.legalDateOfBirth || "N/A"}
-                      </span>
-                    </div>
-
-                    <div className="flex justify-between border-b pb-2">
-                      <Label className="text-sm font-medium text-muted-foreground">
-                        Gender:
-                      </Label>
-                      <span className="text-sm">
-                        {account.legalGender || "N/A"}
-                      </span>
-                    </div>
-
-                    <div className="flex justify-between border-b pb-2">
-                      <Label className="text-sm font-medium text-muted-foreground">
-                        Marital Status:
-                      </Label>
-                      <span className="text-sm">
-                        {account.maritalStatus || "N/A"}
-                      </span>
-                    </div>
-
-                    <div className="flex justify-between border-b pb-2">
-                      <Label className="text-sm font-medium text-muted-foreground">
-                        Nationality:
-                      </Label>
-                      <span className="text-sm">
-                        {account.nationality || "N/A"}
-                      </span>
-                    </div>
-
-                    <div className="flex justify-between border-b pb-2">
-                      <Label className="text-sm font-medium text-muted-foreground">
-                        Phone Number:
-                      </Label>
-                      <span className="text-sm">
-                        {account.phoneNumber || "N/A"}
-                      </span>
-                    </div>
-
-                    <div className="flex justify-between border-b pb-2">
-                      <Label className="text-sm font-medium text-muted-foreground">
-                        Place of Birth:
-                      </Label>
-                      <span className="text-sm">
-                        {account.legalPlaceOfBirth || "N/A"}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                <Separator />
-
-                {/* Employment Information */}
-                <div className="space-y-4">
-                  <div className="flex items-center gap-2">
-                    <div className="w-1 h-6 bg-green-600 rounded-full"></div>
-                    <h3 className="text-lg font-semibold">
-                      Employment Information
-                    </h3>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="flex justify-between border-b pb-2">
-                      <Label className="text-sm font-medium text-muted-foreground">
-                        Company Name:
-                      </Label>
-                      <span className="text-sm">
-                        {account.companyName || "N/A"}
-                      </span>
-                    </div>
-
-                    <div className="flex justify-between border-b pb-2">
-                      <Label className="text-sm font-medium text-muted-foreground">
-                        Occupation:
-                      </Label>
-                      <span className="text-sm">
-                        {account.occupation || "N/A"}
-                      </span>
-                    </div>
-
-                    {/* <div className="flex justify-between border-b pb-2">
-                      <Label className="text-sm font-medium text-muted-foreground">
-                        Average Income:
-                      </Label>
-                      <span className="text-sm">
-                        {account.averageIncome || "N/A"}
-                      </span>
-                    </div> */}
-                  </div>
-                </div>
-
-                <Separator />
-
-                {/* Address Information */}
-                <div className="space-y-4">
-                  <div className="flex items-center gap-2">
-                    <div className="w-1 h-6 bg-orange-600 rounded-full"></div>
-                    <h3 className="text-lg font-semibold">
-                      Address Information
-                    </h3>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="flex justify-between border-b pb-2">
-                      <Label className="text-sm font-medium text-muted-foreground">
-                        Province:
-                      </Label>
-                      <span className="text-sm">
-                        {account.customerProvince || "N/A"}
-                      </span>
-                    </div>
-
-                    <div className="flex justify-between border-b pb-2">
-                      <Label className="text-sm font-medium text-muted-foreground">
-                        District:
-                      </Label>
-                      <span className="text-sm">
-                        {account.customerDistrict || "N/A"}
-                      </span>
-                    </div>
-
-                    <div className="flex justify-between border-b pb-2">
-                      <Label className="text-sm font-medium text-muted-foreground">
-                        Commune:
-                      </Label>
-                      <span className="text-sm">
-                        {account.customerCommune || "N/A"}
-                      </span>
-                    </div>
-
-                    <div className="flex justify-between border-b pb-2">
-                      <Label className="text-sm font-medium text-muted-foreground">
-                        Village:
-                      </Label>
-                      <span className="text-sm">
-                        {account.customerVillage || "N/A"}
-                      </span>
-                    </div>
-
-                    <div className="flex justify-between border-b pb-2 md:col-span-2">
-                      <Label className="text-sm font-medium text-muted-foreground">
-                        Full Address:
-                      </Label>
-                      <span className="text-sm">
-                        {account.legalAddress || "N/A"}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                <Separator />
-
-                {/* Branch Information */}
-                <div className="space-y-4">
-                  <div className="flex items-center gap-2">
-                    <div className="w-1 h-6 bg-indigo-600 rounded-full"></div>
-                    <h3 className="text-lg font-semibold">
-                      Branch Information
-                    </h3>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="flex justify-between border-b pb-2">
-                      <Label className="text-sm font-medium text-muted-foreground">
-                        Branch Code:
-                      </Label>
-                      <span className="text-sm">
-                        {account.branchCode || "N/A"}
-                      </span>
-                    </div>
-
-                    <div className="flex justify-between border-b pb-2">
-                      <Label className="text-sm font-medium text-muted-foreground">
-                        Branch Name (KH):
-                      </Label>
-                      <span className="text-sm">
-                        {account.branchNameKh || "N/A"}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                <Separator />
-
-                {/* AML Information */}
-                <div className="space-y-4">
-                  <div className="flex items-center gap-2">
-                    <div className="w-1 h-6 bg-red-600 rounded-full"></div>
-                    <h3 className="text-lg font-semibold">AML Information</h3>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="flex justify-between border-b pb-2">
-                      <Label className="text-sm font-medium text-muted-foreground">
-                        AML Status:
-                      </Label>
-                      <AmlStatusBadge status={account.amlStatus} />
-                    </div>
-
-                    <div className="flex justify-between border-b pb-2">
-                      <Label className="text-sm font-medium text-muted-foreground">
-                        Risk Level:
-                      </Label>
-                      <span className="text-sm">
-                        {account.amlRiskLevel || "N/A"}
-                      </span>
-                    </div>
-
-                    <div className="flex justify-between border-b pb-2">
-                      <Label className="text-sm font-medium text-muted-foreground">
-                        Action By:
-                      </Label>
-                      <span className="text-sm">
-                        {account.amlActionName || "N/A"}
-                      </span>
-                    </div>
-
-                    <div className="flex justify-between border-b pb-2">
-                      <Label className="text-sm font-medium text-muted-foreground">
-                        Action Role:
-                      </Label>
-                      <span className="text-sm">
-                        {account.amlActionRole || "N/A"}
-                      </span>
-                    </div>
-
-                    <div className="flex justify-between border-b pb-2">
-                      <Label className="text-sm font-medium text-muted-foreground">
-                        Action Taken:
-                      </Label>
-                      <span className="text-sm">
-                        {account.amlActionTaken || "N/A"}
-                      </span>
-                    </div>
-
-                    <div className="flex justify-between border-b pb-2">
-                      <Label className="text-sm font-medium text-muted-foreground">
-                        Total Rules Score:
-                      </Label>
-                      <span className="text-sm">
-                        {account.amlTotalRulesScore || "0"}
-                      </span>
-                    </div>
-
-                    <div className="flex justify-between border-b pb-2">
-                      <Label className="text-sm font-medium text-muted-foreground">
-                        Transaction ID:
-                      </Label>
-                      <span className="text-sm">
-                        {account.amlTrxnId || "N/A"}
-                      </span>
-                    </div>
-
-                    {account.amlRemarks && (
-                      <div className="flex justify-between border-b pb-2 md:col-span-2">
-                        <Label className="text-sm font-medium text-muted-foreground">
-                          Remarks:
-                        </Label>
-                        <span className="text-sm max-w-md text-right">
-                          {account.amlRemarks}
-                        </span>
+                {/* ── Document Images ── */}
+                {(account.nidImageName || account.selfieImageName) && (
+                  <>
+                    <div className="space-y-4">
+                      <SectionHeader color="bg-teal-600" title="Document Images" />
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {account.nidImageName && (
+                          <div className="flex flex-col gap-2">
+                            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                              NID / ID Card
+                            </p>
+                            <ImagePreviewCell
+                              imageId={account.nidImageName}
+                              label="NID / ID Card"
+                              className="w-full h-64"
+                            />
+                          </div>
+                        )}
+                        {account.selfieImageName && (
+                          <div className="flex flex-col gap-2">
+                            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                              Selfie Photo
+                            </p>
+                            <ImagePreviewCell
+                              imageId={account.selfieImageName}
+                              label="Selfie Photo"
+                              className="w-full h-64"
+                            />
+                          </div>
+                        )}
                       </div>
-                    )}
+                    </div>
+                    <Separator />
+                  </>
+                )}
 
-                    {account.amlRulesTriggered && (
-                      <div className="flex justify-between border-b pb-2 md:col-span-2">
-                        <Label className="text-sm font-medium text-muted-foreground">
-                          Rules Triggered:
-                        </Label>
-                        <span className="text-sm max-w-md text-right">
-                          {account.amlRulesTriggered}
-                        </span>
-                      </div>
+                {/* ── Account Information ── */}
+                <div className="space-y-4">
+                  <SectionHeader color="bg-blue-600" title="Account Information" />
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <InfoRow label="CIF" value={account.cif} />
+                    <InfoRow label="KHR Account" value={account.khrAccount} />
+                    <InfoRow label="USD Account" value={account.usdAccount} />
+                    <InfoRow label="Mnemonic" value={account.mnemonic} />
+                    <InfoRow label="Category Account" value={account.categoryAccount} />
+                    <InfoRow label="MB Activation Code" value={account.mbActivationCode} />
+                    <InfoRow
+                      label="MB App Download"
+                      value={
+                        account.mbAppDownloadLink ? (
+                          <a
+                            href={account.mbAppDownloadLink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-500 hover:underline"
+                          >
+                            {account.mbAppDownloadLink}
+                          </a>
+                        ) : undefined
+                      }
+                    />
+                  </div>
+                </div>
+
+                <Separator />
+
+                {/* ── Personal Information (merged with employment, address, pob, branch) ── */}
+                <div className="space-y-4">
+                  <SectionHeader color="bg-purple-600" title="Personal Information" />
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <InfoRow label="Holder Name" value={toProperCase(account.legalHolderName)} />
+                    <InfoRow label="Legal ID" value={account.legalId} />
+                    <InfoRow label="Doc Type" value={account.legalDocName} />
+                    <InfoRow label="First Name (EN)" value={toProperCase(account.legalFirstNameEn)} />
+                    <InfoRow label="Last Name (EN)" value={toProperCase(account.legalLastNameEn)} />
+                    <InfoRow label="First Name (KH)" value={account.legalFirstNameKh} />
+                    <InfoRow label="Last Name (KH)" value={account.legalLastNameKh} />
+                    <InfoRow label="Date of Birth" value={account.legalDateOfBirth} />
+                    <InfoRow label="Gender" value={account.legalGender} />
+                    <InfoRow label="Marital Status" value={account.maritalStatus} />
+                    <InfoRow label="Nationality" value={account.nationality} />
+                    <InfoRow label="Phone Number" value={account.phoneNumber} />
+                    <InfoRow label="Issued Date" value={account.legalIssuedDate} />
+                    <InfoRow label="Expired Date" value={account.legalExpiredDate} />
+                    <InfoRow label="Company Name" value={account.companyName} />
+                    <InfoRow label="Occupation" value={account.occupation} />
+                    <InfoRow label="Branch Code" value={account.branchCode} />
+                    <InfoRow label="Branch Name" value={account.branchNameKh} />
+                    {/* Address */}
+                    <InfoRow label="Province" value={account.customerProvince} />
+                    <InfoRow label="District" value={account.customerDistrict} />
+                    <InfoRow label="Commune" value={account.customerCommune} />
+                    <InfoRow label="Village" value={account.customerVillage} />
+                    <div className="flex justify-between border-b pb-2 gap-4 md:col-span-2">
+                      <Label className="text-sm font-medium text-muted-foreground shrink-0">Full Address:</Label>
+                      <span className="text-sm font-semibold text-right">{account.legalAddress || "N/A"}</span>
+                    </div>
+                    {/* Place of birth */}
+                    <InfoRow label="POB Province" value={account.customerPobProvince} />
+                    <InfoRow label="POB District" value={account.customerPobDistrict} />
+                    <InfoRow label="POB Commune" value={account.customerPobCommune} />
+                    <InfoRow label="POB Village" value={account.customerPobVillage} />
+                    <div className="flex justify-between border-b pb-2 gap-4 md:col-span-2">
+                      <Label className="text-sm font-medium text-muted-foreground shrink-0">Full Place of Birth:</Label>
+                      <span className="text-sm font-semibold text-right">{account.legalPlaceOfBirth || "N/A"}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <Separator />
+
+                {/* ── System Information (no card wrap) ── */}
+                <div className="space-y-4">
+                  <SectionHeader color="bg-gray-600" title="System Information" />
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <InfoRow label="Submitted By" value={account.submittedBy} />
+                    <InfoRow label="Created At" value={DateTimeFormat(account.createdAt)} />
+                    {account.submittedByUser && (
+                      <>
+                        <InfoRow label="Staff Name" value={account.submittedByUser.fullName} />
+                        <InfoRow label="Staff Email" value={account.submittedByUser.email} />
+                        <InfoRow label="Staff Role" value={account.submittedByUser.userRole} />
+                        <InfoRow label="Staff Position" value={account.submittedByUser.position} />
+                      </>
                     )}
                   </div>
                 </div>
 
-                <Separator />
-
-                {/* System Information */}
-                <div className="space-y-4">
-                  <div className="flex items-center gap-2">
-                    <div className="w-1 h-6 bg-gray-600 rounded-full"></div>
-                    <h3 className="text-lg font-semibold">
-                      System Information
-                    </h3>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="flex justify-between border-b pb-2">
-                      <Label className="text-sm font-medium text-muted-foreground">
-                        Created At:
-                      </Label>
-                      <span className="text-sm">
-                        {DateTimeFormat(account.createdAt) || "N/A"}
-                      </span>
-                    </div>
-
-                    <div className="flex justify-between border-b pb-2">
-                      <Label className="text-sm font-medium text-muted-foreground">
-                        Updated At:
-                      </Label>
-                      <span className="text-sm">
-                        {DateTimeFormat(account.updatedAt) || "N/A"}
-                      </span>
-                    </div>
-
-                    <div className="flex justify-between border-b pb-2">
-                      <Label className="text-sm font-medium text-muted-foreground">
-                        Created By:
-                      </Label>
-                      <span className="text-sm">
-                        {account.createdBy || "N/A"}
-                      </span>
-                    </div>
-
-                    <div className="flex justify-between border-b pb-2">
-                      <Label className="text-sm font-medium text-muted-foreground">
-                        Updated By:
-                      </Label>
-                      <span className="text-sm">
-                        {account.updatedBy || "N/A"}
-                      </span>
-                    </div>
-                  </div>
-                </div>
               </div>
             ) : (
               <div className="text-center py-8">
-                <p className="text-muted-foreground">
-                  No account data available
-                </p>
+                <p className="text-muted-foreground">No account data available</p>
               </div>
             )}
           </div>
-        </ScrollArea>
+        </div>
 
         {/* Footer */}
         <DialogFooter className="px-6 py-4 border-t bg-muted/30 flex-shrink-0">
-          <Button variant="outline" onClick={handleClose}>
+          <Button variant="outline" onClick={onClose}>
             Close
           </Button>
         </DialogFooter>

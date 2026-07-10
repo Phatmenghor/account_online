@@ -35,9 +35,6 @@ public class DefaultUserInitializer implements CommandLineRunner {
     @Value("${app.super.password:88889999}")
     private String superPassword;
 
-    @Value("${app.super.email:phatmenghor19@gmail.com}")
-    private String superEmail;
-
     @Override
     public void run(String... args) {
         log.info("Initializing default roles and users...");
@@ -75,7 +72,6 @@ public class DefaultUserInitializer implements CommandLineRunner {
 
         UserEntity user = new UserEntity();
         user.setUsername(superCard);
-        user.setEmail(superEmail);
         user.setStatus(StatusData.ACTIVE);
         user.setPassword(passwordEncoder.encode(superPassword));
 

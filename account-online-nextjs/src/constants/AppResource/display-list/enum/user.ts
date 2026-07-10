@@ -1,9 +1,11 @@
-export enum UserPermission {
-  APPROVED = "APPROVED",
-  NORMAL = "NORMAL",
+export enum Role {
+  DEVELOPER = "DEVELOPER",
+  BUSINESS = "BUSINESS",
+  COMPLIANCE = "COMPLIANCE",
+  STAFF = "STAFF",
 }
 
-export enum Role {
-  COMPLIANCE = "COMPLIANCE",
-  BUSINESS = "BUSINESS",
+export enum UserPermission {
+  NORMAL = "NORMAL",
+  APPROVED = "APPROVED",
 }

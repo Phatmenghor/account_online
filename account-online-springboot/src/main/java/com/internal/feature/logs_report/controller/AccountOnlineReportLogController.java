@@ -59,15 +59,14 @@ public class AccountOnlineReportLogController {
     public ResponseEntity<ApiResponse<PaginationResponse<AccountOnlineReportLogResponse>>> getLogsWithPagination(
             @Valid @RequestBody AccountOnlineReportLogDto request) {
 
-        log.info("Fetching paginated account online report logs - From: {}, To: {}, Status: {}, Page: {}, Size: {}",
-                request.getFromDate(), request.getToDate(), request.getStatus(),
-                request.getPageNo(), request.getPageSize());
+        log.info("Fetching account online report logs - From: {}, To: {}, Status: {}",
+                request.getFromDate(), request.getToDate(), request.getStatus());
 
         PaginationResponse<AccountOnlineReportLogResponse> pagedResponse =
                 reportLogService.getLogsWithPagination(request);
 
-        log.info("Successfully retrieved paginated account online report logs - Page: {} of {}, Total: {}",
-                pagedResponse.getPageNo(), pagedResponse.getTotalPages(), pagedResponse.getTotalElements());
+        log.info("Successfully retrieved paginated account online report logs - Total: {}",
+                pagedResponse.getTotalElements());
 
         return ResponseEntity.ok(ApiResponse.success(
                 ResponseMessage.REPORT_LOGS_RETRIEVED,

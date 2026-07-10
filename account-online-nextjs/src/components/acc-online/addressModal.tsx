@@ -21,7 +21,6 @@ import { ComboboxSelectProvince } from "../shared/combo-box/combobox-province";
 import { ComboboxSelectDistrict } from "../shared/combo-box/combobox-district";
 import { ComboboxSelectCommune } from "../shared/combo-box/combobox-commune";
 import { ComboboxSelectVillage } from "../shared/combo-box/combobox-village";
-import { toast } from "sonner";
 import { getAddressSelectService } from "@/services/address/selectAddress.service";
 import { AddressSelectReq } from "@/models/address/select-address/selectAddress.request";
 import { PosSelectReq } from "@/models/address/select-pos/selectPos.request";
@@ -203,68 +202,70 @@ const LocationModal = ({
 
           const addressData = await getAddressSelectService(request);
 
-          if (addressData.province) {
-            setSelectedProvince(addressData.province);
-            setFormData((prev) => ({
-              ...prev,
-              currentAddress: {
-                ...prev.currentAddress,
-                province: addressData.province,
-              },
-            }));
-            validateField(
-              "currentAddress",
-              "province",
-              addressData.province.provinceCode,
-            );
-          }
+          if (addressData) {
+            if (addressData.province) {
+              setSelectedProvince(addressData.province);
+              setFormData((prev) => ({
+                ...prev,
+                currentAddress: {
+                  ...prev.currentAddress,
+                  province: addressData.province,
+                },
+              }));
+              validateField(
+                "currentAddress",
+                "province",
+                addressData.province.provinceCode,
+              );
+            }
 
-          if (addressData.district) {
-            setSelectedDistrict(addressData.district);
-            setFormData((prev) => ({
-              ...prev,
-              currentAddress: {
-                ...prev.currentAddress,
-                district: addressData.district,
-              },
-            }));
-            validateField(
-              "currentAddress",
-              "district",
-              addressData.district.districtCode,
-            );
-          }
+            if (addressData.district) {
+              setSelectedDistrict(addressData.district);
+              setFormData((prev) => ({
+                ...prev,
+                currentAddress: {
+                  ...prev.currentAddress,
+                  district: addressData.district,
+                },
+              }));
+              validateField(
+                "currentAddress",
+                "district",
+                addressData.district.districtCode,
+              );
+            }
 
-          if (addressData.commune) {
-            setSelectedCommune(addressData.commune);
-            setFormData((prev) => ({
-              ...prev,
-              currentAddress: {
-                ...prev.currentAddress,
-                commune: addressData.commune,
-              },
-            }));
-            validateField(
-              "currentAddress",
-              "commune",
-              addressData.commune.communeCode,
-            );
-          }
+            if (addressData.commune) {
+              setSelectedCommune(addressData.commune);
+              setFormData((prev) => ({
+                ...prev,
+                currentAddress: {
+                  ...prev.currentAddress,
+                  commune: addressData.commune,
+                },
+              }));
+              validateField(
+                "currentAddress",
+                "commune",
+                addressData.commune.communeCode,
+              );
+            }
 
-          if (addressData.village) {
-            setSelectedVillage(addressData.village);
-            setFormData((prev) => ({
-              ...prev,
-              currentAddress: {
-                ...prev.currentAddress,
-                village: addressData.village,
-              },
-            }));
-            validateField(
-              "currentAddress",
-              "village",
-              addressData.village.villageCode,
-            );
+            if (addressData.village) {
+              setSelectedVillage(addressData.village);
+              setFormData((prev) => ({
+                ...prev,
+                currentAddress: {
+                  ...prev.currentAddress,
+                  village: addressData.village,
+                },
+              }));
+              validateField(
+                "currentAddress",
+                "village",
+                addressData.village.villageCode,
+              );
+            }
           }
         } catch (error: any) {
           console.error("Error fetching address data:", error);
@@ -293,40 +294,42 @@ const LocationModal = ({
 
           const pobData = await getPosSelectService(request);
 
-          if (pobData.province) {
-            setPobProvince(pobData.province);
-            validateField(
-              "placeOfBirth",
-              "province",
-              pobData.province.provinceCode,
-            );
-          }
+          if (pobData) {
+            if (pobData.province) {
+              setPobProvince(pobData.province);
+              validateField(
+                "placeOfBirth",
+                "province",
+                pobData.province.provinceCode,
+              );
+            }
 
-          if (pobData.district) {
-            setPobDistrict(pobData.district);
-            validateField(
-              "placeOfBirth",
-              "district",
-              pobData.district.districtCode,
-            );
-          }
+            if (pobData.district) {
+              setPobDistrict(pobData.district);
+              validateField(
+                "placeOfBirth",
+                "district",
+                pobData.district.districtCode,
+              );
+            }
 
-          if (pobData.commune) {
-            setPobCommune(pobData.commune);
-            validateField(
-              "placeOfBirth",
-              "commune",
-              pobData.commune.communeCode,
-            );
-          }
+            if (pobData.commune) {
+              setPobCommune(pobData.commune);
+              validateField(
+                "placeOfBirth",
+                "commune",
+                pobData.commune.communeCode,
+              );
+            }
 
-          if (pobData.village) {
-            setPobVillage(pobData.village);
-            validateField(
-              "placeOfBirth",
-              "village",
-              pobData.village.villageCode,
-            );
+            if (pobData.village) {
+              setPobVillage(pobData.village);
+              validateField(
+                "placeOfBirth",
+                "village",
+                pobData.village.villageCode,
+              );
+            }
           }
         } catch (error: any) {
           console.error("Error fetching place of birth data:", error);
@@ -496,35 +499,35 @@ const LocationModal = ({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 80 }}
             transition={{ type: "spring", damping: 28, stiffness: 300 }}
-            className="relative bg-white w-full sm:max-w-2xl lg:max-w-3xl rounded-t-2xl sm:rounded-2xl shadow-2xl z-10 flex flex-col"
+            className="relative bg-white w-full sm:max-w-[900px] lg:max-w-[1050px] rounded-t-2xl sm:rounded-2xl shadow-2xl z-10 flex flex-col overflow-hidden"
             style={{ maxHeight: "92vh" }}
           >
-            {/* Orange top accent bar */}
-            <div className="h-1.5 w-full bg-gradient-to-r from-orange-400 via-orange-500 to-amber-500 flex-shrink-0 rounded-t-2xl sm:rounded-t-2xl" />
+            {/* Primary top accent bar */}
+            <div className="h-1.5 w-full bg-primary flex-shrink-0 rounded-t-2xl sm:rounded-t-2xl" />
 
             {/* Header */}
             <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-gray-100 flex-shrink-0">
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 bg-gradient-to-br from-orange-400 to-orange-600 rounded-lg flex items-center justify-center shadow-sm flex-shrink-0">
+                <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center shadow-sm flex-shrink-0">
                   <MapPin
-                    style={{ width: 18, height: 18 }}
-                    className="text-white"
+                    style={{ width: 20, height: 20 }}
+                    className="text-primary-foreground"
                   />
                 </div>
                 <div>
-                  <h2 className="text-base sm:text-lg font-bold text-gray-800 leading-tight">
+                  <h2 className="text-lg sm:text-xl font-bold text-gray-800 leading-tight">
                     {translate("locationInfo")}
                   </h2>
-                  <p className="text-xs text-gray-400 hidden sm:block">
+                  <p className="text-sm text-gray-400 hidden sm:block">
                     {translate("selectAddress")}
                   </p>
                 </div>
               </div>
               <button
                 onClick={onClose}
-                className="w-7 h-7 flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-all flex-shrink-0"
+                className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-all flex-shrink-0"
               >
-                <X className="w-4 h-4" />
+                <X className="w-5 h-5" />
               </button>
             </div>
 
@@ -535,10 +538,10 @@ const LocationModal = ({
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: "auto" }}
                   exit={{ opacity: 0, height: 0 }}
-                  className="flex items-center gap-2 px-4 sm:px-6 py-2.5 bg-orange-50 border-b border-orange-100 flex-shrink-0"
+                  className="flex items-center gap-2 px-4 sm:px-6 py-2.5 bg-primary/5 border-b border-primary/20 flex-shrink-0"
                 >
-                  <Loader2 className="w-4 h-4 animate-spin text-orange-500 flex-shrink-0" />
-                  <span className="text-xs sm:text-sm text-orange-600 font-medium">
+                  <Loader2 className="w-4 h-4 animate-spin text-primary flex-shrink-0" />
+                  <span className="text-sm sm:text-base text-primary font-medium">
                     {translate("loading")}
                   </span>
                 </motion.div>
@@ -546,14 +549,14 @@ const LocationModal = ({
             </AnimatePresence>
 
             {/* Scrollable Content */}
-            <div className="flex-1 overflow-y-auto overscroll-contain px-4 sm:px-6 py-4 space-y-5">
+            <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-4 sm:px-6 py-4 space-y-5">
               {/* === SECTION 1: Current Address === */}
-              <div className="bg-orange-50/50 border border-orange-100 rounded-2xl p-4 sm:p-5">
+              <div className="bg-primary/5 border border-primary/20 rounded-2xl p-4 sm:p-5">
                 <div className="flex items-center gap-2.5 mb-4">
-                  <div className="w-7 h-7 bg-gradient-to-br from-orange-400 to-orange-600 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <Home className="w-3.5 h-3.5 text-white" />
+                  <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center flex-shrink-0">
+                    <Home className="w-4 h-4 text-primary-foreground" />
                   </div>
-                  <h3 className="text-sm sm:text-base font-bold text-gray-700">
+                  <h3 className="text-base sm:text-lg font-bold text-gray-700">
                     <span className="text-red-500 mr-1">*</span>
                     {translate("selectAddress")}
                   </h3>
@@ -562,7 +565,7 @@ const LocationModal = ({
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   {/* Province */}
                   <div>
-                    <label className="flex items-center gap-1.5 text-xs sm:text-sm font-medium text-gray-600 mb-1.5">
+                    <label className="flex items-center gap-1.5 text-sm sm:text-base font-medium text-gray-600 mb-1.5">
                       <span className="text-red-400">*</span>
                       {translate("province")}
                       {isLoadingProvinces && (
@@ -586,7 +589,7 @@ const LocationModal = ({
                       />
                     </div>
                     {validationErrors["currentAddress.province"] && (
-                      <p className="text-xs text-red-500 mt-1">
+                      <p className="text-sm text-red-500 mt-1">
                         {translate("err_province")}
                       </p>
                     )}
@@ -594,7 +597,7 @@ const LocationModal = ({
 
                   {/* District */}
                   <div>
-                    <label className="flex items-center gap-1.5 text-xs sm:text-sm font-medium text-gray-600 mb-1.5">
+                    <label className="flex items-center gap-1.5 text-sm sm:text-base font-medium text-gray-600 mb-1.5">
                       <span className="text-red-400">*</span>
                       {currentLocale === "kh" ? "ស្រុក/ខណ្ឌ" : "District"}
                       {isLoadingDistricts && (
@@ -618,7 +621,7 @@ const LocationModal = ({
                       />
                     </div>
                     {validationErrors["currentAddress.district"] && (
-                      <p className="text-xs text-red-500 mt-1">
+                      <p className="text-sm text-red-500 mt-1">
                         {translate("err_district")}
                       </p>
                     )}
@@ -626,7 +629,7 @@ const LocationModal = ({
 
                   {/* Commune */}
                   <div>
-                    <label className="flex items-center gap-1.5 text-xs sm:text-sm font-medium text-gray-600 mb-1.5">
+                    <label className="flex items-center gap-1.5 text-sm sm:text-base font-medium text-gray-600 mb-1.5">
                       <span className="text-red-400">*</span>
                       {translate("commune")}
                       {isLoadingCommunes && (
@@ -650,7 +653,7 @@ const LocationModal = ({
                       />
                     </div>
                     {validationErrors["currentAddress.commune"] && (
-                      <p className="text-xs text-red-500 mt-1">
+                      <p className="text-sm text-red-500 mt-1">
                         {translate("err_commune")}
                       </p>
                     )}
@@ -658,7 +661,7 @@ const LocationModal = ({
 
                   {/* Village */}
                   <div>
-                    <label className="flex items-center gap-1.5 text-xs sm:text-sm font-medium text-gray-600 mb-1.5">
+                    <label className="flex items-center gap-1.5 text-sm sm:text-base font-medium text-gray-600 mb-1.5">
                       <span className="text-red-400">*</span>
                       {translate("village")}
                       {isLoadingVillages && (
@@ -682,7 +685,7 @@ const LocationModal = ({
                       />
                     </div>
                     {validationErrors["currentAddress.village"] && (
-                      <p className="text-xs text-red-500 mt-1">
+                      <p className="text-sm text-red-500 mt-1">
                         {translate("err_village")}
                       </p>
                     )}
@@ -691,12 +694,12 @@ const LocationModal = ({
               </div>
 
               {/* === SECTION 2: Place of Birth === */}
-              <div className="bg-amber-50/50 border border-amber-100 rounded-2xl p-4 sm:p-5">
+              <div className="bg-primary/5 border border-primary/20 rounded-2xl p-4 sm:p-5">
                 <div className="flex items-center gap-2.5 mb-4">
-                  <div className="w-7 h-7 bg-gradient-to-br from-amber-400 to-orange-500 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <Navigation className="w-3.5 h-3.5 text-white" />
+                  <div className="w-8 h-8 bg-primary/80 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <Navigation className="w-4 h-4 text-primary-foreground" />
                   </div>
-                  <h3 className="text-sm sm:text-base font-bold text-gray-700">
+                  <h3 className="text-base sm:text-lg font-bold text-gray-700">
                     <span className="text-red-500 mr-1">*</span>
                     {translate("selectPlaceOfBirth")}
                   </h3>
@@ -705,7 +708,7 @@ const LocationModal = ({
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   {/* Province */}
                   <div>
-                    <label className="flex items-center gap-1.5 text-xs sm:text-sm font-medium text-gray-600 mb-1.5">
+                    <label className="flex items-center gap-1.5 text-sm sm:text-base font-medium text-gray-600 mb-1.5">
                       <span className="text-red-400">*</span>
                       {translate("province")}
                     </label>
@@ -726,7 +729,7 @@ const LocationModal = ({
                       />
                     </div>
                     {validationErrors["placeOfBirth.province"] && (
-                      <p className="text-xs text-red-500 mt-1">
+                      <p className="text-sm text-red-500 mt-1">
                         {translate("err_province")}
                       </p>
                     )}
@@ -734,7 +737,7 @@ const LocationModal = ({
 
                   {/* District */}
                   <div>
-                    <label className="flex items-center gap-1.5 text-xs sm:text-sm font-medium text-gray-600 mb-1.5">
+                    <label className="flex items-center gap-1.5 text-sm sm:text-base font-medium text-gray-600 mb-1.5">
                       <span className="text-red-400">*</span>
                       {translate("district")}
                     </label>
@@ -755,7 +758,7 @@ const LocationModal = ({
                       />
                     </div>
                     {validationErrors["placeOfBirth.district"] && (
-                      <p className="text-xs text-red-500 mt-1">
+                      <p className="text-sm text-red-500 mt-1">
                         {translate("err_district")}
                       </p>
                     )}
@@ -763,7 +766,7 @@ const LocationModal = ({
 
                   {/* Commune */}
                   <div>
-                    <label className="flex items-center gap-1.5 text-xs sm:text-sm font-medium text-gray-600 mb-1.5">
+                    <label className="flex items-center gap-1.5 text-sm sm:text-base font-medium text-gray-600 mb-1.5">
                       <span className="text-red-400">*</span>
                       {translate("commune")}
                     </label>
@@ -784,7 +787,7 @@ const LocationModal = ({
                       />
                     </div>
                     {validationErrors["placeOfBirth.commune"] && (
-                      <p className="text-xs text-red-500 mt-1">
+                      <p className="text-sm text-red-500 mt-1">
                         {translate("err_commune")}
                       </p>
                     )}
@@ -792,7 +795,7 @@ const LocationModal = ({
 
                   {/* Village */}
                   <div>
-                    <label className="flex items-center gap-1.5 text-xs sm:text-sm font-medium text-gray-600 mb-1.5">
+                    <label className="flex items-center gap-1.5 text-sm sm:text-base font-medium text-gray-600 mb-1.5">
                       <span className="text-red-400">*</span>
                       {translate("village")}
                     </label>
@@ -813,7 +816,7 @@ const LocationModal = ({
                       />
                     </div>
                     {validationErrors["placeOfBirth.village"] && (
-                      <p className="text-xs text-red-500 mt-1">
+                      <p className="text-sm text-red-500 mt-1">
                         {translate("err_village")}
                       </p>
                     )}
@@ -823,18 +826,18 @@ const LocationModal = ({
             </div>
 
             {/* Footer Buttons */}
-            <div className="flex justify-end gap-3 px-4 sm:px-6 py-4 bg-gray-50/80 border-t border-gray-100 rounded-b-none sm:rounded-b-2xl flex-shrink-0">
+            <div className="flex flex-col sm:flex-row sm:justify-end gap-3 px-4 sm:px-6 py-4 bg-gray-50/80 border-t border-gray-100 rounded-b-none sm:rounded-b-2xl flex-shrink-0">
               <Button
                 onClick={onClose}
-                className="sm:px-6 py-2.5 bg-white border-2 border-gray-200 text-gray-600 font-semibold rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-all shadow-sm"
+                className="w-full sm:w-auto h-auto min-h-12 py-3 px-6 text-base bg-white border-2 border-gray-200 text-gray-600 font-semibold rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-all shadow-sm"
               >
-                {translate("close")}
+                <span className="whitespace-normal leading-tight text-center">{translate("close")}</span>
               </Button>
               <Button
                 onClick={handleSubmit}
-                className="sm:px-8 py-2.5 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-semibold rounded-lg transition-all shadow-sm"
+                className="w-full sm:w-auto h-auto min-h-12 py-3 px-8 text-base bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-lg transition-all shadow-sm"
               >
-                {translate("submit")}
+                <span className="whitespace-normal leading-tight text-center">{translate("submit")}</span>
               </Button>
             </div>
           </motion.div>
