@@ -80,7 +80,7 @@ cpb:
     username: cpbaml
     password: aml123!@#
   t24:
-    url: http://192.168.101.21:7003
+    url: http://tap.cambodiapostbank.com.kh:7003
     username: APPLOS
     password: CPlos@123!@#
   mb:
