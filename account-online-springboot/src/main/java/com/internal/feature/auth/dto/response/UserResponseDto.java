@@ -29,3 +29,4 @@ public class UserResponseDto {
     private boolean forcePasswordChange;
     private boolean passwordExpired;
 }
+

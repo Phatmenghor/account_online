@@ -1,8 +1,8 @@
 package com.internal.feature.master_data.service.impl;
 
 import com.internal.enumation.StatusData;
-import com.internal.exceptions.error.custom.DuplicateNameException;
-import com.internal.exceptions.error.custom.NotFoundException;
+import com.internal.shared.exception.custom.DuplicateNameException;
+import com.internal.shared.exception.custom.NotFoundException;
 import com.internal.feature.master_data.dto.request.GetAllLegalTypeRequest;
 import com.internal.feature.master_data.dto.request.LegalTypeCreateRequestDto;
 import com.internal.feature.master_data.dto.request.LegalTypeUpdateRequestDto;
@@ -93,3 +93,10 @@ public class LegalTypeServiceImpl implements LegalTypeService {
         return mapper.toDto(doc);
     }
 }
+
+
+
+
+
+
+

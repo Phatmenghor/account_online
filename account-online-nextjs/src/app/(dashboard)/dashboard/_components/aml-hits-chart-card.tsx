@@ -22,7 +22,7 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { ChartSkeleton } from "./chart-skeleton";
-import { DailyCountItem } from "@/models/dashboard/dashboard.model";
+import { DailyCountItem } from "@/types/dashboard/dashboard.model";
 
 ChartJS.register(LineController, CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Legend, Filler);
 
@@ -133,3 +133,4 @@ export function AmlHitsChartCard({ data, loading }: AmlHitsChartCardProps) {
     </Card>
   );
 }
+

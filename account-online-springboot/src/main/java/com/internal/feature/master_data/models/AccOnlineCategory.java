@@ -31,3 +31,5 @@ public class AccOnlineCategory extends BaseEntity {
     @Column(name = "lookup_desc", length = 200)
     private String lookupDesc;
 }
+
+

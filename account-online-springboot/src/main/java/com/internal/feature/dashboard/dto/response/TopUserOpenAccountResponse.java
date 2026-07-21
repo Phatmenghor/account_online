@@ -15,3 +15,4 @@ public class TopUserOpenAccountResponse {
     private String branch;
     private long count;
 }
+

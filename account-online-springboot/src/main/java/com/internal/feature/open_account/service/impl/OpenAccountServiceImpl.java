@@ -1,17 +1,17 @@
 package com.internal.feature.open_account.service.impl;
 
 import com.internal.enumation.AccountOpeningRequestStatusEnum;
-import com.internal.feature.open_account.dto.OpenAccountContext;
+import com.internal.feature.open_account.dto.request.OpenAccountContext;
 import com.internal.feature.open_account.dto.request.CustomerCreationResult;
 import com.internal.feature.open_account.dto.request.CustomerRequest;
 import com.internal.feature.open_account.dto.response.OpenAccountResponseDto;
 import com.internal.feature.open_account.event.AccountOpenedEvent;
-import com.internal.feature.open_account.facade.BankingService;
-import com.internal.feature.open_account.facade.ComplianceService;
-import com.internal.feature.open_account.facade.ReportingService;
+import com.internal.feature.open_account.service.BankingService;
+import com.internal.feature.open_account.service.ComplianceService;
+import com.internal.feature.open_account.service.ReportingService;
 import com.internal.feature.open_account.service.OpenAccountService;
-import com.internal.utils.SecurityUtils;
-import com.internal.utils.constants.AppConstants;
+import com.internal.shared.util.SecurityUtils;
+import com.internal.shared.constant.AppConstants;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -27,7 +27,6 @@ public class OpenAccountServiceImpl implements OpenAccountService {
     private final ComplianceService complianceService;
     private final ReportingService reportingService;
     private final ApplicationEventPublisher eventPublisher;
-    private final SecurityUtils securityUtils;
 
     @Override
     @Transactional
@@ -37,7 +36,10 @@ public class OpenAccountServiceImpl implements OpenAccountService {
 
         String submittedBy = "Customer";
         try {
-            submittedBy = securityUtils.getCurrentUser().getUsername();
+            String username = SecurityUtils.getCurrentUsername();
+            if (username != null) {
+                submittedBy = username;
+            }
         } catch (Exception ignored) {}
 
         log.info("Processing account opening | Legal ID: {} | Submitted by: {}", legalId, submittedBy);
@@ -122,3 +124,10 @@ public class OpenAccountServiceImpl implements OpenAccountService {
         }
     }
 }
+
+
+
+
+
+
+

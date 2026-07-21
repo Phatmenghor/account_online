@@ -9,3 +9,4 @@ public class Base64UploadRequest {
     private String type;
     private String legalId;
 }
+

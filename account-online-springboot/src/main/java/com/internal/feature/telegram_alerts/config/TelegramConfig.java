@@ -12,3 +12,4 @@ public class TelegramConfig {
     private String chatId;
     private boolean enabled = true;
 }
+

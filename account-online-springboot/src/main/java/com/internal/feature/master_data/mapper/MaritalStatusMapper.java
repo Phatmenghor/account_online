@@ -37,3 +37,9 @@ public interface MaritalStatusMapper {
         return response;
     }
 }
+
+
+
+
+
+

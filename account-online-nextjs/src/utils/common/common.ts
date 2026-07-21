@@ -29,6 +29,19 @@ export function formatValue(value: any) {
   return value === null || value === undefined || value === "" ? "---" : value;
 }
 
+const UNREACHABLE_IMAGE_DOMAINS = ["via.placeholder.com"];
+
+export function sanitizeImageUrl(
+  url: string | null | undefined,
+  fallback: string
+): string {
+  if (!url) return fallback;
+  if (UNREACHABLE_IMAGE_DOMAINS.some((domain) => url.includes(domain))) {
+    return fallback;
+  }
+  return url;
+}
+
 export const indexDisplay = (
   pageNo: number,
   pageSize: number,

@@ -1,4 +1,4 @@
-import { CreateOpenAccountReq } from "@/models/open-account/openAccount.request";
+import { CreateOpenAccountReq } from "@/features/account-opening/types/openAccount.request";
 import { axiosClientWithAuth, ACCOUNT_CREATION_TIMEOUT } from "@/utils/axios";
 import axios from "axios";
 
@@ -26,3 +26,5 @@ export async function createOpenAccountService(request: CreateOpenAccountReq) {
     }
   }
 }
+
+

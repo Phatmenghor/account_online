@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { isAuthenticated } from "@/utils/local-storage/token";
-import { OpenAccountContent } from "@/components/acc-online/open-account-content";
+import { OpenAccountContent } from "@/features/account-opening/components/open-account-content";
 
 // Staff-assisted account opening — requires login.
 export default function StaffOpenAccountPage() {
@@ -21,3 +21,4 @@ export default function StaffOpenAccountPage() {
 
   return <OpenAccountContent isPublic={false} />;
 }
+

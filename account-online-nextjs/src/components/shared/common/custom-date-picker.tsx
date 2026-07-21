@@ -131,7 +131,7 @@ export function CustomDatePicker({
     const start = new Date(firstDay);
     start.setDate(start.getDate() - firstDay.getDay());
 
-    const days = [];
+    const days: any[] = [];
     const cur = new Date(start);
     for (let i = 0; i < 35; i++) {
       days.push({
@@ -149,7 +149,7 @@ export function CustomDatePicker({
 
   const generateYearOptions = () => {
     const currentYear = new Date().getFullYear();
-    const years = [];
+    const years: string[] = [];
     for (let i = currentYear - 50; i <= currentYear + 50; i++) {
       years.push(i.toString());
     }

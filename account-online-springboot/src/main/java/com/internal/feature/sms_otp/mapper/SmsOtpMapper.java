@@ -17,3 +17,9 @@ public interface SmsOtpMapper {
     @Mapping(target = "message", constant = "OTP verified successfully")
     VerifyOtpResponse toVerifyOtpResponse(OtpSms otpSms);
 }
+
+
+
+
+
+

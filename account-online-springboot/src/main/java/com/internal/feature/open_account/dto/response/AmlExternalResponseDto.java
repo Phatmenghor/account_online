@@ -30,3 +30,4 @@ public class AmlExternalResponseDto {
     @JsonProperty("TrxnID")
     private String trxnID;
 }
+

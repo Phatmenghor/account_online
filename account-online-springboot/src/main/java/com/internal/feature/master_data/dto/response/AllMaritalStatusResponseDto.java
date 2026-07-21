@@ -18,3 +18,4 @@ public class AllMaritalStatusResponseDto {
     private boolean last;
 }
 
+

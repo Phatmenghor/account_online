@@ -20,3 +20,9 @@ public interface BranchRepository extends JpaRepository<Branch, Long> {
            "OR LOWER(b.branchCode) LIKE LOWER(CONCAT('%', :search, '%')))")
     Page<Branch> findBySearch(@Param("search") String search, Pageable pageable);
 }
+
+
+
+
+
+

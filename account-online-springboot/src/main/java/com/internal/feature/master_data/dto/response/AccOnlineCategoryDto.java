@@ -17,3 +17,4 @@ public class AccOnlineCategoryDto {
     private String lookupName;
     private String lookupDesc;
 }
+

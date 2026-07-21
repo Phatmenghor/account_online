@@ -6,9 +6,9 @@ import com.internal.feature.auth.models.Role;
 import com.internal.feature.auth.models.UserEntity;
 import com.internal.feature.auth.repository.RoleRepository;
 import com.internal.feature.auth.repository.UserRepository;
+import com.internal.config.AppProperties;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -25,15 +25,7 @@ public class DefaultUserInitializer implements CommandLineRunner {
     private final RoleRepository roleRepository;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-
-    @Value("${app.default-users.create:true}")
-    private boolean createDefaultUsers;
-
-    @Value("${app.super.idCard:phatmenghor19@gmail.com}")
-    private String superCard;
-
-    @Value("${app.super.password:88889999}")
-    private String superPassword;
+    private final AppProperties appProperties;
 
     @Override
     public void run(String... args) {
@@ -41,7 +33,7 @@ public class DefaultUserInitializer implements CommandLineRunner {
         
         initializeRoles();
         
-        if (createDefaultUsers) {
+        if (appProperties.getDefaultUsers().isCreate()) {
             createDefaultSuperAdminUser();
         } else {
             log.info("Default user creation is disabled");
@@ -62,6 +54,9 @@ public class DefaultUserInitializer implements CommandLineRunner {
     }
 
     private void createDefaultSuperAdminUser() {
+        String superCard = appProperties.getSuperUser().getIdCard();
+        String superPassword = appProperties.getSuperUser().getPassword();
+
         if (userRepository.existsByUsername(superCard)) {
             log.info("Developer user already exists: {}", superCard);
             return;
@@ -83,3 +78,8 @@ public class DefaultUserInitializer implements CommandLineRunner {
         log.info("Created developer user: {}", superCard);
     }
 }
+
+
+
+
+

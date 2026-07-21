@@ -6,7 +6,7 @@ import { DeleteConfirmationDialog } from "@/components/shared/dialog/dialog-dele
 import ResetPasswordModal from "@/components/shared/dialog/dialog-reset-password";
 import { CustomPagination } from "@/components/shared/pagination/custom-pagination";
 import { DataTable } from "@/components/shared/table/data-table";
-import { createUserTableColumns } from "@/components/shared/table/table-content";
+import { createUserTableColumns } from "@/features/user/table/table-content";
 import { AppToast } from "@/components/shared/toast/app-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -14,23 +14,23 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { ROUTES } from "@/constants/AppRoutes/routes";
 import { usePagination } from "@/hooks/use-pagination";
-import { AllUserModel, UserModel } from "@/models/user/user.response";
+import { AllUserModel, UserModel } from "@/features/user/types/user.response";
 import {
   createUserService,
   deleteUserService,
   getUsersService,
   updateUserService,
-} from "@/services/dashboard/user/user.service";
+} from "@/features/user/services/user.service";
 import { useDebounce } from "@/utils/debounce/debounce";
 
 import { Search } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { startTransition, useCallback, useEffect, useState } from "react";
-import ModalUser from "@/components/shared/modal/user-modal";
-import { CreateUserReq, UpdateUserReq } from "@/models/user/user.request";
+import ModalUser from "@/features/user/components/user-modal";
+import { CreateUserReq, UpdateUserReq } from "@/features/user/types/user.request";
 import Loading from "@/components/shared/common/loading";
-import { UserViewModal } from "@/components/shared/modal/user-detail-modal";
+import { UserViewModal } from "@/features/user/components/user-detail-modal";
 import { ModalMode } from "@/constants/AppResource/display-list/enum/mode";
 import { getUserInfo } from "@/utils/local-storage/userInfo";
 import {
@@ -444,3 +444,5 @@ export default function UserPage() {
     </Suspense>
   );
 }
+
+

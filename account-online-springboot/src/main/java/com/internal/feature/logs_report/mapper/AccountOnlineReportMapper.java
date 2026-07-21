@@ -4,7 +4,7 @@ import com.internal.enumation.OpenAccStatusEnum;
 import com.internal.feature.logs_report.dto.response.AccountOnlineReportLogResponse;
 import com.internal.feature.logs_report.dto.response.AccountOnlineReportProjection;
 import com.internal.feature.logs_report.dto.response.AccountOnlineReportResponse;
-import com.internal.feature.logs_report.model.AccountOnlineReportLog;
+import com.internal.feature.logs_report.models.AccountOnlineReportLog;
 import org.mapstruct.Mapper;
 
 import java.time.LocalDate;
@@ -49,3 +49,7 @@ public interface AccountOnlineReportMapper {
             .collect(Collectors.toList());
     }
 }
+
+
+
+

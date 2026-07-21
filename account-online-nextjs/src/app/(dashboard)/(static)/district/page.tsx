@@ -1,5 +1,11 @@
 "use client";
 
+import { useDistrictState } from '@/features/master-data/store/state/district-state';
+import { setPageNo, setSearchFilter, setStatusFilter } from '@/features/master-data/store/slices/district-slice';
+import { fetchAllDistrictService, createDistrictThunk, updateDistrictThunk, deleteDistrictThunk } from '@/features/master-data/store/thunks/district-thunks';
+import { useAppDispatch } from '@/store/store';
+
+
 import { Suspense } from "react";
 import { DeleteConfirmationDialog } from "@/components/shared/dialog/dialog-delete";
 import { CustomPagination } from "@/components/shared/pagination/custom-pagination";
@@ -19,27 +25,28 @@ import { startTransition, useCallback, useEffect, useState } from "react";
 import {
   AllDistrictModel,
   DistrictModel,
-} from "@/models/static/district/district.response";
+} from "@/features/master-data/types/district/district.response";
 import Loading from "@/components/shared/common/loading";
-import { createDistrictTableColumns } from "@/components/shared/table/district-content";
-import DistrictViewModal from "@/components/shared/modal/district-detail-modal";
-import ModalDistrict from "@/components/shared/modal/district-modal";
+import { createDistrictTableColumns } from "@/features/master-data/table/district-content";
+import DistrictViewModal from "@/features/master-data/components/district-detail-modal";
+import ModalDistrict from "@/features/master-data/components/district-modal";
 import { ModalMode } from "@/constants/AppResource/display-list/enum/mode";
 import {
   CreateDistrictReq,
   UpdateDistrictReq,
-} from "@/models/static/district/district.request";
+} from "@/features/master-data/types/district/district.request";
 import {
   createDistrictService,
   deleteDistrictService,
   getAllDistrictService,
   updateDistrictService,
-} from "@/services/dashboard/district/district.service";
+} from "@/features/master-data/services/district/district.service";
 
 function DistrictPageContent() {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [districts, setDistricts] = useState<AllDistrictModel | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const dispatch = useAppDispatch();
+  const { districtData: districts, isLoading, filters } = useDistrictState();
+  const searchQuery = filters.search;
+  const statusFilter = filters.status;
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedDistrict, setSelectedDistrict] =
     useState<DistrictModel | null>(null);
@@ -67,18 +74,15 @@ function DistrictPageContent() {
   }, [searchParams, updateUrlWithPage]);
 
   const loadDistricts = useCallback(async () => {
-    setIsLoading(true);
     try {
-      const response = await getAllDistrictService({
+      dispatch(fetchAllDistrictService({
         search: debouncedSearchQuery,
         pageNo: currentPage,
         pageSize: 15,
-      });
-      setDistricts(response);
+      }));
     } catch (error: any) {
       console.error("Failed to fetch districts: ", error);
     } finally {
-      setIsLoading(false);
     }
   }, [debouncedSearchQuery, currentPage]);
 
@@ -88,42 +92,17 @@ function DistrictPageContent() {
 
   // Simplified search change handler - just updates the state, debouncing handles the rest
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
+    dispatch(setSearchFilter(e.target.value));
   };
 
   const handleSaveDistrict = async (
-    formData: CreateDistrictReq | { id: number; updates: UpdateDistrictReq },
+    formData: CreateDistrictReq | { id: number; updates: UpdateDistrictReq }
   ) => {
     setIsSubmitting(true);
     try {
       if (mode === ModalMode.CREATE_MODE) {
         const createData = formData as CreateDistrictReq;
-
-        const response = await createDistrictService({
-          districtCode: createData.districtCode,
-          districtEn: createData.districtEn,
-          districtKh: createData.districtKh,
-          provinceCode: createData.provinceCode,
-        });
-
-        // Optimistic update
-        setDistricts((prev: any) =>
-          prev
-            ? {
-                ...prev,
-                content: [response, ...prev.content],
-                totalElements: prev.totalElements + 1,
-              }
-            : {
-                content: [response],
-                pageNo: 1,
-                pageSize: 10,
-                totalElements: 1,
-                totalPages: 1,
-                last: true,
-              },
-        );
-
+        await dispatch(createDistrictThunk(createData)).unwrap();
         startTransition(() => {
           AppToast({
             type: "success",
@@ -132,33 +111,13 @@ function DistrictPageContent() {
           });
         });
       } else if (mode === ModalMode.UPDATE_MODE) {
-        const updateData = formData as {
-          id: number;
-          updates: UpdateDistrictReq;
-        };
-
+        const updateData = formData as { id: number; updates: UpdateDistrictReq };
         if (!updateData.id) {
           console.error("Missing district id in update form");
           setIsSubmitting(false);
           return;
         }
-
-        const response = await updateDistrictService(
-          updateData.id,
-          updateData.updates,
-        );
-
-        setDistricts((prev) =>
-          prev
-            ? {
-                ...prev,
-                content: prev.content.map((district) =>
-                  district.id === updateData.id ? response : district,
-                ),
-              }
-            : prev,
-        );
-
+        await dispatch(updateDistrictThunk({ id: updateData.id, updates: updateData.updates })).unwrap();
         startTransition(() => {
           AppToast({
             type: "success",
@@ -167,14 +126,13 @@ function DistrictPageContent() {
           });
         });
       }
-
       setIsModalOpen(false);
       setSelectedDistrict(null);
       loadDistricts();
     } catch (err: any) {
       AppToast({
         type: "error",
-        message: "Failed to save district",
+        message: "Failed to save district status",
       });
     } finally {
       setIsSubmitting(false);
@@ -185,7 +143,7 @@ function DistrictPageContent() {
     if (!selectedDistrict) return;
     setIsSubmitting(true);
     try {
-      await deleteDistrictService(selectedDistrict.id);
+      await dispatch(deleteDistrictThunk(selectedDistrict.id)).unwrap();
       AppToast({
         type: "success",
         message: "District deleted successfully",

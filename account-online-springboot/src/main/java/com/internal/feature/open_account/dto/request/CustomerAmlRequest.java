@@ -92,3 +92,4 @@ public class CustomerAmlRequest {
     @JsonProperty("CUSTOMER_RATING")
     private String customerRating;
 }
+

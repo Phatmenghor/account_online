@@ -17,3 +17,4 @@ public class MaritalStatusCreateRequestDto {
     private String nameKh;
     private StatusData status = StatusData.ACTIVE;
 }
+

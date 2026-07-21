@@ -19,7 +19,7 @@ import { debounce } from "@/utils/debounce/debounce";
 import { Check, ChevronsUpDown, Loader2 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useInView } from "react-intersection-observer";
-import { getUsersService } from "@/services/dashboard/user/user.service";
+import { getUsersService } from "@/features/user/services/user.service";
 
 interface ComboboxSelectedProps {
   dataSelect: any | null;
@@ -176,3 +176,4 @@ export function ComboboxSelectUser({
     </Popover>
   );
 }
+

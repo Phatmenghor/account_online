@@ -1,5 +1,11 @@
 "use client";
 
+import { useProvinceState } from '@/features/master-data/store/state/province-state';
+import { setPageNo, setSearchFilter, setStatusFilter } from '@/features/master-data/store/slices/province-slice';
+import { fetchAllProvinceService, createProvinceThunk, updateProvinceThunk, deleteProvinceThunk } from '@/features/master-data/store/thunks/province-thunks';
+import { useAppDispatch } from '@/store/store';
+
+
 import { Suspense } from "react";
 import { DeleteConfirmationDialog } from "@/components/shared/dialog/dialog-delete";
 import { CustomPagination } from "@/components/shared/pagination/custom-pagination";
@@ -21,27 +27,28 @@ import { ModalMode } from "@/constants/AppResource/display-list/enum/mode";
 import {
   AllProvinceModel,
   ProvinceModel,
-} from "@/models/static/province/province.response";
-import ProvinceViewModal from "@/components/shared/modal/province-detail-modal";
-import ModalProvince from "@/components/shared/modal/province-modal";
-import { createProvinceTableColumns } from "@/components/shared/table/province-content";
+} from "@/features/master-data/types/province/province.response";
+import ProvinceViewModal from "@/features/master-data/components/province-detail-modal";
+import ModalProvince from "@/features/master-data/components/province-modal";
+import { createProvinceTableColumns } from "@/features/master-data/table/province-content";
 import {
   createProvinceService,
   deleteProvinceService,
   getAllProviceService,
   updateProvinceService,
-} from "@/services/dashboard/province/province.service";
+} from "@/features/master-data/services/province/province.service";
 import {
   CreateProvinceReq,
   UpdateProvinceReq,
-} from "@/models/static/province/province.request";
+} from "@/features/master-data/types/province/province.request";
 
 function ProvincePageContent() {
-  const [searchQuery, setSearchQuery] = useState("");
+  const dispatch = useAppDispatch();
+  const { provinceData: provinces, isLoading, filters } = useProvinceState();
+  const searchQuery = filters.search;
+  const statusFilter = filters.status;
   const [province, setProvince] = useState<AllProvinceModel | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [statusFilter, setStatusFilter] = useState<string>("all");
   const [selectedProvince, setSelectedProvince] =
     useState<ProvinceModel | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -68,7 +75,6 @@ function ProvincePageContent() {
   }, [searchParams, updateUrlWithPage]);
 
   const loadReferences = useCallback(async () => {
-    setIsLoading(true);
     try {
       const response = await getAllProviceService({
         search: debouncedSearchQuery,
@@ -80,7 +86,6 @@ function ProvincePageContent() {
     } catch (error: any) {
       console.error("Failed to fetch references: ", error);
     } finally {
-      setIsLoading(false);
     }
   }, [debouncedSearchQuery, statusFilter, currentPage]);
 
@@ -90,41 +95,17 @@ function ProvincePageContent() {
 
   // Simplified search change handler - just updates the state, debouncing handles the rest
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
+    dispatch(setSearchFilter(e.target.value));
   };
 
   const handleSaveProvince = async (
-    formData: CreateProvinceReq | { id: number; updates: UpdateProvinceReq },
+    formData: CreateProvinceReq | { id: number; updates: UpdateProvinceReq }
   ) => {
     setIsSubmitting(true);
     try {
       if (mode === ModalMode.CREATE_MODE) {
         const createData = formData as CreateProvinceReq;
-
-        const response = await createProvinceService({
-          provinceCode: createData.provinceCode,
-          provinceEn: createData.provinceEn,
-          provinceKh: createData.provinceKh,
-        });
-
-        // Optimistic update
-        setProvince((prev: any) =>
-          prev
-            ? {
-                ...prev,
-                content: [response, ...prev.content],
-                totalElements: prev.totalElements + 1,
-              }
-            : {
-                content: [response],
-                pageNo: 1,
-                pageSize: 10,
-                totalElements: 1,
-                totalPages: 1,
-                last: true,
-              },
-        );
-
+        await dispatch(createProvinceThunk(createData)).unwrap();
         startTransition(() => {
           AppToast({
             type: "success",
@@ -133,33 +114,13 @@ function ProvincePageContent() {
           });
         });
       } else if (mode === ModalMode.UPDATE_MODE) {
-        const updateData = formData as {
-          id: number;
-          updates: UpdateProvinceReq;
-        };
-
+        const updateData = formData as { id: number; updates: UpdateProvinceReq };
         if (!updateData.id) {
-          console.error("Missing reference id in update form");
+          console.error("Missing province id in update form");
           setIsSubmitting(false);
           return;
         }
-
-        const response = await updateProvinceService(
-          updateData.id,
-          updateData.updates,
-        );
-
-        setProvince((prev) =>
-          prev
-            ? {
-                ...prev,
-                content: prev.content.map((province) =>
-                  province.id === updateData.id ? response : province,
-                ),
-              }
-            : prev,
-        );
-
+        await dispatch(updateProvinceThunk({ id: updateData.id, updates: updateData.updates })).unwrap();
         startTransition(() => {
           AppToast({
             type: "success",
@@ -168,14 +129,13 @@ function ProvincePageContent() {
           });
         });
       }
-
       setIsModalOpen(false);
       setSelectedProvince(null);
       loadReferences();
     } catch (err: any) {
       AppToast({
         type: "error",
-        message: "Failed to save province",
+        message: "Failed to save province status",
       });
     } finally {
       setIsSubmitting(false);
@@ -186,7 +146,7 @@ function ProvincePageContent() {
     if (!selectedProvince) return;
     setIsSubmitting(true);
     try {
-      await deleteProvinceService(selectedProvince.id);
+      await dispatch(deleteProvinceThunk(selectedProvince.id)).unwrap();
       AppToast({
         type: "success",
         message: "Province deleted successfully",
@@ -332,3 +292,4 @@ export default function ReferencePage() {
     </Suspense>
   );
 }
+

@@ -32,3 +32,9 @@ public interface CommuneMapper {
     ClsCommuneDto toClsDto(Commune commune);
     List<ClsCommuneDto> toClsDtoList(List<Commune> communes);
 }
+
+
+
+
+
+

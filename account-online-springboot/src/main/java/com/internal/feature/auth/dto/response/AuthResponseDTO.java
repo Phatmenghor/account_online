@@ -5,11 +5,13 @@ import lombok.Data;
 @Data
 public class AuthResponseDTO {
     private String accessToken;
+    private String refreshToken;
     private String tokenType = "Bearer ";
     private UserResponseDto userRole;
 
-    public AuthResponseDTO(String accessToken, UserResponseDto userRole) {
+    public AuthResponseDTO(String accessToken, String refreshToken, UserResponseDto userRole) {
         this.accessToken = accessToken;
+        this.refreshToken = refreshToken;
         this.userRole = userRole;
     }
 
@@ -18,3 +20,4 @@ public class AuthResponseDTO {
         return tokenType + accessToken;
     }
 }
+

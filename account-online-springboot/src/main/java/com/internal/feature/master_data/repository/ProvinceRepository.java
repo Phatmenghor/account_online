@@ -22,3 +22,9 @@ public interface ProvinceRepository extends JpaRepository<Province, Long> {
            "OR LOWER(p.provinceCode) LIKE LOWER(CONCAT('%', :search, '%')))")
     Page<Province> findBySearch(@Param("search") String search, Pageable pageable);
 }
+
+
+
+
+
+

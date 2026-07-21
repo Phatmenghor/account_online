@@ -1,6 +1,6 @@
 package com.internal.feature.logs_report.service;
 
-import com.internal.feature.logs_report.model.RequestLog;
+import com.internal.feature.logs_report.models.RequestLog;
 import com.internal.feature.logs_report.repository.RequestLogRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -44,3 +44,9 @@ public class RequestLogService {
         return deleted;
     }
 }
+
+
+
+
+
+

@@ -1,6 +1,6 @@
 package com.internal.feature.master_data.service.impl;
 
-import com.internal.exceptions.error.custom.NotFoundException;
+import com.internal.shared.exception.custom.NotFoundException;
 import com.internal.feature.master_data.dto.request.AllMasterDataRequest;
 import com.internal.feature.master_data.dto.request.ProvinceRequestDto;
 import com.internal.feature.master_data.dto.response.ProvinceResponseDto;
@@ -8,7 +8,7 @@ import com.internal.feature.master_data.mapper.ProvinceMapper;
 import com.internal.feature.master_data.models.Province;
 import com.internal.feature.master_data.repository.ProvinceRepository;
 import com.internal.feature.master_data.service.ProvinceService;
-import com.internal.utils.pagination.PaginationResponse;
+import com.internal.shared.pagination.PaginationResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -78,3 +78,11 @@ public class ProvinceServiceImpl implements ProvinceService {
         provinceRepository.delete(province);
     }
 }
+
+
+
+
+
+
+
+

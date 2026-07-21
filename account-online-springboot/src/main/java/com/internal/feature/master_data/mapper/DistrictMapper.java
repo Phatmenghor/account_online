@@ -30,3 +30,9 @@ public interface DistrictMapper {
     ClsDistrictDto toClsDto(District district);
     List<ClsDistrictDto> toClsDtoList(List<District> districts);
 }
+
+
+
+
+
+

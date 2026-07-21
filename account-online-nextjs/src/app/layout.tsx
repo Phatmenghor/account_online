@@ -5,8 +5,8 @@ import PageProgressBar from "@/components/shared/progressbar/Nprogressbar/global
 import localFont from "next/font/local";
 import "@/styles/globals.css";
 import { type Locale } from "@/i18n/request";
-import { LocaleProvider } from "@/context/provider/local-provider";
-import { ClientProviders } from "@/context/provider/client-provider";
+import { LocaleProvider } from "@/providers/local-provider";
+import { ClientProviders } from "@/providers/client-provider";
 import { Suspense } from "react";
 
 // Define Kantumruy Pro font
@@ -90,3 +90,4 @@ export default async function RootLayout({
     </html>
   );
 }
+

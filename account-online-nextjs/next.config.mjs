@@ -6,14 +6,6 @@ const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 const nextConfig = {
   output: "standalone",
 
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-
-  typescript: {
-    ignoreBuildErrors: true,
-  },
-
   images: {
     unoptimized: true,
     remotePatterns: [
@@ -26,6 +18,12 @@ const nextConfig = {
         hostname: "**",
       },
     ],
+  },
+
+  experimental: {
+    serverActions: {
+      bodySizeLimit: "10mb",
+    },
   },
 
   trailingSlash: false,

@@ -1,5 +1,11 @@
 "use client";
 
+import { useMaritalState } from '@/features/master-data/store/state/marital-state';
+import { setPageNo, setSearchFilter, setStatusFilter } from '@/features/master-data/store/slices/marital-slice';
+import { fetchAllMaritalService, createMaritalThunk, updateMaritalThunk, deleteMaritalThunk } from '@/features/master-data/store/thunks/marital-thunks';
+import { useAppDispatch } from '@/store/store';
+
+
 import { Suspense } from "react";
 import { DeleteConfirmationDialog } from "@/components/shared/dialog/dialog-delete";
 import { CustomPagination } from "@/components/shared/pagination/custom-pagination";
@@ -19,23 +25,23 @@ import { startTransition, useCallback, useEffect, useState } from "react";
 import {
   AllMaritalModel,
   MaritalModel,
-} from "@/models/static/marital/marital.response";
+} from "@/features/master-data/types/marital/marital.response";
 import Loading from "@/components/shared/common/loading";
-import { createMaritalTableColumns } from "@/components/shared/table/marital-content";
-import MaritalViewModal from "@/components/shared/modal/marital-detail-modal";
-import ModalMarital from "@/components/shared/modal/marital-modal";
+import { createMaritalTableColumns } from "@/features/master-data/table/marital-content";
+import MaritalViewModal from "@/features/master-data/components/marital-detail-modal";
+import ModalMarital from "@/features/master-data/components/marital-modal";
 import { ModalMode } from "@/constants/AppResource/display-list/enum/mode";
-import { CreateMaritalReq, UpdateMaritalReq } from "@/models/static/marital/marital.request";
-import { createMaritalService, deleteMaritalService, getAllMaritalService, updateMaritalService } from "@/services/dashboard/marital/marital.service";
+import { CreateMaritalReq, UpdateMaritalReq } from "@/features/master-data/types/marital/marital.request";
+import { createMaritalService, deleteMaritalService, getAllMaritalService, updateMaritalService } from "@/features/master-data/services/marital/marital.service";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { STATUS_USER_OPTIONS } from "@/constants/AppResource/filter/status";
 
 function MaritalPageContent() {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [maritals, setMaritals] = useState<AllMaritalModel | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const dispatch = useAppDispatch();
+  const { maritalData: maritals, isLoading, filters } = useMaritalState();
+  const searchQuery = filters.search;
+  const statusFilter = filters.status;
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [statusFilter, setStatusFilter] = useState<string>("all");
   const [selectedMarital, setSelectedMarital] = useState<MaritalModel | null>(
     null
   );
@@ -63,19 +69,16 @@ function MaritalPageContent() {
   }, [searchParams, updateUrlWithPage]);
 
   const loadMaritals = useCallback(async () => {
-    setIsLoading(true);
     try {
-      const response = await getAllMaritalService({
+      dispatch(fetchAllMaritalService({
         search: debouncedSearchQuery,
         pageNo: currentPage,
         pageSize: 15,
         status: statusFilter !== "all" ? statusFilter : undefined,
-      });
-      setMaritals(response);
+      }));
     } catch (error: any) {
       console.error("Failed to fetch maritals: ", error);
     } finally {
-      setIsLoading(false);
     }
   }, [debouncedSearchQuery, statusFilter, currentPage]);
 
@@ -85,7 +88,7 @@ function MaritalPageContent() {
 
   // Simplified search change handler - just updates the state, debouncing handles the rest
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
+    dispatch(setSearchFilter(e.target.value));
   };
 
   const handleSaveMarital = async (
@@ -95,72 +98,30 @@ function MaritalPageContent() {
     try {
       if (mode === ModalMode.CREATE_MODE) {
         const createData = formData as CreateMaritalReq;
-
-        const response = await createMaritalService({
-          nameEn: createData.nameEn,
-          nameKh: createData.nameKh,
-          status: createData.status,
-        });
-
-        // Optimistic update
-        setMaritals((prev: any) =>
-          prev
-            ? {
-                ...prev,
-                content: [response, ...prev.content],
-                totalElements: prev.totalElements + 1,
-              }
-            : {
-                content: [response],
-                pageNo: 1,
-                pageSize: 10,
-                totalElements: 1,
-                totalPages: 1,
-                last: true,
-              }
-        );
-
+        await dispatch(createMaritalThunk(createData)).unwrap();
         startTransition(() => {
           AppToast({
             type: "success",
-            message: "Marital status created successfully",
-            description: "New Marital Status",
+            message: "Marital created successfully",
+            description: "New Marital",
           });
         });
       } else if (mode === ModalMode.UPDATE_MODE) {
         const updateData = formData as { id: number; updates: UpdateMaritalReq };
-
         if (!updateData.id) {
           console.error("Missing marital id in update form");
           setIsSubmitting(false);
           return;
         }
-
-        const response = await updateMaritalService(
-          updateData.id,
-          updateData.updates
-        );
-
-        setMaritals((prev) =>
-          prev
-            ? {
-                ...prev,
-                content: prev.content.map((marital) =>
-                  marital.id === updateData.id ? response : marital
-                ),
-              }
-            : prev
-        );
-
+        await dispatch(updateMaritalThunk({ id: updateData.id, updates: updateData.updates })).unwrap();
         startTransition(() => {
           AppToast({
             type: "success",
-            message: "Marital status updated successfully",
-            description: "Updated Marital Status",
+            message: "Marital updated successfully",
+            description: "Updated Marital",
           });
         });
       }
-
       setIsModalOpen(false);
       setSelectedMarital(null);
       loadMaritals();
@@ -178,7 +139,7 @@ function MaritalPageContent() {
     if (!selectedMarital) return;
     setIsSubmitting(true);
     try {
-      await deleteMaritalService(selectedMarital.id);
+      await dispatch(deleteMaritalThunk(selectedMarital.id)).unwrap();
       AppToast({
         type: "success",
         message: "Marital status deleted successfully",
@@ -198,7 +159,7 @@ function MaritalPageContent() {
 
   // Handle status filter change - directly updates the filter value
   const handleStatusChange = (status: string) => {
-    setStatusFilter(status);
+    dispatch(setStatusFilter(status));
     // Reset to first page when filter changes
     updateUrlWithPage(1, true);
   };

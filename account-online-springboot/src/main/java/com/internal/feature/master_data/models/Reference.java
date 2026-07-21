@@ -26,3 +26,5 @@ public class Reference extends BaseEntity {
     @Column(name = "status", nullable = false)
     private StatusData status;
 }
+
+

@@ -2,8 +2,13 @@ package com.internal.feature.master_data.service;
 
 import com.internal.feature.master_data.dto.request.AddressRequestDto;
 import com.internal.feature.master_data.dto.request.AllMasterDataRequest;
-import com.internal.feature.master_data.dto.response.*;
-import com.internal.utils.pagination.PaginationResponse;
+import com.internal.feature.master_data.dto.response.ClsProvinceDto;
+import com.internal.feature.master_data.dto.response.ClsDistrictDto;
+import com.internal.feature.master_data.dto.response.ClsCommuneDto;
+import com.internal.feature.master_data.dto.response.ClsVillageDto;
+import com.internal.feature.master_data.dto.response.ClsBranchDto;
+import com.internal.feature.master_data.dto.response.LocationCodesDto;
+import com.internal.shared.pagination.PaginationResponse;
 
 public interface MasterDataService {
 
@@ -39,3 +44,5 @@ public interface MasterDataService {
     // USED BY OTHER SERVICES (AML, Open Account, Logs Report) - DO NOT MODIFY WITHOUT CHECKING DEPENDENCIES
     ClsBranchDto getBranchByCode(String branchCode);
 }
+
+

@@ -15,3 +15,4 @@ public class UpdateAmlStatusDto {
     private AmlStatusEnum status;
     private String remark;
 }
+

@@ -8,7 +8,7 @@ import com.internal.feature.logs_report.dto.response.AccountOnlineFinalExcelResp
 import com.internal.feature.logs_report.dto.response.AccountOnlineFinalResponseDto;
 import com.internal.feature.logs_report.dto.response.AllAccountOnlineFinalExcelResponseDto;
 import com.internal.feature.logs_report.dto.response.AllAccountOnlineFinalResponseDto;
-import com.internal.feature.logs_report.model.AccountOnlineFinal;
+import com.internal.feature.logs_report.models.AccountOnlineFinal;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
@@ -74,3 +74,9 @@ public interface AccountOnlineFinalMapper {
         return response;
     }
 }
+
+
+
+
+
+

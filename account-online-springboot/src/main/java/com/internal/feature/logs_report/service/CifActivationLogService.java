@@ -1,6 +1,6 @@
 package com.internal.feature.logs_report.service;
 
-import com.internal.feature.logs_report.model.CifActivationLog;
+import com.internal.feature.logs_report.models.CifActivationLog;
 import com.internal.feature.logs_report.repository.CifActivationLogRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,3 +29,9 @@ public class CifActivationLogService {
         }
     }
 }
+
+
+
+
+
+

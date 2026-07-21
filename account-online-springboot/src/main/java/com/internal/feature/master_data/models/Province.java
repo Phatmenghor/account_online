@@ -27,3 +27,5 @@ public class Province extends BaseEntity {
     @Column(name = "province_kh", length = 255)
     private String provinceKh;
 }
+
+

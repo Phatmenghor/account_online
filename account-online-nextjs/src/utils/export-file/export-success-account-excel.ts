@@ -1,7 +1,7 @@
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 import { format } from "date-fns";
-import { SuccessAccountOnlineExcelModel } from "@/models/open-acc-success/success-account-response.model";
+import { SuccessAccountOnlineExcelModel } from "@/features/account-opening/types/success-account-response.model";
 
 const IMAGE_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL_IMAGE ?? "";
 const CUSTOMER_IMAGES_PATH = "/api/customer-images";
@@ -165,3 +165,5 @@ export async function exportSuccessAccountToExcel({
     const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
     saveAs(blob, `success_accounts_${format(new Date(), "dd-MM-yyyy")}.xlsx`);
 }
+
+

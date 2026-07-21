@@ -23,3 +23,4 @@ public class CustomerFileUploadRequestDto {
     private String SelfieImage; // uploaded file
 
 }
+

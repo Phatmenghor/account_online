@@ -1,6 +1,6 @@
 package com.internal.feature.dashboard.controller;
 
-import com.internal.exceptions.response.ApiResponse;
+import com.internal.shared.response.ApiResponse;
 import com.internal.feature.dashboard.dto.response.DailyCountResponse;
 import com.internal.feature.dashboard.dto.response.TopAmlActionUserResponse;
 import com.internal.feature.dashboard.dto.response.TopUserOpenAccountResponse;
@@ -48,3 +48,5 @@ public class DashboardController {
                 dashboardService.getTopAmlActionUsers()));
     }
 }
+
+

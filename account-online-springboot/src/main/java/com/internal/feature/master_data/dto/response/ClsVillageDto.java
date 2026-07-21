@@ -11,3 +11,4 @@ public class ClsVillageDto {
     private String villageKh;
     private String communeCode; // commune code
 }
+

@@ -9,7 +9,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { getImageService } from "@/services/dashboard/image/image.service";
+import { getImageService } from "@/features/account-opening/services/image.service";
 
 interface ImagePreviewCellProps {
   imageId: string;
@@ -165,3 +165,4 @@ export function ImagePreviewCell({
     </>
   );
 }
+

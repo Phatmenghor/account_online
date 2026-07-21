@@ -17,3 +17,4 @@ public interface MaritalStatusService {
     MaritalStatusDto update(Long id, MaritalStatusUpdateRequestDto request);
     MaritalStatusDto delete(Long id);
 }
+

@@ -17,3 +17,4 @@ public class MobileBankingResponse {
     @JsonProperty("Content")
     private String content;
 }
+

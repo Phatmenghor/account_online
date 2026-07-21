@@ -220,3 +220,4 @@ public class CustomerRequest {
     @JsonProperty("account_type")
     private String accountType;
 }
+

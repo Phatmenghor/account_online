@@ -20,3 +20,4 @@ public class DistrictResponseDto {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }
+

@@ -12,14 +12,14 @@ import { usePagination } from "@/hooks/use-pagination";
 import { useDebounce } from "@/utils/debounce/debounce";
 import { Search } from "lucide-react";
 import Loading from "@/components/shared/common/loading";
-import { createHistoryTableColumns } from "@/components/shared/table/aml-history-content";
-import { getAllAmlHistoryService } from "@/services/dashboard/aml/aml-history.service";
+import { createHistoryTableColumns } from "@/features/aml/table/aml-history-content";
+import { getAllAmlHistoryService } from "@/features/aml/services/aml-history.service";
 import {
   AllHistoryModel,
   HistoryModel,
-} from "@/models/aml/history/response/history-response.model";
-import AmlHistoryDetailModal from "@/components/shared/modal/aml-history-detail";
-import AmlStatusFilter from "@/components/app/aml/aml-status-filter";
+} from "@/features/aml/types/history/response/history-response.model";
+import AmlHistoryDetailModal from "@/features/aml/components/aml-history-detail";
+import AmlStatusFilter from "@/features/aml/components/aml-status-filter";
 import { AmlStatusEnum } from "@/constants/AppResource/display-list/enum/status";
 import { CustomDatePicker } from "@/components/shared/common/custom-date-picker";
 
@@ -207,3 +207,5 @@ export default function HistoryPage() {
     </Suspense>
   );
 }
+
+

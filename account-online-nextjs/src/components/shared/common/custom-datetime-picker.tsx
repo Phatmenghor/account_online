@@ -180,7 +180,7 @@ export function CustomDateTimePicker({
     const start = new Date(firstDay);
     start.setDate(start.getDate() - firstDay.getDay());
 
-    const days = [];
+    const days: any[] = [];
     const cur = new Date(start);
     for (let i = 0; i < DATE_RANGE_CALENDAR_DAYS; i++) {
       days.push({
@@ -198,7 +198,7 @@ export function CustomDateTimePicker({
 
   const generateYearOptions = () => {
     const currentYear = new Date().getFullYear();
-    const years = [];
+    const years: string[] = [];
     for (let i = currentYear - YEAR_RANGE_OFFSET; i <= currentYear + YEAR_RANGE_OFFSET; i++) {
       years.push(i.toString());
     }

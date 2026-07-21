@@ -1,4 +1,4 @@
-import { GetAccountReq } from "@/models/acc-online-get/account-online.request";
+import { GetAccountReq } from "@/types/acc-online-get/account-online.request";
 import { axiosClientWithAuth } from "@/utils/axios";
 import axios from "axios";
 
@@ -25,3 +25,4 @@ export async function getAccountOnlineService(request: GetAccountReq) {
     }
   }
 }
+

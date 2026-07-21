@@ -11,3 +11,4 @@ public class AccountOnlineFinalLogRequestDto {
     private String cif;
     private String legalId;
 }
+

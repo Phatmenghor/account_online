@@ -33,3 +33,5 @@ public class SmsLog extends BaseEntity {
     @Column(name = "error_message", length = 500)
     private String errorMessage;
 }
+
+

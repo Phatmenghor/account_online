@@ -5,8 +5,8 @@ import com.internal.enumation.AmlStatusEnum;
 import com.internal.feature.aml.dto.request.AmlHistoryRequestDto;
 import com.internal.feature.aml.dto.response.AllAmlHistoryResponseDto;
 import com.internal.feature.aml.dto.response.AmlHistoryDto;
-import com.internal.feature.aml.model.AmlHistory;
-import com.internal.feature.aml.model.AmlStatus;
+import com.internal.feature.aml.models.AmlHistory;
+import com.internal.feature.aml.models.AmlStatus;
 import com.internal.feature.auth.mapper.UserMapper;
 import com.internal.feature.auth.models.UserEntity;
 import org.mapstruct.Mapper;
@@ -159,3 +159,9 @@ public interface AmlHistoryMapper {
         return response;
     }
 }
+
+
+
+
+
+

@@ -32,3 +32,9 @@ public interface OccupationRepository extends JpaRepository<Occupation, Long> {
                      "OR LOWER(o.nameKh) LIKE LOWER(CONCAT('%', :search, '%')))")
        List<Occupation> findActiveBySearch(@Param("status") StatusData status, @Param("search") String search);
 }
+
+
+
+
+
+

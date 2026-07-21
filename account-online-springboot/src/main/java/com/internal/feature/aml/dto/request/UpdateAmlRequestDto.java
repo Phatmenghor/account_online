@@ -25,3 +25,4 @@ public class UpdateAmlRequestDto {
     private String nationality;
     private String legalAddress;
 }
+

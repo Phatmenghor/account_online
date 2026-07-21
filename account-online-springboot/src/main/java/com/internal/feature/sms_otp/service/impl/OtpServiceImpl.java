@@ -1,10 +1,10 @@
 package com.internal.feature.sms_otp.service.impl;
 
 import com.internal.config.CpbProperties;
-import com.internal.exceptions.error.otp.OtpAttemptsExceededException;
-import com.internal.exceptions.error.otp.OtpCooldownException;
-import com.internal.exceptions.error.otp.OtpInvalidException;
-import com.internal.exceptions.error.otp.OtpNotFoundException;
+import com.internal.shared.exception.otp.OtpAttemptsExceededException;
+import com.internal.shared.exception.otp.OtpCooldownException;
+import com.internal.shared.exception.otp.OtpInvalidException;
+import com.internal.shared.exception.otp.OtpNotFoundException;
 import com.internal.feature.sms_otp.dto.request.SendOtpRequest;
 import com.internal.feature.sms_otp.dto.request.VerifyOtpRequest;
 import com.internal.feature.sms_otp.dto.response.SendOtpResponse;
@@ -13,9 +13,9 @@ import com.internal.feature.sms_otp.mapper.SmsOtpMapper;
 import com.internal.feature.sms_otp.models.OtpSms;
 import com.internal.feature.sms_otp.repository.OtpRepository;
 import com.internal.feature.sms_otp.service.OtpService;
-import com.internal.utils.OtpGenerator;
-import com.internal.utils.constants.AppConstants;
-import com.internal.utils.service.HttpClientUtil;
+import com.internal.shared.component.OtpComponent;
+import com.internal.integration.ports.SmsPort;
+import com.internal.shared.constant.AppConstants;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -25,8 +25,6 @@ import javax.persistence.EntityManager;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Optional;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @Service
 @RequiredArgsConstructor
@@ -34,10 +32,10 @@ import java.util.regex.Pattern;
 public class OtpServiceImpl implements OtpService {
 
     private final OtpRepository otpRepository;
-    private final OtpGenerator otpGenerator;
+    private final OtpComponent otpComponent;
     private final SmsOtpMapper otpMapper;
     private final CpbProperties cpbProperties;
-    private final HttpClientUtil httpClient;
+    private final SmsPort smsPort;
     private final EntityManager entityManager;
 
     @Override
@@ -51,7 +49,7 @@ public class OtpServiceImpl implements OtpService {
 
         otpRepository.expireAllActiveOtpsByPhone(phone);
 
-        String otpCode = otpGenerator.generate();
+        String otpCode = otpComponent.generate();
         LocalDateTime expiresAt = LocalDateTime.now()
                 .plusMinutes(cpbProperties.getOtp().getExpiryMinutes());
 
@@ -70,7 +68,13 @@ public class OtpServiceImpl implements OtpService {
             log.info("Skipping SMS sending for default OTP: {}", otpCode);
         } else {
             try {
-                sendSmsToUser(phone, otpCode);
+                String message = cpbProperties.getOtp().getMessage() + " " + otpCode;
+                smsPort.sendSms(
+                        cpbProperties.getMb().getOtpUrl(),
+                        cpbProperties.getMb().getSecretKey(),
+                        phone,
+                        message
+                );
             } catch (Exception e) {
                 log.error("SMS sending failed but OTP was saved - Phone: {}, OTP ID: {}", phone, otpSms.getId(), e);
             }
@@ -163,56 +167,11 @@ public class OtpServiceImpl implements OtpService {
         otpRepository.saveAndFlush(otp);
         entityManager.clear();
     }
-
-    /**
-     * Send SMS via SOAP Gateway (fixed to avoid JSON converter issue)
-     */
-    private void sendSmsToUser(String phone, String otpCode) {
-        String otpUrl = cpbProperties.getMb().getOtpUrl();
-        String secretKey = cpbProperties.getMb().getSecretKey();
-        String requestID = String.valueOf(System.currentTimeMillis());
-        String message = cpbProperties.getOtp().getMessage() + " " + otpCode;
-
-        String soapXml = "<?xml version=\"1.0\"?>"
-                + "<soap:Envelope xmlns:soap='http://www.w3.org/2003/05/soap-envelope' "
-                + "xmlns:cpb='http://cpbmobile.vnpay.vn'>"
-                + "<soap:Header/>"
-                + "<soap:Body>"
-                + "<cpb:sendSmsNew>"
-                + "<cpb:requestId>" + requestID + "</cpb:requestId>"
-                + "<cpb:keyword>CPBSMS</cpb:keyword>"
-                + "<cpb:mobileNo>" + phone + "</cpb:mobileNo>"
-                + "<cpb:content>" + message + "</cpb:content>"
-                + "<cpb:requestTime></cpb:requestTime>"
-                + "<cpb:contentType>9</cpb:contentType>"
-                + "<cpb:secretKey>" + secretKey + "</cpb:secretKey>"
-                + "</cpb:sendSmsNew>"
-                + "</soap:Body>"
-                + "</soap:Envelope>";
-
-        try {
-            log.info("Sending SOAP SMS request - Phone: {}, RequestID: {}", phone, requestID);
-
-            // Use raw XML POST, return response as String (no JSON parsing)
-            String responseXml = httpClient.postForString(otpUrl, soapXml, "application/soap+xml");
-
-            // Extract <return> JSON payload from SOAP response (handles namespace prefixes e.g. <ns:return>)
-            Matcher matcher = Pattern.compile("<(?:\\w+:)?return>(.*?)</(?:\\w+:)?return>").matcher(responseXml);
-            String jsonPayload = matcher.find() ? matcher.group(1) : null;
-
-            log.info("SOAP SMS raw response: {}", responseXml);
-            if (jsonPayload != null) {
-                log.info("SOAP SMS extracted payload: {}", jsonPayload);
-            }
-
-            if (jsonPayload != null && jsonPayload.contains("\"rescode\":\"00\"")) {
-                log.info("SMS sent successfully to: {}", phone);
-            } else {
-                log.warn("SMS sending may have failed - Phone: {}, Response: {}", phone, jsonPayload);
-            }
-
-        } catch (Exception e) {
-            log.error("Failed to send SOAP SMS - Phone: {}, RequestID: {}", phone, requestID, e);
-        }
-    }
 }
+
+
+
+
+
+
+

@@ -20,3 +20,4 @@ public class CommuneResponseDto {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }
+

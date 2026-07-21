@@ -1,6 +1,6 @@
 package com.internal.feature.open_account.controller;
 
-import com.internal.exceptions.response.ApiResponse;
+import com.internal.shared.response.ApiResponse;
 import com.internal.feature.open_account.dto.request.CustomerRequest;
 import com.internal.feature.open_account.dto.response.OpenAccountResponseDto;
 import com.internal.feature.open_account.service.OpenAccountService;
@@ -32,3 +32,8 @@ public class OpenAccountController {
         return ResponseEntity.ok(ApiResponse.success("Account opened successfully", response));
     }
 }
+
+
+
+
+

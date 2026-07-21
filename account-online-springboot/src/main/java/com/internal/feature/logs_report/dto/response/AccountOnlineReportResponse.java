@@ -17,3 +17,4 @@ public class AccountOnlineReportResponse {
     private Long failureCount;
     private Long amlCount;
 }
+

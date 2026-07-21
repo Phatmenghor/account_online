@@ -25,3 +25,4 @@ public interface UserService {
 
     AuthResponseDTO forceChangePassword(String newPassword, String confirmNewPassword);
 }
+

@@ -1,7 +1,7 @@
 package com.internal.feature.aml.repository;
 
 import com.internal.enumation.AmlStatusEnum;
-import com.internal.feature.aml.model.AmlStatus;
+import com.internal.feature.aml.models.AmlStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -40,3 +40,7 @@ public interface AmlStatusRepository extends JpaRepository<AmlStatus, Long> {
             @Param("fromDate") LocalDateTime fromDate,
             @Param("toDate") LocalDateTime toDate);
 }
+
+
+
+

@@ -25,17 +25,17 @@ import {
   UpdateMaritalSchema,
   CreateMaritalForm,
   UpdateMaritalForm,
-} from "@/models/static/marital/marital.schema";
+} from "@/features/master-data/types/marital/marital.schema";
 import { FileText, FilePenLine, Loader2 } from "lucide-react";
 import Loading from "@/components/shared/common/loading";
 import { ModalMode } from "@/constants/AppResource/display-list/enum/mode";
 import {
   CreateMaritalReq,
   UpdateMaritalReq,
-} from "@/models/static/marital/marital.request";
-import { MaritalModel } from "@/models/static/marital/marital.response";
+} from "@/features/master-data/types/marital/marital.request";
+import { MaritalModel } from "@/features/master-data/types/marital/marital.response";
 import { Status } from "@/constants/AppResource/display-list/enum/status";
-import { getMaritalByIdService } from "@/services/dashboard/marital/marital.service";
+import { getMaritalByIdService } from "@/features/master-data/services/marital/marital.service";
 import { STATUS_USER_OPTIONS } from "@/constants/AppResource/filter/status";
 
 type ModalMaritalProps = {
@@ -405,3 +405,5 @@ export default function ModalMarital({
     </Dialog>
   );
 }
+
+

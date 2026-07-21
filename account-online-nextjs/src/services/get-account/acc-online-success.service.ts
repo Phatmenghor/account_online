@@ -1,4 +1,4 @@
-import { AllSuccessAccountOnlineExcelReq, AllSuccessAccountOnlineReq } from "@/models/open-acc-success/success-account.request.model";
+import { AllSuccessAccountOnlineExcelReq, AllSuccessAccountOnlineReq } from "@/features/account-opening/types/success-account.request.model";
 import { axiosClientWithAuth } from "@/utils/axios";
 import axios from "axios";
 
@@ -56,3 +56,5 @@ export async function getSuccessAccountOnlineExcelService(
     }
   }
 }
+
+

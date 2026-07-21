@@ -21,3 +21,4 @@ public class LegalTypeDto {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }
+

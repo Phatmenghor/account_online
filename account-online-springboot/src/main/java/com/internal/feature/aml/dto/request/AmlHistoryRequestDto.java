@@ -68,3 +68,4 @@ public class AmlHistoryRequestDto {
     private UserResponseDto rejectedBy;
 
 }
+

@@ -52,3 +52,4 @@ public class AmlStatusDto {
     private String nidImageName;
     private String selfieImageName;
 }
+

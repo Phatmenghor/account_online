@@ -1,5 +1,11 @@
 "use client";
 
+import { useVillageState } from '@/features/master-data/store/state/village-state';
+import { setPageNo, setSearchFilter, setStatusFilter } from '@/features/master-data/store/slices/village-slice';
+import { fetchAllVillageService, createVillageThunk, updateVillageThunk, deleteVillageThunk } from '@/features/master-data/store/thunks/village-thunks';
+import { useAppDispatch } from '@/store/store';
+
+
 import { Suspense } from "react";
 import { DeleteConfirmationDialog } from "@/components/shared/dialog/dialog-delete";
 import { CustomPagination } from "@/components/shared/pagination/custom-pagination";
@@ -19,27 +25,28 @@ import { startTransition, useCallback, useEffect, useState } from "react";
 import {
   AllVillageModel,
   VillageModel,
-} from "@/models/static/village/village.response";
+} from "@/features/master-data/types/village/village.response";
 import Loading from "@/components/shared/common/loading";
-import { createVillageTableColumns } from "@/components/shared/table/village-content";
-import VillageViewModal from "@/components/shared/modal/village-detail-modal";
-import ModalVillage from "@/components/shared/modal/village-modal";
+import { createVillageTableColumns } from "@/features/master-data/table/village-content";
+import VillageViewModal from "@/features/master-data/components/village-detail-modal";
+import ModalVillage from "@/features/master-data/components/village-modal";
 import { ModalMode } from "@/constants/AppResource/display-list/enum/mode";
 import {
   CreateVillageReq,
   UpdateVillageReq,
-} from "@/models/static/village/village.request";
+} from "@/features/master-data/types/village/village.request";
 import {
   createVillageService,
   deleteVillageService,
   getAllVillageService,
   updateVillageService,
-} from "@/services/dashboard/village/village.service";
+} from "@/features/master-data/services/village/village.service";
 
 function VillagePageContent() {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [villages, setVillages] = useState<AllVillageModel | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const dispatch = useAppDispatch();
+  const { villageData: villages, isLoading, filters } = useVillageState();
+  const searchQuery = filters.search;
+  const statusFilter = filters.status;
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedVillage, setSelectedVillage] = useState<VillageModel | null>(
     null,
@@ -68,18 +75,15 @@ function VillagePageContent() {
   }, [searchParams, updateUrlWithPage]);
 
   const loadVillages = useCallback(async () => {
-    setIsLoading(true);
     try {
-      const response = await getAllVillageService({
+      dispatch(fetchAllVillageService({
         search: debouncedSearchQuery,
         pageNo: currentPage,
         pageSize: 15,
-      });
-      setVillages(response);
+      }));
     } catch (error: any) {
       console.error("Failed to fetch villages: ", error);
     } finally {
-      setIsLoading(false);
     }
   }, [debouncedSearchQuery, currentPage]);
 
@@ -89,42 +93,17 @@ function VillagePageContent() {
 
   // Simplified search change handler - just updates the state, debouncing handles the rest
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
+    dispatch(setSearchFilter(e.target.value));
   };
 
   const handleSaveVillage = async (
-    formData: CreateVillageReq | { id: number; updates: UpdateVillageReq },
+    formData: CreateVillageReq | { id: number; updates: UpdateVillageReq }
   ) => {
     setIsSubmitting(true);
     try {
       if (mode === ModalMode.CREATE_MODE) {
         const createData = formData as CreateVillageReq;
-
-        const response = await createVillageService({
-          villageCode: createData.villageCode,
-          villageEn: createData.villageEn,
-          villageKh: createData.villageKh,
-          communeCode: createData.communeCode,
-        });
-
-        // Optimistic update
-        setVillages((prev: any) =>
-          prev
-            ? {
-                ...prev,
-                content: [response, ...prev.content],
-                totalElements: prev.totalElements + 1,
-              }
-            : {
-                content: [response],
-                pageNo: 1,
-                pageSize: 10,
-                totalElements: 1,
-                totalPages: 1,
-                last: true,
-              },
-        );
-
+        await dispatch(createVillageThunk(createData)).unwrap();
         startTransition(() => {
           AppToast({
             type: "success",
@@ -133,33 +112,13 @@ function VillagePageContent() {
           });
         });
       } else if (mode === ModalMode.UPDATE_MODE) {
-        const updateData = formData as {
-          id: number;
-          updates: UpdateVillageReq;
-        };
-
+        const updateData = formData as { id: number; updates: UpdateVillageReq };
         if (!updateData.id) {
           console.error("Missing village id in update form");
           setIsSubmitting(false);
           return;
         }
-
-        const response = await updateVillageService(
-          updateData.id,
-          updateData.updates,
-        );
-
-        setVillages((prev) =>
-          prev
-            ? {
-                ...prev,
-                content: prev.content.map((village) =>
-                  village.id === updateData.id ? response : village,
-                ),
-              }
-            : prev,
-        );
-
+        await dispatch(updateVillageThunk({ id: updateData.id, updates: updateData.updates })).unwrap();
         startTransition(() => {
           AppToast({
             type: "success",
@@ -168,14 +127,13 @@ function VillagePageContent() {
           });
         });
       }
-
       setIsModalOpen(false);
       setSelectedVillage(null);
       loadVillages();
     } catch (err: any) {
       AppToast({
         type: "error",
-        message: "Failed to save village",
+        message: "Failed to save village status",
       });
     } finally {
       setIsSubmitting(false);
@@ -186,7 +144,7 @@ function VillagePageContent() {
     if (!selectedVillage) return;
     setIsSubmitting(true);
     try {
-      await deleteVillageService(selectedVillage.id);
+      await dispatch(deleteVillageThunk(selectedVillage.id)).unwrap();
       AppToast({
         type: "success",
         message: "Village deleted successfully",

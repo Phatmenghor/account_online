@@ -1,5 +1,11 @@
 "use client";
 
+import { useOccupationState } from '@/features/master-data/store/state/occupation-state';
+import { setPageNo, setSearchFilter, setStatusFilter } from '@/features/master-data/store/slices/occupation-slice';
+import { fetchAllOccupationService, createOccupationThunk, updateOccupationThunk, deleteOccupationThunk } from '@/features/master-data/store/thunks/occupation-thunks';
+import { useAppDispatch } from '@/store/store';
+
+
 import { Suspense } from "react";
 import { DeleteConfirmationDialog } from "@/components/shared/dialog/dialog-delete";
 import { CustomPagination } from "@/components/shared/pagination/custom-pagination";
@@ -19,22 +25,22 @@ import { startTransition, useCallback, useEffect, useState } from "react";
 import {
   AllOccupationModel,
   OccupationModel,
-} from "@/models/static/occupation/occupation.response";
+} from "@/features/master-data/types/occupation/occupation.response";
 import Loading from "@/components/shared/common/loading";
-import { createOccupationTableColumns } from "@/components/shared/table/occupation-content";
-import OccupationViewModal from "@/components/shared/modal/occupation-detail-modal";
-import ModalOccupation from "@/components/shared/modal/occupation-modal";
+import { createOccupationTableColumns } from "@/features/master-data/table/occupation-content";
+import OccupationViewModal from "@/features/master-data/components/occupation-detail-modal";
+import ModalOccupation from "@/features/master-data/components/occupation-modal";
 import { ModalMode } from "@/constants/AppResource/display-list/enum/mode";
 import {
   CreateOccupationReq,
   UpdateOccupationReq,
-} from "@/models/static/occupation/occupation.request";
+} from "@/features/master-data/types/occupation/occupation.request";
 import {
   createOccupationService,
   deleteOccupationService,
   getAllOccupationService,
   updateOccupationService,
-} from "@/services/dashboard/occupation/occupation.service";
+} from "@/features/master-data/services/occupation/occupation.service";
 import {
   Select,
   SelectContent,
@@ -45,13 +51,11 @@ import {
 import { STATUS_USER_OPTIONS } from "@/constants/AppResource/filter/status";
 
 function OccupationPageContent() {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [occupations, setOccupations] = useState<AllOccupationModel | null>(
-    null,
-  );
-  const [isLoading, setIsLoading] = useState(false);
+  const dispatch = useAppDispatch();
+  const { occupationData: occupations, isLoading, filters } = useOccupationState();
+  const searchQuery = filters.search;
+  const statusFilter = filters.status;
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [statusFilter, setStatusFilter] = useState<string>("all");
   const [selectedOccupation, setSelectedOccupation] =
     useState<OccupationModel | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -78,19 +82,16 @@ function OccupationPageContent() {
   }, [searchParams, updateUrlWithPage]);
 
   const loadOccupations = useCallback(async () => {
-    setIsLoading(true);
     try {
-      const response = await getAllOccupationService({
+      dispatch(fetchAllOccupationService({
         search: debouncedSearchQuery,
         pageNo: currentPage,
         pageSize: 15,
         status: statusFilter !== "all" ? statusFilter : undefined,
-      });
-      setOccupations(response);
+      }));
     } catch (error: any) {
       console.error("Failed to fetch occupations: ", error);
     } finally {
-      setIsLoading(false);
     }
   }, [debouncedSearchQuery, statusFilter, currentPage]);
 
@@ -100,44 +101,17 @@ function OccupationPageContent() {
 
   // Simplified search change handler - just updates the state, debouncing handles the rest
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
+    dispatch(setSearchFilter(e.target.value));
   };
 
   const handleSaveOccupation = async (
-    formData:
-      | CreateOccupationReq
-      | { id: number; updates: UpdateOccupationReq },
+    formData: CreateOccupationReq | { id: number; updates: UpdateOccupationReq }
   ) => {
     setIsSubmitting(true);
     try {
       if (mode === ModalMode.CREATE_MODE) {
         const createData = formData as CreateOccupationReq;
-
-        const response = await createOccupationService({
-          nameEn: createData.nameEn,
-          nameKh: createData.nameKh,
-          occupationCode: createData.occupationCode,
-          status: createData.status,
-        });
-
-        // Optimistic update
-        setOccupations((prev: any) =>
-          prev
-            ? {
-                ...prev,
-                content: [response, ...prev.content],
-                totalElements: prev.totalElements + 1,
-              }
-            : {
-                content: [response],
-                pageNo: 1,
-                pageSize: 10,
-                totalElements: 1,
-                totalPages: 1,
-                last: true,
-              },
-        );
-
+        await dispatch(createOccupationThunk(createData)).unwrap();
         startTransition(() => {
           AppToast({
             type: "success",
@@ -146,33 +120,13 @@ function OccupationPageContent() {
           });
         });
       } else if (mode === ModalMode.UPDATE_MODE) {
-        const updateData = formData as {
-          id: number;
-          updates: UpdateOccupationReq;
-        };
-
+        const updateData = formData as { id: number; updates: UpdateOccupationReq };
         if (!updateData.id) {
           console.error("Missing occupation id in update form");
           setIsSubmitting(false);
           return;
         }
-
-        const response = await updateOccupationService(
-          updateData.id,
-          updateData.updates,
-        );
-
-        setOccupations((prev) =>
-          prev
-            ? {
-                ...prev,
-                content: prev.content.map((occupation) =>
-                  occupation.id === updateData.id ? response : occupation,
-                ),
-              }
-            : prev,
-        );
-
+        await dispatch(updateOccupationThunk({ id: updateData.id, updates: updateData.updates })).unwrap();
         startTransition(() => {
           AppToast({
             type: "success",
@@ -181,14 +135,13 @@ function OccupationPageContent() {
           });
         });
       }
-
       setIsModalOpen(false);
       setSelectedOccupation(null);
       loadOccupations();
     } catch (err: any) {
       AppToast({
         type: "error",
-        message: "Failed to save occupation",
+        message: "Failed to save occupation status",
       });
     } finally {
       setIsSubmitting(false);
@@ -199,7 +152,7 @@ function OccupationPageContent() {
     if (!selectedOccupation) return;
     setIsSubmitting(true);
     try {
-      await deleteOccupationService(selectedOccupation.id);
+      await dispatch(deleteOccupationThunk(selectedOccupation.id)).unwrap();
       AppToast({
         type: "success",
         message: "Occupation deleted successfully",
@@ -219,7 +172,7 @@ function OccupationPageContent() {
 
   // Handle status filter change - directly updates the filter value
   const handleStatusChange = (status: string) => {
-    setStatusFilter(status);
+    dispatch(setStatusFilter(status));
     // Reset to first page when filter changes
     updateUrlWithPage(1, true);
   };

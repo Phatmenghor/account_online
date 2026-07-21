@@ -24,3 +24,4 @@ public class AllAmlRequestDto {
     private String search;
     private AmlStatusEnum status;
 }
+

@@ -31,3 +31,9 @@ public interface VillageMapper {
     ClsVillageDto toClsDto(Village village);
     List<ClsVillageDto> toClsDtoList(List<Village> villages);
 }
+
+
+
+
+
+

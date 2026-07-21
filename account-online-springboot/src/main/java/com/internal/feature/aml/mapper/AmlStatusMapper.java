@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.internal.feature.aml.dto.request.CreateAmlRequestDto;
 import com.internal.feature.aml.dto.response.AllAmlResponseDto;
 import com.internal.feature.aml.dto.response.AmlStatusDto;
-import com.internal.feature.aml.model.AmlStatus;
+import com.internal.feature.aml.models.AmlStatus;
 import com.internal.feature.auth.mapper.UserMapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -169,3 +169,7 @@ public interface AmlStatusMapper {
         catch (Exception e) { throw new RuntimeException(e); }
     }
 }
+
+
+
+

@@ -40,3 +40,9 @@ public interface OccupationMapper {
         return response;
     }
 }
+
+
+
+
+
+

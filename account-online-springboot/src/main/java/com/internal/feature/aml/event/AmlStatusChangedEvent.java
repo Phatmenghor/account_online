@@ -13,3 +13,4 @@ public class AmlStatusChangedEvent extends ApplicationEvent {
         this.amlStatusDto = amlStatusDto;
     }
 }
+

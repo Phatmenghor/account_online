@@ -1,17 +1,17 @@
 import { useState, useEffect } from "react";
 import { AppToast } from "@/components/shared/toast/app-toast";
-import { getAllPublicMaritalService } from "@/services/dashboard/marital/marital.service";
-import { getAllPublicOccupationService } from "@/services/dashboard/occupation/occupation.service";
-import { getAllPublicReferenceService } from "@/services/dashboard/reference/reference.service";
+import { getAllPublicMaritalService } from "@/features/master-data/services/marital/marital.service";
+import { getAllPublicOccupationService } from "@/features/master-data/services/occupation/occupation.service";
+import { getAllPublicReferenceService } from "@/features/master-data/services/reference/reference.service";
 import { getAllPublicBranchService } from "@/services/branch/branch.service";
-import { MaritalModel } from "@/models/static/marital/marital.response";
-import { OccupationModel } from "@/models/static/occupation/occupation.response";
-import { ReferenceModel } from "@/models/static/reference/reference.response";
-import { BranchModel } from "@/models/branch/branch.response";
-import { LegalTypeModel } from "@/models/static/legal-type/legal-type.response";
-import { getAllPublicLegalTypeService } from "@/services/dashboard/legal-type/legal-type.service";
-import { AccOnlineCategoryModel } from "@/models/static/acc-online-category/acc-online-category.response";
-import { getAllPublicAccOnlineCategoryService } from "@/services/dashboard/acc-online-category/acc-online-category.service";
+import { MaritalModel } from "@/features/master-data/types/marital/marital.response";
+import { OccupationModel } from "@/features/master-data/types/occupation/occupation.response";
+import { ReferenceModel } from "@/features/master-data/types/reference/reference.response";
+import { BranchModel } from "@/types/branch/branch.response";
+import { LegalTypeModel } from "@/features/master-data/types/legal-type/legal-type.response";
+import { getAllPublicLegalTypeService } from "@/features/master-data/services/legal-type/legal-type.service";
+import { AccOnlineCategoryModel } from "@/features/master-data/types/acc-online-category/acc-online-category.response";
+import { getAllPublicAccOnlineCategoryService } from "@/features/master-data/services/acc-online-category/acc-online-category.service";
 
 /**
  * Generic hook for fetching data with loading and error states
@@ -209,3 +209,5 @@ export const useBranches = (): UseFetchDataResult<BranchModel> => {
 
   return { data, isLoading, error, refetch: fetchData };
 };
+
+

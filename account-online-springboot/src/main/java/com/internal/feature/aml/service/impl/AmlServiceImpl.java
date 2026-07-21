@@ -2,7 +2,7 @@ package com.internal.feature.aml.service.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.internal.enumation.AmlStatusEnum;
-import com.internal.exceptions.error.custom.NotFoundException;
+import com.internal.shared.exception.custom.NotFoundException;
 import com.internal.feature.aml.dto.request.AllAmlHistoryRequestDto;
 import com.internal.feature.aml.dto.request.AllAmlRequestDto;
 import com.internal.feature.aml.dto.request.CreateAmlRequestDto;
@@ -15,16 +15,15 @@ import com.internal.feature.aml.dto.response.AmlStatusDto;
 import com.internal.feature.aml.event.AmlStatusChangedEvent;
 import com.internal.feature.aml.mapper.AmlHistoryMapper;
 import com.internal.feature.aml.mapper.AmlStatusMapper;
-import com.internal.feature.aml.model.AmlHistory;
-import com.internal.feature.aml.model.AmlStatus;
+import com.internal.feature.aml.models.AmlHistory;
+import com.internal.feature.aml.models.AmlStatus;
 import com.internal.feature.aml.repository.AmlHistoryRepository;
 import com.internal.feature.aml.repository.AmlStatusRepository;
 import com.internal.feature.aml.service.AmlService;
 import com.internal.feature.auth.models.UserEntity;
 import com.internal.feature.master_data.dto.response.LocationCodesDto;
 import com.internal.feature.open_account.mapper.MasterDataServiceHelper;
-import com.internal.utils.SecurityUtils;
-import com.internal.utils.constants.AppConstants;
+import com.internal.shared.constant.AppConstants;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -36,11 +35,14 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.security.authentication.BadCredentialsException;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import com.internal.shared.component.AuditComponent;
 
 @Service
 @RequiredArgsConstructor
@@ -51,7 +53,7 @@ public class AmlServiceImpl implements AmlService {
     private final AmlHistoryRepository amlHistoryRepository;
     private final AmlStatusMapper amlStatusMapper;
     private final AmlHistoryMapper amlHistoryMapper;
-    private final SecurityUtils securityUtils;
+    private final AuditComponent auditComponent;
     private final ApplicationEventPublisher eventPublisher;
     private final MasterDataServiceHelper masterDataServiceHelper;
 
@@ -95,7 +97,7 @@ public class AmlServiceImpl implements AmlService {
     @Transactional
     public AmlStatusDto updateAmlStatus(Long id, UpdateAmlStatusDto req) {
         log.info("Updating AML status with id: {} to status: {}", id, req.getStatus());
-        UserEntity currentUser = securityUtils.getCurrentUser();
+        UserEntity currentUser = auditComponent.getCurrentUser();
 
         AmlStatus status = amlStatusRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("AML Status not found"));
@@ -195,7 +197,7 @@ public class AmlServiceImpl implements AmlService {
 
     @Override
     @Transactional
-    public void updateExternalAmlStatus(ExternalAmlStatusUpdateDto request) {
+    public void updateExternalAmlStatus(String apiKey, String secretKey, ExternalAmlStatusUpdateDto request) {
         log.info("Updating external AML status for customerId: {}", request.getCustomerId());
         String legalId = request.getCustomerId();
         if (legalId != null && legalId.toUpperCase().startsWith("OAO")) {
@@ -251,3 +253,10 @@ public class AmlServiceImpl implements AmlService {
         }
     }
 }
+
+
+
+
+
+
+

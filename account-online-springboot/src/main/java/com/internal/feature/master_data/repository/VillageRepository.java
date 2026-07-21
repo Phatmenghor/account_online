@@ -30,3 +30,9 @@ public interface VillageRepository extends JpaRepository<Village, Long> {
            "OR LOWER(v.villageCode) LIKE LOWER(CONCAT('%', :search, '%')))")
     Page<Village> findByCommuneCodeAndSearch(@Param("communeCode") String communeCode, @Param("search") String search, Pageable pageable);
 }
+
+
+
+
+
+

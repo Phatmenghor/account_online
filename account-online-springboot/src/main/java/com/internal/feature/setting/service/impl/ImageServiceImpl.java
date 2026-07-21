@@ -1,9 +1,9 @@
 package com.internal.feature.setting.service.impl;
 
-import com.internal.exceptions.error.custom.NotFoundException;
-import com.internal.feature.setting.dto.ImageDto;
-import com.internal.feature.setting.dto.ImageResponse;
-import com.internal.feature.setting.dto.ImageUploadRequest;
+import com.internal.shared.exception.custom.NotFoundException;
+import com.internal.feature.setting.dto.request.ImageDto;
+import com.internal.feature.setting.dto.response.ImageResponse;
+import com.internal.feature.setting.dto.request.ImageUploadRequest;
 import com.internal.feature.setting.mapper.ImageMapper;
 import com.internal.feature.setting.models.ImageEntity;
 import com.internal.feature.setting.repository.ImageRepository;
@@ -60,3 +60,12 @@ public class ImageServiceImpl implements ImageService {
         }
     }
 }
+
+
+
+
+
+
+
+
+

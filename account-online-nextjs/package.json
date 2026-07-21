@@ -3,11 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "node --max-old-space-size=4096 node_modules/next/dist/bin/next dev",
-    "build": "node --max-old-space-size=4096 node_modules/next/dist/bin/next build",
+    "dev": "next dev",
+    "build": "next build",
+    "postbuild": "node scripts/postbuild.js",
     "start": "next start",
     "lint": "next lint",
-    "deploy": "npm run build && rm -rf .next/standalone/.next/static && mkdir -p .next/standalone/.next && cp -r .next/static .next/standalone/.next/static && rm -rf .next/standalone/public && cp -r public .next/standalone/public && pm2 restart 21 --update-env"
+    "deploy": "npm run build && pm2 restart 21 --update-env"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.1.1",
@@ -65,6 +66,8 @@
     "@types/file-saver": "^2.0.7",
     "@types/node": "24.5.2",
     "@types/nprogress": "^0.2.3",
+    "eslint": "^8.57.0",
+    "eslint-config-next": "^14.2.33",
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
     "typescript": "^5"

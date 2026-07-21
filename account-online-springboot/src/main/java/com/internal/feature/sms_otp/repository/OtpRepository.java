@@ -51,3 +51,9 @@ public interface OtpRepository extends JpaRepository<OtpSms, Long> {
     @Query("UPDATE OtpSms o SET o.status = 2 WHERE o.phone = :phone AND o.status = 0")
     void expireAllActiveOtpsByPhone(@Param("phone") String phone);
 }
+
+
+
+
+
+

@@ -22,3 +22,4 @@ public class OccupationCreateRequestDto {
 
     private StatusData status = StatusData.ACTIVE;
 }
+

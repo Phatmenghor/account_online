@@ -17,3 +17,4 @@ public class TopAmlActionUserResponse {
     private long rejectCount;
     private long totalCount;
 }
+

@@ -7,3 +7,9 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface SmsLogRepository extends JpaRepository<SmsLog, Long> {
 }
+
+
+
+
+
+

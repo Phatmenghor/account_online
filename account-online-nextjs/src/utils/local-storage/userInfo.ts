@@ -1,4 +1,4 @@
-import { UserModel } from "@/models/user/user.response";
+import { UserModel } from "@/features/user/types/user.response";
 import { setCookie, getCookie, deleteCookie } from "cookies-next";
 
 const USER_INFO_COOKIE_KEY = "auth-user-info";
@@ -23,3 +23,5 @@ export function getUserInfo(): UserModel | null {
 export function clearUserInfo(): void {
   deleteCookie(USER_INFO_COOKIE_KEY);
 }
+
+

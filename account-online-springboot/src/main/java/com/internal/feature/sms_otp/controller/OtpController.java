@@ -1,6 +1,6 @@
 package com.internal.feature.sms_otp.controller;
 
-import com.internal.exceptions.response.ApiResponse;
+import com.internal.shared.response.ApiResponse;
 import com.internal.feature.sms_otp.dto.request.SendOtpRequest;
 import com.internal.feature.sms_otp.dto.request.VerifyOtpRequest;
 import com.internal.feature.sms_otp.dto.response.SendOtpResponse;
@@ -50,3 +50,8 @@ public class OtpController {
         );
     }
 }
+
+
+
+
+

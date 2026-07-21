@@ -20,3 +20,4 @@ public class GetAllLegalTypeRequest {
     @Builder.Default
     private StatusData status = StatusData.ACTIVE;
 }
+

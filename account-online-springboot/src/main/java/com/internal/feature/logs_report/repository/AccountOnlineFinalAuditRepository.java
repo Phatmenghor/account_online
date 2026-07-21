@@ -1,7 +1,7 @@
 package com.internal.feature.logs_report.repository;
 
 
-import com.internal.feature.logs_report.model.AccountOnlineOpenFinalAudit;
+import com.internal.feature.logs_report.models.AccountOnlineOpenFinalAudit;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
@@ -12,3 +12,7 @@ public interface AccountOnlineFinalAuditRepository extends JpaRepository<Account
         JpaSpecificationExecutor<AccountOnlineOpenFinalAudit> {
 
     }
+
+
+
+

@@ -15,3 +15,4 @@ public class CustomerResponse {
     private String usdAccount;
     private String mnemonic;
 }
+

@@ -95,7 +95,8 @@ aml:
     url: http://localservice.cambodiapostbank/aml-management?pageNo=1
 
 jwt:
-  expiration-min: 43200   # 30 days (30 * 24 * 60)
+  expiration-min: 10                    # Access Token: 10 minutes
+  refresh-token-expiration-min: 43200   # Refresh Token: 30 days (30 * 24 * 60)
   issuer: account-online-api
 
 telegram:

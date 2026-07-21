@@ -31,3 +31,4 @@ public class RegisterRequestDto {
 
     private RoleEnum role;
 }
+

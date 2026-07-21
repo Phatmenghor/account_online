@@ -54,3 +54,5 @@ public class UserEntity extends BaseEntity {
     @Column(name = "password_changed_at")
     private LocalDateTime passwordChangedAt;
 }
+
+

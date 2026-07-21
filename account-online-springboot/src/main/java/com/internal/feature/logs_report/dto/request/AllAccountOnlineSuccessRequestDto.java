@@ -31,3 +31,4 @@ public class AllAccountOnlineSuccessRequestDto {
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate toDate;
 }
+

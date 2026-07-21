@@ -2,13 +2,13 @@
 <configuration>
     <property name="LOG_PATH" value="logs" />
     <property name="LOG_FILE_NAME" value="account_online" />
-    <property name="LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS, Asia/Phnom_Penh} [%thread] %-5level [%logger{36}] - %msg%n" />
+    <property name="LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level %-35.35logger{35} [%X{traceId:--}] %msg%n" />
     <property name="MAX_FILE_SIZE" value="100MB" />
     <timestamp key="byDay" datePattern="yyyy-MM-dd" timeReference="contextBirth" />
 
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
-        <encoder>
-            <pattern>%d{HH:mm:ss.SSS, Asia/Phnom_Penh} [%thread] %-5level [%logger{20}] - %msg%n</pattern>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>%clr(%d{HH:mm:ss.SSS}){faint} %clr(%-5level){highlight} %clr(%-35.35logger{35}){cyan} %clr([%X{traceId:--}]){blue} %msg%n</pattern>
         </encoder>
     </appender>
 
@@ -33,7 +33,7 @@
             <onMismatch>DENY</onMismatch>
         </filter>
         <encoder>
-            <pattern>${LOG_PATTERN}</pattern>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} ERROR %-35.35logger{35} [%X{traceId:--}] %msg%n%ex{full}</pattern>
         </encoder>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
             <fileNamePattern>${LOG_PATH}/${LOG_FILE_NAME}-error-%d{yyyy-MM-dd}-%i.log</fileNamePattern>
@@ -65,14 +65,6 @@
         <appender-ref ref="ASYNC_ERROR_FILE" />
         <appender-ref ref="CONSOLE" />
     </logger>
-
-    <!-- Feature-specific monitoring -->
-    <logger name="com.internal.feature.open_account" level="INFO" />
-    <logger name="com.internal.feature.aml" level="INFO" />
-    <logger name="com.internal.feature.camdx" level="INFO" />
-    <logger name="com.internal.feature.sms_otp" level="INFO" />
-    <logger name="com.internal.feature.auth.security" level="INFO" />
-    <logger name="com.internal.feature.telegram_alerts" level="INFO" />
 
     <!-- Framework logging (reduce noise) -->
     <logger name="org.springframework" level="WARN" />

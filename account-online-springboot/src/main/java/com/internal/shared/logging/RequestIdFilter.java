@@ -1,0 +1,97 @@
+package com.internal.shared.logging;
+
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
+import org.springframework.stereotype.Component;
+import org.springframework.web.filter.OncePerRequestFilter;
+
+import java.io.IOException;
+import java.util.Set;
+import java.util.UUID;
+
+/**
+ * First filter in the chain. Responsible for:
+ *  - Generating / propagating X-Request-ID
+ *  - Populating MDC with: requestId, method, path
+ *  - Measuring request duration
+ *  - Logging structured access log entry at INFO level
+ *  - Clearing ALL MDC keys at the end of the request
+ */
+@Component
+@Order(Ordered.HIGHEST_PRECEDENCE)
+@Slf4j
+public class RequestIdFilter extends OncePerRequestFilter {
+
+    private static final String REQUEST_ID_HEADER = "X-Request-ID";
+    private static final String TRACE_ID_HEADER   = "X-Trace-ID";
+
+    // Skip noisy health/metrics probes from access logs
+    private static final Set<String> SKIP_PATHS = Set.of(
+            "/actuator/health",
+            "/actuator/health/liveness",
+            "/actuator/health/readiness",
+            "/actuator/prometheus"
+    );
+
+    @Override
+    protected void doFilterInternal(HttpServletRequest request,
+                                    HttpServletResponse response,
+                                    FilterChain chain) throws IOException, ServletException {
+
+        String path = request.getRequestURI();
+
+        // Pass through silently for probe paths
+        if (SKIP_PATHS.contains(path)) {
+            chain.doFilter(request, response);
+            return;
+        }
+
+        String traceId = resolveOrGenerate(request);
+        long start = System.currentTimeMillis();
+
+        MDC.put("traceId", traceId);
+        MDC.put("method",  request.getMethod());
+        MDC.put("path",    path);
+
+        // Echo back to caller for correlation
+        response.setHeader(REQUEST_ID_HEADER, traceId);
+        response.setHeader(TRACE_ID_HEADER,   traceId);
+
+        try {
+            chain.doFilter(request, response);
+        } finally {
+            long duration = System.currentTimeMillis() - start;
+            int status = response.getStatus();
+            MDC.put("statusCode", String.valueOf(status));
+            MDC.put("duration",   String.valueOf(duration));
+
+            String responseMessage = MDC.get("responseMessage");
+
+            if (status >= 400 && responseMessage != null && !responseMessage.isBlank()) {
+                if (status >= 500) {
+                    log.error("{} {} → {} in {}ms [{}] — {}",
+                            request.getMethod(), path, status, duration, traceId, responseMessage);
+                } else {
+                    log.warn("{} {} → {} in {}ms [{}] — {}",
+                            request.getMethod(), path, status, duration, traceId, responseMessage);
+                }
+            } else {
+                log.info("{} {} → {} in {}ms [{}]",
+                        request.getMethod(), path, status, duration, traceId);
+            }
+
+            MDC.clear();
+        }
+    }
+
+    private String resolveOrGenerate(HttpServletRequest request) {
+        String incoming = request.getHeader(REQUEST_ID_HEADER);
+        return (incoming != null && !incoming.isBlank()) ? incoming : UUID.randomUUID().toString();
+    }
+}

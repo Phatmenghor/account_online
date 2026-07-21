@@ -199,14 +199,9 @@ logging:
     org.springframework: WARN
     org.hibernate: WARN
     com.zaxxer.hikari: ERROR
-    com.internal.feature.auth.security.RequestLoggingFilter: DEBUG
-    com.internal.feature.auth.service.RequestLogService: INFO
-    com.internal.feature.auth.scheduler.RequestLogCleanupScheduler: INFO
-    com.internal.feature.open_account: DEBUG
-    com.internal.feature.aml: DEBUG
   pattern:
-    console: "%d{HH:mm:ss.SSS} [%thread] %-5level [%logger{30}] - %msg%n"
-    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level [%logger{50}] - [%X{userId}] %msg%n"
+    console: "%d{HH:mm:ss.SSS} %-5level %-35.35logger{35} [%X{traceId:--}] %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level %-35.35logger{35} [%X{traceId:--}] %msg%n"
   file:
     name: logs/account_online.log
     max-size: 100MB

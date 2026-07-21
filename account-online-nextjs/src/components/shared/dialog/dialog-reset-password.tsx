@@ -11,7 +11,7 @@ import { DialogTitle } from "@radix-ui/react-dialog";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Shield, CheckCircle, AlertTriangle, Lock, User } from "lucide-react";
-import { ChangeUserPasswordByAdminService } from "@/services/dashboard/user/user.service";
+import { ChangeUserPasswordByAdminService } from "@/features/user/services/user.service";
 import { AppToast } from "../toast/app-toast";
 
 export default function ResetPasswordModal({
@@ -212,3 +212,4 @@ export default function ResetPasswordModal({
     </Dialog>
   );
 }
+

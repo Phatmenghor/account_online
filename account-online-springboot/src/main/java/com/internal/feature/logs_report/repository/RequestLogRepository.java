@@ -1,6 +1,6 @@
 package com.internal.feature.logs_report.repository;
 
-import com.internal.feature.logs_report.model.RequestLog;
+import com.internal.feature.logs_report.models.RequestLog;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -72,3 +72,7 @@ public interface RequestLogRepository extends JpaRepository<RequestLog, UUID> {
                                                 @Param("startDate") LocalDateTime startDate,
                                                 @Param("endDate") LocalDateTime endDate);
 }
+
+
+
+

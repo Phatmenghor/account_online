@@ -27,3 +27,9 @@ public interface ReferenceRepository extends JpaRepository<Reference, Long> {
            "OR LOWER(r.nameKh) LIKE LOWER(CONCAT('%', :search, '%')))")
     List<Reference> findActiveBySearch(@Param("status") StatusData status, @Param("search") String search);
 }
+
+
+
+
+
+

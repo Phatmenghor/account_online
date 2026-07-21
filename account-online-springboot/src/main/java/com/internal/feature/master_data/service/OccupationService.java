@@ -21,3 +21,4 @@ public interface OccupationService {
     OccupationDto updateOccupation(Long id, OccupationUpdateRequestDto requestDto);
     OccupationDto deleteOccupation(Long id);
 }
+

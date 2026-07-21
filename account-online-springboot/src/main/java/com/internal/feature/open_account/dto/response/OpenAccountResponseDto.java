@@ -29,3 +29,4 @@ public class OpenAccountResponseDto {
     private String status;
     private String message;
 }
+

@@ -1,4 +1,4 @@
-import { SendOtpReq, VerifyOtpReq } from "@/models/otp/otp.request";
+import { SendOtpReq, VerifyOtpReq } from "@/features/account-opening/types/otp.request";
 import { axiosClientWithAuth } from "@/utils/axios";
 
 export async function SendOtpService(data: SendOtpReq) {
@@ -21,4 +21,6 @@ export async function VerifyOtpService(data: VerifyOtpReq) {
         throw error;
     }
 }
+
+
 

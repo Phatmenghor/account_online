@@ -29,3 +29,5 @@ public class Commune extends BaseEntity {
     @JoinColumn(name = "district_id")
     private District district;
 }
+
+

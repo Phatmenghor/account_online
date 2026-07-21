@@ -1,6 +1,8 @@
 package com.internal.feature.master_data.service;
 
-import com.internal.feature.master_data.dto.request.*;
+import com.internal.feature.master_data.dto.request.GetAllLegalTypeRequest;
+import com.internal.feature.master_data.dto.request.LegalTypeCreateRequestDto;
+import com.internal.feature.master_data.dto.request.LegalTypeUpdateRequestDto;
 import com.internal.feature.master_data.dto.response.AllLegalTypeResponseDto;
 import com.internal.feature.master_data.dto.response.LegalTypeDto;
 
@@ -16,3 +18,4 @@ public interface LegalTypeService {
     LegalTypeDto delete(Long id);
 
 }
+

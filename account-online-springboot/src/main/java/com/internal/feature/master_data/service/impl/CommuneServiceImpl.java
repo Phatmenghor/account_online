@@ -1,6 +1,6 @@
 package com.internal.feature.master_data.service.impl;
 
-import com.internal.exceptions.error.custom.NotFoundException;
+import com.internal.shared.exception.custom.NotFoundException;
 import com.internal.feature.master_data.dto.request.AllMasterDataRequest;
 import com.internal.feature.master_data.dto.request.CommuneRequestDto;
 import com.internal.feature.master_data.dto.response.CommuneResponseDto;
@@ -10,7 +10,7 @@ import com.internal.feature.master_data.models.District;
 import com.internal.feature.master_data.repository.CommuneRepository;
 import com.internal.feature.master_data.repository.DistrictRepository;
 import com.internal.feature.master_data.service.CommuneService;
-import com.internal.utils.pagination.PaginationResponse;
+import com.internal.shared.pagination.PaginationResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -104,3 +104,11 @@ public class CommuneServiceImpl implements CommuneService {
         communeRepository.delete(commune);
     }
 }
+
+
+
+
+
+
+
+

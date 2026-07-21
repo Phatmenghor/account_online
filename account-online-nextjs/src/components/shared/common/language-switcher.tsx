@@ -13,7 +13,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Languages, Check, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useClientLocale } from "@/context/provider/local-provider";
+import { useClientLocale } from "@/providers/local-provider";
 import { localeConfig } from "@/constants/AppResource/language/language";
 
 interface LanguageSwitcherProps {
@@ -243,3 +243,4 @@ export default function LanguageSwitcher({
     </div>
   );
 }
+

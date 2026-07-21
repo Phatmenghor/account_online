@@ -7,16 +7,16 @@ import { User, Key } from "lucide-react";
 import { AppToast } from "@/components/shared/toast/app-toast";
 import Loading from "@/components/shared/common/loading";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import ProfileTab from "@/components/app/profile/profile-tab";
-import ChangePasswordTab from "@/components/app/profile/change-password-tab";
-import { getUserProfileService } from "@/services/dashboard/user/user.service";
-import { updateUserProfileService } from "@/services/auth/login.service";
-import { uploadImageService } from "@/services/dashboard/image/image.service";
-import { UserModel } from "@/models/user/user.response";
+import ProfileTab from "@/features/user/components/profile-tab";
+import ChangePasswordTab from "@/features/user/components/change-password-tab";
+import { getUserProfileService } from "@/features/user/services/user.service";
+import { updateUserProfileService } from "@/features/auth/services/login.service";
+import { uploadImageService } from "@/features/account-opening/services/image.service";
+import { UserModel } from "@/features/user/types/user.response";
 import {
   UpdateUserProfileForm,
   UpdateUserProfileSchema,
-} from "@/models/auth/profile.schema";
+} from "@/features/auth/types/profile.schema";
 import { Status } from "@/constants/AppResource/display-list/enum/status";
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
@@ -213,3 +213,5 @@ export default function ProfilePage() {
     </Suspense>
   );
 }
+
+

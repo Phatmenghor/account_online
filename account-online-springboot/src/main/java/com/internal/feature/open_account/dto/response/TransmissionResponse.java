@@ -16,3 +16,4 @@ public class TransmissionResponse {
     @JsonProperty("Content")
     private String content;
 }
+

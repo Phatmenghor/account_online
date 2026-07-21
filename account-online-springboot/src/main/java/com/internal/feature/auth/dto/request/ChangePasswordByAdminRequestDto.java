@@ -20,3 +20,4 @@ public class ChangePasswordByAdminRequestDto {
     @NotBlank(message = "Confirm new password is required")
     private String confirmNewPassword;
 }
+

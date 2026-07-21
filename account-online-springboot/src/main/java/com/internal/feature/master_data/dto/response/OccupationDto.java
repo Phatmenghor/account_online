@@ -21,3 +21,4 @@ public class OccupationDto {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }
+

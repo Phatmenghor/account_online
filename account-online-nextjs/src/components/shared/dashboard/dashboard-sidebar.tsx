@@ -7,10 +7,10 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { ROUTES } from "@/constants/AppRoutes/routes";
-import { SidebarUserProfile } from "@/components/app/profile/sidebar-profile";
-import { UserModel } from "@/models/user/user.response";
+import { SidebarUserProfile } from "@/features/user/components/sidebar-profile";
+import { UserModel } from "@/features/user/types/user.response";
 import { AppIcons } from "@/constants/AppResource/icons/app-icons";
-import { getUserProfileService } from "@/services/dashboard/user/user.service";
+import { getUserProfileService } from "@/features/user/services/user.service";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getRoles } from "@/utils/local-storage/roles";
@@ -252,3 +252,5 @@ export function DashboardSidebar({
     </>
   );
 }
+
+

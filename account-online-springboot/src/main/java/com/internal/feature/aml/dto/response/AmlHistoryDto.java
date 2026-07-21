@@ -48,3 +48,4 @@ public class AmlHistoryDto {
     private String nidImageName;
     private String selfieImageName;
 }
+

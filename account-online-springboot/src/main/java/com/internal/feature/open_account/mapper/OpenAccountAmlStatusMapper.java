@@ -6,7 +6,7 @@ import com.internal.enumation.StatusData;
 import com.internal.feature.aml.dto.request.CreateAmlRequestDto;
 import com.internal.feature.aml.dto.request.CustomerAmlDto;
 import com.internal.feature.aml.dto.response.AmlStatusDto;
-import com.internal.feature.aml.model.AmlStatus;
+import com.internal.feature.aml.models.AmlStatus;
 import com.internal.feature.auth.dto.response.UserResponseDto;
 import com.internal.feature.auth.models.UserEntity;
 import com.internal.feature.master_data.dto.response.LocationCodesDto;
@@ -290,3 +290,9 @@ public class OpenAccountAmlStatusMapper {
         }
 
 }
+
+
+
+
+
+

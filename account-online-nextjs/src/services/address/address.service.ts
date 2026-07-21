@@ -1,4 +1,4 @@
-import { AddressRequest } from "@/models/address/address.request";
+import { AddressRequest } from "@/types/address/address.request";
 import { axiosClientWithAuth } from "@/utils/axios";
 import axios from "axios";
 

@@ -1,8 +1,8 @@
 package com.internal.feature.master_data.service.impl;
 
 import com.internal.enumation.StatusData;
-import com.internal.exceptions.error.custom.DuplicateNameException;
-import com.internal.exceptions.error.custom.NotFoundException;
+import com.internal.shared.exception.custom.DuplicateNameException;
+import com.internal.shared.exception.custom.NotFoundException;
 import com.internal.feature.master_data.dto.request.GetAllMaritalStatusRequest;
 import com.internal.feature.master_data.dto.request.MaritalStatusCreateRequestDto;
 import com.internal.feature.master_data.dto.request.MaritalStatusUpdateRequestDto;
@@ -96,3 +96,10 @@ public class MaritalStatusServiceImpl implements MaritalStatusService {
         return mapper.toDto(maritalStatus);
     }
 }
+
+
+
+
+
+
+

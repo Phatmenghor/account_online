@@ -7,8 +7,8 @@ import com.internal.feature.logs_report.dto.request.AllAccountOnlineSuccessReque
 import com.internal.feature.logs_report.dto.response.AccountOnlineFinalResponseDto;
 import com.internal.feature.logs_report.dto.response.AllAccountOnlineFinalExcelResponseDto;
 import com.internal.feature.logs_report.dto.response.AllAccountOnlineFinalResponseDto;
-import com.internal.feature.logs_report.dto.response.CustomerImageUploadResponseDto;
-import com.internal.feature.logs_report.model.AccountOnlineFinal;
+import com.internal.feature.customer_image.dto.response.CustomerImageUploadResponseDto;
+import com.internal.feature.logs_report.models.AccountOnlineFinal;
 import com.internal.feature.open_account.dto.request.CustomerRequest;
 import com.internal.feature.open_account.dto.response.CustomerResponse;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,3 +42,8 @@ public interface AccountOnlineOpenFinalService {
     AccountOnlineFinalResponseDto findAccountByCifOrLegalId(AccountOnlineFinalLogRequestDto requestDto);
 
 }
+
+
+
+
+

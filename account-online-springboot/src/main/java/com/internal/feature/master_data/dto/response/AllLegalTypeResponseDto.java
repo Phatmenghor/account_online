@@ -17,3 +17,4 @@ public class AllLegalTypeResponseDto {
     private int totalPages;
     private boolean last;
 }
+

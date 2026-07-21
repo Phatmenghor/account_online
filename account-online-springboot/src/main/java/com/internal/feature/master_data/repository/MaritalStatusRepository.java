@@ -27,3 +27,9 @@ public interface MaritalStatusRepository extends JpaRepository<MaritalStatus, Lo
            "OR LOWER(m.nameKh) LIKE LOWER(CONCAT('%', :search, '%')))")
     List<MaritalStatus> findActiveBySearch(@Param("status") StatusData status, @Param("search") String search);
 }
+
+
+
+
+
+

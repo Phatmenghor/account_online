@@ -10,7 +10,7 @@ import { TopBar } from "@/components/shared/dashboard/topbar";
 import { isAuthenticated } from "@/utils/local-storage/token";
 import { getRoles } from "@/utils/local-storage/roles";
 import { ROUTES } from "@/constants/AppRoutes/routes";
-import { getUserProfileService } from "@/services/dashboard/user/user.service";
+import { getUserProfileService } from "@/features/user/services/user.service";
 import { storeUserInfo } from "@/utils/local-storage/userInfo";
 
 export default function DashboardLayout({
@@ -77,3 +77,4 @@ export default function DashboardLayout({
     </div>
   );
 }
+

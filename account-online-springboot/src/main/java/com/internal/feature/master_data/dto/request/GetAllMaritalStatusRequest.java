@@ -22,3 +22,4 @@ public class GetAllMaritalStatusRequest {
     private StatusData status;
 }
 
+

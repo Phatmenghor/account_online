@@ -26,3 +26,5 @@ public class MaritalStatus extends BaseEntity {
     @Column(name = "status", nullable = false)
     private StatusData status;
 }
+
+

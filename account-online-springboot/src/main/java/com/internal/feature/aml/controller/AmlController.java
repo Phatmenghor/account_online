@@ -1,7 +1,7 @@
 package com.internal.feature.aml.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.internal.exceptions.response.ApiResponse;
+import com.internal.shared.response.ApiResponse;
 import com.internal.feature.aml.dto.request.AllAmlHistoryRequestDto;
 import com.internal.feature.aml.dto.request.AllAmlRequestDto;
 import com.internal.feature.aml.dto.request.ExternalAmlStatusUpdateDto;
@@ -11,12 +11,16 @@ import com.internal.feature.aml.dto.response.AllAmlResponseDto;
 import com.internal.feature.aml.dto.response.AmlHistoryDto;
 import com.internal.feature.aml.dto.response.AmlStatusDto;
 import com.internal.feature.aml.service.AmlService;
-import com.internal.feature.auth.service.ApiKeyService;
-import com.internal.utils.constants.ResponseMessage;
+import com.internal.shared.constant.ResponseMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
 
@@ -74,22 +78,20 @@ public class AmlController {
     }
 
 
-    private final ApiKeyService apiKeyService;
-
     @PostMapping("/external/update-status")
     public ResponseEntity<ApiResponse<String>> updateExternalAmlStatus(
             @RequestHeader("X-API-KEY") String apiKey,
             @RequestHeader("X-SECRET-KEY") String secretKey,
             @RequestBody @Valid ExternalAmlStatusUpdateDto req) {
 
-        if (!apiKeyService.validateKey(apiKey, secretKey)) {
-            log.warn("Authentication failed for external AML update");
-            return ResponseEntity.status(401).body(ApiResponse.error(ResponseMessage.INVALID_API_KEY));
-        }
-
         log.info("Received external request to update AML status for Legal ID: {}", req.getCustomerId());
-        service.updateExternalAmlStatus(req);
+        service.updateExternalAmlStatus(apiKey, secretKey, req);
         
         return ResponseEntity.ok(ApiResponse.success(ResponseMessage.AML_EXTERNAL_UPDATED, null));
     }
 }
+
+
+
+
+

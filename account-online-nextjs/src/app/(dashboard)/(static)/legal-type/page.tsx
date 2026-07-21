@@ -1,5 +1,11 @@
 "use client";
 
+import { useLegalTypeState } from '@/features/master-data/store/state/legaltype-state';
+import { setPageNo, setSearchFilter, setStatusFilter } from '@/features/master-data/store/slices/legaltype-slice';
+import { fetchAllLegalTypeService, createLegalTypeThunk, updateLegalTypeThunk, deleteLegalTypeThunk } from '@/features/master-data/store/thunks/legaltype-thunks';
+import { useAppDispatch } from '@/store/store';
+
+
 import { Suspense } from "react";
 import { DeleteConfirmationDialog } from "@/components/shared/dialog/dialog-delete";
 import { CustomPagination } from "@/components/shared/pagination/custom-pagination";
@@ -19,23 +25,23 @@ import { startTransition, useCallback, useEffect, useState } from "react";
 import {
   AllLegalTypeModel,
   LegalTypeModel,
-} from "@/models/static/legal-type/legal-type.response";
+} from "@/features/master-data/types/legal-type/legal-type.response";
 import Loading from "@/components/shared/common/loading";
-import { createLegalTypeTableColumns } from "@/components/shared/table/legal-type-content";
-import LegalTypeViewModal from "@/components/shared/modal/legal-type-detail-modal";
-import ModalLegalType from "@/components/shared/modal/legal-type-modal";
+import { createLegalTypeTableColumns } from "@/features/master-data/table/legal-type-content";
+import LegalTypeViewModal from "@/features/master-data/components/legal-type-detail-modal";
+import ModalLegalType from "@/features/master-data/components/legal-type-modal";
 import { ModalMode } from "@/constants/AppResource/display-list/enum/mode";
 import {
   AllLegalTypeReq,
   CreateLegalTypeReq,
   UpdateLegalTypeReq,
-} from "@/models/static/legal-type/legal-type.request";
+} from "@/features/master-data/types/legal-type/legal-type.request";
 import {
   createLegalTypeService,
   deleteLegalTypeService,
   getAllLegalTypeService,
   updateLegalTypeService,
-} from "@/services/dashboard/legal-type/legal-type.service";
+} from "@/features/master-data/services/legal-type/legal-type.service";
 import {
   Select,
   SelectContent,
@@ -46,11 +52,11 @@ import {
 import { STATUS_USER_OPTIONS } from "@/constants/AppResource/filter/status";
 
 function LegalTypePageContent() {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [legalTypes, setLegalTypes] = useState<AllLegalTypeModel | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const dispatch = useAppDispatch();
+  const { legalTypeData: legalTypes, isLoading, filters } = useLegalTypeState();
+  const searchQuery = filters.search;
+  const statusFilter = filters.status;
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [statusFilter, setStatusFilter] = useState<string>("all");
   const [selectedLegalType, setSelectedLegalType] =
     useState<LegalTypeModel | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -77,19 +83,16 @@ function LegalTypePageContent() {
   }, [searchParams, updateUrlWithPage]);
 
   const loadLegalTypes = useCallback(async () => {
-    setIsLoading(true);
     try {
-      const response = await getAllLegalTypeService({
+      dispatch(fetchAllLegalTypeService({
         search: debouncedSearchQuery,
         pageNo: currentPage,
         pageSize: 15,
         status: statusFilter !== "all" ? statusFilter : undefined,
-      });
-      setLegalTypes(response);
+      }));
     } catch (error: any) {
       console.error("Failed to fetch legal types: ", error);
     } finally {
-      setIsLoading(false);
     }
   }, [debouncedSearchQuery, statusFilter, currentPage]);
 
@@ -99,93 +102,47 @@ function LegalTypePageContent() {
 
   // Simplified search change handler - just updates the state, debouncing handles the rest
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
+    dispatch(setSearchFilter(e.target.value));
   };
 
   const handleSaveLegalType = async (
-    formData: CreateLegalTypeReq | { id: number; updates: UpdateLegalTypeReq },
+    formData: CreateLegalTypeReq | { id: number; updates: UpdateLegalTypeReq }
   ) => {
     setIsSubmitting(true);
     try {
       if (mode === ModalMode.CREATE_MODE) {
         const createData = formData as CreateLegalTypeReq;
-
-        const response = await createLegalTypeService({
-          nameEn: createData.nameEn,
-          nameKh: createData.nameKh,
-          legalTypeValue: createData.legalTypeValue,
-          status: createData.status,
-        });
-
-        // Optimistic update
-        setLegalTypes((prev: any) =>
-          prev
-            ? {
-                ...prev,
-                content: [response, ...prev.content],
-                totalElements: prev.totalElements + 1,
-              }
-            : {
-                content: [response],
-                pageNo: 1,
-                pageSize: 10,
-                totalElements: 1,
-                totalPages: 1,
-                last: true,
-              },
-        );
-
+        await dispatch(createLegalTypeThunk(createData)).unwrap();
         startTransition(() => {
           AppToast({
             type: "success",
-            message: "Legal Type created successfully",
-            description: "New Legal Type",
+            message: "LegalType created successfully",
+            description: "New LegalType",
           });
         });
       } else if (mode === ModalMode.UPDATE_MODE) {
-        const updateData = formData as {
-          id: number;
-          updates: UpdateLegalTypeReq;
-        };
-
+        const updateData = formData as { id: number; updates: UpdateLegalTypeReq };
         if (!updateData.id) {
-          console.error("Missing legal type id in update form");
+          console.error("Missing legalType id in update form");
           setIsSubmitting(false);
           return;
         }
-
-        const response = await updateLegalTypeService(
-          updateData.id,
-          updateData.updates,
-        );
-
-        setLegalTypes((prev: any) =>
-          prev
-            ? {
-                ...prev,
-                content: prev.content.map((legalType: any) =>
-                  legalType.id === updateData.id ? response : legalType,
-                ),
-              }
-            : prev,
-        );
-
+        await dispatch(updateLegalTypeThunk({ id: updateData.id, updates: updateData.updates })).unwrap();
         startTransition(() => {
           AppToast({
             type: "success",
-            message: "Legal Type updated successfully",
-            description: "Updated Legal Type",
+            message: "LegalType updated successfully",
+            description: "Updated LegalType",
           });
         });
       }
-
       setIsModalOpen(false);
       setSelectedLegalType(null);
       loadLegalTypes();
     } catch (err: any) {
       AppToast({
         type: "error",
-        message: "Failed to save legal type",
+        message: "Failed to save legalType status",
       });
     } finally {
       setIsSubmitting(false);
@@ -196,7 +153,7 @@ function LegalTypePageContent() {
     if (!selectedLegalType) return;
     setIsSubmitting(true);
     try {
-      await deleteLegalTypeService(selectedLegalType.id);
+      await dispatch(deleteLegalTypeThunk(selectedLegalType.id)).unwrap();
       AppToast({
         type: "success",
         message: "Legal Type deleted successfully",
@@ -216,7 +173,7 @@ function LegalTypePageContent() {
 
   // Handle status filter change - directly updates the filter value
   const handleStatusChange = (status: string) => {
-    setStatusFilter(status);
+    dispatch(setStatusFilter(status));
     // Reset to first page when filter changes
     updateUrlWithPage(1, true);
   };

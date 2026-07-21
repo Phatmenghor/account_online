@@ -21,3 +21,4 @@ public class AccountOnlineReportLogResponse {
     private String remark;
     private LocalDateTime createdAt;
 }
+

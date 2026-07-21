@@ -9,3 +9,4 @@ public interface AccountOnlineReportProjection {
     OpenAccStatusEnum getStatus();
     Long getCount();
 }
+

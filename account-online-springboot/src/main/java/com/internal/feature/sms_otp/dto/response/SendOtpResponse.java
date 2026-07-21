@@ -25,3 +25,4 @@ public class SendOtpResponse {
     @Schema(description = "OTP expires at")
     private LocalDateTime expiresAt;
 }
+

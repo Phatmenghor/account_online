@@ -1,6 +1,6 @@
 package com.internal.feature.telegram_alerts.repository;
 
-import com.internal.feature.telegram_alerts.model.TelegramMessageLog;
+import com.internal.feature.telegram_alerts.models.TelegramMessageLog;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -11,3 +11,7 @@ import java.util.List;
 public interface TelegramMessageLogRepository extends JpaRepository<TelegramMessageLog, Long> {
     List<TelegramMessageLog> findByCreatedAtBefore(LocalDateTime dateTime);
 }
+
+
+
+

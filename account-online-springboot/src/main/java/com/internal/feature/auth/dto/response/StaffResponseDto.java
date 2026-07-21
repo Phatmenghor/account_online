@@ -20,3 +20,4 @@ public class StaffResponseDto {
     private String probationDate;
     private String email;
 }
+

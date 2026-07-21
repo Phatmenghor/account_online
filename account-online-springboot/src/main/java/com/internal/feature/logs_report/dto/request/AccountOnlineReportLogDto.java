@@ -22,3 +22,4 @@ public class AccountOnlineReportLogDto {
 
     private List<OpenAccStatusEnum> status;
 }
+

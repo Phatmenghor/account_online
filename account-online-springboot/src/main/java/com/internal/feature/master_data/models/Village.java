@@ -29,3 +29,5 @@ public class Village extends BaseEntity {
     @JoinColumn(name = "commune_id")
     private Commune commune;
 }
+
+

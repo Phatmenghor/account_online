@@ -7,3 +7,4 @@ public interface OpenAccountService {
 
     OpenAccountResponseDto processAccountOpening(CustomerRequest request) throws Exception;
 }
+

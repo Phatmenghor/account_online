@@ -113,7 +113,6 @@ export function detectBrowserLanguage(): Locale {
   try {
     const browserLang = navigator.language.toLowerCase();
 
-    if (browserLang.startsWith("zh")) return "zh-CN";
     if (browserLang.startsWith("km") || browserLang.startsWith("kh"))
       return "kh";
     if (browserLang.startsWith("en")) return "en";

@@ -80,3 +80,4 @@ public class MobileBankingRequest {
     @JsonProperty("MobileChannel")
     private String mobileChannel;
 }
+

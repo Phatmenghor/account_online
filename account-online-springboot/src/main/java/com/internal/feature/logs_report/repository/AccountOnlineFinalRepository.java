@@ -1,6 +1,6 @@
 package com.internal.feature.logs_report.repository;
 
-import com.internal.feature.logs_report.model.AccountOnlineFinal;
+import com.internal.feature.logs_report.models.AccountOnlineFinal;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -73,3 +73,7 @@ public interface AccountOnlineFinalRepository extends JpaRepository<AccountOnlin
                 @Param("toDate") LocalDateTime toDate
         );
 }
+
+
+
+

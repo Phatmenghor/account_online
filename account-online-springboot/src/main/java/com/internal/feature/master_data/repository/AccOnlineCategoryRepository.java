@@ -18,3 +18,9 @@ public interface AccOnlineCategoryRepository extends JpaRepository<AccOnlineCate
            "ORDER BY a.lookupId ASC, a.lookupName ASC")
     List<AccOnlineCategory> findAllBySearch(@Param("search") String search);
 }
+
+
+
+
+
+

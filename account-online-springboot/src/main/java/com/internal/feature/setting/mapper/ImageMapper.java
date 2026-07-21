@@ -1,8 +1,8 @@
 package com.internal.feature.setting.mapper;
 
-import com.internal.feature.setting.dto.ImageDto;
-import com.internal.feature.setting.dto.ImageResponse;
-import com.internal.feature.setting.dto.ImageUploadRequest;
+import com.internal.feature.setting.dto.request.ImageDto;
+import com.internal.feature.setting.dto.response.ImageResponse;
+import com.internal.feature.setting.dto.request.ImageUploadRequest;
 import com.internal.feature.setting.models.ImageEntity;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -52,3 +52,10 @@ public interface ImageMapper {
                 .build();
     }
 }
+
+
+
+
+
+
+

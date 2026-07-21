@@ -23,3 +23,4 @@ public class VerifyOtpResponse {
     @Schema(description = "Message")
     private String message;
 }
+

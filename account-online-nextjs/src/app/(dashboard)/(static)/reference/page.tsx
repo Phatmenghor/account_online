@@ -1,5 +1,11 @@
 "use client";
 
+import { useReferenceState } from '@/features/master-data/store/state/reference-state';
+import { setPageNo, setSearchFilter, setStatusFilter } from '@/features/master-data/store/slices/reference-slice';
+import { fetchAllReferenceService, createReferenceThunk, updateReferenceThunk, deleteReferenceThunk } from '@/features/master-data/store/thunks/reference-thunks';
+import { useAppDispatch } from '@/store/store';
+
+
 import { Suspense } from "react";
 import { DeleteConfirmationDialog } from "@/components/shared/dialog/dialog-delete";
 import { CustomPagination } from "@/components/shared/pagination/custom-pagination";
@@ -19,22 +25,22 @@ import { startTransition, useCallback, useEffect, useState } from "react";
 import {
   AllReferenceModel,
   ReferenceModel,
-} from "@/models/static/reference/reference.response";
+} from "@/features/master-data/types/reference/reference.response";
 import Loading from "@/components/shared/common/loading";
-import { createReferenceTableColumns } from "@/components/shared/table/reference-content";
-import ReferenceViewModal from "@/components/shared/modal/reference-detail-modal";
-import ModalReference from "@/components/shared/modal/reference-modal";
+import { createReferenceTableColumns } from "@/features/master-data/table/reference-content";
+import ReferenceViewModal from "@/features/master-data/components/reference-detail-modal";
+import ModalReference from "@/features/master-data/components/reference-modal";
 import { ModalMode } from "@/constants/AppResource/display-list/enum/mode";
 import {
   CreateReferenceReq,
   UpdateReferenceReq,
-} from "@/models/static/reference/reference.request";
+} from "@/features/master-data/types/reference/reference.request";
 import {
   createReferenceService,
   deleteReferenceService,
   getAllReferenceService,
   updateReferenceService,
-} from "@/services/dashboard/reference/reference.service";
+} from "@/features/master-data/services/reference/reference.service";
 import {
   Select,
   SelectContent,
@@ -45,11 +51,11 @@ import {
 import { STATUS_USER_OPTIONS } from "@/constants/AppResource/filter/status";
 
 function ReferencePageContent() {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [references, setReferences] = useState<AllReferenceModel | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const dispatch = useAppDispatch();
+  const { referenceData: references, isLoading, filters } = useReferenceState();
+  const searchQuery = filters.search;
+  const statusFilter = filters.status;
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [statusFilter, setStatusFilter] = useState<string>("all");
   const [selectedReference, setSelectedReference] =
     useState<ReferenceModel | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -76,19 +82,16 @@ function ReferencePageContent() {
   }, [searchParams, updateUrlWithPage]);
 
   const loadReferences = useCallback(async () => {
-    setIsLoading(true);
     try {
-      const response = await getAllReferenceService({
+      dispatch(fetchAllReferenceService({
         search: debouncedSearchQuery,
         pageNo: currentPage,
         pageSize: 15,
         status: statusFilter !== "all" ? statusFilter : undefined,
-      });
-      setReferences(response);
+      }));
     } catch (error: any) {
       console.error("Failed to fetch references: ", error);
     } finally {
-      setIsLoading(false);
     }
   }, [debouncedSearchQuery, statusFilter, currentPage]);
 
@@ -98,92 +101,47 @@ function ReferencePageContent() {
 
   // Simplified search change handler - just updates the state, debouncing handles the rest
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
+    dispatch(setSearchFilter(e.target.value));
   };
 
   const handleSaveReference = async (
-    formData: CreateReferenceReq | { id: number; updates: UpdateReferenceReq },
+    formData: CreateReferenceReq | { id: number; updates: UpdateReferenceReq }
   ) => {
     setIsSubmitting(true);
     try {
       if (mode === ModalMode.CREATE_MODE) {
         const createData = formData as CreateReferenceReq;
-
-        const response = await createReferenceService({
-          nameEn: createData.nameEn,
-          nameKh: createData.nameKh,
-          status: createData.status,
-        });
-
-        // Optimistic update
-        setReferences((prev: any) =>
-          prev
-            ? {
-                ...prev,
-                content: [response, ...prev.content],
-                totalElements: prev.totalElements + 1,
-              }
-            : {
-                content: [response],
-                pageNo: 1,
-                pageSize: 10,
-                totalElements: 1,
-                totalPages: 1,
-                last: true,
-              },
-        );
-
+        await dispatch(createReferenceThunk(createData)).unwrap();
         startTransition(() => {
           AppToast({
             type: "success",
-            message: "Bank created successfully",
-            description: "New Bank",
+            message: "Reference created successfully",
+            description: "New Reference",
           });
         });
       } else if (mode === ModalMode.UPDATE_MODE) {
-        const updateData = formData as {
-          id: number;
-          updates: UpdateReferenceReq;
-        };
-
+        const updateData = formData as { id: number; updates: UpdateReferenceReq };
         if (!updateData.id) {
           console.error("Missing reference id in update form");
           setIsSubmitting(false);
           return;
         }
-
-        const response = await updateReferenceService(
-          updateData.id,
-          updateData.updates,
-        );
-
-        setReferences((prev) =>
-          prev
-            ? {
-                ...prev,
-                content: prev.content.map((reference) =>
-                  reference.id === updateData.id ? response : reference,
-                ),
-              }
-            : prev,
-        );
-
+        await dispatch(updateReferenceThunk({ id: updateData.id, updates: updateData.updates })).unwrap();
         startTransition(() => {
           AppToast({
             type: "success",
-            message: "Bank updated successfully",
-            description: "Updated Bank",
+            message: "Reference updated successfully",
+            description: "Updated Reference",
           });
         });
       }
-
       setIsModalOpen(false);
       setSelectedReference(null);
       loadReferences();
     } catch (err: any) {
       AppToast({
         type: "error",
-        message: "Failed to save bank",
+        message: "Failed to save reference status",
       });
     } finally {
       setIsSubmitting(false);
@@ -194,7 +152,7 @@ function ReferencePageContent() {
     if (!selectedReference) return;
     setIsSubmitting(true);
     try {
-      await deleteReferenceService(selectedReference.id);
+      await dispatch(deleteReferenceThunk(selectedReference.id)).unwrap();
       AppToast({
         type: "success",
         message: "Bank deleted successfully",
@@ -214,7 +172,7 @@ function ReferencePageContent() {
 
   // Handle status filter change - directly updates the filter value
   const handleStatusChange = (status: string) => {
-    setStatusFilter(status);
+    dispatch(setStatusFilter(status));
     // Reset to first page when filter changes
     updateUrlWithPage(1, true);
   };

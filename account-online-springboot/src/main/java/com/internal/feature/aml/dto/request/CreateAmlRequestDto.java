@@ -65,3 +65,4 @@ public class CreateAmlRequestDto {
     private UserResponseDto approvedBy;
     private UserResponseDto rejectedBy;
 }
+

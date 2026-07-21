@@ -1,4 +1,4 @@
-import { CommuneModel, DistrictModel, ProvinceModel, VillageModel } from "@/models/address/address.response";
+import { CommuneModel, DistrictModel, ProvinceModel, VillageModel } from "@/types/address/address.response";
 import { getAllCommuneService, getAllDistrictService, getAllProvinceService, getAllVillageService } from "@/services/address/address.service";
 import { useEffect, useState } from "react";
 import { AppToast } from "@/components/shared/toast/app-toast";

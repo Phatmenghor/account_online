@@ -1,4 +1,4 @@
-import { AllBranchReq } from "@/models/branch/branch.request";
+import { AllBranchReq } from "@/types/branch/branch.request";
 import { axiosClientWithAuth } from "@/utils/axios";
 import axios from "axios";
 
@@ -49,3 +49,4 @@ export async function getAllBranchService(request: AllBranchReq) {
     }
   }
 }
+

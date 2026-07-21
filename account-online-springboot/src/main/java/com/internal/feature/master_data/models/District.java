@@ -29,3 +29,5 @@ public class District extends BaseEntity {
     @JoinColumn(name = "province_id")
     private Province province;
 }
+
+

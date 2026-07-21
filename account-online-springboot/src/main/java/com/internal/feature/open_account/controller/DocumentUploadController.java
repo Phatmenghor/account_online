@@ -1,6 +1,6 @@
 package com.internal.feature.open_account.controller;
 
-import com.internal.feature.logs_report.service.CustomerImageService;
+import com.internal.feature.customer_image.service.CustomerImageService;
 import com.internal.feature.open_account.dto.request.Base64UploadRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -100,3 +100,9 @@ public class DocumentUploadController {
         return prefix + identifier + "_" + timestamp + "_" + random + ".jpg";
     }
 }
+
+
+
+
+
+

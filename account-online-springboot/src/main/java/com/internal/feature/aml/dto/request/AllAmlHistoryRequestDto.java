@@ -29,3 +29,4 @@ public class AllAmlHistoryRequestDto {
     private LocalDate startDate;
     private LocalDate endDate;
 }
+

@@ -4,7 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { loginService } from "@/services/auth/login.service";
+import { loginService } from "@/features/auth/services/login.service";
 import { useForm } from "react-hook-form";
 import { Eye, EyeOff, Lock, IdCard, ShieldCheck, Loader2 } from "lucide-react";
 import {
@@ -21,7 +21,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ROUTES } from "@/constants/AppRoutes/routes";
 import { AppToast } from "@/components/shared/toast/app-toast";
-import ForceChangePasswordModal from "@/components/shared/modal/force-change-password-modal";
+import ForceChangePasswordModal from "@/features/master-data/components/force-change-password-modal";
 
 const schema = z.object({
   username: z.string().min(1, "Please enter your ID Card"),
@@ -265,3 +265,4 @@ export default function LoginPage() {
     </div>
   );
 }
+

@@ -37,3 +37,9 @@ public interface LegalTypeMapper {
         return response;
     }
 }
+
+
+
+
+
+

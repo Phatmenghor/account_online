@@ -9,7 +9,7 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { TopUserOpenAccount } from "@/models/dashboard/dashboard.model";
+import { TopUserOpenAccount } from "@/types/dashboard/dashboard.model";
 
 function UserRow({ user, rank }: { user: TopUserOpenAccount; rank: number }) {
   return (
@@ -94,3 +94,4 @@ export function TopUsersOpenAccountCard({ users, loading }: TopUsersOpenAccountC
     </Card>
   );
 }
+

@@ -4,7 +4,7 @@ import com.internal.enumation.OpenAccStatusEnum;
 import com.internal.feature.logs_report.dto.request.AccountOnlineReportLogDto;
 import com.internal.feature.logs_report.dto.response.AccountOnlineReportLogResponse;
 import com.internal.feature.logs_report.dto.response.AccountOnlineReportResponse;
-import com.internal.utils.pagination.PaginationResponse;
+import com.internal.shared.pagination.PaginationResponse;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -17,3 +17,5 @@ public interface AccountOnlineReportLogService {
 
     PaginationResponse<AccountOnlineReportLogResponse> getLogsWithPagination(AccountOnlineReportLogDto request);
 }
+
+

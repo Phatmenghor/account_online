@@ -14,3 +14,4 @@ public class ExternalAmlStatusUpdateDto {
     private String customerId;
     private String updateFrom;
 }
+

@@ -10,3 +10,4 @@ public class LocationFilter {
     private String districtCode;
     private String communeCode;
 }
+

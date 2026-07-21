@@ -14,3 +14,4 @@ public class LegalTypeUpdateRequestDto {
     private String legalTypeValue;
     private StatusData status;
 }
+

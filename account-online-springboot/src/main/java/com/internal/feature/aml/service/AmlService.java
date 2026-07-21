@@ -10,7 +10,7 @@ import com.internal.feature.aml.dto.response.AllAmlHistoryResponseDto;
 import com.internal.feature.aml.dto.response.AllAmlResponseDto;
 import com.internal.feature.aml.dto.response.AmlHistoryDto;
 import com.internal.feature.aml.dto.response.AmlStatusDto;
-import com.internal.feature.aml.model.AmlStatus;
+import com.internal.feature.aml.models.AmlStatus;
 
 import java.util.Optional;
 
@@ -25,5 +25,9 @@ public interface AmlService {
 
     AllAmlHistoryResponseDto getAllAmlHistory(AllAmlHistoryRequestDto requestDto);
 
-    void updateExternalAmlStatus(ExternalAmlStatusUpdateDto request);
+    void updateExternalAmlStatus(String apiKey, String secretKey, ExternalAmlStatusUpdateDto request);
 }
+
+
+
+

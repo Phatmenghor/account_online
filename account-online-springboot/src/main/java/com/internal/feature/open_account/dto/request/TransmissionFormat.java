@@ -74,3 +74,4 @@ public class TransmissionFormat {
     @JsonProperty("SignData")
     private String signData;
 }
+

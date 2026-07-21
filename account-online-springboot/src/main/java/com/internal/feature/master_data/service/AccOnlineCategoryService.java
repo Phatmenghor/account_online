@@ -7,3 +7,4 @@ import java.util.List;
 public interface AccOnlineCategoryService {
     List<AccOnlineCategoryDto> getAll(String search);
 }
+

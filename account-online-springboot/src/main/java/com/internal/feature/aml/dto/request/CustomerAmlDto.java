@@ -23,3 +23,4 @@ public class CustomerAmlDto {
     private String issuedDate;
     private String expiredDate;
 }
+

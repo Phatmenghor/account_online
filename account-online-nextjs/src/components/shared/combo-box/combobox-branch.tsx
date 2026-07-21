@@ -15,7 +15,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { BranchModel } from "@/models/branch/branch.response";
+import { BranchModel } from "@/types/branch/branch.response";
 import { getAllBranchService } from "@/services/branch/branch.service";
 import { debounce } from "@/utils/debounce/debounce";
 import { Check, ChevronsUpDown, Loader2 } from "lucide-react";
@@ -180,3 +180,4 @@ export function ComboboxSelectBranch({
     </Popover>
   );
 }
+

@@ -2,8 +2,8 @@ package com.internal.feature.telegram_alerts.service;
 
 import com.internal.enumation.AmlStatusEnum;
 import com.internal.feature.aml.dto.response.AmlStatusDto;
-import com.internal.feature.logs_report.service.CustomerImageService;
-import com.internal.feature.telegram_alerts.config.TelegramService;
+import com.internal.feature.customer_image.service.CustomerImageService;
+import com.internal.feature.telegram_alerts.service.TelegramService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
@@ -234,3 +234,9 @@ public class MonitoringService {
         return text.replace("_", "\\_").replace("*", "\\*").replace("`", "\\`").replace("~", "\\~");
     }
 }
+
+
+
+
+
+

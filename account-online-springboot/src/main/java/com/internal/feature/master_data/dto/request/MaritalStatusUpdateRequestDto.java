@@ -13,3 +13,4 @@ public class MaritalStatusUpdateRequestDto {
     private String nameKh;
     private StatusData status;
 }
+

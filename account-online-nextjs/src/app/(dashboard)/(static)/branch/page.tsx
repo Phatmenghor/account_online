@@ -1,5 +1,11 @@
 "use client";
 
+import { useBranchState } from '@/features/master-data/store/state/branch-state';
+import { setPageNo, setSearchFilter, setStatusFilter } from '@/features/master-data/store/slices/branch-slice';
+import { fetchAllBranchService, createBranchThunk, updateBranchThunk, deleteBranchThunk } from '@/features/master-data/store/thunks/branch-thunks';
+import { useAppDispatch } from '@/store/store';
+
+
 import { Suspense } from "react";
 import { DeleteConfirmationDialog } from "@/components/shared/dialog/dialog-delete";
 import { CustomPagination } from "@/components/shared/pagination/custom-pagination";
@@ -17,30 +23,31 @@ import { useSearchParams } from "next/navigation";
 import { startTransition, useCallback, useEffect, useState } from "react";
 import Loading from "@/components/shared/common/loading";
 import { ModalMode } from "@/constants/AppResource/display-list/enum/mode";
-import { createBranchTableColumns } from "@/components/shared/table/branch-content";
+import { createBranchTableColumns } from "@/features/master-data/table/branch-content";
 import {
   AllBranchModel,
   BranchModel,
-} from "@/models/static/branch/branch.response";
+} from "@/features/master-data/types/branch/branch.response";
 import {
   CreateBranchReq,
   UpdateBranchReq,
-} from "@/models/static/branch/branch.request";
+} from "@/features/master-data/types/branch/branch.request";
 import {
   createBranchService,
   deleteBranchService,
   getAllBranchService,
   updateBranchService,
-} from "@/services/dashboard/branch/branch.service";
-import BranchViewModal from "@/components/shared/modal/branch-detail-modal";
-import ModalBranch from "@/components/shared/modal/branch-modal";
+} from "@/features/master-data/services/branch/branch.service";
+import BranchViewModal from "@/features/master-data/components/branch-detail-modal";
+import ModalBranch from "@/features/master-data/components/branch-modal";
 
 function BranchPageContent() {
-  const [searchQuery, setSearchQuery] = useState("");
+  const dispatch = useAppDispatch();
+  const { branchData: branchs, isLoading, filters } = useBranchState();
+  const searchQuery = filters.search;
+  const statusFilter = filters.status;
   const [branch, setBranch] = useState<AllBranchModel | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [statusFilter, setStatusFilter] = useState<string>("all");
   const [selectedBranch, setSelectedBranch] = useState<BranchModel | null>(
     null,
   );
@@ -66,7 +73,6 @@ function BranchPageContent() {
   }, [searchParams, updateUrlWithPage]);
 
   const loadBranch = useCallback(async () => {
-    setIsLoading(true);
     try {
       const response = await getAllBranchService({
         search: debouncedSearchQuery,
@@ -78,7 +84,6 @@ function BranchPageContent() {
     } catch (error: any) {
       console.error("Failed to fetch branch: ", error);
     } finally {
-      setIsLoading(false);
     }
   }, [debouncedSearchQuery, statusFilter, currentPage]);
 
@@ -88,40 +93,17 @@ function BranchPageContent() {
 
   // Simplified search change handler - just updates the state, debouncing handles the rest
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
+    dispatch(setSearchFilter(e.target.value));
   };
 
   const handleSaveBranch = async (
-    formData: CreateBranchReq | { id: number; updates: UpdateBranchReq },
+    formData: CreateBranchReq | { id: number; updates: UpdateBranchReq }
   ) => {
     setIsSubmitting(true);
     try {
       if (mode === ModalMode.CREATE_MODE) {
         const createData = formData as CreateBranchReq;
-
-        const response = await createBranchService({
-          branchCode: createData.branchCode,
-          branchKh: createData.branchKh,
-        });
-
-        // Optimistic update
-        setBranch((prev: any) =>
-          prev
-            ? {
-                ...prev,
-                content: [response, ...prev.content],
-                totalElements: prev.totalElements + 1,
-              }
-            : {
-                content: [response],
-                pageNo: 1,
-                pageSize: 10,
-                totalElements: 1,
-                totalPages: 1,
-                last: true,
-              },
-        );
-
+        await dispatch(createBranchThunk(createData)).unwrap();
         startTransition(() => {
           AppToast({
             type: "success",
@@ -131,29 +113,12 @@ function BranchPageContent() {
         });
       } else if (mode === ModalMode.UPDATE_MODE) {
         const updateData = formData as { id: number; updates: UpdateBranchReq };
-
         if (!updateData.id) {
           console.error("Missing branch id in update form");
           setIsSubmitting(false);
           return;
         }
-
-        const response = await updateBranchService(
-          updateData.id,
-          updateData.updates,
-        );
-
-        setBranch((prev) =>
-          prev
-            ? {
-                ...prev,
-                content: prev.content.map((branch) =>
-                  branch.id === updateData.id ? response : branch,
-                ),
-              }
-            : prev,
-        );
-
+        await dispatch(updateBranchThunk({ id: updateData.id, updates: updateData.updates })).unwrap();
         startTransition(() => {
           AppToast({
             type: "success",
@@ -162,14 +127,13 @@ function BranchPageContent() {
           });
         });
       }
-
       setIsModalOpen(false);
       setSelectedBranch(null);
       loadBranch();
     } catch (err: any) {
       AppToast({
         type: "error",
-        message: "Failed to save branch",
+        message: "Failed to save branch status",
       });
     } finally {
       setIsSubmitting(false);
@@ -180,7 +144,7 @@ function BranchPageContent() {
     if (!selectedBranch) return;
     setIsSubmitting(true);
     try {
-      await deleteBranchService(selectedBranch.id);
+      await dispatch(deleteBranchThunk(selectedBranch.id)).unwrap();
       AppToast({
         type: "success",
         message: "Branch deleted successfully",
@@ -324,3 +288,4 @@ export default function ReferencePage() {
     </Suspense>
   );
 }
+

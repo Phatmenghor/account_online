@@ -11,3 +11,4 @@ public class DailyCountResponse {
     private String date;
     private long count;
 }
+

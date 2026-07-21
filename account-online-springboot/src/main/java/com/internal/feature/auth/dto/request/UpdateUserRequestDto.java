@@ -16,3 +16,4 @@ public class UpdateUserRequestDto {
     private String department;
     private RoleEnum userRole;
 }
+

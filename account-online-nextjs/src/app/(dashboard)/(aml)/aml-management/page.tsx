@@ -19,17 +19,17 @@ import { Search } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useRouter, useSearchParams } from "next/navigation";
 import Loading from "@/components/shared/common/loading";
-import { createManagementTableColumns } from "@/components/shared/table/aml-management-content";
+import { createManagementTableColumns } from "@/features/aml/table/aml-management-content";
 import {
   getAllAmlManagementService,
   updateManagementService,
-} from "@/services/dashboard/aml/aml-management.service";
+} from "@/features/aml/services/aml-management.service";
 import AmlConfirmDialog from "@/components/shared/dialog/dialog-aml";
 import {
   AllAmlManagementModel,
   AmlManagementModel,
-} from "@/models/aml/management/response/aml-management.response";
-import AmlViewDetailModal from "@/components/shared/modal/aml-management-detail";
+} from "@/features/aml/types/management/response/aml-management.response";
+import AmlViewDetailModal from "@/features/aml/components/aml-management-detail";
 import { AmlStatusEnum } from "@/constants/AppResource/display-list/enum/status";
 import { AppToast } from "@/components/shared/toast/app-toast";
 
@@ -259,3 +259,5 @@ export default function ManagementPage() {
     </Suspense>
   );
 }
+
+

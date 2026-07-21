@@ -31,3 +31,4 @@ public class AdLoginResponseDto {
         private String samaccountName;
     }
 }
+

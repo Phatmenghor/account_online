@@ -17,7 +17,7 @@ import {
 import { cn } from "@/lib/utils";
 import { Check, ChevronsUpDown, Loader2 } from "lucide-react";
 import { useState, useMemo, useEffect } from "react";
-import { VillageModel } from "@/models/address/address.response";
+import { VillageModel } from "@/types/address/address.response";
 import { useTranslations } from "next-intl";
 
 interface ComboboxSelectVillageProps {

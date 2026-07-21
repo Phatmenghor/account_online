@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { AppToast } from "@/components/shared/toast/app-toast";
-import { findStaffByIdCardService, registerService } from "@/services/auth/register.service";
+import { findStaffByIdCardService, registerService } from "@/features/auth/services/register.service";
 import { ROUTES } from "@/constants/AppRoutes/routes";
 
 const MIN_LOOKUP_LENGTH = 4;
@@ -349,3 +349,4 @@ export default function RegisterPage() {
     </div>
   );
 }
+

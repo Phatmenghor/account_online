@@ -2,7 +2,7 @@ package com.internal.feature.logs_report.repository;
 
 import com.internal.enumation.OpenAccStatusEnum;
 import com.internal.feature.logs_report.dto.response.AccountOnlineReportProjection;
-import com.internal.feature.logs_report.model.AccountOnlineReportLog;
+import com.internal.feature.logs_report.models.AccountOnlineReportLog;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -48,3 +48,7 @@ public interface AccountOnlineReportLogRepository extends JpaRepository<AccountO
             @Param("statuses") List<OpenAccStatusEnum> statuses,
             Pageable pageable);
 }
+
+
+
+

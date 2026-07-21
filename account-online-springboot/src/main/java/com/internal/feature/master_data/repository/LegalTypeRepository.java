@@ -29,3 +29,9 @@ public interface LegalTypeRepository extends JpaRepository<LegalType, Long> {
            "OR LOWER(l.legalTypeValue) LIKE LOWER(CONCAT('%', :search, '%')))")
     List<LegalType> findActiveBySearch(@Param("status") StatusData status, @Param("search") String search);
 }
+
+
+
+
+
+

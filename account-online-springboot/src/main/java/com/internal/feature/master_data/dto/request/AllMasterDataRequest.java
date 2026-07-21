@@ -16,3 +16,4 @@ public class AllMasterDataRequest {
     private int pageSize = 10;
     private String search;
 }
+

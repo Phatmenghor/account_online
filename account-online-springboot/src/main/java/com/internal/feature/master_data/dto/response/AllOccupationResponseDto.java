@@ -18,3 +18,4 @@ public class AllOccupationResponseDto {
     private boolean last;
 }
 
+

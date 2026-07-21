@@ -1,8 +1,8 @@
 package com.internal.feature.master_data.service.impl;
 
 import com.internal.enumation.StatusData;
-import com.internal.exceptions.error.custom.DuplicateNameException;
-import com.internal.exceptions.error.custom.NotFoundException;
+import com.internal.shared.exception.custom.DuplicateNameException;
+import com.internal.shared.exception.custom.NotFoundException;
 import com.internal.feature.master_data.dto.request.GetAllOccupationRequest;
 import com.internal.feature.master_data.dto.request.OccupationCreateRequestDto;
 import com.internal.feature.master_data.dto.request.OccupationUpdateRequestDto;
@@ -103,3 +103,10 @@ public class OccupationServiceImpl implements OccupationService {
         return mapper.toDto(occupation);
     }
 }
+
+
+
+
+
+
+

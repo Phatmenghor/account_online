@@ -9,7 +9,7 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { TopAmlActionUser } from "@/models/dashboard/dashboard.model";
+import { TopAmlActionUser } from "@/types/dashboard/dashboard.model";
 
 function AmlUserRow({ user, rank }: { user: TopAmlActionUser; rank: number }) {
   return (
@@ -101,3 +101,4 @@ export function TopAmlActionsCard({ users, loading }: TopAmlActionsCardProps) {
     </Card>
   );
 }
+

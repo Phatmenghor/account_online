@@ -1,4 +1,4 @@
-import { AddressSelectReq } from "@/models/address/select-address/selectAddress.request";
+import { AddressSelectReq } from "@/types/address/select-address/selectAddress.request";
 import { axiosClientWithAuth } from "@/utils/axios";
 import axios from "axios";
 

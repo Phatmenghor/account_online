@@ -1,13 +1,13 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { DailyCountItem, TopUserOpenAccount, TopAmlActionUser } from "@/models/dashboard/dashboard.model";
+import { DailyCountItem, TopUserOpenAccount, TopAmlActionUser } from "@/types/dashboard/dashboard.model";
 import {
   getAccountOpeningChartService,
   getAmlHitsChartService,
   getTopUsersOpenAccountService,
   getTopAmlActionUsersService,
-} from "@/services/dashboard/report/report.service";
+} from "@/features/account-opening/services/report.service";
 import { AccountOpeningChartCard } from "./_components/account-opening-chart-card";
 import { AmlHitsChartCard } from "./_components/aml-hits-chart-card";
 import { TopUsersOpenAccountCard } from "./_components/top-users-open-account-card";
@@ -73,3 +73,5 @@ export default function Dashboard() {
     </div>
   );
 }
+
+

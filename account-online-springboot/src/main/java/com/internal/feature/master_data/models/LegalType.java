@@ -29,3 +29,5 @@ public class LegalType extends BaseEntity {
     @Column(name = "status", nullable = false)
     private StatusData status;
 }
+
+

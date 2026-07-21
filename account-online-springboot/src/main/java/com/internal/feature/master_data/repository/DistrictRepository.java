@@ -30,3 +30,9 @@ public interface DistrictRepository extends JpaRepository<District, Long> {
            "OR LOWER(d.districtCode) LIKE LOWER(CONCAT('%', :search, '%')))")
     Page<District> findByProvinceCodeAndSearch(@Param("provinceCode") String provinceCode, @Param("search") String search, Pageable pageable);
 }
+
+
+
+
+
+

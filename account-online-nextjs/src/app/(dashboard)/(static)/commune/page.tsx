@@ -1,5 +1,11 @@
 "use client";
 
+import { useCommuneState } from '@/features/master-data/store/state/commune-state';
+import { setPageNo, setSearchFilter, setStatusFilter } from '@/features/master-data/store/slices/commune-slice';
+import { fetchAllCommuneService, createCommuneThunk, updateCommuneThunk, deleteCommuneThunk } from '@/features/master-data/store/thunks/commune-thunks';
+import { useAppDispatch } from '@/store/store';
+
+
 import { Suspense } from "react";
 import { DeleteConfirmationDialog } from "@/components/shared/dialog/dialog-delete";
 import { CustomPagination } from "@/components/shared/pagination/custom-pagination";
@@ -19,19 +25,20 @@ import { startTransition, useCallback, useEffect, useState } from "react";
 import {
   AllCommuneModel,
   CommuneModel,
-} from "@/models/static/commune/commune.response";
+} from "@/features/master-data/types/commune/commune.response";
 import Loading from "@/components/shared/common/loading";
-import { createCommuneTableColumns } from "@/components/shared/table/commune-content";
-import CommuneViewModal from "@/components/shared/modal/commune-detail-modal";
-import ModalCommune from "@/components/shared/modal/commune-modal";
+import { createCommuneTableColumns } from "@/features/master-data/table/commune-content";
+import CommuneViewModal from "@/features/master-data/components/commune-detail-modal";
+import ModalCommune from "@/features/master-data/components/commune-modal";
 import { ModalMode } from "@/constants/AppResource/display-list/enum/mode";
-import { CreateCommuneReq, UpdateCommuneReq } from "@/models/static/commune/commune.request";
-import { createCommuneService, deleteCommuneService, getAllCommuneService, updateCommuneService } from "@/services/dashboard/commune/commune.service";
+import { CreateCommuneReq, UpdateCommuneReq } from "@/features/master-data/types/commune/commune.request";
+import { createCommuneService, deleteCommuneService, getAllCommuneService, updateCommuneService } from "@/features/master-data/services/commune/commune.service";
 
 function CommunePageContent() {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [communes, setCommunes] = useState<AllCommuneModel | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const dispatch = useAppDispatch();
+  const { communeData: communes, isLoading, filters } = useCommuneState();
+  const searchQuery = filters.search;
+  const statusFilter = filters.status;
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedCommune, setSelectedCommune] = useState<CommuneModel | null>(
     null
@@ -60,18 +67,15 @@ function CommunePageContent() {
   }, [searchParams, updateUrlWithPage]);
 
   const loadCommunes = useCallback(async () => {
-    setIsLoading(true);
     try {
-      const response = await getAllCommuneService({
+      dispatch(fetchAllCommuneService({
         search: debouncedSearchQuery,
         pageNo: currentPage,
         pageSize: 15,
-      });
-      setCommunes(response);
+      }));
     } catch (error: any) {
       console.error("Failed to fetch communes: ", error);
     } finally {
-      setIsLoading(false);
     }
   }, [debouncedSearchQuery, currentPage]);
 
@@ -81,7 +85,7 @@ function CommunePageContent() {
 
   // Simplified search change handler - just updates the state, debouncing handles the rest
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
+    dispatch(setSearchFilter(e.target.value));
   };
 
   const handleSaveCommune = async (
@@ -91,32 +95,7 @@ function CommunePageContent() {
     try {
       if (mode === ModalMode.CREATE_MODE) {
         const createData = formData as CreateCommuneReq;
-
-        const response = await createCommuneService({
-          communeCode: createData.communeCode,
-          communeEn: createData.communeEn,
-          communeKh: createData.communeKh,
-          districtCode: createData.districtCode,
-        });
-
-        // Optimistic update
-        setCommunes((prev: any) =>
-          prev
-            ? {
-                ...prev,
-                content: [response, ...prev.content],
-                totalElements: prev.totalElements + 1,
-              }
-            : {
-                content: [response],
-                pageNo: 1,
-                pageSize: 10,
-                totalElements: 1,
-                totalPages: 1,
-                last: true,
-              }
-        );
-
+        await dispatch(createCommuneThunk(createData)).unwrap();
         startTransition(() => {
           AppToast({
             type: "success",
@@ -126,29 +105,12 @@ function CommunePageContent() {
         });
       } else if (mode === ModalMode.UPDATE_MODE) {
         const updateData = formData as { id: number; updates: UpdateCommuneReq };
-
         if (!updateData.id) {
           console.error("Missing commune id in update form");
           setIsSubmitting(false);
           return;
         }
-
-        const response = await updateCommuneService(
-          updateData.id,
-          updateData.updates
-        );
-
-        setCommunes((prev) =>
-          prev
-            ? {
-                ...prev,
-                content: prev.content.map((commune) =>
-                  commune.id === updateData.id ? response : commune
-                ),
-              }
-            : prev
-        );
-
+        await dispatch(updateCommuneThunk({ id: updateData.id, updates: updateData.updates })).unwrap();
         startTransition(() => {
           AppToast({
             type: "success",
@@ -157,14 +119,13 @@ function CommunePageContent() {
           });
         });
       }
-
       setIsModalOpen(false);
       setSelectedCommune(null);
       loadCommunes();
     } catch (err: any) {
       AppToast({
         type: "error",
-        message: "Failed to save commune",
+        message: "Failed to save commune status",
       });
     } finally {
       setIsSubmitting(false);
@@ -175,7 +136,7 @@ function CommunePageContent() {
     if (!selectedCommune) return;
     setIsSubmitting(true);
     try {
-      await deleteCommuneService(selectedCommune.id);
+      await dispatch(deleteCommuneThunk(selectedCommune.id)).unwrap();
       AppToast({
         type: "success",
         message: "Commune deleted successfully",

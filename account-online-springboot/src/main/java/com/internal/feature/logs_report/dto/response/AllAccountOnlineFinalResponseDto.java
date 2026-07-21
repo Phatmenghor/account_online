@@ -19,3 +19,4 @@ public class AllAccountOnlineFinalResponseDto {
     private int totalPages;
     private boolean last;
 }
+

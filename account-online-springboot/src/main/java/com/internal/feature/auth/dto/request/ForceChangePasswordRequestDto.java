@@ -16,3 +16,4 @@ public class ForceChangePasswordRequestDto {
     @Size(min = 6, message = "Password must be at least 6 characters long.")
     private String confirmNewPassword;
 }
+

@@ -27,3 +27,9 @@ public interface ProvinceMapper {
     ClsProvinceDto toClsDto(Province province);
     List<ClsProvinceDto> toClsDtoList(List<Province> provinces);
 }
+
+
+
+
+
+

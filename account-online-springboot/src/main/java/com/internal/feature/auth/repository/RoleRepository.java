@@ -11,3 +11,9 @@ public interface RoleRepository extends JpaRepository<Role, Integer> {
     Optional<Role> findByName(RoleEnum name);
     boolean existsByName(RoleEnum name);
 }
+
+
+
+
+
+

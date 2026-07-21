@@ -12,13 +12,13 @@ import { useDebounce } from "@/utils/debounce/debounce";
 import { Search } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import Loading from "@/components/shared/common/loading";
-import { createSuccessAccountTableColumns } from "@/components/shared/table/success-account-content";
+import { createSuccessAccountTableColumns } from "@/features/account-opening/table/success-account-content";
 import {
   AllSuccessAccountOnlineModel,
   SuccessAccountOnlineModel,
-} from "@/models/open-acc-success/success-account-response.model";
+} from "@/features/account-opening/types/success-account-response.model";
 import { getSuccessAccountOnlineService } from "@/services/get-account/acc-online-success.service";
-import SuccessAccountViewModal from "@/components/shared/modal/success-account-detail-modal";
+import SuccessAccountViewModal from "@/features/account-opening/components/success-account-detail-modal";
 import { AppToast } from "@/components/shared/toast/app-toast";
 
 function SuccessAccountPageContent() {
@@ -145,3 +145,4 @@ export default function SuccessAccountPage() {
     </Suspense>
   );
 }
+

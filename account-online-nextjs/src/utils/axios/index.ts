@@ -8,6 +8,8 @@ import {
   getToken,
   logoutToken,
   storeToken,
+  getRefreshToken,
+  storeTokens,
 } from "../local-storage/token";
 // Define types
 type RequestMetadata = {
@@ -261,6 +263,24 @@ const formatRequestData = (data: unknown): unknown => {
 const DEFAULT_TIMEOUT = parseInt(process.env.NEXT_PUBLIC_API_TIMEOUT || "300000", 10); // Default 5 minutes (300 seconds)
 const ACCOUNT_CREATION_TIMEOUT = parseInt(process.env.NEXT_PUBLIC_ACCOUNT_CREATION_TIMEOUT || "300000", 10); // Default 5 minutes (300 seconds)
 
+// Refresh token queue state
+let isRefreshing = false;
+let failedQueue: Array<{
+  resolve: (value: unknown) => void;
+  reject: (reason?: unknown) => void;
+}> = [];
+
+const processQueue = (error: unknown, token: string | null = null) => {
+  failedQueue.forEach((prom) => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+  failedQueue = [];
+};
+
 // Create axios instances with enhanced request body logging
 const createAxiosInstance = (requiresAuth = false): AxiosInstance => {
   const axiosInstance = axios.create({
@@ -444,11 +464,77 @@ const createAxiosInstance = (requiresAuth = false): AxiosInstance => {
     },
     async (error: unknown) => {
       const err = error as AxiosError;
+      const originalRequest = err.config;
 
-      if (err.response?.status === 401) {
-        logoutToken();
-        window.location.href = "/login";
-        return Promise.reject(error);
+      // Handle 401 Unauthorized with Token Refresh
+      if (err.response?.status === 401 && originalRequest && !(originalRequest as any)._retry) {
+        if (originalRequest.url?.includes("/api/auth/refresh") || originalRequest.url?.includes("/api/v1/auth/refresh")) {
+          logoutToken();
+          if (typeof window !== "undefined") {
+            window.location.href = "/login";
+          }
+          return Promise.reject(error);
+        }
+
+        if (isRefreshing) {
+          return new Promise((resolve, reject) => {
+            failedQueue.push({ resolve, reject });
+          })
+            .then((token) => {
+              if (originalRequest.headers) {
+                originalRequest.headers["Authorization"] = `Bearer ${token}`;
+              }
+              return axiosInstance(originalRequest);
+            })
+            .catch((refreshError) => {
+              return Promise.reject(refreshError);
+            });
+        }
+
+        (originalRequest as any)._retry = true;
+        isRefreshing = true;
+
+        const refreshToken = getRefreshToken();
+        if (!refreshToken) {
+          isRefreshing = false;
+          logoutToken();
+          if (typeof window !== "undefined") {
+            window.location.href = "/login";
+          }
+          return Promise.reject(error);
+        }
+
+        try {
+          const response = await axios.post(
+            `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth/refresh`,
+            { refreshToken },
+            { headers: { "Content-Type": "application/json" } }
+          );
+
+          // Standard response wrapper from Spring Boot wraps in "data" property
+          const newTokens = response.data.data || response.data;
+          const { accessToken: newAccessToken, refreshToken: newRefreshToken } = newTokens;
+
+          import("../local-storage/token").then((module) => {
+            module.storeTokens(newAccessToken, newRefreshToken);
+          });
+
+          if (originalRequest.headers) {
+            originalRequest.headers["Authorization"] = `Bearer ${newAccessToken}`;
+          }
+
+          processQueue(null, newAccessToken);
+          isRefreshing = false;
+          return axiosInstance(originalRequest);
+        } catch (refreshError) {
+          processQueue(refreshError, null);
+          isRefreshing = false;
+          logoutToken();
+          if (typeof window !== "undefined") {
+            window.location.href = "/login";
+          }
+          return Promise.reject(refreshError);
+        }
       }
 
       // Get request ID from metadata

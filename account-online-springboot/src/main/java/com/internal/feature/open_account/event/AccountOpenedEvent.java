@@ -1,6 +1,6 @@
 package com.internal.feature.open_account.event;
 
-import com.internal.feature.open_account.dto.OpenAccountContext;
+import com.internal.feature.open_account.dto.request.OpenAccountContext;
 import lombok.Getter;
 import org.springframework.context.ApplicationEvent;
 
@@ -13,3 +13,5 @@ public class AccountOpenedEvent extends ApplicationEvent {
         this.context = context;
     }
 }
+
+

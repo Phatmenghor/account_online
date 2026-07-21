@@ -1,8 +1,8 @@
 package com.internal.feature.auth.service.impl;
 
 import com.internal.enumation.StatusData;
-import com.internal.exceptions.error.custom.BadRequestException;
-import com.internal.exceptions.error.custom.NotFoundException;
+import com.internal.shared.exception.custom.BadRequestException;
+import com.internal.shared.exception.custom.NotFoundException;
 import com.internal.feature.auth.dto.request.ChangePasswordByAdminRequestDto;
 import com.internal.feature.auth.dto.request.ChangePasswordRequestDto;
 import com.internal.feature.auth.dto.request.GetAllUserRequestDto;
@@ -15,9 +15,9 @@ import com.internal.feature.auth.dto.response.UserResponseDto;
 import com.internal.feature.auth.mapper.UserMapper;
 import com.internal.feature.auth.models.UserEntity;
 import com.internal.feature.auth.repository.UserRepository;
-import com.internal.feature.auth.security.JWTGenerator;
+import com.internal.shared.security.JWTGenerator;
 import com.internal.feature.auth.service.UserService;
-import com.internal.utils.SecurityUtils;
+import com.internal.shared.component.AuditComponent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -45,10 +45,12 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
-    private final SecurityUtils securityUtils;
+    private final AuditComponent auditComponent;
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
     private final JWTGenerator jwtGenerator;
+    private final com.internal.feature.auth.service.RefreshTokenService refreshTokenService;
+    private final com.internal.shared.component.ClientIpComponent clientIpComponent;
 
     @Override
     public AllUserResponseDto getAllUser(GetAllUserRequestDto requestDto) {
@@ -79,7 +81,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponseDto getUserByToken() {
-        UserEntity currentUser = securityUtils.getCurrentUser();
+        UserEntity currentUser = auditComponent.getCurrentUser();
         UserResponseDto dto = userMapper.mapToDto(currentUser);
         if (!currentUser.isForcePasswordChange()) {
             if (currentUser.getPasswordChangedAt() == null) {
@@ -119,7 +121,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponseDto changePassword(ChangePasswordRequestDto requestDto) {
-        UserEntity user = securityUtils.getCurrentUser();
+        UserEntity user = auditComponent.getCurrentUser();
         log.info("Changing password for current user: {}", user.getUsername());
 
         validateCurrentPassword(requestDto.getCurrentPassword(), user.getPassword());
@@ -151,7 +153,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public AuthResponseDTO forceChangePassword(String newPassword, String confirmNewPassword) {
-        UserEntity user = securityUtils.getCurrentUser();
+        UserEntity user = auditComponent.getCurrentUser();
         log.info("Force password change for user: {}", user.getUsername());
 
         validatePasswordMatch(newPassword, confirmNewPassword);
@@ -167,7 +169,10 @@ public class UserServiceImpl implements UserService {
         String token = jwtGenerator.generateTokenForUser(saved.getUsername(), roles);
 
         UserResponseDto dto = userMapper.mapToDto(saved);
-        return new AuthResponseDTO(token, dto);
+        String clientIp = clientIpComponent.getClientIp();
+        com.internal.feature.auth.models.RefreshToken refreshTokenEntity = refreshTokenService.createRefreshToken(saved, clientIp, null);
+
+        return new AuthResponseDTO(token, refreshTokenEntity.getToken(), dto);
     }
 
     private Page<UserEntity> fetchUsers(String search, StatusData status, List<String> roles, Pageable pageable) {
@@ -213,7 +218,7 @@ public class UserServiceImpl implements UserService {
         if (request.getDepartment() != null) user.setDepartment(request.getDepartment());
         if (request.getUserRole() != null) {
             Role role = roleRepository.findByName(request.getUserRole())
-                    .orElseThrow(() -> new com.internal.exceptions.error.custom.BadRequestException("Invalid role: " + request.getUserRole()));
+                    .orElseThrow(() -> new com.internal.shared.exception.custom.BadRequestException("Invalid role: " + request.getUserRole()));
             user.getRoles().clear();
             user.getRoles().add(role);
         }
@@ -231,3 +236,10 @@ public class UserServiceImpl implements UserService {
         }
     }
 }
+
+
+
+
+
+
+

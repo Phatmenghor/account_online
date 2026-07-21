@@ -2,7 +2,7 @@ package com.internal.feature.auth.service.impl;
 
 import com.internal.enumation.RoleEnum;
 import com.internal.enumation.StatusData;
-import com.internal.exceptions.error.custom.*;
+import com.internal.shared.exception.custom.*;
 import com.internal.feature.auth.dto.request.*;
 import com.internal.feature.auth.dto.response.AuthResponseDTO;
 import com.internal.feature.auth.dto.response.UserResponseDto;
@@ -12,9 +12,10 @@ import com.internal.feature.auth.models.Role;
 import com.internal.feature.auth.models.UserEntity;
 import com.internal.feature.auth.repository.RoleRepository;
 import com.internal.feature.auth.repository.UserRepository;
-import com.internal.feature.auth.security.JWTGenerator;
+import com.internal.shared.security.JWTGenerator;
 import com.internal.feature.auth.service.AuthService;
-import com.internal.feature.telegram_alerts.config.TelegramService;
+import com.internal.feature.telegram_alerts.service.TelegramService;
+import com.internal.shared.component.ClientIpComponent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
@@ -44,13 +45,15 @@ public class AuthServiceImpl implements AuthService {
     private final AuthMapper authMapper;
     private final UserMapper userMapper;
     private final TelegramService telegramService;
+    private final ClientIpComponent clientIpComponent;
+    private final com.internal.feature.auth.service.RefreshTokenService refreshTokenService;
 
     private static final DateTimeFormatter DT_FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     @Override
     public AuthResponseDTO login(LoginRequestDto loginDto) {
         log.info("Processing login request for user: {}", loginDto.getUsername());
-        String clientIp = getClientIp();
+        String clientIp = clientIpComponent.getClientIp();
 
         UserEntity userEntity = userRepository.findByUsername(loginDto.getUsername())
                 .orElseThrow(() -> {
@@ -106,12 +109,18 @@ public class AuthServiceImpl implements AuthService {
         userDto.setPasswordExpired(passwordExpired);
         log.info("User {} logged in successfully (forceChange={}, passwordExpired={})",
                 loginDto.getUsername(), forceChange, passwordExpired);
-        return new AuthResponseDTO(token, userDto);
+
+        com.internal.feature.auth.models.RefreshToken refreshTokenEntity = refreshTokenService.createRefreshToken(userEntity, clientIp, null);
+
+        return new AuthResponseDTO(token, refreshTokenEntity.getToken(), userDto);
     }
 
     @Override
     public void logout(String username) {
         log.info("User logged out: {}", username);
+        userRepository.findByUsername(username).ifPresent(u -> {
+            refreshTokenService.revokeAllUserTokens(u.getId(), "User logged out");
+        });
     }
 
     @Override
@@ -154,7 +163,11 @@ public class AuthServiceImpl implements AuthService {
         UserResponseDto userDto = authMapper.userToUserResponseDto(user);
         userDto.setLastLogin(user.getLastLogin());
         log.info("Registration completed and user created for ID Card: {}", dto.getIdCard());
-        return new AuthResponseDTO(token, userDto);
+
+        String clientIp = clientIpComponent.getClientIp();
+        com.internal.feature.auth.models.RefreshToken refreshTokenEntity = refreshTokenService.createRefreshToken(user, clientIp, null);
+
+        return new AuthResponseDTO(token, refreshTokenEntity.getToken(), userDto);
     }
 
     @Override
@@ -232,6 +245,36 @@ public class AuthServiceImpl implements AuthService {
         return true;
     }
 
+    @Override
+    @org.springframework.transaction.annotation.Transactional
+    public com.internal.feature.auth.dto.response.RefreshTokenResponseDto refreshToken(com.internal.feature.auth.dto.request.RefreshTokenRequestDto requestDto) {
+        log.info("Processing token refresh request");
+        com.internal.feature.auth.models.RefreshToken refreshToken = refreshTokenService.verifyRefreshToken(requestDto.getRefreshToken())
+                .orElseThrow(() -> new com.internal.shared.exception.custom.UnauthorizedException("Invalid or expired refresh token"));
+
+        UserEntity user = userRepository.findById(refreshToken.getUserId())
+                .orElseThrow(() -> new com.internal.shared.exception.custom.UnauthorizedException("User associated with refresh token not found"));
+
+        if (user.getStatus() != StatusData.ACTIVE) {
+            throw new com.internal.shared.exception.custom.UnauthorizedException("User account is inactive or deleted");
+        }
+
+        List<String> roles = user.getRoles().stream()
+                .map(r -> r.getName().name())
+                .collect(Collectors.toList());
+
+        String newAccessToken = jwtGenerator.generateTokenForUser(user.getUsername(), roles);
+        String clientIp = clientIpComponent.getClientIp();
+
+        refreshTokenService.revokeRefreshToken(requestDto.getRefreshToken(), "Rotated with new refresh token");
+        com.internal.feature.auth.models.RefreshToken newRefreshTokenEntity = refreshTokenService.createRefreshToken(user, clientIp, null);
+
+        return com.internal.feature.auth.dto.response.RefreshTokenResponseDto.builder()
+                .accessToken(newAccessToken)
+                .refreshToken(newRefreshTokenEntity.getToken())
+                .build();
+    }
+
     private String formatDisplayName(String roleName) {
         return Arrays.stream(roleName.split("_"))
                 .map(word -> word.substring(0, 1).toUpperCase() + word.substring(1).toLowerCase())
@@ -253,22 +296,12 @@ public class AuthServiceImpl implements AuthService {
         }
     }
 
-    private String getClientIp() {
-        try {
-            HttpServletRequest request = ((ServletRequestAttributes)
-                    RequestContextHolder.currentRequestAttributes()).getRequest();
-            String xff = request.getHeader("X-Forwarded-For");
-            if (xff != null && !xff.isBlank()) return xff.split(",")[0].trim();
-            String xri = request.getHeader("X-Real-IP");
-            if (xri != null && !xri.isBlank()) return xri;
-            return request.getRemoteAddr();
-        } catch (Exception e) {
-            return "Unknown";
-        }
-    }
 
     private String escapeMarkdown(String text) {
         if (text == null) return "";
         return text.replace("_", "\\_").replace("*", "\\*").replace("`", "\\`").replace("~", "\\~");
     }
 }
+
+
+

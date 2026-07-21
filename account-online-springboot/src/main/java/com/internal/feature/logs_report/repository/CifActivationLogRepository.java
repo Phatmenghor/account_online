@@ -1,6 +1,6 @@
 package com.internal.feature.logs_report.repository;
 
-import com.internal.feature.logs_report.model.CifActivationLog;
+import com.internal.feature.logs_report.models.CifActivationLog;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -16,3 +16,7 @@ public interface CifActivationLogRepository extends JpaRepository<CifActivationL
 
     List<CifActivationLog> findTop100ByOrderByCreatedAtDesc();
 }
+
+
+
+

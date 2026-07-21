@@ -16,3 +16,4 @@ public class AllAmlHistoryResponseDto {
     private int totalPages;
     private boolean last;
 }
+

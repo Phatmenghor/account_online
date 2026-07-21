@@ -20,3 +20,4 @@ public class SendOtpRequest {
     @Schema(description = "Phone number", example = "85512345678")
     private String phone;
 }
+

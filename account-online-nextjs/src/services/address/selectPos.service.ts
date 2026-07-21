@@ -1,4 +1,4 @@
-import { PosSelectReq } from "@/models/address/select-pos/selectPos.request";
+import { PosSelectReq } from "@/types/address/select-pos/selectPos.request";
 import { axiosClientWithAuth } from "@/utils/axios";
 import axios from "axios";
 

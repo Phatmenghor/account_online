@@ -14,3 +14,4 @@ public class OccupationUpdateRequestDto {
     private String occupationCode;
     private StatusData status;
 }
+

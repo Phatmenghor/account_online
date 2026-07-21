@@ -15,3 +15,4 @@ public class LocationCodesDto {
     private ClsCommuneDto commune;
     private ClsVillageDto village;
 }
+

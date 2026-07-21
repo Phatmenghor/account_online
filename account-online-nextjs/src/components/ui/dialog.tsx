@@ -3,64 +3,120 @@
 import * as React from "react"
 import * as DialogPrimitive from "@radix-ui/react-dialog"
 import { X } from "lucide-react"
-
 import { cn } from "@/lib/utils"
 
 const Dialog = DialogPrimitive.Root
-
 const DialogTrigger = DialogPrimitive.Trigger
-
 const DialogPortal = DialogPrimitive.Portal
-
 const DialogClose = DialogPrimitive.Close
 
 const DialogOverlay = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Overlay>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Overlay>
->(({ className, ...props }, ref) => (
+>((({ className, ...props }, ref) => (
   <DialogPrimitive.Overlay
     ref={ref}
     className={cn(
-      "fixed inset-0 z-50 bg-black/60 backdrop-blur-[2px]",
+      "fixed inset-0 z-50 bg-black/80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
       className
     )}
     {...props}
   />
-))
+)))
 DialogOverlay.displayName = DialogPrimitive.Overlay.displayName
 
-// Mobile (default / no breakpoint prefix) renders as a slide-up bottom sheet
-// that hugs the bottom edge; sm: and up switches to a classic centered modal.
-// onOpenAutoFocus is prevented so opening a dialog never auto-focuses an
-// input and pops the mobile keyboard open underneath the user's thumb.
+interface DialogContentProps extends React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content> {
+  closeButtonClassName?: string;
+  disableScrollWrapper?: boolean;
+}
+
 const DialogContent = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>
->(({ className, children, onOpenAutoFocus, ...props }, ref) => (
+  DialogContentProps
+>(({ className, children, closeButtonClassName = "", disableScrollWrapper = false, style, ...props }, ref) => {
+  const closeRef = React.useRef<HTMLButtonElement>(null);
+  const dragState = React.useRef({ startY: 0, dragging: false });
+  const [dragY, setDragY] = React.useState(0);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (typeof window !== "undefined" && window.innerWidth >= 768) return;
+    dragState.current = { startY: e.touches[0].clientY, dragging: true };
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!dragState.current.dragging) return;
+    const delta = e.touches[0].clientY - dragState.current.startY;
+    if (delta > 0) setDragY(delta);
+  };
+
+  const handleTouchEnd = () => {
+    if (!dragState.current.dragging) return;
+    dragState.current.dragging = false;
+    if (dragY > 100) {
+      closeRef.current?.click();
+    }
+    setDragY(0);
+  };
+
+  return (
   <DialogPortal>
     <DialogOverlay />
     <DialogPrimitive.Content
       ref={ref}
       onOpenAutoFocus={(e) => {
         e.preventDefault();
-        onOpenAutoFocus?.(e);
+        (e.currentTarget as HTMLElement)?.focus();
+      }}
+      style={{
+        ...style,
+        ...(dragY ? { transform: `translateY(${dragY}px)`, transition: "none" } : undefined),
       }}
       className={cn(
-        "fixed inset-x-0 bottom-0 top-auto z-50 grid w-full max-h-[88vh] translate-x-0 translate-y-0 gap-4 overflow-y-auto rounded-t-2xl border bg-background p-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))] shadow-xl",
-        "sm:inset-x-auto sm:bottom-auto sm:left-[50%] sm:top-[50%] sm:max-h-[90vh] sm:max-w-lg sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-2xl sm:pb-6",
+        // Default (md and up): standard centered dialog with the default shadcn entrance animation
+        "fixed left-1/2 top-1/2 z-50 w-full max-w-lg -translate-x-1/2 -translate-y-1/2",
+        "border bg-background shadow-lg rounded-lg outline-none overflow-hidden",
+        "flex flex-col max-h-[85vh]",
+        "md:duration-200 md:data-[state=open]:animate-in md:data-[state=closed]:animate-out",
+        "md:data-[state=closed]:fade-out-0 md:data-[state=open]:fade-in-0",
+        "md:data-[state=closed]:zoom-out-95 md:data-[state=open]:zoom-in-95",
+        "md:data-[state=closed]:slide-out-to-left-1/2 md:data-[state=closed]:slide-out-to-top-[48%]",
+        "md:data-[state=open]:slide-in-from-left-1/2 md:data-[state=open]:slide-in-from-top-[48%]",
+        // <md: animated bottom sheet instead of a centered dialog
+        "max-md:left-0 max-md:right-0 max-md:top-auto max-md:bottom-0 max-md:translate-x-0 max-md:translate-y-0",
+        "max-md:max-w-none max-md:mx-0 max-md:max-h-[92dvh] max-md:pb-safe",
+        "max-md:rounded-b-none max-md:rounded-t-[20px] max-md:border-t max-md:border-x-0 max-md:border-b-0",
+        "max-md:data-[state=open]:animate-in max-md:data-[state=closed]:animate-out",
+        "max-md:data-[state=open]:slide-in-from-bottom-full max-md:data-[state=closed]:slide-out-to-bottom-full",
         className
       )}
       {...props}
+      aria-describedby={props["aria-describedby"] ?? undefined}
     >
-      <div className="mx-auto -mt-2 mb-1 h-1.5 w-10 shrink-0 rounded-full bg-muted-foreground/25 sm:hidden" />
-      {children}
-      <DialogPrimitive.Close className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full opacity-70 ring-offset-background transition-opacity hover:opacity-100 hover:bg-accent focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
+      {/* Mobile drag handle — swipe down to dismiss; not shown in the centered desktop modal */}
+      <div
+        className="hidden max-md:block h-1 bg-muted rounded-full w-10 mx-auto mt-3 mb-1 shrink-0 touch-none"
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+      />
+
+      {/* Content scroll area */}
+      {disableScrollWrapper ? (
+        children
+      ) : (
+        <div className="flex-1 overflow-y-auto px-4 py-4 no-scrollbar flex flex-col min-h-0">
+          {children}
+        </div>
+      )}
+
+      <DialogPrimitive.Close ref={closeRef} className={cn("absolute right-4 top-4 rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:outline-none disabled:pointer-events-none", closeButtonClassName)}>
         <X className="h-4 w-4" />
         <span className="sr-only">Close</span>
       </DialogPrimitive.Close>
     </DialogPrimitive.Content>
   </DialogPortal>
-))
+  );
+})
 DialogContent.displayName = DialogPrimitive.Content.displayName
 
 const DialogHeader = ({
@@ -69,7 +125,7 @@ const DialogHeader = ({
 }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
     className={cn(
-      "flex flex-col space-y-1.5 text-center sm:text-left",
+      "flex flex-col space-y-1 text-left shrink-0 pb-3 border-b border-border/40",
       className
     )}
     {...props}
@@ -83,7 +139,7 @@ const DialogFooter = ({
 }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
     className={cn(
-      "flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2",
+      "flex flex-col gap-2 pt-3 border-t mt-auto shrink-0 pb-safe",
       className
     )}
     {...props}
@@ -98,7 +154,7 @@ const DialogTitle = React.forwardRef<
   <DialogPrimitive.Title
     ref={ref}
     className={cn(
-      "text-lg font-semibold leading-none tracking-tight",
+      "text-xs font-semibold leading-none tracking-tight",
       className
     )}
     {...props}
@@ -112,7 +168,7 @@ const DialogDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DialogPrimitive.Description
     ref={ref}
-    className={cn("text-sm text-muted-foreground", className)}
+    className={cn("text-xs text-muted-foreground mt-0.5", className)}
     {...props}
   />
 ))

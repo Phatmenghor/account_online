@@ -10,7 +10,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Info } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
-import { AppIcons } from "@/constants/icons/icon";
 
 interface HelpDialogProps {
   open: boolean;
@@ -38,11 +37,7 @@ export function HelpDialog({
         <div className="flex flex-col items-center space-y-6">
           {/* Info Icon */}
           <div className="flex items-center justify-center">
-            <img
-              src={AppIcons.Circle_alert}
-              alt="back Icon"
-              className="h-10 w-10 text-muted-foreground"
-            />{" "}
+            <Info className="h-10 w-10 text-amber-500" />
           </div>
 
           {/* Title and Description */}

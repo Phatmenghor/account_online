@@ -3,7 +3,7 @@ package com.internal.feature.master_data.service;
 import com.internal.feature.master_data.dto.request.AllMasterDataRequest;
 import com.internal.feature.master_data.dto.request.CommuneRequestDto;
 import com.internal.feature.master_data.dto.response.CommuneResponseDto;
-import com.internal.utils.pagination.PaginationResponse;
+import com.internal.shared.pagination.PaginationResponse;
 
 public interface CommuneService {
     PaginationResponse<CommuneResponseDto> getAllCommunes(AllMasterDataRequest request);
@@ -13,3 +13,5 @@ public interface CommuneService {
     CommuneResponseDto updateCommune(Long id, CommuneRequestDto request);
     void deleteCommune(Long id);
 }
+
+

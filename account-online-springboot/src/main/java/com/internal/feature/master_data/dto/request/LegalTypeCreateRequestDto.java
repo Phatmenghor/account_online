@@ -21,3 +21,4 @@ public class LegalTypeCreateRequestDto {
 
     private StatusData status = StatusData.ACTIVE;
 }
+

@@ -3,7 +3,7 @@ package com.internal.feature.master_data.service;
 import com.internal.feature.master_data.dto.request.AllMasterDataRequest;
 import com.internal.feature.master_data.dto.request.VillageRequestDto;
 import com.internal.feature.master_data.dto.response.VillageResponseDto;
-import com.internal.utils.pagination.PaginationResponse;
+import com.internal.shared.pagination.PaginationResponse;
 
 public interface VillageService {
     PaginationResponse<VillageResponseDto> getAllVillages(AllMasterDataRequest request);
@@ -13,3 +13,5 @@ public interface VillageService {
     VillageResponseDto updateVillage(Long id, VillageRequestDto request);
     void deleteVillage(Long id);
 }
+
+

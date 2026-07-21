@@ -28,3 +28,4 @@ public class VerifyOtpRequest {
     @Schema(description = "6-digit OTP code", example = "123456")
     private String otpCode;
 }
+

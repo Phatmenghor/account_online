@@ -17,7 +17,7 @@ import {
 import { cn } from "@/lib/utils";
 import { Check, ChevronsUpDown, Loader2 } from "lucide-react";
 import { useState, useMemo, useEffect } from "react";
-import { ProvinceModel } from "@/models/address/address.response";
+import { ProvinceModel } from "@/types/address/address.response";
 import { useTranslations } from "next-intl";
 
 interface ComboboxSelectProvinceProps {

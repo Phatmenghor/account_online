@@ -19,3 +19,4 @@ public class ReferenceCreateRequestDto {
 
     private StatusData status = StatusData.ACTIVE;
 }
+

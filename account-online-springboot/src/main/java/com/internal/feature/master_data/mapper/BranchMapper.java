@@ -29,3 +29,9 @@ public interface BranchMapper {
     
     List<com.internal.feature.master_data.dto.response.ClsBranchDto> toClsDtoList(List<Branch> branches);
 }
+
+
+
+
+
+
