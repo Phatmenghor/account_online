@@ -54,12 +54,10 @@ function UserPageContent() {
 
   const t = useTranslations();
 
-  const searchParams = useSearchParams();
-
   // Debounced search query - Optimized api performance when search
   const debouncedSearchQuery = useDebounce(searchQuery, 400);
 
-  const { currentPage, updateUrlWithPage, handlePageChange } = usePagination({
+  const { currentPage, handlePageChange } = usePagination({
     baseRoute: ROUTES.DASHBOARD.INDEX,
     defaultPageSize: 10,
   });
@@ -72,12 +70,7 @@ function UserPageContent() {
     }
   }, []);
 
-  useEffect(() => {
-    const pageParam = searchParams.get("pageNo");
-    if (!pageParam) {
-      updateUrlWithPage(1, true);
-    }
-  }, [searchParams, updateUrlWithPage]);
+
 
   const loadUsers = useCallback(async () => {
     setIsLoading(true);
@@ -432,5 +425,6 @@ export default function UserPage() {
     </Suspense>
   );
 }
+
 
 

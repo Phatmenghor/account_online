@@ -1,12 +1,12 @@
 "use client";
 
-import { useDistrictState } from '@/features/master-data/store/state/district-state';
-import { setPageNo, setSearchFilter, setStatusFilter } from '@/features/master-data/store/slices/district-slice';
-import { fetchAllDistrictService, createDistrictThunk, updateDistrictThunk, deleteDistrictThunk } from '@/features/master-data/store/thunks/district-thunks';
-import { useAppDispatch } from '@/store/store';
+import { PageHeader } from "@/components/shared/common/page-header";
+import { useDistrictState } from "@/features/master-data/store/state/district-state";
+import { setSearchFilter } from "@/features/master-data/store/slices/district-slice";
+import { createDistrictThunk, updateDistrictThunk, deleteDistrictThunk } from "@/features/master-data/store/thunks/district-thunks";
+import { useAppDispatch } from "@/store/store";
 
-
-import { Suspense } from "react";
+import { Suspense, startTransition, useCallback, useEffect, useState } from "react";
 import { DeleteConfirmationDialog } from "@/components/shared/dialog/dialog-delete";
 import { CustomPagination } from "@/components/shared/pagination/custom-pagination";
 import { DataTable } from "@/components/shared/table/data-table";
@@ -18,48 +18,39 @@ import { Separator } from "@/components/ui/separator";
 import { ROUTES } from "@/constants/AppRoutes/routes";
 import { usePagination } from "@/hooks/use-pagination";
 import { useDebounce } from "@/utils/debounce/debounce";
-import { Search } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { Search, MapPin } from "lucide-react";
 import { useSearchParams } from "next/navigation";
-import { startTransition, useCallback, useEffect, useState } from "react";
+import Loading from "@/components/shared/common/loading";
+import { ModalMode } from "@/constants/AppResource/display-list/enum/mode";
+import { createDistrictTableColumns } from "@/features/master-data/table/district-content";
 import {
   AllDistrictModel,
   DistrictModel,
 } from "@/features/master-data/types/district/district.response";
-import Loading from "@/components/shared/common/loading";
-import { createDistrictTableColumns } from "@/features/master-data/table/district-content";
-import DistrictViewModal from "@/features/master-data/components/district-detail-modal";
-import ModalDistrict from "@/features/master-data/components/district-modal";
-import { ModalMode } from "@/constants/AppResource/display-list/enum/mode";
 import {
   CreateDistrictReq,
   UpdateDistrictReq,
 } from "@/features/master-data/types/district/district.request";
 import {
-  createDistrictService,
-  deleteDistrictService,
   getAllDistrictService,
-  updateDistrictService,
 } from "@/features/master-data/services/district/district.service";
+import DistrictViewModal from "@/features/master-data/components/district-detail-modal";
+import ModalDistrict from "@/features/master-data/components/district-modal";
 
 function DistrictPageContent() {
   const dispatch = useAppDispatch();
   const { districtData: districts, isLoading, filters } = useDistrictState();
   const searchQuery = filters.search;
   const statusFilter = filters.status;
+  const [district, setDistrict] = useState<AllDistrictModel | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [selectedDistrict, setSelectedDistrict] =
-    useState<DistrictModel | null>(null);
+  const [selectedDistrict, setSelectedDistrict] = useState<DistrictModel | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [mode, setMode] = useState<ModalMode>(ModalMode.CREATE_MODE);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDistrictDetailOpen, setIsDistrictDetailOpen] = useState(false);
 
-  const t = useTranslations();
-
   const searchParams = useSearchParams();
-
-  // Debounced search query - Optimized api performance when search
   const debouncedSearchQuery = useDebounce(searchQuery, 400);
 
   const { currentPage, updateUrlWithPage, handlePageChange } = usePagination({
@@ -73,24 +64,23 @@ function DistrictPageContent() {
     }
   }, [searchParams, updateUrlWithPage]);
 
-  const loadDistricts = useCallback(async () => {
+  const loadDistrict = useCallback(async () => {
     try {
-      dispatch(fetchAllDistrictService({
+      const response = await getAllDistrictService({
         search: debouncedSearchQuery,
         pageNo: currentPage,
         pageSize: 15,
-      }));
+      });
+      setDistrict(response);
     } catch (error: any) {
-      console.error("Failed to fetch districts: ", error);
-    } finally {
+      console.error("Failed to fetch district: ", error);
     }
-  }, [debouncedSearchQuery, currentPage]);
+  }, [debouncedSearchQuery, statusFilter, currentPage]);
 
   useEffect(() => {
-    loadDistricts();
-  }, [loadDistricts, debouncedSearchQuery]);
+    loadDistrict();
+  }, [loadDistrict, debouncedSearchQuery, statusFilter]);
 
-  // Simplified search change handler - just updates the state, debouncing handles the rest
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     dispatch(setSearchFilter(e.target.value));
   };
@@ -128,7 +118,7 @@ function DistrictPageContent() {
       }
       setIsModalOpen(false);
       setSelectedDistrict(null);
-      loadDistricts();
+      loadDistrict();
     } catch (err: any) {
       AppToast({
         type: "error",
@@ -150,7 +140,7 @@ function DistrictPageContent() {
       });
       setIsDeleteDialogOpen(false);
       setSelectedDistrict(null);
-      loadDistricts();
+      loadDistrict();
     } catch (err: any) {
       AppToast({
         type: "error",
@@ -161,8 +151,8 @@ function DistrictPageContent() {
     }
   };
 
-  const handleEditDistrict = (district: DistrictModel) => {
-    setSelectedDistrict(district);
+  const handleEditDistrict = (districtItem: DistrictModel) => {
+    setSelectedDistrict(districtItem);
     setMode(ModalMode.UPDATE_MODE);
     setIsModalOpen(true);
   };
@@ -173,23 +163,28 @@ function DistrictPageContent() {
     setIsModalOpen(true);
   };
 
-  const handleViewDistrictDetail = (district: DistrictModel) => {
-    setSelectedDistrict(district);
+  const handleViewDistrictDetail = (districtItem: DistrictModel) => {
+    setSelectedDistrict(districtItem);
     setIsDistrictDetailOpen(true);
   };
 
-  const handleDeleteDistrict = (district: DistrictModel) => {
-    setSelectedDistrict(district);
+  const handleDeleteDistrict = (districtItem: DistrictModel) => {
+    setSelectedDistrict(districtItem);
     setIsDeleteDialogOpen(true);
   };
 
   return (
-    <Card className="h-full flex flex-col">
-      <CardContent className="space-y-6 p-6 flex flex-col h-full">
-        <div className="flex justify-between items-center gap-4">
-          <div />
-          <div className="flex items-center gap-3">
-            <div className="relative w-full sm:w-[280px]">
+    <div className="space-y-4">
+      <PageHeader
+        title="Districts"
+        subtitle="Manage district database records"
+        icon={MapPin}
+        count={districts?.totalElements || 0}
+      />
+      <Card className="h-full flex flex-col">
+        <CardContent className="space-y-6 p-6 flex flex-col h-full">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+            <div className="relative w-full max-w-sm">
               <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 aria-label="search-district"
@@ -202,84 +197,79 @@ function DistrictPageContent() {
                 disabled={isSubmitting}
               />
             </div>
-            <Button onClick={handleAddDistrict}>New</Button>
+            <Button size="sm" onClick={handleAddDistrict}>New</Button>
           </div>
-        </div>
 
-        <div className="w-full">
-          <Separator className="bg-gray-300" />
-        </div>
+          <div className="w-full">
+            <Separator className="bg-gray-300" />
+          </div>
 
-        <div className="flex-1 flex flex-col min-h-0">
-          {/* Table container with proper overflow handling */}
-          <div className="flex-1 rounded-md border overflow-hidden flex flex-col">
-            <div className="flex-1 overflow-x-auto">
-              <DataTable
-                data={districts?.content || []}
-                columns={createDistrictTableColumns({
-                  data: districts,
-                  handlers: {
-                    handleEditDistrict,
-                    handleViewDistrictDetail,
-                    handleDeleteDistrict,
-                  },
-                })}
-                loading={isLoading}
-                emptyMessage="No districts found"
-                getRowKey={(district) => district.id}
-              />
-              {/* Pagination positioned to the right and outside the scrollable area */}
-              <div className="border-t bg-background p-2 flex justify-end">
-                <CustomPagination
-                  currentPage={currentPage}
-                  totalPages={districts?.totalPages || 1}
-                  onPageChange={handlePageChange}
-                  size="md"
+          <div className="flex-1 flex flex-col min-h-0">
+            <div className="flex-1 rounded-md border overflow-hidden flex flex-col">
+              <div className="flex-1 overflow-x-auto">
+                <DataTable
+                  data={districts?.content || []}
+                  columns={createDistrictTableColumns({
+                    data: districts,
+                    handlers: {
+                      handleEditDistrict,
+                      handleViewDistrictDetail,
+                      handleDeleteDistrict,
+                    },
+                  })}
+                  loading={isLoading}
+                  emptyMessage="No districts found"
+                  getRowKey={(districtItem) => districtItem.id}
                 />
+                <div className="border-t bg-background p-2 flex justify-end">
+                  <CustomPagination
+                    currentPage={currentPage}
+                    totalPages={districts?.totalPages || 1}
+                    onPageChange={handlePageChange}
+                    size="md"
+                  />
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-        <DeleteConfirmationDialog
-          isOpen={isDeleteDialogOpen}
-          onClose={() => {
-            setIsDeleteDialogOpen(false);
-            setSelectedDistrict(null);
-          }}
-          onDelete={confirmDeleteDistrict}
-          title="Delete District"
-          description={`Are you sure you want to delete this district`}
-          itemName={
-            selectedDistrict?.districtEn || selectedDistrict?.districtKh
-          }
-          isSubmitting={isSubmitting}
-        />
+          <DeleteConfirmationDialog
+            isOpen={isDeleteDialogOpen}
+            onClose={() => {
+              setIsDeleteDialogOpen(false);
+              setSelectedDistrict(null);
+            }}
+            onDelete={confirmDeleteDistrict}
+            title="Delete District"
+            description={`Are you sure you want to delete this district`}
+            itemName={selectedDistrict?.districtEn || selectedDistrict?.districtKh}
+            isSubmitting={isSubmitting}
+          />
 
-        <DistrictViewModal
-          isOpen={isDistrictDetailOpen}
-          onClose={() => {
-            setIsDistrictDetailOpen(false);
-            setSelectedDistrict(null);
-          }}
-          district={selectedDistrict ?? undefined}
-          districtId={selectedDistrict?.id ?? 0}
-        />
+          <DistrictViewModal
+            isOpen={isDistrictDetailOpen}
+            onClose={() => {
+              setIsDistrictDetailOpen(false);
+              setSelectedDistrict(null);
+            }}
+            district={selectedDistrict ?? undefined}
+            districtId={selectedDistrict?.id ?? 0}
+          />
 
-        <ModalDistrict
-          isOpen={isModalOpen}
-          mode={mode}
-          onClose={() => {
-            setSelectedDistrict(null);
-            setIsModalOpen(false);
-          }}
-          onSave={handleSaveDistrict}
-          districtId={selectedDistrict?.id ?? 0}
-          isSubmitting={isSubmitting}
-          provinces={[]} // TODO: Add provinces list from API
-        />
-      </CardContent>
-    </Card>
+          <ModalDistrict
+            isOpen={isModalOpen}
+            mode={mode}
+            onClose={() => {
+              setSelectedDistrict(null);
+              setIsModalOpen(false);
+            }}
+            onSave={handleSaveDistrict}
+            districtId={selectedDistrict?.id ?? 0}
+            isSubmitting={isSubmitting}
+          />
+        </CardContent>
+      </Card>
+    </div>
   );
 }
 

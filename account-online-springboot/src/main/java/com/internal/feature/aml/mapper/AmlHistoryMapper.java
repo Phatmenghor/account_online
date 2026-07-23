@@ -133,6 +133,7 @@ public interface AmlHistoryMapper {
         history.setPhoneNumber(status.getPhoneNumber());
         history.setOccupationStatus(status.getOccupationStatus());
         history.setOccupationCode(status.getOccupationCode());
+        history.setBranch(status.getBranch());
 
         // Convert rulesTriggered safely
         history.setAmlExternalRulesTriggered(status.getAmlExternalRulesTriggered());

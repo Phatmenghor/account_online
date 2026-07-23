@@ -1,5 +1,7 @@
 "use client";
 
+import { PageHeader } from '@/components/shared/common/page-header';
+
 import { useReferenceState } from '@/features/master-data/store/state/reference-state';
 import { setPageNo, setSearchFilter, setStatusFilter } from '@/features/master-data/store/slices/reference-slice';
 import { fetchAllReferenceService, createReferenceThunk, updateReferenceThunk, deleteReferenceThunk } from '@/features/master-data/store/thunks/reference-thunks';
@@ -18,7 +20,7 @@ import { Separator } from "@/components/ui/separator";
 import { ROUTES } from "@/constants/AppRoutes/routes";
 import { usePagination } from "@/hooks/use-pagination";
 import { useDebounce } from "@/utils/debounce/debounce";
-import { Search } from "lucide-react";
+import { Search, UserCheck } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { startTransition, useCallback, useEffect, useState } from "react";
@@ -200,7 +202,14 @@ function ReferencePageContent() {
   };
 
   return (
-    <Card className="h-full flex flex-col">
+    <div className="space-y-4">
+      <PageHeader
+        title="Relationship Managers"
+        subtitle="Manage RM (Relationship Manager) directories"
+        icon={UserCheck}
+        count={references?.totalElements || 0}
+      />
+      <Card className="h-full flex flex-col">
       <CardContent className="space-y-6 p-6 flex flex-col h-full">
         <div className="flex justify-between items-center gap-4">
           <div />
@@ -218,7 +227,7 @@ function ReferencePageContent() {
                 disabled={isSubmitting}
               />
             </div>
-            <Button onClick={handleAddReference}>New</Button>
+            <Button size="sm" onClick={handleAddReference}>New</Button>
           </div>
         </div>
 
@@ -293,6 +302,7 @@ function ReferencePageContent() {
         />
       </CardContent>
     </Card>
+    </div>
   );
 }
 

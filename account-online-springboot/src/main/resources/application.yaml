@@ -4,7 +4,7 @@
 # ==============================================================
 spring:
   profiles:
-    active: prod
+    active: local
   application:
     name: account_online
   main:
@@ -241,4 +241,4 @@ management:
 
 telegram:
   bot:
-    message-retention-days: 30
+    message-retention-days: 30

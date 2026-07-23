@@ -226,12 +226,12 @@ export function CustomDateTimePicker({
           id={id}
           variant="outline"
           className={cn(
-            "w-full justify-start text-left font-normal h-12 px-3.5 text-base border-input",
+            "flex h-9 w-full items-center justify-start text-left font-normal px-3 text-sm border border-input rounded-xl bg-transparent shadow-sm transition-colors",
             !selectedDate && "text-muted-foreground",
-            "hover:bg-primary/10 hover:border-primary hover:text-primary",
-            "focus:bg-primary/10 focus:border-primary focus:text-primary focus:ring-2 focus:ring-primary/30",
-            isOpen && "bg-primary/20 border-primary text-primary",
-            error && "border-red-500 focus:border-red-500",
+            "hover:bg-primary/5 hover:border-primary/50 hover:text-primary",
+            "focus:outline-none focus:ring-1 focus:ring-ring",
+            isOpen && "border-primary text-primary",
+            error && "border-red-400 focus:border-red-400",
             disabled && "opacity-50 cursor-not-allowed",
             className
           )}

@@ -13,6 +13,9 @@ import { AmlHitsChartCard } from "./_components/aml-hits-chart-card";
 import { TopUsersOpenAccountCard } from "./_components/top-users-open-account-card";
 import { TopAmlActionsCard } from "./_components/top-aml-actions-card";
 
+import { PageHeader } from "@/components/shared/common/page-header";
+import { LayoutDashboard } from "lucide-react";
+
 function dateStr(d: Date) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
@@ -60,7 +63,12 @@ export default function Dashboard() {
   useEffect(() => { fetchAll(); }, [fetchAll]);
 
   return (
-    <div className="flex flex-col gap-6 p-6">
+    <div className="flex flex-col gap-4">
+      <PageHeader
+        title="Dashboard Overview"
+        subtitle="Real-time analytics, account metrics, and activity summary"
+        icon={LayoutDashboard}
+      />
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <AccountOpeningChartCard data={accountChart} loading={loadingAccountChart} />
         <AmlHitsChartCard data={amlChart} loading={loadingAmlChart} />

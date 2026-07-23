@@ -142,19 +142,17 @@ export default function ModalCommune({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[750px] w-full max-h-[90vh] overflow-hidden p-0 flex flex-col gap-0">
+      <DialogContent className="sm:max-w-lg w-full max-h-[90vh] overflow-hidden p-0 flex flex-col gap-0">
         {/* Header */}
         <DialogHeader className="px-6 py-4 border-b flex-shrink-0">
           <div className="flex items-center gap-4 pr-8">
             <div
-              className={`p-2 rounded-full ${
-                isCreate ? "bg-green-100" : "bg-blue-100"
-              }`}
+              className="p-2 rounded-full bg-primary/10"
             >
               {isCreate ? (
-                <FileText className="h-5 w-5 text-green-600" />
+                <FileText className="h-5 w-5 text-primary" />
               ) : (
-                <FilePenLine className="h-5 w-5 text-blue-600" />
+                <FilePenLine className="h-5 w-5 text-primary" />
               )}
             </div>
             <div className="flex-1">

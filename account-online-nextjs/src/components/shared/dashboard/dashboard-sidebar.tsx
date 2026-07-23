@@ -98,18 +98,18 @@ export function DashboardSidebar({
         )}
       >
         {/* Header */}
-        <div className="flex h-16 items-center justify-between border-b px-3 relative">
+        <div className="flex h-16 items-center justify-between border-b px-3.5 relative">
           {isOpen ? (
             <Link
               href={ROUTES.DASHBOARD.INDEX}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2.5"
             >
               <img
                 src={AppIcons.APP.APP_LOGO}
                 alt="Logo"
-                className="w-10 h-10"
+                className="w-9 h-9 flex-shrink-0"
               />
-              <span className="text-lg font-bold tracking-tight text-gray-900 dark:text-white whitespace-nowrap">
+              <span className="text-base font-bold tracking-tight text-gray-900 dark:text-white whitespace-nowrap">
                 Account Online
               </span>
             </Link>
@@ -121,7 +121,7 @@ export function DashboardSidebar({
               <img
                 src={AppIcons.APP.APP_LOGO}
                 alt="Logo"
-                className="w-10 h-10"
+                className="w-9 h-9"
               />
             </Link>
           )}
@@ -142,8 +142,8 @@ export function DashboardSidebar({
         </div>
 
         {/* Navigation */}
-        <ScrollArea className="flex-1 py-2">
-          <nav className={cn("grid gap-0.5", isOpen ? "px-2" : "px-1")}>
+        <ScrollArea className="flex-1 py-3 pb-6">
+          <nav className={cn("grid gap-1 pb-4", isOpen ? "px-3" : "px-1.5")}>
             {mounted &&
               menuItems.map((item) => (
                 <div key={item.title} className="flex flex-col">
@@ -152,31 +152,32 @@ export function DashboardSidebar({
                       {/* Parent with children */}
                       {isOpen ? (
                         <div
-                          className="flex h-9 w-full items-center gap-2 rounded-md px-2 text-sm font-medium hover:bg-primary/10 hover:text-primary transition-colors cursor-pointer"
+                          className="flex h-9 w-full items-center gap-2.5 rounded-lg px-2.5 text-xs sm:text-sm font-medium text-gray-700 hover:bg-primary/10 hover:text-primary transition-colors cursor-pointer"
                           onClick={() => toggleSubmenu(item.title)}
                         >
                           {item.icon && (
-                            <item.icon className="h-5 w-5 flex-shrink-0" />
+                            <item.icon className="h-4 w-4 shrink-0 text-muted-foreground" />
                           )}
-                          <span className="flex-1">{item.title}</span>
+                          <span className="flex-1 truncate">{item.title}</span>
                           <ChevronRight
                             className={cn(
-                              "h-4 w-4 transition-transform duration-200",
-                              openSubmenus[item.title] && "rotate-90",
+                              "h-3.5 w-3.5 transition-transform duration-200 text-muted-foreground",
+                              openSubmenus[item.title] && "rotate-90 text-primary",
                             )}
                           />
                         </div>
                       ) : (
-                        <div className="flex h-9 w-full items-center justify-center rounded-md px-2 hover:bg-primary/10 hover:text-primary transition-colors group relative">
-                          {item.icon && <item.icon className="h-5 w-5" />}
-                          <div className="absolute left-full ml-2 px-2 py-1 bg-popover text-popover-foreground text-xs rounded-md shadow-md opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50">
+                        <div className="flex h-9 w-full items-center justify-center rounded-lg px-2 hover:bg-primary/10 hover:text-primary transition-colors group relative">
+                          {item.icon && <item.icon className="h-4 w-4 text-muted-foreground" />}
+                          <div className="absolute left-full ml-2 px-2.5 py-1 bg-popover text-popover-foreground text-xs rounded-md shadow-md opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50">
                             {item.title}
                           </div>
                         </div>
                       )}
 
+                      {/* Sub-routed Items List with Dotted Primary Tree Guide Line */}
                       {isOpen && openSubmenus[item.title] && (
-                        <div className="ml-4 flex flex-col gap-0.5 mt-0.5 animate-in slide-in-from-top-1 duration-200">
+                        <div className="ml-4 flex flex-col gap-0.5 my-0.5 pl-2 border-l-[1.5px] border-dashed border-primary/45 dark:border-primary/60 animate-in slide-in-from-top-1 duration-200">
                           {item.children.map((child) => {
                             const isActive = pathname === child.href;
                             return (
@@ -184,13 +185,31 @@ export function DashboardSidebar({
                                 key={child.href}
                                 href={child.href ?? "#"}
                                 className={cn(
-                                  "flex h-8 items-center rounded-md px-2 text-sm transition-colors",
+                                  "group relative flex h-8 items-center rounded-md px-2 text-xs font-medium transition-all duration-150",
                                   isActive
-                                    ? "bg-primary/80 text-primary-foreground font-medium"
-                                    : "hover:bg-primary/10 hover:text-primary",
+                                    ? "bg-primary text-white font-semibold shadow-xs"
+                                    : "text-gray-600 hover:bg-primary/10 hover:text-primary",
                                 )}
                               >
-                                {child.title}
+                                {/* Dotted Primary Branch Horizontal Connector */}
+                                <span
+                                  className={cn(
+                                    "absolute -left-2 top-1/2 -translate-y-1/2 w-1.5 border-t-[1.5px] border-dashed transition-colors",
+                                    isActive
+                                      ? "border-primary"
+                                      : "border-primary/45 group-hover:border-primary"
+                                  )}
+                                />
+                                {/* Primary Bullet Dot Indicator */}
+                                <span
+                                  className={cn(
+                                    "w-1.5 h-1.5 rounded-full shrink-0 mr-1.5 transition-all duration-150",
+                                    isActive
+                                      ? "bg-white scale-110"
+                                      : "bg-primary/50 group-hover:bg-primary group-hover:scale-110"
+                                  )}
+                                />
+                                <span className="truncate">{child.title}</span>
                               </Link>
                             );
                           })}
@@ -205,19 +224,19 @@ export function DashboardSidebar({
                         <Link
                           href={item.href ?? "#"}
                           className={cn(
-                            "flex h-9 w-full items-center gap-2 rounded-md px-2 text-sm font-medium transition-colors group relative",
+                            "flex h-9 w-full items-center gap-2.5 rounded-lg px-2.5 text-xs sm:text-sm font-medium transition-colors group relative",
                             isActive
-                              ? "bg-primary/80 text-primary-foreground"
-                              : "hover:bg-primary/10 hover:text-primary",
+                              ? "bg-primary text-white font-semibold shadow-xs"
+                              : "text-gray-700 hover:bg-primary/10 hover:text-primary",
                             !isOpen && "justify-center",
                           )}
                         >
                           {item.icon && (
-                            <item.icon className="h-5 w-5 flex-shrink-0" />
+                            <item.icon className={cn("h-4 w-4 shrink-0", isActive ? "text-white" : "text-muted-foreground")} />
                           )}
-                          {isOpen && <span>{item.title}</span>}
+                          {isOpen && <span className="truncate">{item.title}</span>}
                           {!isOpen && (
-                            <div className="absolute left-full ml-2 px-2 py-1 bg-popover text-popover-foreground text-xs rounded-md shadow-md opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50">
+                            <div className="absolute left-full ml-2 px-2.5 py-1 bg-popover text-popover-foreground text-xs rounded-md shadow-md opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50">
                               {item.title}
                             </div>
                           )}
@@ -229,25 +248,6 @@ export function DashboardSidebar({
               ))}
           </nav>
         </ScrollArea>
-
-        {/* Footer */}
-        <div className="border-t p-3">
-          {isLoadingUser ? (
-            <div className="animate-pulse flex flex-col gap-2">
-              <div
-                className={cn(
-                  "h-10 bg-slate-200 rounded-md dark:bg-slate-700",
-                  isOpen ? "w-full" : "w-10 mx-auto",
-                )}
-              />
-              {isOpen && (
-                <div className="h-4 w-3/4 bg-slate-200 rounded-md dark:bg-slate-700" />
-              )}
-            </div>
-          ) : (
-            <SidebarUserProfile user={authUser} isOpen={isOpen} />
-          )}
-        </div>
       </aside>
     </>
   );

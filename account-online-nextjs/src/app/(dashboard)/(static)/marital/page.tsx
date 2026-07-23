@@ -1,12 +1,12 @@
 "use client";
 
-import { useMaritalState } from '@/features/master-data/store/state/marital-state';
-import { setPageNo, setSearchFilter, setStatusFilter } from '@/features/master-data/store/slices/marital-slice';
-import { fetchAllMaritalService, createMaritalThunk, updateMaritalThunk, deleteMaritalThunk } from '@/features/master-data/store/thunks/marital-thunks';
-import { useAppDispatch } from '@/store/store';
+import { PageHeader } from "@/components/shared/common/page-header";
+import { useMaritalState } from "@/features/master-data/store/state/marital-state";
+import { setSearchFilter } from "@/features/master-data/store/slices/marital-slice";
+import { createMaritalThunk, updateMaritalThunk, deleteMaritalThunk } from "@/features/master-data/store/thunks/marital-thunks";
+import { useAppDispatch } from "@/store/store";
 
-
-import { Suspense } from "react";
+import { Suspense, startTransition, useCallback, useEffect, useState } from "react";
 import { DeleteConfirmationDialog } from "@/components/shared/dialog/dialog-delete";
 import { CustomPagination } from "@/components/shared/pagination/custom-pagination";
 import { DataTable } from "@/components/shared/table/data-table";
@@ -18,43 +18,39 @@ import { Separator } from "@/components/ui/separator";
 import { ROUTES } from "@/constants/AppRoutes/routes";
 import { usePagination } from "@/hooks/use-pagination";
 import { useDebounce } from "@/utils/debounce/debounce";
-import { Search } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { Search, Heart } from "lucide-react";
 import { useSearchParams } from "next/navigation";
-import { startTransition, useCallback, useEffect, useState } from "react";
+import Loading from "@/components/shared/common/loading";
+import { ModalMode } from "@/constants/AppResource/display-list/enum/mode";
+import { createMaritalTableColumns } from "@/features/master-data/table/marital-content";
 import {
   AllMaritalModel,
   MaritalModel,
 } from "@/features/master-data/types/marital/marital.response";
-import Loading from "@/components/shared/common/loading";
-import { createMaritalTableColumns } from "@/features/master-data/table/marital-content";
+import {
+  CreateMaritalReq,
+  UpdateMaritalReq,
+} from "@/features/master-data/types/marital/marital.request";
+import {
+  getAllMaritalService,
+} from "@/features/master-data/services/marital/marital.service";
 import MaritalViewModal from "@/features/master-data/components/marital-detail-modal";
 import ModalMarital from "@/features/master-data/components/marital-modal";
-import { ModalMode } from "@/constants/AppResource/display-list/enum/mode";
-import { CreateMaritalReq, UpdateMaritalReq } from "@/features/master-data/types/marital/marital.request";
-import { createMaritalService, deleteMaritalService, getAllMaritalService, updateMaritalService } from "@/features/master-data/services/marital/marital.service";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { STATUS_USER_OPTIONS } from "@/constants/AppResource/filter/status";
 
 function MaritalPageContent() {
   const dispatch = useAppDispatch();
   const { maritalData: maritals, isLoading, filters } = useMaritalState();
   const searchQuery = filters.search;
   const statusFilter = filters.status;
+  const [marital, setMarital] = useState<AllMaritalModel | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [selectedMarital, setSelectedMarital] = useState<MaritalModel | null>(
-    null
-  );
+  const [selectedMarital, setSelectedMarital] = useState<MaritalModel | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [mode, setMode] = useState<ModalMode>(ModalMode.CREATE_MODE);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isMaritalDetailOpen, setIsMaritalDetailOpen] = useState(false);
 
-  const t = useTranslations();
-
   const searchParams = useSearchParams();
-
-  // Debounced search query - Optimized api performance when search
   const debouncedSearchQuery = useDebounce(searchQuery, 400);
 
   const { currentPage, updateUrlWithPage, handlePageChange } = usePagination({
@@ -68,25 +64,24 @@ function MaritalPageContent() {
     }
   }, [searchParams, updateUrlWithPage]);
 
-  const loadMaritals = useCallback(async () => {
+  const loadMarital = useCallback(async () => {
     try {
-      dispatch(fetchAllMaritalService({
+      const response = await getAllMaritalService({
         search: debouncedSearchQuery,
         pageNo: currentPage,
         pageSize: 15,
         status: statusFilter !== "all" ? statusFilter : undefined,
-      }));
+      });
+      setMarital(response);
     } catch (error: any) {
-      console.error("Failed to fetch maritals: ", error);
-    } finally {
+      console.error("Failed to fetch marital: ", error);
     }
   }, [debouncedSearchQuery, statusFilter, currentPage]);
 
   useEffect(() => {
-    loadMaritals();
-  }, [loadMaritals, debouncedSearchQuery, statusFilter]);
+    loadMarital();
+  }, [loadMarital, debouncedSearchQuery, statusFilter]);
 
-  // Simplified search change handler - just updates the state, debouncing handles the rest
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     dispatch(setSearchFilter(e.target.value));
   };
@@ -102,7 +97,7 @@ function MaritalPageContent() {
         startTransition(() => {
           AppToast({
             type: "success",
-            message: "Marital created successfully",
+            message: "Marital status created successfully",
             description: "New Marital",
           });
         });
@@ -117,14 +112,14 @@ function MaritalPageContent() {
         startTransition(() => {
           AppToast({
             type: "success",
-            message: "Marital updated successfully",
+            message: "Marital status updated successfully",
             description: "Updated Marital",
           });
         });
       }
       setIsModalOpen(false);
       setSelectedMarital(null);
-      loadMaritals();
+      loadMarital();
     } catch (err: any) {
       AppToast({
         type: "error",
@@ -146,7 +141,7 @@ function MaritalPageContent() {
       });
       setIsDeleteDialogOpen(false);
       setSelectedMarital(null);
-      loadMaritals();
+      loadMarital();
     } catch (err: any) {
       AppToast({
         type: "error",
@@ -157,15 +152,8 @@ function MaritalPageContent() {
     }
   };
 
-  // Handle status filter change - directly updates the filter value
-  const handleStatusChange = (status: string) => {
-    dispatch(setStatusFilter(status));
-    // Reset to first page when filter changes
-    updateUrlWithPage(1, true);
-  };
-
-  const handleEditMarital = (marital: MaritalModel) => {
-    setSelectedMarital(marital);
+  const handleEditMarital = (maritalItem: MaritalModel) => {
+    setSelectedMarital(maritalItem);
     setMode(ModalMode.UPDATE_MODE);
     setIsModalOpen(true);
   };
@@ -176,110 +164,113 @@ function MaritalPageContent() {
     setIsModalOpen(true);
   };
 
-  const handleViewMaritalDetail = (marital: MaritalModel) => {
-    setSelectedMarital(marital);
+  const handleViewMaritalDetail = (maritalItem: MaritalModel) => {
+    setSelectedMarital(maritalItem);
     setIsMaritalDetailOpen(true);
   };
 
-  const handleDeleteMarital = (marital: MaritalModel) => {
-    setSelectedMarital(marital);
+  const handleDeleteMarital = (maritalItem: MaritalModel) => {
+    setSelectedMarital(maritalItem);
     setIsDeleteDialogOpen(true);
   };
 
   return (
-    <Card className="h-full flex flex-col">
-      <CardContent className="space-y-6 p-6 flex flex-col h-full">
-        <div className="flex justify-between items-center gap-4">
-          <div />
-          <div className="flex items-center gap-3">
-            <div className="relative w-full sm:w-[280px]">
+    <div className="space-y-4">
+      <PageHeader
+        title="Marital Statuses"
+        subtitle="Manage marital status classifications"
+        icon={Heart}
+        count={maritals?.totalElements || 0}
+      />
+      <Card className="h-full flex flex-col">
+        <CardContent className="space-y-6 p-6 flex flex-col h-full">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+            <div className="relative w-full max-w-sm">
               <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 aria-label="search-marital"
                 autoComplete="search-marital"
                 type="search"
-                placeholder="Search maritals..."
+                placeholder="Search marital status..."
                 value={searchQuery}
                 onChange={handleSearchChange}
                 className="pl-8 w-full text-xs h-9"
                 disabled={isSubmitting}
               />
             </div>
-            <Button onClick={handleAddMarital}>New</Button>
+            <Button size="sm" onClick={handleAddMarital}>New</Button>
           </div>
-        </div>
 
-        <div className="w-full">
-          <Separator className="bg-gray-300" />
-        </div>
+          <div className="w-full">
+            <Separator className="bg-gray-300" />
+          </div>
 
-        <div className="flex-1 flex flex-col min-h-0">
-          {/* Table container with proper overflow handling */}
-          <div className="flex-1 rounded-md border overflow-hidden flex flex-col">
-            <div className="flex-1 overflow-x-auto">
-              <DataTable
-                data={maritals?.content || []}
-                columns={createMaritalTableColumns({
-                  data: maritals,
-                  handlers: {
-                    handleEditMarital,
-                    handleViewMaritalDetail,
-                    handleDeleteMarital,
-                  },
-                })}
-                loading={isLoading}
-                emptyMessage="No marital status found"
-                getRowKey={(marital) => marital.id}
-              />
-              {/* Pagination positioned to the right and outside the scrollable area */}
-              <div className="border-t bg-background p-2 flex justify-end">
-                <CustomPagination
-                  currentPage={currentPage}
-                  totalPages={maritals?.totalPages || 1}
-                  onPageChange={handlePageChange}
-                  size="md"
+          <div className="flex-1 flex flex-col min-h-0">
+            <div className="flex-1 rounded-md border overflow-hidden flex flex-col">
+              <div className="flex-1 overflow-x-auto">
+                <DataTable
+                  data={maritals?.content || []}
+                  columns={createMaritalTableColumns({
+                    data: maritals,
+                    handlers: {
+                      handleEditMarital,
+                      handleViewMaritalDetail,
+                      handleDeleteMarital,
+                    },
+                  })}
+                  loading={isLoading}
+                  emptyMessage="No marital statuses found"
+                  getRowKey={(maritalItem) => maritalItem.id}
                 />
+                <div className="border-t bg-background p-2 flex justify-end">
+                  <CustomPagination
+                    currentPage={currentPage}
+                    totalPages={maritals?.totalPages || 1}
+                    onPageChange={handlePageChange}
+                    size="md"
+                  />
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-        <DeleteConfirmationDialog
-          isOpen={isDeleteDialogOpen}
-          onClose={() => {
-            setIsDeleteDialogOpen(false);
-            setSelectedMarital(null);
-          }}
-          onDelete={confirmDeleteMarital}
-          title="Delete Marital Status"
-          description={`Are you sure you want to delete this marital status`}
-          itemName={selectedMarital?.nameEn || selectedMarital?.nameKh}
-          isSubmitting={isSubmitting}
-        />
+          <DeleteConfirmationDialog
+            isOpen={isDeleteDialogOpen}
+            onClose={() => {
+              setIsDeleteDialogOpen(false);
+              setSelectedMarital(null);
+            }}
+            onDelete={confirmDeleteMarital}
+            title="Delete Marital Status"
+            description={`Are you sure you want to delete this marital status`}
+            itemName={selectedMarital?.nameEn || selectedMarital?.nameKh}
+            isSubmitting={isSubmitting}
+          />
 
-        <MaritalViewModal
-          isOpen={isMaritalDetailOpen}
-          onClose={() => {
-            setIsMaritalDetailOpen(false);
-            setSelectedMarital(null);
-          }}
-          marital={selectedMarital ?? undefined}
-          maritalId={selectedMarital?.id ?? 0}
-        />
+          <MaritalViewModal
+            isOpen={isMaritalDetailOpen}
+            onClose={() => {
+              setIsMaritalDetailOpen(false);
+              setSelectedMarital(null);
+            }}
+            marital={selectedMarital ?? undefined}
+            maritalId={selectedMarital?.id ?? 0}
+          />
 
-        <ModalMarital
-          isOpen={isModalOpen}
-          mode={mode}
-          onClose={() => {
-            setSelectedMarital(null);
-            setIsModalOpen(false);
-          }}
-          onSave={handleSaveMarital}
-          maritalId={selectedMarital?.id ?? 0}
-          isSubmitting={isSubmitting}
-        />
-      </CardContent>
-    </Card>
+          <ModalMarital
+            isOpen={isModalOpen}
+            mode={mode}
+            onClose={() => {
+              setSelectedMarital(null);
+              setIsModalOpen(false);
+            }}
+            onSave={handleSaveMarital}
+            maritalId={selectedMarital?.id ?? 0}
+            isSubmitting={isSubmitting}
+          />
+        </CardContent>
+      </Card>
+    </div>
   );
 }
 

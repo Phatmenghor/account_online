@@ -69,12 +69,7 @@ public class OtpServiceImpl implements OtpService {
         } else {
             try {
                 String message = cpbProperties.getOtp().getMessage() + " " + otpCode;
-                smsPort.sendSms(
-                        cpbProperties.getMb().getOtpUrl(),
-                        cpbProperties.getMb().getSecretKey(),
-                        phone,
-                        message
-                );
+                smsPort.sendSms(phone, message);
             } catch (Exception e) {
                 log.error("SMS sending failed but OTP was saved - Phone: {}, OTP ID: {}", phone, otpSms.getId(), e);
             }

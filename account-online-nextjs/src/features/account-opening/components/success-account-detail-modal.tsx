@@ -9,7 +9,6 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
-  DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { SuccessAccountOnlineModel } from "@/features/account-opening/types/success-account-response.model";
@@ -35,11 +34,11 @@ function InfoRow({ label, value }: { label: string; value?: React.ReactNode }) {
   );
 }
 
-function SectionHeader({ color, title }: { color: string; title: string }) {
+function SectionHeader({ color, title }: { color?: string; title: string }) {
   return (
-    <div className="flex items-center gap-2">
-      <div className={`w-1 h-6 ${color} rounded-full`} />
-      <h3 className="text-lg font-semibold">{title}</h3>
+    <div className="flex items-center gap-2.5 mb-3">
+      <div className={`w-1 h-5 ${color || "bg-primary"} rounded-full shrink-0`} />
+      <h3 className="text-base font-bold text-gray-900 dark:text-white">{title}</h3>
     </div>
   );
 }
@@ -51,7 +50,7 @@ export default function SuccessAccountViewModal({
 }: SuccessAccountViewModalProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[850px] h-[92vh] overflow-hidden p-0 gap-0 flex flex-col">
+      <DialogContent className="max-w-2xl sm:max-w-2xl w-full max-h-[90vh] overflow-hidden p-0 gap-0 flex flex-col">
         {/* Header */}
         <DialogHeader className="px-6 py-4 border-b bg-muted/30 flex-shrink-0">
           <div className="flex items-center gap-4 pr-8">
@@ -79,11 +78,11 @@ export default function SuccessAccountViewModal({
             {account ? (
               <div className="space-y-6">
 
-                {/* ── Document Images ── */}
+                {/* ── Document Images (at top) ── */}
                 {(account.nidImageName || account.selfieImageName) && (
                   <>
                     <div className="space-y-4">
-                      <SectionHeader color="bg-teal-600" title="Document Images" />
+                      <SectionHeader color="bg-primary" title="Document Images" />
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {account.nidImageName && (
                           <div className="flex flex-col gap-2">
@@ -117,7 +116,7 @@ export default function SuccessAccountViewModal({
 
                 {/* ── Account Information ── */}
                 <div className="space-y-4">
-                  <SectionHeader color="bg-blue-600" title="Account Information" />
+                  <SectionHeader color="bg-primary" title="Account Information" />
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <InfoRow label="CIF" value={account.cif} />
                     <InfoRow label="KHR Account" value={account.khrAccount} />
@@ -133,7 +132,7 @@ export default function SuccessAccountViewModal({
                             href={account.mbAppDownloadLink}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-blue-500 hover:underline"
+                            className="text-primary hover:underline font-medium"
                           >
                             {account.mbAppDownloadLink}
                           </a>
@@ -145,9 +144,9 @@ export default function SuccessAccountViewModal({
 
                 <Separator />
 
-                {/* ── Personal Information (merged with employment, address, pob, branch) ── */}
+                {/* ── Personal Information ── */}
                 <div className="space-y-4">
-                  <SectionHeader color="bg-purple-600" title="Personal Information" />
+                  <SectionHeader color="bg-primary" title="Personal Information" />
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <InfoRow label="Holder Name" value={toProperCase(account.legalHolderName)} />
                     <InfoRow label="Legal ID" value={account.legalId} />
@@ -188,11 +187,9 @@ export default function SuccessAccountViewModal({
                   </div>
                 </div>
 
-                <Separator />
-
-                {/* ── System Information (no card wrap) ── */}
+                {/* ── System Information ── */}
                 <div className="space-y-4">
-                  <SectionHeader color="bg-gray-600" title="System Information" />
+                  <SectionHeader color="bg-primary" title="System Information" />
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <InfoRow label="Submitted By" value={account.submittedBy} />
                     <InfoRow label="Created At" value={DateTimeFormat(account.createdAt)} />
@@ -217,11 +214,6 @@ export default function SuccessAccountViewModal({
         </div>
 
         {/* Footer */}
-        <DialogFooter className="px-6 py-4 border-t bg-muted/30 flex-shrink-0">
-          <Button variant="outline" onClick={onClose}>
-            Close
-          </Button>
-        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

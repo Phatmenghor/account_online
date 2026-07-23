@@ -80,12 +80,7 @@ public class MobileBankingRestAdapter implements MobileBankingPort {
 
             log.info("Start send SMS to phone: {}", phone);
 
-            smsPort.sendSms(
-                    properties.getMb().getOtpUrl(),
-                    properties.getMb().getSecretKey(),
-                    phone,
-                    message.toString()
-            );
+            smsPort.sendSms(phone, message.toString());
 
             log.info("Account SMS sent successfully to phone: {}", phone);
 

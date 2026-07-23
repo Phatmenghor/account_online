@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { Input } from "@/components/ui/input";
 import { Loader2, CheckCircle } from "lucide-react";
 import { AppToast } from "@/components/shared/toast/app-toast";
-import { SendOtpService, VerifyOtpService } from "@/services/otp/otp.service";
+import { sendOtpService, verifiedOtpService } from "@/features/account-opening/services/otp.service";
 import { SendOtpReq, VerifyOtpReq } from "@/features/account-opening/types/otp.request";
 import { useTranslations } from "next-intl";
 
@@ -116,7 +116,7 @@ export default function OTPInput({
     setIsSendingOtp(true);
     try {
       const requestData: SendOtpReq = { phone: phoneNumber.replace(/\s/g, "") };
-      const response = await SendOtpService(requestData);
+      const response = await sendOtpService(requestData);
 
       setIsOtpSent(true);
       setOtpExpiresAt(response?.expiresAt ?? "");
@@ -211,7 +211,7 @@ export default function OTPInput({
           otpCode: currentOtpCode,
         };
 
-        const response = await VerifyOtpService(requestData);
+        const response = await verifiedOtpService(requestData);
 
         if (response?.verified) {
           setIsOtpVerified(true);
@@ -278,47 +278,45 @@ export default function OTPInput({
   return (
     <>
       {/* Contact Number */}
-      <div>
-        <label className="text-base sm:text-lg font-medium text-gray-700 block mb-1">
-          {translate("contactNumber")}
+      <div className="space-y-1">
+        <div className="flex items-center justify-between mb-1">
+          <label className="text-sm font-medium text-gray-700">
+            {translate("contactNumber")}
+          </label>
           {isOtpVerified && (
-            <span className="float-right text-green-600 text-sm flex items-center gap-1">
-              <CheckCircle className="h-4 w-4" />
-              {translate("otp_verified_label")}
-            </span>
+            <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0" />
           )}
-        </label>
+        </div>
         <div className="relative">
           <Input
             placeholder={translate("contactNumber")}
             value={phoneNumber}
             onChange={(e) => handlePhoneChange(e.target.value)}
             onBlur={handlePhoneBlur}
-            className={`w-full h-12 text-sm ${validationErrors.phoneNumber ? "border-red-500" : ""}`}
+            className={`w-full h-9 text-sm rounded-xl ${validationErrors.phoneNumber ? "border-red-400" : ""}`}
             disabled={disabled || isSendingOtp}
             maxLength={15}
           />
           {isSendingOtp && (
-            <Loader2 className="absolute right-3 top-3.5 h-5 w-5 animate-spin text-primary" />
-          )}
-          {isOtpVerified && !isSendingOtp && (
-            <CheckCircle className="absolute right-3 top-3.5 h-5 w-5 text-green-600" />
+            <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-primary pointer-events-none" />
           )}
         </div>
         {validationErrors.phoneNumber && (
-          <p className="text-sm text-red-500 mt-1">{translate("err_phoneNumber_regex")}</p>
+          <p className="text-xs text-red-500 mt-1">{translate("err_phoneNumber_regex")}</p>
         )}
       </div>
 
       {/* OTP Code */}
-      <div>
-        <label className="text-base sm:text-lg font-medium text-gray-700 block mb-1">
-          {translate("otpCode")}
+      <div className="space-y-1">
+        <div className="flex items-center justify-between mb-1">
+          <label className="text-sm font-medium text-gray-700">
+            {translate("otpCode")}
+          </label>
           <button
             type="button"
             onClick={handleSendOtp}
             disabled={countdown > 0 || disabled || isSendingOtp || isOtpVerified}
-            className={`float-right text-sm font-semibold bg-transparent border-none p-0 transition-colors duration-200 ${
+            className={`text-xs font-semibold bg-transparent border-none p-0 transition-colors duration-200 ${
               countdown > 0 || disabled || isSendingOtp || isOtpVerified
                 ? "text-gray-400 cursor-not-allowed"
                 : "text-primary hover:text-primary/70 cursor-pointer"
@@ -337,24 +335,21 @@ export default function OTPInput({
               translate("sendOtp")
             )}
           </button>
-        </label>
+        </div>
         <div className="relative">
           <Input
             placeholder={translate("otp6Digit")}
             value={otpCode}
             onChange={(e) => handleOtpChange(e.target.value)}
             maxLength={6}
-            className={`w-full h-12 text-sm ${validationErrors.isPhoneVerified ? "border-red-500" : ""}`}
+            className={`w-full h-9 text-sm rounded-xl ${validationErrors.isPhoneVerified ? "border-red-400" : ""}`}
           />
           {isVerifyingOtp && (
-            <Loader2 className="absolute right-3 top-3.5 h-5 w-5 animate-spin text-primary" />
-          )}
-          {isOtpVerified && !isVerifyingOtp && (
-            <CheckCircle className="absolute right-3 top-3.5 h-5 w-5 text-green-600" />
+            <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-primary pointer-events-none" />
           )}
         </div>
         {validationErrors.isPhoneVerified && (
-          <p className="text-sm text-red-500 mt-1">{translate("err_isPhoneVerified")}</p>
+          <p className="text-xs text-red-500 mt-1">{translate("err_isPhoneVerified")}</p>
         )}
       </div>
     </>

@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense } from "react";
+import { PageHeader } from "@/components/shared/common/page-header";
 import { CustomPagination } from "@/components/shared/pagination/custom-pagination";
 import { DataTable } from "@/components/shared/table/data-table";
 import { Card, CardContent } from "@/components/ui/card";
@@ -104,70 +105,68 @@ function ReportSuccessAccountPageContent() {
     };
 
     return (
-        <Card className="h-full flex flex-col">
-            <CardContent className="space-y-6 p-6 flex flex-col h-full">
-                {/* Header */}
-                <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                    <div className="relative w-full md:w-[350px]">
-                        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input
-                            aria-label="search-report-account"
-                            type="search"
-                            placeholder="Search by Legal ID or CIF"
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            className="pl-8 w-full min-w-[200px] text-xs md:min-w-[300px] h-9"
-                        />
+        <div className="space-y-4">
+            <PageHeader
+                title="Account Opening Success List"
+                subtitle="List of successfully opened online bank accounts"
+                icon={FileSpreadsheet}
+                count={accounts?.totalElements || 0}
+            />
+            <Card className="h-full flex flex-col">
+                <CardContent className="space-y-6 p-6 flex flex-col h-full">
+                    {/* Header */}
+                    <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                        <div className="relative w-full md:w-[350px]">
+                            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                            <Input
+                                aria-label="search-report-account"
+                                type="search"
+                                placeholder="Search by Legal ID or CIF"
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="pl-8 w-full min-w-[200px] text-xs md:min-w-[300px] h-9"
+                            />
+                        </div>
+
+                        <div className="flex flex-wrap items-center justify-end gap-2">
+                            <CustomDatePicker
+                                value={fromDate}
+                                onChange={setFromDate}
+                                placeholder="From Date"
+                                className="h-9 text-xs w-[130px]"
+                            />
+                            <CustomDatePicker
+                                value={toDate}
+                                onChange={setToDate}
+                                placeholder="To Date"
+                                className="h-9 text-xs w-[130px]"
+                            />
+                            <Button
+                                size="sm"
+                                onClick={handleExportExcel}
+                                disabled={isExportingExcel || (accounts?.totalElements ?? 0) === 0}
+                                className="h-9 px-3 gap-1.5 text-xs"
+                            >
+                                {isExportingExcel ? (
+                                    <>
+                                        <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                                        <span>Exporting...</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <FileSpreadsheet className="h-3.5 w-3.5" />
+                                        <span>Export Excel</span>
+                                    </>
+                                )}
+                            </Button>
+                        </div>
                     </div>
 
-                    <div className="flex flex-wrap items-center justify-end gap-2">
-                        <CustomDatePicker
-                            value={fromDate}
-                            onChange={setFromDate}
-                            placeholder="From Date"
-                            className="h-9 text-xs w-[130px]"
-                        />
-                        <CustomDatePicker
-                            value={toDate}
-                            onChange={setToDate}
-                            placeholder="To Date"
-                            className="h-9 text-xs w-[130px]"
-                        />
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => { setFromDate(defaultFromDate); setToDate(defaultToDate); }}
-                            className="h-9 px-2 gap-1 text-xs border-gray-300 text-gray-700 hover:bg-gray-100"
-                        >
-                            <RotateCcw className="h-3 w-3" />
-                            Reset
-                        </Button>
-                        <Button
-                            size="sm"
-                            onClick={handleExportExcel}
-                            disabled={isExportingExcel || (accounts?.totalElements ?? 0) === 0}
-                            className="h-9 px-3 gap-1.5 text-xs"
-                        >
-                            {isExportingExcel ? (
-                                <>
-                                    <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                                    <span>Exporting...</span>
-                                </>
-                            ) : (
-                                <>
-                                    <FileSpreadsheet className="h-3.5 w-3.5" />
-                                    <span>Export Excel</span>
-                                </>
-                            )}
-                        </Button>
-                    </div>
-                </div>
+                    <Separator className="bg-gray-300" />
 
-                <Separator className="bg-gray-300" />
-
-                <div className="flex-1 flex flex-col min-h-0">
-                    <div className="flex-1 rounded-md border overflow-hidden flex flex-col">
-                        <div className="flex-1 overflow-x-auto">
+                    <div className="flex-1 flex flex-col min-h-0">
+                        <div className="flex-1 rounded-md border overflow-hidden flex flex-col">
+                          <div className="flex-1 overflow-x-auto">
                             <DataTable
                                 data={accounts?.content || []}
                                 columns={createSuccessAccountTableColumns({
@@ -186,17 +185,18 @@ function ReportSuccessAccountPageContent() {
                                     size="md"
                                 />
                             </div>
+                          </div>
                         </div>
                     </div>
-                </div>
 
-                <SuccessAccountViewModal
-                    isOpen={isDetailOpen}
-                    onClose={() => { setIsDetailOpen(false); setSelectedAccount(null); }}
-                    account={selectedAccount ?? undefined}
-                />
-            </CardContent>
-        </Card>
+                    <SuccessAccountViewModal
+                        isOpen={isDetailOpen}
+                        onClose={() => { setIsDetailOpen(false); setSelectedAccount(null); }}
+                        account={selectedAccount ?? undefined}
+                    />
+                </CardContent>
+            </Card>
+        </div>
     );
 }
 

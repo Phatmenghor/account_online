@@ -148,6 +148,7 @@ public class OpenAccountAmlStatusMapper {
                                                                 : null)
                                 .maritalStatus(request.getMaritalStatus())
                                 .occupationCode(request.getOccupation())
+                                .branch(request.getBranchCode())
                                 .build();
         }
 
@@ -204,6 +205,7 @@ public class OpenAccountAmlStatusMapper {
                                 .issuedDate(request.getLegalIssueDate())
                                 .expiredDate(request.getLegalExpireDate())
                                 .phoneNumber(request.getPhoneNumber())
+                                .branch(request.getBranchCode())
                                 .maritalStatus(request.getMaritalStatus())
                                 .occupationCode(request.getOccupation())
                                 .occupationStatus(occupationStatus)

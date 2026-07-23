@@ -81,7 +81,7 @@ export function SidebarUserProfile({
             <Link
               href={ROUTES.DASHBOARD.PROFILE}
               className={cn(
-                "flex items-center gap-3 rounded-xl p-3 bg-accent/30 hover:bg-accent/50 transition-colors duration-300 cursor-pointer group",
+                "flex items-center gap-1.5 rounded-md p-1 px-1.5 bg-accent/30 hover:bg-accent/50 transition-colors duration-200 cursor-pointer group",
                 !isOpen && "justify-center"
               )}
             >
@@ -89,20 +89,20 @@ export function SidebarUserProfile({
                 onMouseEnter={handlePhotoMouseEnter}
                 onMouseLeave={handlePhotoMouseLeave}
               >
-                <Avatar className="h-10 w-10 border-2 border-background dark:border-card shadow-sm group-hover:border-primary/30 transition-all">
+                <Avatar className="h-6 w-6 border border-background dark:border-card shadow-2xs group-hover:border-primary/30 transition-all">
                   <AvatarImage src={profileImageUrl} alt="Profile" />
-                  <AvatarFallback className="bg-primary/10 dark:bg-primary/20 text-primary font-semibold">
+                  <AvatarFallback className="bg-primary/10 dark:bg-primary/20 text-primary font-bold text-[10px]">
                     {user?.email?.charAt(0).toUpperCase() || "U"}
                   </AvatarFallback>
                 </Avatar>
               </div>
 
               {isOpen && (
-                <div className="grid gap-0.5 text-sm overflow-hidden">
-                  <div className="font-medium capitalize truncate">
+                <div className="grid gap-0 overflow-hidden leading-none">
+                  <div className="text-[11px] font-semibold capitalize truncate text-gray-900 dark:text-white leading-tight">
                     {user?.fullName || "User"}
                   </div>
-                  <div className="text-xs text-muted-foreground truncate max-w-[150px]">
+                  <div className="text-[9.5px] text-muted-foreground truncate max-w-[130px] mt-0.5">
                     {user?.email || "user@example.com"}
                   </div>
                 </div>

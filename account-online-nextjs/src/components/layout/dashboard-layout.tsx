@@ -70,8 +70,8 @@ export default function DashboardLayout({
         <TopBar onMenuClick={() => setIsSidebarOpen(!isSidebarOpen)} />
 
         {/* Main Content - ONLY THIS SCROLLS */}
-        <main className="flex-1 overflow-y-auto overflow-x-hidden px-4 py-4 md:px-6 md:py-6">
-          <div className="mx-auto ">{children}</div>
+        <main className="flex-1 overflow-y-auto overflow-x-hidden px-2.5 py-2.5 sm:px-4 sm:py-3">
+          <div className="mx-auto text-xs sm:text-xs md:text-sm max-w-[1600px] [zoom:0.9] sm:[zoom:0.92] md:[zoom:0.95]">{children}</div>
         </main>
       </div>
     </div>

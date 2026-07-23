@@ -7,7 +7,6 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -85,9 +84,7 @@ export default function VillageViewModal({
           {loading ? (
             <div className="text-center py-8 text-muted-foreground">Loading...</div>
           ) : village ? (
-            <div className="space-y-4">
-              <SectionHeader color="bg-teal-600" title="Village Information" />
-              <div className="space-y-3">
+            <div className="space-y-3">
                 <InfoRow label="Village Code" value={village.villageCode} />
                 <InfoRow label="Name (EN)" value={village.villageEn} />
                 <InfoRow label="Name (KH)" value={village.villageKh} />
@@ -97,17 +94,10 @@ export default function VillageViewModal({
                 <InfoRow label="Created At" value={DateTimeFormat(village.createdAt)} />
                 <InfoRow label="Updated At" value={DateTimeFormat(village.updatedAt)} />
               </div>
-            </div>
           ) : (
             <div className="text-center py-8 text-muted-foreground">No data available</div>
           )}
         </div>
-
-        <DialogFooter className="px-6 py-4 border-t bg-muted/30 flex-shrink-0">
-          <Button variant="outline" onClick={onClose}>
-            Close
-          </Button>
-        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

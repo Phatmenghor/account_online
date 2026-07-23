@@ -41,6 +41,7 @@ public class RequestLoggingFilter extends OncePerRequestFilter {
             "/favicon.ico",
             "/webjars",
             "/api/images",
+            "/api/customer-images",
             "/api/v1/customer-images" // Added to fix UTF-8 error on image fetch
     );
 

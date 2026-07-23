@@ -7,7 +7,6 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -85,26 +84,17 @@ export default function ProvinceViewModal({
           {loading ? (
             <div className="text-center py-8 text-muted-foreground">Loading...</div>
           ) : province ? (
-            <div className="space-y-4">
-              <SectionHeader color="bg-teal-600" title="Province Information" />
-              <div className="space-y-3">
+            <div className="space-y-3">
                 <InfoRow label="Province Code" value={province.provinceCode} />
                 <InfoRow label="Name (EN)" value={province.provinceEn} />
                 <InfoRow label="Name (KH)" value={province.provinceKh} />
                 <InfoRow label="Created At" value={DateTimeFormat(province.createdAt)} />
                 <InfoRow label="Updated At" value={DateTimeFormat(province.updatedAt)} />
               </div>
-            </div>
           ) : (
             <div className="text-center py-8 text-muted-foreground">No data available</div>
           )}
         </div>
-
-        <DialogFooter className="px-6 py-4 border-t bg-muted/30 flex-shrink-0">
-          <Button variant="outline" onClick={onClose}>
-            Close
-          </Button>
-        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

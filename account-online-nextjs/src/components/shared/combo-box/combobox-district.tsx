@@ -72,7 +72,7 @@ export function ComboboxSelectDistrict({
           role="combobox"
           aria-expanded={open}
           className={cn(
-            "w-full h-12 text-sm flex-1 justify-between bg-white border-gray-300",
+            "flex h-9 w-full items-center justify-between whitespace-nowrap rounded-xl border border-input bg-transparent px-3 py-1.5 text-sm font-normal shadow-sm transition-colors focus:outline-none focus:ring-1 focus:ring-ring",
             !dataSelect && "text-muted-foreground",
             disabled && "opacity-50 cursor-not-allowed"
           )}

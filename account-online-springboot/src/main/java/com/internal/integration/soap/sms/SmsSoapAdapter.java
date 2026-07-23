@@ -5,6 +5,7 @@ import com.internal.shared.component.SoapComponent;
 import com.internal.shared.component.ReferenceNumberComponent;
 import com.internal.feature.sms_otp.models.SmsLog;
 import com.internal.feature.sms_otp.service.SmsLogService;
+import com.internal.config.CpbProperties;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -20,6 +21,15 @@ public class SmsSoapAdapter implements SmsPort {
     private final SoapComponent soapComponent;
     private final SmsLogService smsLogService;
     private final ReferenceNumberComponent referenceNumberComponent;
+    private final CpbProperties properties;
+
+    @org.springframework.beans.factory.annotation.Value("${spring.profiles.active:local}")
+    private String activeProfile;
+
+    @Override
+    public void sendSms(String phone, String message) {
+        sendSms(properties.getMb().getOtpUrl(), properties.getMb().getSecretKey(), phone, message);
+    }
 
     /**
      * Sends an SMS and logs the transaction.
@@ -34,6 +44,20 @@ public class SmsSoapAdapter implements SmsPort {
         if (cleanedMessage != null) {
             cleanedMessage = cleanedMessage.replaceAll("(?i)registCode:\\s*", "").trim();
             cleanedMessage = cleanedMessage.replaceAll(" +", " ");
+        }
+
+        // On local and uat environments, bypass actual SOAP network calls to avoid connection errors
+        if (activeProfile != null && (activeProfile.contains("local") || activeProfile.contains("uat"))) {
+            log.info("[MOCK SMS] Skipping real SOAP call on profile '{}' - Phone: {}, Message: {}", activeProfile, phone, cleanedMessage);
+            smsLogService.saveLog(SmsLog.builder()
+                    .phone(phone)
+                    .message(cleanedMessage)
+                    .status("SUCCESS")
+                    .responseCode("200")
+                    .errorMessage("MOCK_SMS_LOCAL_UAT")
+                    .requestId(requestId)
+                    .build());
+            return;
         }
 
         try {

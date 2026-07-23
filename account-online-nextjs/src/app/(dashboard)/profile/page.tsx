@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import { User, Key } from "lucide-react";
 import { AppToast } from "@/components/shared/toast/app-toast";
 import Loading from "@/components/shared/common/loading";
+import { PageHeader } from "@/components/shared/common/page-header";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ProfileTab from "@/features/user/components/profile-tab";
 import ChangePasswordTab from "@/features/user/components/change-password-tab";
@@ -173,9 +174,12 @@ function ProfilePageContent() {
   if (isLoading) return <Loading />;
 
   return (
-    <div className="p-3">
-      <div className="flex flex-col gap-4">
-        <h1 className="text-2xl font-bold tracking-tight">My Profile</h1>
+    <div className="space-y-4">
+      <PageHeader
+        title="My Profile"
+        subtitle="Manage your personal information, profile photo, and security password"
+        icon={User}
+      />
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
           <TabsList>
@@ -201,7 +205,6 @@ function ProfilePageContent() {
 
           <ChangePasswordTab value="password" />
         </Tabs>
-      </div>
     </div>
   );
 }

@@ -26,6 +26,7 @@ export interface AmlManagementModel {
   currentAddressCode: string;
   placeOfBirthName: string;
   placeOfBirthCode: string;
+  branch?: string;
   maritalStatus: string;
   occupationCode: string;
   occupationStatus: string;

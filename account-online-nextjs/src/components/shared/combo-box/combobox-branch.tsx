@@ -112,7 +112,7 @@ export function ComboboxSelectBranch({
           role="combobox"
           aria-expanded={open}
           className={cn(
-            "w-full h-12 text-base rounded-xl justify-between",
+            "flex h-9 w-full items-center justify-between whitespace-nowrap rounded-xl border border-input bg-transparent px-3 py-1.5 text-sm font-normal shadow-sm transition-colors focus:outline-none focus:ring-1 focus:ring-ring",
             !dataSelect && "text-muted-foreground",
             disabled && "opacity-50 cursor-not-allowed",
           )}

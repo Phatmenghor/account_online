@@ -74,7 +74,7 @@ export default async function RootLayout({
       <head>
         <link rel="icon" href="/assets/cp.png" />
       </head>
-      <body className="font-kantumruy antialiased overscroll-y-none" suppressHydrationWarning>
+      <body className="font-kantumruy antialiased min-h-screen overflow-y-auto" suppressHydrationWarning>
         <LocaleProvider
           initialLocale={serverLocale}
           initialMessages={serverMessages}

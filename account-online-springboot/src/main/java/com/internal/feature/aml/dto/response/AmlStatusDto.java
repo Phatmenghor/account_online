@@ -41,6 +41,7 @@ public class AmlStatusDto {
     private LocalDateTime updatedAt;
 
     // ADDRESS & CUSTOMER DATA (kept for service use, excluded from API responses)
+    private String branch;
     private String currentAddressName;
     private String currentAddressCode;
     private String placeOfBirthName;

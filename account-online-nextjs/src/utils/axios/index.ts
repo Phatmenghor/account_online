@@ -307,16 +307,25 @@ const createAxiosInstance = (requiresAuth = false): AxiosInstance => {
 
       // Handle authentication
       if (requiresAuth) {
-        const token = getToken();
+        // If this is a retried request that already has a new Authorization header set, do not overwrite it
+        const currentAuth = config.headers?.["Authorization"] || (typeof (config.headers as any)?.get === "function" ? (config.headers as any).get("Authorization") : undefined);
+        const isRetried = (config as any)._retry;
 
-        if (token) {
-          config.headers["Authorization"] = `Bearer ${token}`;
-        } else {
-          logger.warn(
-            "No authentication token for protected route",
-            undefined,
-            requestId,
-          );
+        if (!isRetried || !currentAuth) {
+          const token = getToken();
+          if (token) {
+            if (typeof (config.headers as any)?.set === "function") {
+              (config.headers as any).set("Authorization", `Bearer ${token}`);
+            } else {
+              config.headers["Authorization"] = `Bearer ${token}`;
+            }
+          } else {
+            logger.warn(
+              "No authentication token for protected route",
+              undefined,
+              requestId,
+            );
+          }
         }
       }
 
@@ -482,6 +491,9 @@ const createAxiosInstance = (requiresAuth = false): AxiosInstance => {
           })
             .then((token) => {
               if (originalRequest.headers) {
+                if (typeof (originalRequest.headers as any).set === "function") {
+                  (originalRequest.headers as any).set("Authorization", `Bearer ${token}`);
+                }
                 originalRequest.headers["Authorization"] = `Bearer ${token}`;
               }
               return axiosInstance(originalRequest);
@@ -506,7 +518,7 @@ const createAxiosInstance = (requiresAuth = false): AxiosInstance => {
 
         try {
           const response = await axios.post(
-            `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth/refresh`,
+            `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/auth/refresh`,
             { refreshToken },
             { headers: { "Content-Type": "application/json" } }
           );
@@ -515,11 +527,12 @@ const createAxiosInstance = (requiresAuth = false): AxiosInstance => {
           const newTokens = response.data.data || response.data;
           const { accessToken: newAccessToken, refreshToken: newRefreshToken } = newTokens;
 
-          import("../local-storage/token").then((module) => {
-            module.storeTokens(newAccessToken, newRefreshToken);
-          });
+          storeTokens(newAccessToken, newRefreshToken);
 
           if (originalRequest.headers) {
+            if (typeof (originalRequest.headers as any).set === "function") {
+              (originalRequest.headers as any).set("Authorization", `Bearer ${newAccessToken}`);
+            }
             originalRequest.headers["Authorization"] = `Bearer ${newAccessToken}`;
           }
 

@@ -7,7 +7,6 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -86,9 +85,7 @@ export default function OccupationViewModal({
           {loading ? (
             <div className="text-center py-8 text-muted-foreground">Loading...</div>
           ) : occupation ? (
-            <div className="space-y-4">
-              <SectionHeader color="bg-orange-600" title="Occupation Information" />
-              <div className="space-y-3">
+            <div className="space-y-3">
                 <InfoRow label="Name (EN)" value={occupation.nameEn} />
                 <InfoRow label="Name (KH)" value={occupation.nameKh} />
                 <InfoRow label="Occupation Code" value={occupation.occupationCode} />
@@ -96,17 +93,10 @@ export default function OccupationViewModal({
                 <InfoRow label="Created At" value={DateTimeFormat(occupation.createdAt)} />
                 <InfoRow label="Updated At" value={DateTimeFormat(occupation.updatedAt)} />
               </div>
-            </div>
           ) : (
             <div className="text-center py-8 text-muted-foreground">No data available</div>
           )}
         </div>
-
-        <DialogFooter className="px-6 py-4 border-t bg-muted/30 flex-shrink-0">
-          <Button variant="outline" onClick={onClose}>
-            Close
-          </Button>
-        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

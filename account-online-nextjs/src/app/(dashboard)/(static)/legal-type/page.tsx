@@ -1,5 +1,7 @@
 "use client";
 
+import { PageHeader } from '@/components/shared/common/page-header';
+
 import { useLegalTypeState } from '@/features/master-data/store/state/legaltype-state';
 import { setPageNo, setSearchFilter, setStatusFilter } from '@/features/master-data/store/slices/legaltype-slice';
 import { fetchAllLegalTypeService, createLegalTypeThunk, updateLegalTypeThunk, deleteLegalTypeThunk } from '@/features/master-data/store/thunks/legaltype-thunks';
@@ -18,7 +20,7 @@ import { Separator } from "@/components/ui/separator";
 import { ROUTES } from "@/constants/AppRoutes/routes";
 import { usePagination } from "@/hooks/use-pagination";
 import { useDebounce } from "@/utils/debounce/debounce";
-import { Search } from "lucide-react";
+import { Search, IdCard } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { startTransition, useCallback, useEffect, useState } from "react";
@@ -201,26 +203,30 @@ function LegalTypePageContent() {
   };
 
   return (
-    <Card className="h-full flex flex-col">
+    <div className="space-y-4">
+      <PageHeader
+        title="Legal Types"
+        subtitle="Manage identification card legal types"
+        icon={IdCard}
+        count={legalTypes?.totalElements || 0}
+      />
+      <Card className="h-full flex flex-col">
       <CardContent className="space-y-6 p-6 flex flex-col h-full">
-        <div className="flex justify-between items-center gap-4">
-          <div />
-          <div className="flex items-center gap-3">
-            <div className="relative w-full sm:w-[280px]">
-              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                aria-label="search-legal-type"
-                autoComplete="search-legal-type"
-                type="search"
-                placeholder="Search legal types..."
-                value={searchQuery}
-                onChange={handleSearchChange}
-                className="pl-8 w-full text-xs h-9"
-                disabled={isSubmitting}
-              />
-            </div>
-            <Button onClick={handleAddLegalType}>New</Button>
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+          <div className="relative w-full max-w-sm">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              aria-label="search-legaltype"
+              autoComplete="search-legaltype"
+              type="search"
+              placeholder="Search legal type..."
+              value={searchQuery}
+              onChange={handleSearchChange}
+              className="pl-8 w-full text-xs h-9"
+              disabled={isSubmitting}
+            />
           </div>
+          <Button size="sm" onClick={handleAddLegalType}>New</Button>
         </div>
 
         <div className="w-full">
@@ -298,6 +304,7 @@ function LegalTypePageContent() {
         />
       </CardContent>
     </Card>
+    </div>
   );
 }
 

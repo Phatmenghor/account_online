@@ -289,16 +289,35 @@ public class CustomerImageServiceImpl implements CustomerImageService {
      * Searches flat (old) + week subfolders (new) at depth 2.
      */
     public Optional<Path> findFileByName(String subFolder, String filename) {
-        Path baseDir = Paths.get(uploadDir, subFolder);
-        try (Stream<Path> walk = Files.walk(baseDir, 2)) {
-            return walk
-                    .filter(Files::isRegularFile)
-                    .filter(p -> p.getFileName().toString().equals(filename))
-                    .findFirst();
-        } catch (IOException e) {
-            log.warn("Could not search for file {} in {}: {}", filename, baseDir, e.getMessage());
-            return Optional.empty();
+        Path subDir = Paths.get(uploadDir, subFolder);
+        if (Files.exists(subDir)) {
+            try (Stream<Path> walk = Files.walk(subDir, 4)) {
+                Optional<Path> found = walk
+                        .filter(Files::isRegularFile)
+                        .filter(p -> p.getFileName().toString().equalsIgnoreCase(filename))
+                        .findFirst();
+                if (found.isPresent()) {
+                    return found;
+                }
+            } catch (IOException e) {
+                log.warn("Could not search for file {} in {}: {}", filename, subDir, e.getMessage());
+            }
         }
+
+        // Fallback: search entire uploadDir if subDir doesn't contain the file
+        Path mainDir = Paths.get(uploadDir);
+        if (Files.exists(mainDir)) {
+            try (Stream<Path> walk = Files.walk(mainDir, 4)) {
+                return walk
+                        .filter(Files::isRegularFile)
+                        .filter(p -> p.getFileName().toString().equalsIgnoreCase(filename))
+                        .findFirst();
+            } catch (IOException e) {
+                log.warn("Could not search for file {} in root {}: {}", filename, mainDir, e.getMessage());
+            }
+        }
+
+        return Optional.empty();
     }
 
     // ─────────────────────────────────────────────

@@ -23,7 +23,8 @@ import {
 } from "@/features/user/services/user.service";
 import { useDebounce } from "@/utils/debounce/debounce";
 
-import { Search } from "lucide-react";
+import { PageHeader } from "@/components/shared/common/page-header";
+import { Search, Users } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { startTransition, useCallback, useEffect, useState } from "react";
@@ -64,12 +65,10 @@ function UserPageContent() {
 
   const t = useTranslations();
 
-  const searchParams = useSearchParams();
-
   // Debounced search query - Optimized api performance when search
   const debouncedSearchQuery = useDebounce(searchQuery, 400);
 
-  const { currentPage, updateUrlWithPage, handlePageChange } = usePagination({
+  const { currentPage, handlePageChange } = usePagination({
     baseRoute: ROUTES.DASHBOARD.USER,
   });
 
@@ -81,12 +80,7 @@ function UserPageContent() {
     }
   }, []);
 
-  useEffect(() => {
-    const pageParam = searchParams.get("pageNo");
-    if (!pageParam) {
-      updateUrlWithPage(1, true);
-    }
-  }, [searchParams, updateUrlWithPage]);
+
 
   const loadUsers = useCallback(async () => {
     setIsLoading(true);
@@ -301,39 +295,46 @@ function UserPageContent() {
   };
 
   return (
-    <Card className="h-full flex flex-col">
-      <CardContent className="space-y-6 p-6 flex flex-col h-full">
-        <div className="flex justify-between">
-          <div className="flex flex-wrap items-center justify-start gap-4 w-full">
-            <div className="relative w-full md:w-[350px]">
-              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                // aria-label="search-users"
-                autoComplete="search-user"
-                type="search"
-                placeholder="Search users..."
-                value={searchQuery}
-                onChange={handleSearchChange}
-                className="pl-8 w-full min-w-[200px] text-xs md:min-w-[300px] h-9"
-                disabled={isSubmitting}
-              />
-            </div>
+    <div className="space-y-4">
+      <PageHeader
+        title="Users"
+        subtitle="Manage back-office users and permissions"
+        icon={Users}
+        count={users?.totalElements || 0}
+      />
+      <Card className="h-full flex flex-col">
+        <CardContent className="space-y-6 p-6 flex flex-col h-full">
+          <div className="flex justify-between">
+            <div className="flex flex-wrap items-center justify-start gap-4 w-full">
+              <div className="relative w-full md:w-[350px]">
+                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  // aria-label="search-users"
+                  autoComplete="search-user"
+                  type="search"
+                  placeholder="Search users..."
+                  value={searchQuery}
+                  onChange={handleSearchChange}
+                  className="pl-8 w-full min-w-[200px] text-xs md:min-w-[300px] h-9"
+                  disabled={isSubmitting}
+                />
+              </div>
 
+            </div>
+            <div className="flex items-center gap-2">
+              <Select value={roleFilter} onValueChange={setRoleFilter}>
+                <SelectTrigger className="h-9 w-[160px] text-xs">
+                  <SelectValue placeholder="All Roles" />
+                </SelectTrigger>
+                <SelectContent>
+                  {ROLE_FILTER_WITH_ALL.map((r) => (
+                    <SelectItem key={r.value} value={r.value}>{r.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Button size="sm" onClick={handleAddUser}>New</Button>
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            <Select value={roleFilter} onValueChange={setRoleFilter}>
-              <SelectTrigger className="h-9 w-[160px] text-xs">
-                <SelectValue placeholder="All Roles" />
-              </SelectTrigger>
-              <SelectContent>
-                {ROLE_FILTER_WITH_ALL.map((r) => (
-                  <SelectItem key={r.value} value={r.value}>{r.label}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Button onClick={handleAddUser}>New</Button>
-          </div>
-        </div>
 
         <div className="w-full">
           <Separator className="bg-gray-300" />
@@ -434,6 +435,7 @@ function UserPageContent() {
         />
       </CardContent>
     </Card>
+    </div>
   );
 }
 
@@ -444,5 +446,6 @@ export default function UserPage() {
     </Suspense>
   );
 }
+
 
 

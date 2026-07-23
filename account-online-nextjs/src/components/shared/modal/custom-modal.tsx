@@ -5,18 +5,18 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 
 export const SIZE_CLASSES = {
-  xs: "sm:max-w-xs",
-  sm: "sm:max-w-sm",
-  default: "sm:max-w-md",
-  md: "sm:max-w-md",
+  xs: "sm:max-w-md",
+  sm: "sm:max-w-md",
+  default: "sm:max-w-lg",
+  md: "sm:max-w-lg",
   lg: "sm:max-w-lg",
-  xl: "sm:max-w-xl",
-  "2xl": "sm:max-w-2xl",
-  "3xl": "sm:max-w-3xl",
-  "4xl": "sm:max-w-4xl",
-  "5xl": "sm:max-w-5xl",
-  "6xl": "sm:max-w-6xl",
-  full: "sm:max-w-[95vw]",
+  xl: "sm:max-w-lg",
+  "2xl": "sm:max-w-lg",
+  "3xl": "sm:max-w-lg",
+  "4xl": "sm:max-w-lg",
+  "5xl": "sm:max-w-lg",
+  "6xl": "sm:max-w-lg",
+  full: "sm:max-w-lg",
 };
 
 export type ModalSize = keyof typeof SIZE_CLASSES;

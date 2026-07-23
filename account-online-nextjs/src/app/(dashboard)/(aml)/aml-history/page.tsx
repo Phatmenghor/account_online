@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense, useCallback, useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
+
 import { CustomPagination } from "@/components/shared/pagination/custom-pagination";
 import { DataTable } from "@/components/shared/table/data-table";
 import { Card, CardContent } from "@/components/ui/card";
@@ -10,7 +10,8 @@ import { Separator } from "@/components/ui/separator";
 import { ROUTES } from "@/constants/AppRoutes/routes";
 import { usePagination } from "@/hooks/use-pagination";
 import { useDebounce } from "@/utils/debounce/debounce";
-import { Search } from "lucide-react";
+import { PageHeader } from "@/components/shared/common/page-header";
+import { Search, History as HistoryIcon } from "lucide-react";
 import Loading from "@/components/shared/common/loading";
 import { createHistoryTableColumns } from "@/features/aml/table/aml-history-content";
 import { getAllAmlHistoryService } from "@/features/aml/services/aml-history.service";
@@ -88,115 +89,109 @@ function History() {
     setIsHistoryDetailOpen(true);
   };
 
-  const handleResetDateFilter = () => {
-    setStartDate(null);
-    setEndDate(null);
-    loadHistory();
-  };
+
 
   return (
-    <Card className="h-full flex flex-col">
-      <CardContent className="space-y-6 p-6 flex flex-col h-full">
-        {/* HEADER */}
-        <div className="flex flex-wrap gap-4 items-end">
-          {/* Search */}
-          <div className="relative flex-1 min-w-[250px]">
-            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              aria-label="search-history"
-              type="search"
-              placeholder="Search history"
-              value={searchQuery}
-              onChange={handleSearchChange}
-              className="pl-8 w-full text-xs h-9"
-            />
-          </div>
-
-          {/* Status Filter */}
-          <div className="w-[150px]">
-            <AmlStatusFilter
-              selectedStatus={statusFilter}
-              onChange={handleStatusChange}
-            />
-          </div>
-
-          {/* Start Date */}
-          <div className="w-[150px] flex flex-col">
-            <span className="text-sm font-medium text-muted-foreground">
-              Start Date
-            </span>
-            <CustomDatePicker
-              value={startDate || ""}
-              onChange={setStartDate}
-              placeholder="Start Date"
-              className="w-full"
-            />
-          </div>
-
-          {/* End Date */}
-          <div className="w-[150px] flex flex-col">
-            <span className="text-sm font-medium text-muted-foreground">
-              End Date
-            </span>
-            <CustomDatePicker
-              value={endDate || ""}
-              onChange={setEndDate}
-              placeholder="End Date"
-              className="w-full"
-            />
-          </div>
-
-          {/* Buttons */}
-          <div className="flex gap-2 mt-5">
-            <Button
-              size="default"
-              variant="outline"
-              onClick={handleResetDateFilter}
-            >
-              Reset
-            </Button>
-          </div>
-        </div>
-
-        <Separator className="bg-gray-300" />
-
-        {/* TABLE */}
-        <div className="flex-1 flex flex-col min-h-0">
-          <div className="flex-1 rounded-md border overflow-hidden flex flex-col">
-            <div className="flex-1 overflow-x-auto">
-              <DataTable
-                data={historyData?.content || []}
-                columns={createHistoryTableColumns({
-                  data: historyData,
-                  handlers: { handleViewHistoryDetail },
-                })}
-                loading={isLoading}
-                emptyMessage="No history records found"
-                getRowKey={(history) => history.id ?? crypto.randomUUID()}
+    <div className="space-y-4">
+      <PageHeader
+        title="AML Audit History"
+        subtitle="Audit trail of processed AML review cases"
+        icon={HistoryIcon}
+        count={historyData?.totalElements || 0}
+      />
+      <Card className="h-full flex flex-col">
+        <CardContent className="space-y-6 p-6 flex flex-col h-full">
+          {/* HEADER */}
+          <div className="flex flex-wrap gap-4 items-end">
+            {/* Search */}
+            <div className="relative w-full max-w-sm">
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                aria-label="search-history"
+                type="search"
+                placeholder="Search history..."
+                value={searchQuery}
+                onChange={handleSearchChange}
+                className="pl-8 w-full text-xs h-9"
               />
+            </div>
 
-              <div className="border-t bg-background p-2 flex justify-end">
-                <CustomPagination
-                  currentPage={currentPage}
-                  totalPages={historyData?.totalPages || 1}
-                  onPageChange={handlePageChange}
-                  size="md"
+            {/* Status Filter */}
+            <div className="w-[150px]">
+              <AmlStatusFilter
+                selectedStatus={statusFilter}
+                onChange={handleStatusChange}
+              />
+            </div>
+
+            {/* Start Date */}
+            <div className="w-[170px]">
+              <span className="text-[10px] text-muted-foreground block mb-1">
+                Start Date
+              </span>
+              <CustomDatePicker
+                value={startDate || ""}
+                onChange={setStartDate}
+                placeholder="Start Date"
+                className="w-full"
+              />
+            </div>
+
+            {/* End Date */}
+            <div className="w-[170px]">
+              <span className="text-[10px] text-muted-foreground block mb-1">
+                End Date
+              </span>
+              <CustomDatePicker
+                value={endDate || ""}
+                onChange={setEndDate}
+                placeholder="End Date"
+                className="w-full"
+              />
+            </div>
+
+          </div>
+
+          <Separator className="bg-gray-300" />
+
+          {/* TABLE */}
+          <div className="flex-1 flex flex-col min-h-0">
+            <div className="flex-1 rounded-md border overflow-hidden flex flex-col">
+              <div className="flex-1 overflow-x-auto">
+                <DataTable
+                  data={historyData?.content || []}
+                  columns={createHistoryTableColumns({
+                    data: historyData,
+                    handlers: { handleViewHistoryDetail },
+                  })}
+                  loading={isLoading}
+                  emptyMessage="No history records found"
+                  getRowKey={(history) => history.id ?? crypto.randomUUID()}
                 />
+
+                <div className="border-t bg-background p-2 flex justify-end">
+                  <CustomPagination
+                    currentPage={currentPage}
+                    totalPages={historyData?.totalPages || 1}
+                    onPageChange={handlePageChange}
+                    size="md"
+                  />
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-        {/* MODALS */}
-        {selectedHistoryRecord && (
-          <AmlHistoryDetailModal
-            history={selectedHistoryRecord}
-            isOpen={isHistoryDetailOpen}
-            onClose={() => setIsHistoryDetailOpen(false)}
-          />
-        )}
-      </CardContent>
-    </Card>
+          {/* MODALS */}
+          {selectedHistoryRecord && (
+            <AmlHistoryDetailModal
+              history={selectedHistoryRecord}
+              isOpen={isHistoryDetailOpen}
+              onClose={() => setIsHistoryDetailOpen(false)}
+            />
+          )}
+        </CardContent>
+      </Card>
+    </div>
   );
 }
 

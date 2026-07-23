@@ -65,6 +65,9 @@ public class AmlStatus extends BaseEntity {
     @Column(name = "phone_number")
     private String phoneNumber; // Phone Number
 
+    @Column(name = "branch")
+    private String branch; // Branch Code/Name
+
     @Column(name = "marital_status")
     private String maritalStatus; // Marital Status
 

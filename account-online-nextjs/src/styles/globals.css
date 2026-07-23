@@ -579,11 +579,11 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 11%;
 
-    /* Primary color: Elegant gold/bronze — matches the new logo */
-    --primary: 40 51% 39%;
+    /* Primary color: CPBank Orange */
+    --primary: 23 70% 55%;
     --primary-foreground: 0 0% 98%;
-    --primary-hover: 40 51% 34%;
-    --primary-active: 40 51% 29%;
+    --primary-hover: 23 70% 50%;
+    --primary-active: 23 70% 45%;
 
     /* SECONDARY - Light grey */
     --secondary: 220 13% 95%;
@@ -596,9 +596,9 @@
     --muted-hover: 220 13% 91%;
 
     /* ACCENT */
-    --accent: 40 51% 95%;
-    --accent-foreground: 40 51% 29%;
-    --accent-hover: 40 51% 91%;
+    --accent: 23 70% 95%;
+    --accent-foreground: 23 70% 45%;
+    --accent-hover: 23 70% 91%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
@@ -608,15 +608,15 @@
     --border-strong: 220 13% 75%;
     --border-subtle: 220 13% 96%;
     --input: 220 13% 91%;
-    --input-focus: 40 51% 39%;
-    --ring: 40 51% 39%;
+    --input-focus: 23 70% 55%;
+    --ring: 23 70% 55%;
 
     /* COMBOBOX CUSTOM COLORS */
     --combobox-bg: 0 0% 100%;
     --combobox-fg: 222 47% 11%;
     --combobox-hover: 220 8% 95%;
-    --combobox-selected: 40 51% 95%;
-    --combobox-selected-fg: 40 51% 29%;
+    --combobox-selected: 23 70% 95%;
+    --combobox-selected-fg: 23 70% 45%;
 
     --success: 146 79% 41%;
     --success-foreground: 0 0% 98%;
@@ -706,12 +706,9 @@
 
   html,
   body {
-    /* Prevent rubber-band scroll from bleeding into parent (Telegram
-       container) or pulling-to-refresh inside modals. */
-    overscroll-behavior-y: contain;
-    /* No horizontal overflow — prevents layout shift and accidental
-       side-scrolling on narrow viewports (WebView / Mini App). */
     overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior-y: auto;
   }
 
   body {
@@ -725,7 +722,7 @@
     line-height: 1.5;
     /* Faster tap response on mobile; prevents accidental zoom on
        double-tap without disabling pinch-zoom for accessibility. */
-    touch-action: manipulation;
+    touch-action: pan-x pan-y;
     -webkit-tap-highlight-color: transparent;
   }
 
@@ -1152,17 +1149,16 @@ gmp-placeautocomplete {
 
 /* Reset layout constraints for mobile apps */
 html, body {
-  overscroll-behavior-y: none !important;
   -webkit-tap-highlight-color: transparent !important;
 }
 
 
 
-/* Force 16px minimum font size for inputs to completely prevent iOS auto-zoom on focus */
+/* Default minimum font size for inputs to prevent iOS auto-zoom on focus */
 input,
 textarea,
 select {
-  font-size: 16px !important;
+  font-size: 16px;
 }
 
 /* Hide default scrollbars for modern, clean viewports */

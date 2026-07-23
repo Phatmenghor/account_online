@@ -35,6 +35,7 @@ public class AmlHistoryDto {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
+    private String branch;
     private String currentAddressName;
     private String currentAddressCode;
     private String placeOfBirthName;

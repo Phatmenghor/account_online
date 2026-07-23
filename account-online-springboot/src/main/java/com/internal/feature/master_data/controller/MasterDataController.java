@@ -3,19 +3,17 @@ package com.internal.feature.master_data.controller;
 import com.internal.shared.response.ApiResponse;
 import com.internal.feature.master_data.dto.request.AddressRequestDto;
 import com.internal.feature.master_data.dto.request.AllMasterDataRequest;
-import com.internal.feature.master_data.dto.response.LocationCodesDto;
-import com.internal.feature.master_data.dto.response.ClsProvinceDto;
-import com.internal.feature.master_data.dto.response.ClsDistrictDto;
-import com.internal.feature.master_data.dto.response.ClsCommuneDto;
-import com.internal.feature.master_data.dto.response.ClsVillageDto;
-import com.internal.feature.master_data.dto.response.ClsBranchDto;
-import com.internal.feature.master_data.service.MasterDataService;
+import com.internal.feature.master_data.dto.request.PublicReferenceRequest;
+import com.internal.feature.master_data.dto.response.*;
+import com.internal.feature.master_data.service.*;
 import com.internal.shared.constant.ResponseMessage;
 import com.internal.shared.pagination.PaginationResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/public/master-data")
@@ -24,6 +22,11 @@ import org.springframework.web.bind.annotation.*;
 public class MasterDataController {
 
     private final MasterDataService masterDataService;
+    private final OccupationService occupationService;
+    private final MaritalStatusService maritalStatusService;
+    private final ReferenceService referenceService;
+    private final LegalTypeService legalTypeService;
+    private final AccOnlineCategoryService accOnlineCategoryService;
 
     @PostMapping("/init/address")
     public ResponseEntity<ApiResponse<LocationCodesDto>> initAddress(
@@ -82,6 +85,41 @@ public class MasterDataController {
 
         PaginationResponse<ClsBranchDto> response = masterDataService.getBranch(request);
         return ResponseEntity.ok(ApiResponse.success(ResponseMessage.BRANCHES_RETRIEVED, response));
+    }
+
+    @PostMapping("/occupation/all")
+    public ResponseEntity<ApiResponse<List<OccupationDto>>> getAllOccupations(@RequestBody PublicReferenceRequest request) {
+        log.info("API: Public request - Fetch all occupations");
+        List<OccupationDto> list = occupationService.getAllOccupationsPublic(request.getSearch());
+        return ResponseEntity.ok(ApiResponse.success(ResponseMessage.retrieved(ResponseMessage.ALL_OCCUPATIONS), list));
+    }
+
+    @PostMapping("/marital-status/all")
+    public ResponseEntity<ApiResponse<List<MaritalStatusDto>>> getAllMaritalStatus(@RequestBody PublicReferenceRequest request) {
+        log.info("API: Public request - Fetch all marital statuses");
+        List<MaritalStatusDto> list = maritalStatusService.getAllPublic(request.getSearch());
+        return ResponseEntity.ok(ApiResponse.success(ResponseMessage.retrieved(ResponseMessage.ALL_MARITAL_STATUSES), list));
+    }
+
+    @PostMapping("/bank/all")
+    public ResponseEntity<ApiResponse<List<ReferenceDto>>> getAllReferences(@RequestBody PublicReferenceRequest request) {
+        log.info("API: Public request - Fetch all banks");
+        List<ReferenceDto> list = referenceService.getAllPublic(request.getSearch());
+        return ResponseEntity.ok(ApiResponse.success(ResponseMessage.retrieved(ResponseMessage.ALL_BANKS), list));
+    }
+
+    @PostMapping("/legal-type/all")
+    public ResponseEntity<ApiResponse<List<LegalTypeDto>>> getAllLegalTypes(@RequestBody PublicReferenceRequest request) {
+        log.info("API: Public request - Fetch all legal types");
+        List<LegalTypeDto> list = legalTypeService.getAllLegalTypePublic(request.getSearch());
+        return ResponseEntity.ok(ApiResponse.success(ResponseMessage.retrieved(ResponseMessage.ALL_LEGAL_TYPES), list));
+    }
+
+    @PostMapping("/acc-online-category/all")
+    public ResponseEntity<ApiResponse<List<AccOnlineCategoryDto>>> getAllAccOnlineCategories(@RequestBody PublicReferenceRequest request) {
+        log.info("API: Public request - Fetch all categories");
+        List<AccOnlineCategoryDto> list = accOnlineCategoryService.getAll(request.getSearch());
+        return ResponseEntity.ok(ApiResponse.success("Categories retrieved successfully.", list));
     }
 }
 

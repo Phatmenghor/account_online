@@ -147,14 +147,12 @@ export default function ModalVillage({
         <DialogHeader className="px-6 py-4 border-b flex-shrink-0">
           <div className="flex items-center gap-4 pr-8">
             <div
-              className={`p-2 rounded-full ${
-                isCreate ? "bg-green-100" : "bg-blue-100"
-              }`}
+              className="p-2 rounded-full bg-primary/10"
             >
               {isCreate ? (
-                <FileText className="h-5 w-5 text-green-600" />
+                <FileText className="h-5 w-5 text-primary" />
               ) : (
-                <FilePenLine className="h-5 w-5 text-blue-600" />
+                <FilePenLine className="h-5 w-5 text-primary" />
               )}
             </div>
             <div className="flex-1">

@@ -163,14 +163,14 @@ export default function ModalUser({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[850px] max-h-[90vh] overflow-hidden p-0 gap-0 flex flex-col">
+      <DialogContent className="max-w-2xl sm:max-w-2xl w-full max-h-[90vh] overflow-hidden p-0 gap-0 flex flex-col">
         {/* Header */}
         <DialogHeader className="px-6 py-4 border-b bg-muted/30 flex-shrink-0">
           <div className="flex items-center gap-4 pr-8">
-            <div className={`w-12 h-12 rounded-full flex items-center justify-center ${isCreate ? "bg-green-100" : "bg-blue-100"}`}>
+            <div className="w-12 h-12 rounded-full flex items-center justify-center bg-primary/10">
               {isCreate
-                ? <UserPlus className="h-6 w-6 text-green-600" />
-                : <UserCog className="h-6 w-6 text-blue-600" />}
+                ? <UserPlus className="h-6 w-6 text-primary" />
+                : <UserCog className="h-6 w-6 text-primary" />}
             </div>
             <div className="flex-1">
               <DialogTitle className="text-xl font-semibold">

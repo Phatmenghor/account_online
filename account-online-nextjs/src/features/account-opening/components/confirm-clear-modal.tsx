@@ -31,46 +31,53 @@ export const ConfirmClearModal = ({
                     />
 
                     <motion.div
-                        initial={{ opacity: 0, y: 60, scale: 0.97 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: 60, scale: 0.97 }}
-                        transition={{ type: "spring", damping: 25, stiffness: 300 }}
-                        className="relative bg-white w-full sm:max-w-[420px] rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden z-10"
+                        initial={{ opacity: 0, scale: 0.96, y: 12 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.96, y: 12 }}
+                        transition={{ duration: 0.2, ease: "easeOut" }}
+                        className="relative bg-white w-full max-w-[480px] rounded-2xl shadow-xl overflow-hidden z-10 border border-gray-100"
                     >
-                        <div className="h-1.5 w-full bg-primary" />
-
-                        <div className="px-6 pt-7 pb-6">
-                            <div className="flex items-center justify-center w-14 h-14 bg-primary/10 border border-primary/20 rounded-lg mx-auto mb-4">
-                                <Trash2 className="text-primary" style={{ width: 24, height: 24 }} />
+                        {/* Header */}
+                        <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between bg-white">
+                            <div className="flex items-center gap-2.5">
+                                <div className="w-8 h-8 rounded-lg bg-red-50 flex items-center justify-center text-red-500 flex-shrink-0">
+                                    <Trash2 className="w-4 h-4" />
+                                </div>
+                                <h3 className="text-base font-bold text-gray-900 tracking-tight">{title || "Clear Form?"}</h3>
                             </div>
+                            <button
+                                type="button"
+                                onClick={onClose}
+                                className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+                            >
+                                <X className="w-4.5 h-4.5" />
+                            </button>
+                        </div>
 
-                            <h3 className="text-lg sm:text-xl font-bold text-gray-800 text-center mb-2">
-                                {title || "Clear Form?"}
-                            </h3>
-                            <p className="text-base text-gray-500 text-center mb-6 leading-relaxed">
+                        {/* Body */}
+                        <div className="p-6 text-center sm:text-left">
+                            <p className="text-sm text-gray-600 leading-relaxed">
                                 {message || "Are you sure you want to clear all fields? This action cannot be undone."}
                             </p>
+                        </div>
 
-                            <div className="flex flex-col sm:flex-row gap-3">
-                                <motion.button
-                                    whileHover={{ scale: 1.01 }}
-                                    whileTap={{ scale: 0.99 }}
-                                    onClick={onClose}
-                                    className="flex-1 h-auto min-h-12 flex items-center justify-center gap-2 px-4 py-3 border-2 border-gray-200 text-gray-600 font-semibold rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-all text-base"
-                                >
-                                    <X className="w-4 h-4 flex-shrink-0" />
-                                    <span className="whitespace-normal leading-tight text-center">Cancel</span>
-                                </motion.button>
-                                <motion.button
-                                    whileHover={{ scale: 1.01 }}
-                                    whileTap={{ scale: 0.99 }}
-                                    onClick={onConfirm}
-                                    className="flex-1 h-auto min-h-12 flex items-center justify-center gap-2 px-4 py-3 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-lg transition-all shadow-sm text-base"
-                                >
-                                    <Trash2 className="w-4 h-4 flex-shrink-0" />
-                                    <span className="whitespace-normal leading-tight text-center">Clear All</span>
-                                </motion.button>
-                            </div>
+                        {/* Footer */}
+                        <div className="px-6 py-4 border-t border-gray-100 bg-gray-50/80 flex flex-col sm:flex-row justify-end items-center gap-3 rounded-b-2xl">
+                            <button
+                                type="button"
+                                onClick={onClose}
+                                className="w-full sm:w-auto h-10 px-5 text-sm font-medium rounded-xl border border-gray-200 bg-white text-gray-700 hover:bg-gray-100 transition-colors"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                type="button"
+                                onClick={onConfirm}
+                                className="w-full sm:w-auto h-10 px-6 text-sm font-semibold rounded-xl bg-red-600 hover:bg-red-700 text-white shadow-sm flex items-center justify-center gap-1.5 transition-all"
+                            >
+                                <Trash2 className="w-4 h-4" />
+                                <span>Clear All</span>
+                            </button>
                         </div>
                     </motion.div>
                 </div>

@@ -11,6 +11,7 @@ import { formatDate } from "@/constants/AppResource/format-date/format-dd-mm-yyy
 import { createOpenAccountService } from "@/services/open-account/openAccount.service";
 import { uploadDocument } from "@/services/document/document.service";
 import { OpenAccountResponse } from "@/features/account-opening/types/openAccount.response";
+import { compressBase64Image } from "@/utils/image-compressor";
 
 interface UseAccountSubmissionProps {
   formData: ResponseNID;
@@ -91,6 +92,7 @@ export const useAccountSubmission = ({
     title: "",
     message: "",
   });
+  const [progressPercent, setProgressPercent] = useState<number>(0);
 
   const uploadCache = useRef<UploadCache>({
     nidFileName: null,
@@ -112,10 +114,10 @@ export const useAccountSubmission = ({
   };
 
   const handleSubmitAccount = async () => {
-    const nidBase64Full: string = uploadedImage?.idImage ?? "";
-    const selfieBase64Full: string = selfieImage ?? "";
+    const nidBase64Raw: string = uploadedImage?.idImage ?? "";
+    const selfieBase64Raw: string = selfieImage ?? "";
 
-    if (!nidBase64Full) {
+    if (!nidBase64Raw) {
       showError({
         title: translate("err_nid_missing_title"),
         message: translate("err_nid_missing_message"),
@@ -123,7 +125,7 @@ export const useAccountSubmission = ({
       return;
     }
 
-    if (!selfieBase64Full) {
+    if (!selfieBase64Raw) {
       showError({
         title: translate("err_selfie_missing_title"),
         message: translate("err_selfie_missing_message"),
@@ -131,13 +133,24 @@ export const useAccountSubmission = ({
       return;
     }
 
+    setProgressPercent(5);
     setLoadingState({
       isLoading: true,
-      title: translate("submitting_title"),
-      message: translate("loading_images"),
+      title: translate("submitting_title") || "កំពុងដំណើរការបង្កើតគណនី",
+      message: "សូមរង់ចាំបន្តិច ប្រព័ន្ធកំពុងដំណើរការស្នើសុំគណនីរបស់លោកអ្នក...",
     });
 
     try {
+      // Step 1: Compress images client-side before uploading (reduces payload from ~5MB to ~150KB)
+      setProgressPercent(15);
+      const [compressedNid, compressedSelfie] = await Promise.all([
+        compressBase64Image(nidBase64Raw, 1200, 1200, 0.78),
+        compressBase64Image(selfieBase64Raw, 1200, 1200, 0.78),
+      ]);
+
+      // Step 2: Upload Compressed Documents
+      setProgressPercent(35);
+
       if (
         !uploadCache.current.nidFileName ||
         !uploadCache.current.selfieFileName
@@ -146,18 +159,18 @@ export const useAccountSubmission = ({
           uploadCache.current.nidFileName
             ? Promise.resolve(uploadCache.current.nidFileName)
             : uploadDocument(
-                nidBase64Full,
+                compressedNid,
                 `nid_${formData.idNumber}.jpg`,
                 "nid",
-                formData.idNumber,
+                formData.idNumber
               ),
           uploadCache.current.selfieFileName
             ? Promise.resolve(uploadCache.current.selfieFileName)
             : uploadDocument(
-                selfieBase64Full,
+                compressedSelfie,
                 `selfie_${formData.idNumber}.jpg`,
                 "selfie",
-                formData.idNumber,
+                formData.idNumber
               ),
         ]);
         uploadCache.current = { nidFileName, selfieFileName };
@@ -165,10 +178,8 @@ export const useAccountSubmission = ({
 
       const { nidFileName, selfieFileName } = uploadCache.current;
 
-      setLoadingState((prev) => ({
-        ...prev,
-        message: translate("submitting_wait"),
-      }));
+      // Step 3: Verifying and Creating Account
+      setProgressPercent(65);
 
       const accountData = {
         legalId: formData.idNumber,
@@ -218,12 +229,19 @@ export const useAccountSubmission = ({
         accountType: isPublic ? "6011" : (selectedCategory?.lookupId || "6011"),
       };
 
+      setProgressPercent(85);
       const response = await createOpenAccountService(accountData);
+
+      // Step 4: Finalizing & Success
+      setProgressPercent(100);
       uploadCache.current = { nidFileName: null, selfieFileName: null };
 
       setSuccessData(response?.data ?? response);
       setShowSuccessModal(true);
     } catch (error: any) {
+      // Clean up cache on failure so retry doesn't reuse partial/failed files
+      resetUploadCache();
+
       const errorMessage = error?.errorMessage || error?.message;
       const errorResponse = error?.rawError;
 
@@ -256,7 +274,10 @@ export const useAccountSubmission = ({
         showError();
       }
     } finally {
-      setLoadingState({ isLoading: false, title: "", message: "" });
+      setTimeout(() => {
+        setLoadingState({ isLoading: false, title: "", message: "" });
+        setProgressPercent(0);
+      }, 300);
     }
   };
 
@@ -277,6 +298,7 @@ export const useAccountSubmission = ({
     setAccountExistsData,
     loadingState,
     setLoadingState,
+    progressPercent,
   };
 };
 

@@ -74,19 +74,13 @@ const DialogContent = React.forwardRef<
       className={cn(
         // Default (md and up): standard centered dialog with the default shadcn entrance animation
         "fixed left-1/2 top-1/2 z-50 w-full max-w-lg -translate-x-1/2 -translate-y-1/2",
-        "border bg-background shadow-lg rounded-lg outline-none overflow-hidden",
+        "border bg-background shadow-lg sm:rounded-lg outline-none overflow-hidden",
         "flex flex-col max-h-[85vh]",
-        "md:duration-200 md:data-[state=open]:animate-in md:data-[state=closed]:animate-out",
-        "md:data-[state=closed]:fade-out-0 md:data-[state=open]:fade-in-0",
-        "md:data-[state=closed]:zoom-out-95 md:data-[state=open]:zoom-in-95",
-        "md:data-[state=closed]:slide-out-to-left-1/2 md:data-[state=closed]:slide-out-to-top-[48%]",
-        "md:data-[state=open]:slide-in-from-left-1/2 md:data-[state=open]:slide-in-from-top-[48%]",
-        // <md: animated bottom sheet instead of a centered dialog
-        "max-md:left-0 max-md:right-0 max-md:top-auto max-md:bottom-0 max-md:translate-x-0 max-md:translate-y-0",
-        "max-md:max-w-none max-md:mx-0 max-md:max-h-[92dvh] max-md:pb-safe",
-        "max-md:rounded-b-none max-md:rounded-t-[20px] max-md:border-t max-md:border-x-0 max-md:border-b-0",
-        "max-md:data-[state=open]:animate-in max-md:data-[state=closed]:animate-out",
-        "max-md:data-[state=open]:slide-in-from-bottom-full max-md:data-[state=closed]:slide-out-to-bottom-full",
+        "duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out",
+        "data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
+        "data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95",
+        "data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%]",
+        "data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%]",
         className
       )}
       {...props}
@@ -104,7 +98,7 @@ const DialogContent = React.forwardRef<
       {disableScrollWrapper ? (
         children
       ) : (
-        <div className="flex-1 overflow-y-auto px-4 py-4 no-scrollbar flex flex-col min-h-0">
+        <div className="flex-1 overflow-y-auto px-0 py-0 no-scrollbar flex flex-col min-h-0">
           {children}
         </div>
       )}

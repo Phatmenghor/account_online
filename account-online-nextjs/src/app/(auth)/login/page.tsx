@@ -146,41 +146,41 @@ export default function LoginPage() {
           <div className="absolute inset-0 bg-gradient-to-br from-black/80 via-black/60 to-black/40" />
         </div>
 
-        <Card className="animate-fade-in-up relative z-10 w-full max-w-lg overflow-hidden rounded-2xl border border-border/60 shadow-2xl sm:rounded-2xl">
-          <div className="bg-primary/5 border-b border-border/50 px-6 pt-8 pb-6 sm:px-8">
-            <div className="flex items-center gap-3 mb-5">
-              <div className="w-11 h-11 rounded-xl bg-primary flex items-center justify-center shadow-sm">
-                <ShieldCheck className="h-5 w-5 text-primary-foreground" />
+        <Card className="animate-fade-in-up relative z-10 w-full max-w-[400px] overflow-hidden rounded-2xl border border-border/60 shadow-xl">
+          <div className="bg-primary/5 border-b border-border/50 px-6 py-5">
+            <div className="flex items-center gap-2.5 mb-3">
+              <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shadow-sm">
+                <ShieldCheck className="h-4 w-4 text-primary-foreground" />
               </div>
-              <span className="text-xs font-semibold uppercase tracking-widest text-primary">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-primary">
                 Account Online Opening
               </span>
             </div>
-            <h1 className="text-2xl font-bold text-foreground">Welcome back</h1>
-            <p className="text-sm text-muted-foreground mt-1">
+            <h1 className="text-xl font-bold text-foreground">Welcome back</h1>
+            <p className="text-xs text-muted-foreground mt-0.5">
               Sign in to your account to continue
             </p>
           </div>
 
-          <CardContent className="px-6 py-7 sm:px-8">
+          <CardContent className="px-6 py-5">
             <Form {...form}>
               <form
                 onSubmit={form.handleSubmit(onSubmit)}
-                className="space-y-4"
+                className="space-y-3.5"
                 autoComplete="off"
               >
                 <FormField
                   control={form.control}
                   name="username"
                   render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>
-                        user identifier{" "}
+                    <FormItem className="space-y-1">
+                      <FormLabel className="text-xs font-semibold text-gray-700">
+                        User Identifier{" "}
                         <span className="text-destructive">*</span>
                       </FormLabel>
                       <FormControl>
                         <div className="relative">
-                          <IdCard className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                          <IdCard className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
                           <Input
                             {...field}
                             type="text"
@@ -191,11 +191,11 @@ export default function LoginPage() {
                             onFocus={(e) =>
                               e.target.removeAttribute("readonly")
                             }
-                            className="h-12 pl-11"
+                            className="h-9 pl-8 text-xs sm:text-sm rounded-xl"
                           />
                         </div>
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className="text-xs" />
                     </FormItem>
                   )}
                 />
@@ -204,13 +204,13 @@ export default function LoginPage() {
                   control={form.control}
                   name="password"
                   render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>
+                    <FormItem className="space-y-1">
+                      <FormLabel className="text-xs font-semibold text-gray-700">
                         Password <span className="text-destructive">*</span>
                       </FormLabel>
                       <FormControl>
                         <div className="relative">
-                          <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                          <Lock className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
                           <Input
                             {...field}
                             type={showPassword ? "text" : "password"}
@@ -221,36 +221,35 @@ export default function LoginPage() {
                             onFocus={(e) =>
                               e.target.removeAttribute("readonly")
                             }
-                            className="h-12 pl-11 pr-11"
+                            className="h-9 pl-8 pr-8 text-xs sm:text-sm rounded-xl"
                           />
                           <button
                             type="button"
                             onClick={() => setShowPassword((v) => !v)}
-                            className="absolute right-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full text-muted-foreground transition-colors active:bg-accent"
+                            className="absolute right-2 top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-gray-100"
                             disabled={isLoading}
                           >
                             {showPassword ? (
-                              <EyeOff className="h-4 w-4" />
+                              <EyeOff className="h-3.5 w-3.5" />
                             ) : (
-                              <Eye className="h-4 w-4" />
+                              <Eye className="h-3.5 w-3.5" />
                             )}
                           </button>
                         </div>
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className="text-xs" />
                     </FormItem>
                   )}
                 />
 
                 <Button
                   type="submit"
-                  size="lg"
-                  className="w-full font-semibold mt-6 shadow-md"
+                  className="w-full h-9 font-semibold rounded-xl text-sm mt-4 shadow-sm bg-primary hover:bg-primary/90 text-white"
                   disabled={isLoading}
                 >
                   {isLoading ? (
                     <>
-                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
                       <span className="ml-2">Logging in...</span>
                     </>
                   ) : (

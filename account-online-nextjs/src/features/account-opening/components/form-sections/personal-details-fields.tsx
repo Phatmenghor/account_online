@@ -59,19 +59,18 @@ export const PersonalDetailsFields: React.FC<PersonalDetailsFieldsProps> = ({
   }, [legalTypes, selectedLegalType]);
 
   const renderLabel = (labelKey: string) => (
-    <Label htmlFor={labelKey} className="text-base sm:text-lg font-medium mb-1 block">
-      {translate(labelKey)}
+    <div className="flex items-center justify-between mb-1">
+      <Label htmlFor={labelKey} className="text-sm font-medium text-gray-700">
+        {translate(labelKey)}
+      </Label>
       {isVerified && (
-        <span className="float-right text-green-600 text-sm flex items-center gap-1">
-          <CheckCircle className="h-4 w-4" />
-          Verified
-        </span>
+        <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0" />
       )}
-    </Label>
+    </div>
   );
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       {/* First Name (KH) */}
       <div className="space-y-1">
         {renderLabel("firstNameKh")}
@@ -80,11 +79,11 @@ export const PersonalDetailsFields: React.FC<PersonalDetailsFieldsProps> = ({
           placeholder={translate("firstNameKh")}
           value={formData.lastNameKh}
           onChange={(e) => handleInputChange("lastNameKh", e.target.value)}
-          className={`w-full h-12 text-base ${validationErrors.lastNameKh ? "border-red-500" : ""}`}
+          className={`w-full h-9 text-sm rounded-xl ${validationErrors.lastNameKh ? "border-red-400 focus-visible:ring-red-300" : ""}`}
           disabled={isLoading || isValidating || isSubmitting}
         />
         {validationErrors.lastNameKh && (
-          <p className="text-sm text-red-500">{translate("err_firstNameKh")}</p>
+          <p className="text-xs text-red-500">{translate("err_firstNameKh")}</p>
         )}
       </div>
 
@@ -96,11 +95,11 @@ export const PersonalDetailsFields: React.FC<PersonalDetailsFieldsProps> = ({
           placeholder={translate("lastNameKH")}
           value={formData.firstNameKh}
           onChange={(e) => handleInputChange("firstNameKh", e.target.value)}
-          className={`w-full h-12 text-base ${validationErrors.firstNameKh ? "border-red-500" : ""}`}
+          className={`w-full h-9 text-sm rounded-xl ${validationErrors.firstNameKh ? "border-red-400 focus-visible:ring-red-300" : ""}`}
           disabled={isLoading || isValidating || isSubmitting}
         />
         {validationErrors.firstNameKh && (
-          <p className="text-sm text-red-500">{translate("err_lastNameKh")}</p>
+          <p className="text-xs text-red-500">{translate("err_lastNameKh")}</p>
         )}
       </div>
 
@@ -112,11 +111,11 @@ export const PersonalDetailsFields: React.FC<PersonalDetailsFieldsProps> = ({
           placeholder={translate("familyNameEn")}
           value={formData.lastNameEn}
           onChange={(e) => handleInputChange("lastNameEn", e.target.value)}
-          className={`w-full h-12 text-base ${validationErrors.lastNameEn ? "border-red-500" : ""}`}
+          className={`w-full h-9 text-sm rounded-xl ${validationErrors.lastNameEn ? "border-red-400 focus-visible:ring-red-300" : ""}`}
           disabled={isLoading || isValidating || isSubmitting}
         />
         {validationErrors.lastNameEn && (
-          <p className="text-sm text-red-500">{translate("err_lastNameEn")}</p>
+          <p className="text-xs text-red-500">{translate("err_lastNameEn")}</p>
         )}
       </div>
 
@@ -128,11 +127,11 @@ export const PersonalDetailsFields: React.FC<PersonalDetailsFieldsProps> = ({
           placeholder={translate("givenNameEn")}
           value={formData.firstNameEn}
           onChange={(e) => handleInputChange("firstNameEn", e.target.value)}
-          className={`w-full h-12 text-base ${validationErrors.firstNameEn ? "border-red-500" : ""}`}
+          className={`w-full h-9 text-sm rounded-xl ${validationErrors.firstNameEn ? "border-red-400 focus-visible:ring-red-300" : ""}`}
           disabled={isLoading || isValidating || isSubmitting}
         />
         {validationErrors.firstNameEn && (
-          <p className="text-sm text-red-500">{translate("err_firstNameEn")}</p>
+          <p className="text-xs text-red-500">{translate("err_firstNameEn")}</p>
         )}
       </div>
 
@@ -147,7 +146,7 @@ export const PersonalDetailsFields: React.FC<PersonalDetailsFieldsProps> = ({
           error={!!validationErrors.dob}
         />
         {validationErrors.dob && (
-          <p className="text-sm text-red-500">{translate("err_dob")}</p>
+          <p className="text-xs text-red-500">{translate("err_dob")}</p>
         )}
       </div>
 
@@ -159,9 +158,7 @@ export const PersonalDetailsFields: React.FC<PersonalDetailsFieldsProps> = ({
           onValueChange={(value) => handleInputChange("gender", value)}
           disabled={isLoading || isValidating || isSubmitting}
         >
-          <SelectTrigger
-            className={`w-full h-12 text-base ${validationErrors.gender ? "border-red-500" : ""}`}
-          >
+          <SelectTrigger className={`w-full h-9 text-sm rounded-xl ${validationErrors.gender ? "border-red-400" : ""}`}>
             <SelectValue placeholder={translateSelect("selectGender")} />
           </SelectTrigger>
           <SelectContent>
@@ -170,34 +167,24 @@ export const PersonalDetailsFields: React.FC<PersonalDetailsFieldsProps> = ({
           </SelectContent>
         </Select>
         {validationErrors.gender && (
-          <p className="text-sm text-red-500">{translate("err_gender")}</p>
+          <p className="text-xs text-red-500">{translate("err_gender")}</p>
         )}
       </div>
 
-      {/* Legal Type new*/}
+      {/* Legal Type */}
       <div className="space-y-1">
         {renderLabel("legalType")}
         <Select
           value={selectedLegalType?.id.toString() || ""}
           onValueChange={(value) => {
-            const legalType = legalTypes.find(
-              (l) => l.id.toString() === value
-            );
+            const legalType = legalTypes.find((l) => l.id.toString() === value);
             setSelectedLegalType(legalType || null);
             validateField("legalType", value);
           }}
           disabled={isLoading || isValidating || isLegalTypeLoading}
         >
-          <SelectTrigger
-            className={`w-full h-12 text-base ${validationErrors.legalType ? "border-red-500" : ""}`}
-          >
-            <SelectValue
-              placeholder={
-                isLegalTypeLoading
-                  ? translate("loading")
-                  : translateSelect("selectLegalType")
-              }
-            />
+          <SelectTrigger className={`w-full h-9 text-sm rounded-xl ${validationErrors.legalType ? "border-red-400" : ""}`}>
+            <SelectValue placeholder={isLegalTypeLoading ? translate("loading") : translateSelect("selectLegalType")} />
           </SelectTrigger>
           <SelectContent>
             {legalTypes.map((legalType) => (
@@ -208,7 +195,7 @@ export const PersonalDetailsFields: React.FC<PersonalDetailsFieldsProps> = ({
           </SelectContent>
         </Select>
         {validationErrors.legalType && (
-          <p className="text-sm text-red-500">{translate("err_legalType")}</p>
+          <p className="text-xs text-red-500">{translate("err_legalType")}</p>
         )}
       </div>
 
@@ -220,12 +207,12 @@ export const PersonalDetailsFields: React.FC<PersonalDetailsFieldsProps> = ({
           placeholder={translate("legalId")}
           value={formData.idNumber}
           onChange={(e) => handleInputChange("idNumber", e.target.value)}
-          className={`w-full h-12 text-base ${validationErrors.idNumber ? "border-red-500" : ""} ${isNidExtracted ? "cursor-default select-text" : ""}`}
+          className={`w-full h-9 text-sm rounded-xl ${validationErrors.idNumber ? "border-red-400 focus-visible:ring-red-300" : ""} ${isNidExtracted ? "bg-gray-50 cursor-default" : ""}`}
           readOnly={isNidExtracted}
           disabled={isLoading || isValidating || isSubmitting}
         />
         {validationErrors.idNumber && (
-          <p className="text-sm text-red-500">{translate("err_idNumber")}</p>
+          <p className="text-xs text-red-500">{translate("err_idNumber")}</p>
         )}
       </div>
 
@@ -237,11 +224,11 @@ export const PersonalDetailsFields: React.FC<PersonalDetailsFieldsProps> = ({
           placeholder={translate("address")}
           value={formData.address}
           onChange={(e) => handleInputChange("address", e.target.value)}
-          className={`w-full h-12 text-base ${validationErrors.address ? "border-red-500" : ""}`}
+          className={`w-full h-9 text-sm rounded-xl ${validationErrors.address ? "border-red-400 focus-visible:ring-red-300" : ""}`}
           disabled={isLoading || isValidating || isSubmitting}
         />
         {validationErrors.address && (
-          <p className="text-sm text-red-500">{translate("err_address")}</p>
+          <p className="text-xs text-red-500">{translate("err_address")}</p>
         )}
       </div>
 
@@ -253,15 +240,13 @@ export const PersonalDetailsFields: React.FC<PersonalDetailsFieldsProps> = ({
           placeholder={translate("pob")}
           value={formData.pob}
           onChange={(e) => handleInputChange("pob", e.target.value)}
-          className={`w-full h-12 text-base ${validationErrors.pob ? "border-red-500" : ""}`}
+          className={`w-full h-9 text-sm rounded-xl ${validationErrors.pob ? "border-red-400 focus-visible:ring-red-300" : ""}`}
           disabled={isLoading || isValidating || isSubmitting}
         />
         {validationErrors.pob && (
-          <p className="text-sm text-red-500">{translate("err_pob")}</p>
+          <p className="text-xs text-red-500">{translate("err_pob")}</p>
         )}
       </div>
     </div>
   );
 };
-
-

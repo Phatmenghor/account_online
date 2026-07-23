@@ -136,6 +136,9 @@ public class JWTGenerator {
         try {
             parseToken(token);
             return true;
+        } catch (io.jsonwebtoken.ExpiredJwtException ex) {
+            log.debug("JWT token expired: {}", ex.getMessage());
+            return false;
         } catch (Exception ex) {
             log.warn("JWT validation failed: {}", ex.getMessage());
             return false;

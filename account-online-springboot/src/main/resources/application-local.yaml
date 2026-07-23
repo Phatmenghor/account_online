@@ -7,6 +7,12 @@ email:
   sender:
     enabled: false    # local: OTP is always 123456, no need to send email
 
+file:
+  upload:
+    directory: uploads/customer-image
+    nid: /nid
+    selfie: /selfie
+
 ad:
   login:
     url: http://localhost:8080/api/v1/auth/login
@@ -14,7 +20,7 @@ ad:
     password: admin123
 
 server:
-  port: 7070
+  port: 8080
   max-http-header-size: 65536
   tomcat:
     connection-timeout: 90000
@@ -94,7 +100,7 @@ cpb:
   t24:
     url: http://192.168.127.31:7003
     username: LEANGHOURNG.PHOEUNG
-    password: SHIwo@1122
+    password: LEang@321
   mb:
     otpUrl: http://192.168.103.11:15004/CPBBank/services/CPBMobile?wsdl
     registerCodeUrl: http://192.168.103.13:8090/API/RegisterCustomerMB/

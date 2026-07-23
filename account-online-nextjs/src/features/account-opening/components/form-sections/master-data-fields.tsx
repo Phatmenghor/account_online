@@ -134,19 +134,18 @@ export const MasterDataFields: React.FC<MasterDataFieldsProps> = ({
   }, []);
 
   const renderLabel = (labelKey: string) => (
-    <Label htmlFor={labelKey} className="text-base sm:text-lg font-medium mb-1 block">
-      {translate(labelKey)}
+    <div className="flex items-center justify-between mb-1">
+      <Label htmlFor={labelKey} className="text-sm font-medium text-gray-700">
+        {translate(labelKey)}
+      </Label>
       {isVerified && (
-        <span className="float-right text-green-600 text-sm flex items-center gap-1">
-          <CheckCircle className="h-4 w-4" />
-          Verified
-        </span>
+        <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0" />
       )}
-    </Label>
+    </div>
   );
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
       {/* Marital Status */}
       <div className="space-y-1">
         {renderLabel("marital")}
@@ -162,7 +161,7 @@ export const MasterDataFields: React.FC<MasterDataFieldsProps> = ({
           disabled={isLoading || isValidating || isLoadingMarital}
         >
           <SelectTrigger
-            className={`w-full h-12 text-base ${validationErrors.maritalStatus ? "border-red-500" : ""}`}
+            className={`w-full h-9 text-sm rounded-xl ${validationErrors.maritalStatus ? "border-red-400" : ""}`}
           >
             <SelectValue
               placeholder={
@@ -181,7 +180,7 @@ export const MasterDataFields: React.FC<MasterDataFieldsProps> = ({
           </SelectContent>
         </Select>
         {validationErrors.maritalStatus && (
-          <p className="text-sm text-red-500">
+          <p className="text-xs text-red-500">
             {translate("err_maritalStatus")}
           </p>
         )}
@@ -202,7 +201,7 @@ export const MasterDataFields: React.FC<MasterDataFieldsProps> = ({
           disabled={isLoading || isValidating || isLoadingOccupations}
         >
           <SelectTrigger
-            className={`w-full h-12 text-base ${validationErrors.occupation ? "border-red-500" : ""}`}
+            className={`w-full h-9 text-sm rounded-xl ${validationErrors.occupation ? "border-red-400" : ""}`}
           >
             <SelectValue
               placeholder={
@@ -224,7 +223,7 @@ export const MasterDataFields: React.FC<MasterDataFieldsProps> = ({
           </SelectContent>
         </Select>
         {validationErrors.occupation && (
-          <p className="text-sm text-red-500">{translate("err_occupation")}</p>
+          <p className="text-xs text-red-500">{translate("err_occupation")}</p>
         )}
       </div>
 
@@ -233,7 +232,7 @@ export const MasterDataFields: React.FC<MasterDataFieldsProps> = ({
         {renderLabel("branch")}
         <div
           className={
-            validationErrors.branch ? "border border-red-500 rounded-xl" : ""
+            validationErrors.branch ? "border border-red-400 rounded-xl" : ""
           }
         >
           <ComboboxSelectBranch
@@ -243,11 +242,11 @@ export const MasterDataFields: React.FC<MasterDataFieldsProps> = ({
           />
         </div>
         {validationErrors.branch && (
-          <p className="text-sm text-red-500">{translate("err_branch")}</p>
+          <p className="text-xs text-red-500">{translate("err_branch")}</p>
         )}
       </div>
 
-      {/* Account Type — hidden for public self-service opening (fixed to 6011) */}
+      {/* Account Type */}
       {!isPublic && (
         <div className="space-y-1">
           {renderLabel("accountType")}
@@ -261,7 +260,7 @@ export const MasterDataFields: React.FC<MasterDataFieldsProps> = ({
             disabled={isLoading || isValidating || isLoadingCategories}
           >
             <SelectTrigger
-              className={`w-full h-12 text-base ${validationErrors.accountProduct ? "border-red-500" : ""}`}
+              className={`w-full h-9 text-sm rounded-xl ${validationErrors.accountProduct ? "border-red-400" : ""}`}
             >
               <SelectValue
                 placeholder={isLoadingCategories ? translate("loading") : translateSelect("selectAccount")}
@@ -276,14 +275,12 @@ export const MasterDataFields: React.FC<MasterDataFieldsProps> = ({
             </SelectContent>
           </Select>
           {validationErrors.accountProduct && (
-            <p className="text-sm text-red-500">{translate("err_accountProduct")}</p>
+            <p className="text-xs text-red-500">{translate("err_accountProduct")}</p>
           )}
         </div>
       )}
 
-      {/* Relationship Manager — Staff ID. Required + verified against staff records
-          on staff opening; on the public route it's optional, stored for logs only,
-          and never verified or submitted to T24. */}
+      {/* Relationship Manager / Staff ID */}
       <div className={`${isPublic ? "" : "md:col-span-2"} space-y-1`}>
         {renderLabel(isPublic ? "referralId" : "relationshipManager")}
         <div className="relative">
@@ -295,7 +292,7 @@ export const MasterDataFields: React.FC<MasterDataFieldsProps> = ({
               if (!isPublic) validateField("staffCode", e.target.value);
               handleStaffCodeChange(e.target.value);
             }}
-            className={`w-full h-12 text-base pr-10 ${validationErrors.staffCode ? "border-red-500" : ""}`}
+            className={`w-full h-9 text-sm rounded-xl pr-10 ${validationErrors.staffCode ? "border-red-400" : ""}`}
             disabled={isLoading || isValidating || isSubmitting}
           />
           {!isPublic && isVerifyingStaff && (
@@ -308,7 +305,7 @@ export const MasterDataFields: React.FC<MasterDataFieldsProps> = ({
           </p>
         )}
         {!isPublic && validationErrors.staffCode && (
-          <p className="text-sm text-red-500">{validationErrors.staffCode}</p>
+          <p className="text-xs text-red-500">{validationErrors.staffCode}</p>
         )}
       </div>
     </div>

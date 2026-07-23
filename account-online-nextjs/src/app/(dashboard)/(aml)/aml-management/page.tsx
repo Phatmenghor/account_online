@@ -15,7 +15,8 @@ import { Separator } from "@/components/ui/separator";
 import { ROUTES } from "@/constants/AppRoutes/routes";
 import { usePagination } from "@/hooks/use-pagination";
 import { useDebounce } from "@/utils/debounce/debounce";
-import { Search } from "lucide-react";
+import { PageHeader } from "@/components/shared/common/page-header";
+import { Search, ShieldAlert } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useRouter, useSearchParams } from "next/navigation";
 import Loading from "@/components/shared/common/loading";
@@ -65,12 +66,7 @@ function Management() {
     baseRoute: ROUTES.DASHBOARD.AML.MANAGEMENT,
   });
 
-  useEffect(() => {
-    const pageParam = searchParams.get("pageNo");
-    if (!pageParam) {
-      updateUrlWithPage(1, true);
-    }
-  }, [searchParams, updateUrlWithPage]);
+
 
   useEffect(() => {
     const legalIdParam = searchParams.get("legalId");
@@ -180,75 +176,83 @@ function Management() {
   };
 
   return (
-    <Card className="h-full flex flex-col">
-      <CardContent className="space-y-6 p-6 flex flex-col h-full">
-        {/* Header */}
-        <div className="flex justify-between">
-          <div className="flex flex-wrap items-center justify-start gap-4 w-full">
-            <div className="relative w-full md:w-[350px]">
-              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                aria-label="search-management"
-                type="search"
-                placeholder={"Search management"}
-                value={searchQuery}
-                onChange={handleSearchChange}
-                className="pl-8 w-full min-w-[200px] text-xs md:min-w-[300px] h-9"
-              />
-            </div>
-          </div>
-        </div>
-
-        <Separator className="bg-gray-300" />
-
-        {/* TABLE */}
-        <div className="flex-1 flex flex-col min-h-0">
-          <div className="flex-1 rounded-md border overflow-hidden flex flex-col">
-            <div className="flex-1 overflow-x-auto">
-              <DataTable
-                data={amlManagement?.content || []}
-                columns={createManagementTableColumns({
-                  data: amlManagement,
-                  handlers: {
-                    handleViewManagementDetail,
-                    openConfirmAmlDialog,
-                  },
-                })}
-                loading={isLoading}
-                emptyMessage="No AML management records found"
-                getRowKey={(management) => management.id ?? crypto.randomUUID()}
-              />
-
-              <div className="border-t bg-background p-2 flex justify-end">
-                <CustomPagination
-                  currentPage={currentPage}
-                  totalPages={amlManagement?.totalPages || 1}
-                  onPageChange={handlePageChange}
-                  size="md"
+    <div className="space-y-4">
+      <PageHeader
+        title="AML Pending List"
+        subtitle="Review and process pending AML cases"
+        icon={ShieldAlert}
+        count={amlManagement?.totalElements || 0}
+      />
+      <Card className="h-full flex flex-col">
+        <CardContent className="space-y-6 p-6 flex flex-col h-full">
+          {/* Header */}
+          <div className="flex justify-between">
+            <div className="flex flex-wrap items-center justify-start gap-4 w-full">
+              <div className="relative w-full md:w-[350px]">
+                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  aria-label="search-management"
+                  type="search"
+                  placeholder={"Search management"}
+                  value={searchQuery}
+                  onChange={handleSearchChange}
+                  className="pl-8 w-full min-w-[200px] text-xs md:min-w-[300px] h-9"
                 />
               </div>
             </div>
           </div>
-        </div>
 
-        {/* CONFIRM DIALOG */}
-        <AmlConfirmDialog
-          isOpen={isConfirmAmlDialogOpen}
-          isLoading={isConfirmLoading}
-          onClose={() => setIsConfirmAmlDialogOpen(false)}
-          status={selectedStatus}
-          onConfirm={handleConfirmAmlStatus}
-        />
+          <Separator className="bg-gray-300" />
 
-        {/* VIEW DETAIL MODAL */}
-        <AmlViewDetailModal
-          isOpen={isAmlManagementDetailOpen}
-          onClose={handleCloseManagementDetail}
-          alert={selectedAmlManagement!}
-          alertId={selectedAmlManagement?.id}
-        />
-      </CardContent>
-    </Card>
+          {/* TABLE */}
+          <div className="flex-1 flex flex-col min-h-0">
+            <div className="flex-1 rounded-md border overflow-hidden flex flex-col">
+              <div className="flex-1 overflow-x-auto">
+                <DataTable
+                  data={amlManagement?.content || []}
+                  columns={createManagementTableColumns({
+                    data: amlManagement,
+                    handlers: {
+                      handleViewManagementDetail,
+                      openConfirmAmlDialog,
+                    },
+                  })}
+                  loading={isLoading}
+                  emptyMessage={t("common.loading")}
+                  getRowKey={(item) => item.id}
+                />
+                {/* Pagination */}
+                <div className="border-t bg-background p-2 flex justify-end">
+                  <CustomPagination
+                    currentPage={currentPage}
+                    totalPages={amlManagement?.totalPages || 1}
+                    onPageChange={handlePageChange}
+                    size="md"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* CONFIRM DIALOG */}
+          <AmlConfirmDialog
+            isLoading={isConfirmLoading}
+            isOpen={isConfirmAmlDialogOpen}
+            onClose={() => setIsConfirmAmlDialogOpen(false)}
+            status={selectedStatus}
+            onConfirm={handleConfirmAmlStatus}
+          />
+
+          {/* VIEW DETAIL MODAL */}
+          <AmlViewDetailModal
+            isOpen={isAmlManagementDetailOpen}
+            onClose={handleCloseManagementDetail}
+            alert={selectedAmlManagement!}
+            alertId={selectedAmlManagement?.id}
+          />
+        </CardContent>
+      </Card>
+    </div>
   );
 }
 
@@ -259,5 +263,6 @@ export default function ManagementPage() {
     </Suspense>
   );
 }
+
 
 

@@ -1,5 +1,7 @@
 "use client";
 
+import { PageHeader } from '@/components/shared/common/page-header';
+
 import { useVillageState } from '@/features/master-data/store/state/village-state';
 import { setPageNo, setSearchFilter, setStatusFilter } from '@/features/master-data/store/slices/village-slice';
 import { fetchAllVillageService, createVillageThunk, updateVillageThunk, deleteVillageThunk } from '@/features/master-data/store/thunks/village-thunks';
@@ -18,7 +20,7 @@ import { Separator } from "@/components/ui/separator";
 import { ROUTES } from "@/constants/AppRoutes/routes";
 import { usePagination } from "@/hooks/use-pagination";
 import { useDebounce } from "@/utils/debounce/debounce";
-import { Search } from "lucide-react";
+import { Search, MapPin } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { startTransition, useCallback, useEffect, useState } from "react";
@@ -185,7 +187,14 @@ function VillagePageContent() {
   };
 
   return (
-    <Card className="h-full flex flex-col">
+    <div className="space-y-4">
+      <PageHeader
+        title="Villages"
+        subtitle="Manage village database records"
+        icon={MapPin}
+        count={villages?.totalElements || 0}
+      />
+      <Card className="h-full flex flex-col">
       <CardContent className="space-y-6 p-6 flex flex-col h-full">
         <div className="flex justify-between items-center gap-4">
           <div />
@@ -203,7 +212,7 @@ function VillagePageContent() {
                 disabled={isSubmitting}
               />
             </div>
-            <Button onClick={handleAddVillage}>New</Button>
+            <Button size="sm" onClick={handleAddVillage}>New</Button>
           </div>
         </div>
 
@@ -279,6 +288,7 @@ function VillagePageContent() {
         />
       </CardContent>
     </Card>
+    </div>
   );
 }
 

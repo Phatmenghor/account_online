@@ -166,11 +166,14 @@ export default function ProfileTab({
     <>
       <TabsContent value={tabValue}>
         <div className="grid gap-6 md:grid-cols-12">
-          {/* Profile Banner */}
-          <Card className="md:col-span-12 overflow-hidden border-enhanced">
+          {/* Unified Profile & Account Information Card */}
+          <Card className="md:col-span-12 overflow-hidden border-enhanced shadow-sm">
+            {/* Top Gradient Banner */}
             <div className="h-24 bg-gradient-to-r from-primary/90 to-primary/70 dark:from-primary/80 dark:to-primary/60" />
-            <CardContent className="relative pt-0">
-              <div className="flex flex-col md:flex-row gap-6 -mt-12 items-start">
+
+            <CardContent className="relative pt-0 pb-6">
+              {/* Profile Avatar & Header Information */}
+              <div className="flex flex-col md:flex-row gap-8 md:gap-10 -mt-12 items-start">
                 <div
                   className={`relative group z-10 ${
                     editMode ? "cursor-pointer" : "cursor-default"
@@ -205,147 +208,344 @@ export default function ProfileTab({
                 </div>
 
                 <div className="flex-1 pt-12 md:pt-4">
-                  <div className="flex flex-col md:flex-row md:items-center justify-between">
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
+                    {/* Line 1: Name and ID Card Badge */}
                     <div className="space-y-1">
-                      <h2 className="text-2xl font-bold">{user?.fullName}</h2>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <h2 className="text-xl font-extrabold text-gray-900 dark:text-white">
+                          {user?.fullName || user?.idCard || "User Profile"}
+                        </h2>
+                        {user?.idCard && (
+                          <span className="text-xs font-semibold px-2 py-0.5 rounded-md bg-primary/10 text-primary border border-primary/20">
+                            ID: {user.idCard}
+                          </span>
+                        )}
+                      </div>
                     </div>
-                    <div className="mt-3 md:mt-0 flex items-center gap-3">
+
+                    {/* Action Button */}
+                    <div className="flex items-center gap-2 shrink-0">
                       <Button
                         variant={editMode ? "outline" : "secondary"}
                         size="sm"
                         onClick={toggleEditMode}
                         disabled={isSubmitting}
-                        className="gap-1.5"
+                        className="h-8 px-3 text-xs font-semibold rounded-lg gap-1.5"
                       >
                         {editMode ? (
                           <>
-                            <X className="h-4 w-4" /> Cancel
+                            <X className="h-3.5 w-3.5" /> Cancel
                           </>
                         ) : (
                           <>
-                            <Edit3 className="h-4 w-4" /> Edit Profile
+                            <Edit3 className="h-3.5 w-3.5" /> Edit Profile
                           </>
                         )}
                       </Button>
                     </div>
                   </div>
 
-                  <div className="flex flex-col sm:flex-row gap-3 mt-4 text-sm text-muted-foreground">
+                  {/* Line 2: Email, Joined, Last Login metadata */}
+                  <div className="flex flex-wrap items-center gap-4 mt-2 text-xs text-muted-foreground">
+                    {user?.email && (
+                      <div className="flex items-center gap-1.5">
+                        <Mail className="h-3.5 w-3.5 text-primary shrink-0" />
+                        <span>{user.email}</span>
+                      </div>
+                    )}
                     <div className="flex items-center gap-1.5">
-                      <Mail className="h-4 w-4" />
-                      {user?.email || "username@example.com"}
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      <Calendar className="h-4 w-4" />
-                      Joined{" "}
-                      {user?.createdAt
-                        ? new Date(user.createdAt).toLocaleDateString()
-                        : "Recently"}
+                      <Calendar className="h-3.5 w-3.5 text-gray-400 shrink-0" />
+                      <span>
+                        Joined{" "}
+                        {user?.createdAt
+                          ? new Date(user.createdAt).toLocaleDateString()
+                          : "Recently"}
+                      </span>
                     </div>
                     {user?.lastLogin && (
                       <div className="flex items-center gap-1.5">
-                        <Info className="h-4 w-4" />
-                        Last Login {DateTimeFormat(user.lastLogin)}
+                        <Info className="h-3.5 w-3.5 text-gray-400 shrink-0" />
+                        <span>Last Login {DateTimeFormat(user.lastLogin)}</span>
                       </div>
                     )}
                   </div>
 
                   {imageData && editMode && (
-                    <p className="mt-4 text-sm text-green-600 dark:text-green-400 font-medium flex items-center gap-1.5">
-                      <Info className="h-4 w-4" /> New profile image selected -
-                      Click Save Changes
+                    <p className="mt-3 text-xs text-green-600 dark:text-green-400 font-medium flex items-center gap-1.5">
+                      <Info className="h-3.5 w-3.5" /> New profile image selected — Click Save Changes
                     </p>
                   )}
                 </div>
               </div>
-            </CardContent>
-          </Card>
 
-          {/* Profile Form */}
-          <Card className="md:col-span-12 border-enhanced">
-            <CardHeader>
-              <div className="flex items-center justify-between">
+              {/* Section Header: Account Information (32px top spacing, no line) */}
+              <div className="flex items-center justify-between mt-8 mb-5">
                 <div>
-                  <CardTitle>Account Information</CardTitle>
-                  <CardDescription>
+                  <h3 className="text-base font-bold text-gray-900 dark:text-white">
+                    {editMode ? "Update Profile Information" : "Account Information"}
+                  </h3>
+                  <p className="text-xs text-muted-foreground mt-0.5">
                     {editMode
-                      ? "Edit your account information and profile details."
-                      : "View your account information and profile details."}
-                  </CardDescription>
+                      ? "Modify your editable profile information below."
+                      : "View your personal account information and organizational details."}
+                  </p>
                 </div>
-                {editMode && (
-                  <Badge variant="secondary" className="gap-1">
+                {editMode ? (
+                  <Badge variant="secondary" className="gap-1 bg-primary/10 text-primary border-primary/20">
                     <Edit3 className="h-3 w-3" /> Edit Mode
+                  </Badge>
+                ) : (
+                  <Badge variant="outline" className="gap-1">
+                    <Info className="h-3 w-3" /> Read Only
                   </Badge>
                 )}
               </div>
-            </CardHeader>
 
-            <CardContent className="mb-5">
-              <Form {...form}>
-                <form onSubmit={handleSubmit(submitForm)} className="space-y-6">
+              {!editMode ? (
+                /* ================= VIEW MODE (Disabled Inputs Matching Edit Mode) ================= */
+                <div className="py-2">
                   <div className="grid gap-4 md:grid-cols-2">
-                    {formFields.map(({ name, label }) => (
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-semibold text-gray-700 block">ID Card</label>
+                      <Input
+                        value={user?.idCard || "—"}
+                        disabled
+                        className="h-9 text-xs sm:text-sm rounded-xl bg-gray-50/80 text-gray-800 border-gray-200 cursor-default font-normal"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-semibold text-gray-700 block">Full Name</label>
+                      <Input
+                        value={user?.fullName || "—"}
+                        disabled
+                        className="h-9 text-xs sm:text-sm rounded-xl bg-gray-50/80 text-gray-800 border-gray-200 cursor-default font-normal"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-semibold text-gray-700 block">Email Address</label>
+                      <Input
+                        value={user?.email || "—"}
+                        disabled
+                        className="h-9 text-xs sm:text-sm rounded-xl bg-gray-50/80 text-gray-800 border-gray-200 cursor-default font-normal"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-semibold text-gray-700 block">Phone Number</label>
+                      <Input
+                        value={user?.phoneNumber || "—"}
+                        disabled
+                        className="h-9 text-xs sm:text-sm rounded-xl bg-gray-50/80 text-gray-800 border-gray-200 cursor-default font-normal"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-semibold text-gray-700 block">Position</label>
+                      <Input
+                        value={user?.position || "—"}
+                        disabled
+                        className="h-9 text-xs sm:text-sm rounded-xl bg-gray-50/80 text-gray-800 border-gray-200 cursor-default font-normal"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-semibold text-gray-700 block">Branch</label>
+                      <Input
+                        value={user?.branch || "—"}
+                        disabled
+                        className="h-9 text-xs sm:text-sm rounded-xl bg-gray-50/80 text-gray-800 border-gray-200 cursor-default font-normal"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-semibold text-gray-700 block">Department</label>
+                      <Input
+                        value={user?.department || "—"}
+                        disabled
+                        className="h-9 text-xs sm:text-sm rounded-xl bg-gray-50/80 text-gray-800 border-gray-200 cursor-default font-normal"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-semibold text-gray-700 block">Account Status</label>
+                      <Input
+                        value={user?.userStatus || "ACTIVE"}
+                        disabled
+                        className="h-9 text-xs sm:text-sm rounded-xl bg-green-50 text-green-700 border-green-200 font-semibold cursor-default"
+                      />
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                /* ================= EDIT MODE (Show Only Editable Fields) ================= */
+                <Form {...form}>
+                  <form onSubmit={handleSubmit(submitForm)} className="space-y-6">
+                    <div className="grid gap-4 md:grid-cols-2">
+                      <FormItem>
+                        <FormLabel className="text-xs font-semibold text-gray-500">ID Card (Read-only)</FormLabel>
+                        <FormControl>
+                          <Input
+                            value={user?.idCard || "—"}
+                            readOnly
+                            disabled
+                            className="h-9 text-xs sm:text-sm rounded-xl bg-gray-100/80 text-gray-600 border-gray-200 cursor-not-allowed"
+                          />
+                        </FormControl>
+                      </FormItem>
+
                       <FormField
-                        key={name}
                         control={control}
-                        name={name}
+                        name="fullName"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>{label}</FormLabel>
+                            <FormLabel className="text-xs font-semibold">Full Name</FormLabel>
                             <FormControl>
                               <Input
                                 {...field}
-                                value={field.value as string ?? ""}
-                                readOnly={
-                                  !editMode || readOnlyFields.includes(name)
-                                }
+                                value={(field.value as string) ?? ""}
                                 disabled={isSubmitting}
-                                className={
-                                  readOnlyFields.includes(name)
-                                    ? "bg-muted/50"
-                                    : ""
-                                }
+                                placeholder="Enter full name"
+                                className="h-9 text-xs sm:text-sm rounded-xl"
                               />
                             </FormControl>
-                            <FormMessage />
+                            <FormMessage className="text-xs" />
                           </FormItem>
                         )}
                       />
-                    ))}
-                  </div>
 
-                  {editMode && (
-                    <div className="flex justify-end gap-3 pt-6 border-t">
+                      <FormField
+                        control={control}
+                        name="email"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-xs font-semibold">Email Address</FormLabel>
+                            <FormControl>
+                              <Input
+                                {...field}
+                                type="email"
+                                value={(field.value as string) ?? ""}
+                                disabled={isSubmitting}
+                                placeholder="Enter email address"
+                                className="h-9 text-xs sm:text-sm rounded-xl"
+                              />
+                            </FormControl>
+                            <FormMessage className="text-xs" />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={control}
+                        name="phoneNumber"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-xs font-semibold">Phone Number</FormLabel>
+                            <FormControl>
+                              <Input
+                                {...field}
+                                value={(field.value as string) ?? ""}
+                                disabled={isSubmitting}
+                                placeholder="Enter phone number"
+                                className="h-9 text-xs sm:text-sm rounded-xl"
+                              />
+                            </FormControl>
+                            <FormMessage className="text-xs" />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={control}
+                        name="position"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-xs font-semibold">Position</FormLabel>
+                            <FormControl>
+                              <Input
+                                {...field}
+                                value={(field.value as string) ?? ""}
+                                disabled={isSubmitting}
+                                placeholder="Enter position"
+                                className="h-9 text-xs sm:text-sm rounded-xl"
+                              />
+                            </FormControl>
+                            <FormMessage className="text-xs" />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={control}
+                        name="branch"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-xs font-semibold">Branch</FormLabel>
+                            <FormControl>
+                              <Input
+                                {...field}
+                                value={(field.value as string) ?? ""}
+                                disabled={isSubmitting}
+                                placeholder="Enter branch"
+                                className="h-9 text-xs sm:text-sm rounded-xl"
+                              />
+                            </FormControl>
+                            <FormMessage className="text-xs" />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={control}
+                        name="department"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-xs font-semibold">Department</FormLabel>
+                            <FormControl>
+                              <Input
+                                {...field}
+                                value={(field.value as string) ?? ""}
+                                disabled={isSubmitting}
+                                placeholder="Enter department"
+                                className="h-9 text-xs sm:text-sm rounded-xl"
+                              />
+                            </FormControl>
+                            <FormMessage className="text-xs" />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    <div className="flex justify-end gap-3 pt-5 border-t">
                       <Button
                         type="button"
                         variant="outline"
                         onClick={toggleEditMode}
                         disabled={isSubmitting}
-                        className="gap-1"
+                        className="h-9 px-4 text-xs font-semibold rounded-xl gap-1"
                       >
-                        <X className="h-4 w-4" /> Cancel
+                        <X className="h-3.5 w-3.5" /> Cancel
                       </Button>
                       <Button
                         type="submit"
-                        className="gap-1 btn-primary"
                         disabled={isSubmitting}
+                        className="h-9 px-5 text-xs font-semibold rounded-xl gap-1.5 bg-primary hover:bg-primary/90 text-white"
                       >
                         {isSubmitting ? (
                           <>
-                            <Loader2 className="h-4 w-4 animate-spin" />{" "}
-                            Saving...
+                            <Loader2 className="h-3.5 w-3.5 animate-spin" /> Saving...
                           </>
                         ) : (
                           <>
-                            <Save className="h-4 w-4" /> Save Changes
+                            <Save className="h-3.5 w-3.5" /> Save Changes
                           </>
                         )}
                       </Button>
                     </div>
-                  )}
-                </form>
-              </Form>
+                  </form>
+                </Form>
+              )}
             </CardContent>
           </Card>
         </div>

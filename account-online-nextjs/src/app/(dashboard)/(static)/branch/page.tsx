@@ -1,12 +1,12 @@
 "use client";
 
-import { useBranchState } from '@/features/master-data/store/state/branch-state';
-import { setPageNo, setSearchFilter, setStatusFilter } from '@/features/master-data/store/slices/branch-slice';
-import { fetchAllBranchService, createBranchThunk, updateBranchThunk, deleteBranchThunk } from '@/features/master-data/store/thunks/branch-thunks';
-import { useAppDispatch } from '@/store/store';
+import { PageHeader } from "@/components/shared/common/page-header";
+import { useBranchState } from "@/features/master-data/store/state/branch-state";
+import { setSearchFilter } from "@/features/master-data/store/slices/branch-slice";
+import { createBranchThunk, updateBranchThunk, deleteBranchThunk } from "@/features/master-data/store/thunks/branch-thunks";
+import { useAppDispatch } from "@/store/store";
 
-
-import { Suspense } from "react";
+import { Suspense, startTransition, useCallback, useEffect, useState } from "react";
 import { DeleteConfirmationDialog } from "@/components/shared/dialog/dialog-delete";
 import { CustomPagination } from "@/components/shared/pagination/custom-pagination";
 import { DataTable } from "@/components/shared/table/data-table";
@@ -18,9 +18,8 @@ import { Separator } from "@/components/ui/separator";
 import { ROUTES } from "@/constants/AppRoutes/routes";
 import { usePagination } from "@/hooks/use-pagination";
 import { useDebounce } from "@/utils/debounce/debounce";
-import { Search } from "lucide-react";
+import { Search, GitBranch } from "lucide-react";
 import { useSearchParams } from "next/navigation";
-import { startTransition, useCallback, useEffect, useState } from "react";
 import Loading from "@/components/shared/common/loading";
 import { ModalMode } from "@/constants/AppResource/display-list/enum/mode";
 import { createBranchTableColumns } from "@/features/master-data/table/branch-content";
@@ -33,10 +32,7 @@ import {
   UpdateBranchReq,
 } from "@/features/master-data/types/branch/branch.request";
 import {
-  createBranchService,
-  deleteBranchService,
   getAllBranchService,
-  updateBranchService,
 } from "@/features/master-data/services/branch/branch.service";
 import BranchViewModal from "@/features/master-data/components/branch-detail-modal";
 import ModalBranch from "@/features/master-data/components/branch-modal";
@@ -48,17 +44,13 @@ function BranchPageContent() {
   const statusFilter = filters.status;
   const [branch, setBranch] = useState<AllBranchModel | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [selectedBranch, setSelectedBranch] = useState<BranchModel | null>(
-    null,
-  );
+  const [selectedBranch, setSelectedBranch] = useState<BranchModel | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [mode, setMode] = useState<ModalMode>(ModalMode.CREATE_MODE);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isReferenceDetailOpen, setIsReferenceDetailOpen] = useState(false);
 
   const searchParams = useSearchParams();
-
-  // Debounced search query - Optimized api performance when search
   const debouncedSearchQuery = useDebounce(searchQuery, 400);
 
   const { currentPage, updateUrlWithPage, handlePageChange } = usePagination({
@@ -83,7 +75,6 @@ function BranchPageContent() {
       setBranch(response);
     } catch (error: any) {
       console.error("Failed to fetch branch: ", error);
-    } finally {
     }
   }, [debouncedSearchQuery, statusFilter, currentPage]);
 
@@ -91,7 +82,6 @@ function BranchPageContent() {
     loadBranch();
   }, [loadBranch, debouncedSearchQuery, statusFilter]);
 
-  // Simplified search change handler - just updates the state, debouncing handles the rest
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     dispatch(setSearchFilter(e.target.value));
   };
@@ -162,8 +152,8 @@ function BranchPageContent() {
     }
   };
 
-  const handleEditBranch = (branch: BranchModel) => {
-    setSelectedBranch(branch);
+  const handleEditBranch = (branchItem: BranchModel) => {
+    setSelectedBranch(branchItem);
     setMode(ModalMode.UPDATE_MODE);
     setIsModalOpen(true);
   };
@@ -174,23 +164,28 @@ function BranchPageContent() {
     setIsModalOpen(true);
   };
 
-  const handleViewBranchDetail = (branch: BranchModel) => {
-    setSelectedBranch(branch);
+  const handleViewBranchDetail = (branchItem: BranchModel) => {
+    setSelectedBranch(branchItem);
     setIsReferenceDetailOpen(true);
   };
 
-  const handleDeleteBranch = (branch: BranchModel) => {
-    setSelectedBranch(branch);
+  const handleDeleteBranch = (branchItem: BranchModel) => {
+    setSelectedBranch(branchItem);
     setIsDeleteDialogOpen(true);
   };
 
   return (
-    <Card className="h-full flex flex-col">
-      <CardContent className="space-y-6 p-6 flex flex-col h-full">
-        <div className="flex justify-between items-center gap-4">
-          <div />
-          <div className="flex items-center gap-3">
-            <div className="relative w-full sm:w-[280px]">
+    <div className="space-y-4">
+      <PageHeader
+        title="Branches"
+        subtitle="Manage CPBank branch directories"
+        icon={GitBranch}
+        count={branchs?.totalElements || 0}
+      />
+      <Card className="h-full flex flex-col">
+        <CardContent className="space-y-6 p-6 flex flex-col h-full">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+            <div className="relative w-full max-w-sm">
               <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 aria-label="search-branch"
@@ -203,81 +198,79 @@ function BranchPageContent() {
                 disabled={isSubmitting}
               />
             </div>
-            <Button onClick={handleAddBranch}>New</Button>
+            <Button size="sm" onClick={handleAddBranch}>New</Button>
           </div>
-        </div>
 
-        <div className="w-full">
-          <Separator className="bg-gray-300" />
-        </div>
+          <div className="w-full">
+            <Separator className="bg-gray-300" />
+          </div>
 
-        <div className="flex-1 flex flex-col min-h-0">
-          {/* Table container with proper overflow handling */}
-          <div className="flex-1 rounded-md border overflow-hidden flex flex-col">
-            <div className="flex-1 overflow-x-auto">
-              <DataTable
-                data={branch?.content || []}
-                columns={createBranchTableColumns({
-                  data: branch,
-                  handlers: {
-                    handleEditBranch,
-                    handleViewBranchDetail,
-                    handleDeleteBranch,
-                  },
-                })}
-                loading={isLoading}
-                emptyMessage="No branch found"
-                getRowKey={(reference) => reference.id}
-              />
-              {/* Pagination positioned to the right and outside the scrollable area */}
-              <div className="border-t bg-background p-2 flex justify-end">
-                <CustomPagination
-                  currentPage={currentPage}
-                  totalPages={branch?.totalPages || 1}
-                  onPageChange={handlePageChange}
-                  size="md"
+          <div className="flex-1 flex flex-col min-h-0">
+            <div className="flex-1 rounded-md border overflow-hidden flex flex-col">
+              <div className="flex-1 overflow-x-auto">
+                <DataTable
+                  data={branchs?.content || []}
+                  columns={createBranchTableColumns({
+                    data: branchs,
+                    handlers: {
+                      handleEditBranch,
+                      handleViewBranchDetail,
+                      handleDeleteBranch,
+                    },
+                  })}
+                  loading={isLoading}
+                  emptyMessage="No branch found"
+                  getRowKey={(reference) => reference.id}
                 />
+                <div className="border-t bg-background p-2 flex justify-end">
+                  <CustomPagination
+                    currentPage={currentPage}
+                    totalPages={branchs?.totalPages || 1}
+                    onPageChange={handlePageChange}
+                    size="md"
+                  />
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-        <DeleteConfirmationDialog
-          isOpen={isDeleteDialogOpen}
-          onClose={() => {
-            setIsDeleteDialogOpen(false);
-            setSelectedBranch(null);
-          }}
-          onDelete={confirmDeleteReference}
-          title="Delete Branch"
-          description={`Are you sure you want to delete this branch`}
-          itemName={selectedBranch?.branchCode || selectedBranch?.branchKh}
-          isSubmitting={isSubmitting}
-        />
+          <DeleteConfirmationDialog
+            isOpen={isDeleteDialogOpen}
+            onClose={() => {
+              setIsDeleteDialogOpen(false);
+              setSelectedBranch(null);
+            }}
+            onDelete={confirmDeleteReference}
+            title="Delete Branch"
+            description={`Are you sure you want to delete this branch`}
+            itemName={selectedBranch?.branchCode || selectedBranch?.branchKh}
+            isSubmitting={isSubmitting}
+          />
 
-        <BranchViewModal
-          isOpen={isReferenceDetailOpen}
-          onClose={() => {
-            setIsReferenceDetailOpen(false);
-            setSelectedBranch(null);
-          }}
-          branch={selectedBranch ?? undefined}
-          branchId={selectedBranch?.id ?? 0}
-        />
+          <BranchViewModal
+            isOpen={isReferenceDetailOpen}
+            onClose={() => {
+              setIsReferenceDetailOpen(false);
+              setSelectedBranch(null);
+            }}
+            branch={selectedBranch ?? undefined}
+            branchId={selectedBranch?.id ?? 0}
+          />
 
-        <ModalBranch
-          isOpen={isModalOpen}
-          mode={mode}
-          onClose={() => {
-            setSelectedBranch(null);
-            setIsModalOpen(false);
-          }}
-          onSave={handleSaveBranch}
-          branchId={selectedBranch?.id ?? 0}
-          isSubmitting={isSubmitting}
-        />
-      </CardContent>
-    </Card>
+          <ModalBranch
+            isOpen={isModalOpen}
+            mode={mode}
+            onClose={() => {
+              setSelectedBranch(null);
+              setIsModalOpen(false);
+            }}
+            onSave={handleSaveBranch}
+            branchId={selectedBranch?.id ?? 0}
+            isSubmitting={isSubmitting}
+          />
+        </CardContent>
+      </Card>
+    </div>
   );
 }
 
@@ -288,4 +281,3 @@ export default function ReferencePage() {
     </Suspense>
   );
 }
-

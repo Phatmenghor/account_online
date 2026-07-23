@@ -9,7 +9,6 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
-  DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -35,11 +34,11 @@ function InfoRow({ label, value }: { label: string; value?: React.ReactNode }) {
   );
 }
 
-function SectionHeader({ color, title }: { color: string; title: string }) {
+function SectionHeader({ color, title }: { color?: string; title: string }) {
   return (
-    <div className="flex items-center gap-2">
-      <div className={`w-1 h-6 ${color} rounded-full`} />
-      <h3 className="text-lg font-semibold">{title}</h3>
+    <div className="flex items-center gap-2.5 mb-3">
+      <div className={`w-1 h-5 ${color || "bg-primary"} rounded-full shrink-0`} />
+      <h3 className="text-base font-bold text-gray-900 dark:text-white">{title}</h3>
     </div>
   );
 }
@@ -47,7 +46,7 @@ function SectionHeader({ color, title }: { color: string; title: string }) {
 export function UserViewModal({ user, isOpen, onClose }: UserViewModalProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[850px] max-h-[88vh] overflow-hidden p-0 gap-0 flex flex-col">
+      <DialogContent className="max-w-2xl sm:max-w-2xl w-full max-h-[88vh] overflow-hidden p-0 gap-0 flex flex-col">
         {/* Header */}
         <DialogHeader className="px-6 py-4 border-b bg-muted/30 flex-shrink-0">
           <div className="flex items-center gap-4 pr-8">
@@ -119,9 +118,6 @@ export function UserViewModal({ user, isOpen, onClose }: UserViewModalProps) {
         </div>
 
         {/* Footer */}
-        <DialogFooter className="px-6 py-4 border-t bg-muted/30 flex-shrink-0">
-          <Button variant="outline" onClick={onClose}>Close</Button>
-        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

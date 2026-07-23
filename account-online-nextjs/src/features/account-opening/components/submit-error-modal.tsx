@@ -209,73 +209,73 @@ export default function SubmitErrorModal({
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/50 backdrop-blur-xs"
           />
 
           <motion.div
-            initial={{ opacity: 0, y: 60, scale: 0.97 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 60, scale: 0.97 }}
-            transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className="relative bg-white w-full sm:max-w-[520px] rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden z-10"
+            initial={{ opacity: 0, scale: 0.96, y: 12 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.96, y: 12 }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
+            className="relative bg-white w-full max-w-lg sm:max-w-[480px] rounded-2xl shadow-xl overflow-hidden z-10 border border-gray-100 flex flex-col"
           >
+            {/* Top Accent */}
             <div className={`h-1.5 w-full bg-gradient-to-r ${config.accent}`} />
 
-            <div className="px-6 pt-8 pb-6 flex flex-col items-center text-center">
-              <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ type: "spring", damping: 15, stiffness: 200, delay: 0.1 }}
-                className={`w-16 h-16 rounded-lg bg-gradient-to-br ${config.iconBg} flex items-center justify-center mb-5 shadow-sm`}
+            {/* Header */}
+            <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between bg-white flex-shrink-0">
+              <div className="flex items-center gap-2.5">
+                <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${config.iconBg} flex items-center justify-center text-white flex-shrink-0 shadow-sm`}>
+                  <Icon className="w-4 h-4" />
+                </div>
+                <h3 className={`text-base font-bold ${config.titleColor} tracking-tight`}>
+                  {title}
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={onClose}
+                className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
               >
-                <Icon className="text-white" style={{ width: 30, height: 30 }} />
-              </motion.div>
+                <X className="w-4.5 h-4.5" />
+              </button>
+            </div>
 
-              <motion.h2
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-                className={`text-lg sm:text-xl font-bold ${config.titleColor} mb-2`}
-              >
-                {title}
-              </motion.h2>
-
-              <motion.p
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.25 }}
-                className="text-sm sm:text-base text-gray-500 leading-relaxed mb-7"
-              >
+            {/* Body */}
+            <div className="px-6 py-6">
+              <p className="text-sm text-gray-600 leading-relaxed text-center font-medium">
                 {message}
-              </motion.p>
+              </p>
+              {description && (
+                <p className="text-xs text-gray-400 mt-2 text-center">
+                  {description}
+                </p>
+              )}
+            </div>
 
-              <motion.div
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-                className="flex flex-col sm:flex-row gap-3 w-full"
+            {/* Footer */}
+            <div className="px-6 py-4 border-t border-gray-100 bg-gray-50/80 flex flex-col sm:flex-row justify-end items-center gap-3 rounded-b-2xl flex-shrink-0">
+              <Button
+                type="button"
+                onClick={onClose}
+                className="w-full sm:w-auto h-10 px-5 text-sm font-medium rounded-xl border border-gray-200 bg-white text-gray-700 hover:bg-gray-100 transition-colors"
               >
-                <Button
-                  onClick={onClose}
-                  className="flex-1 flex items-center justify-center gap-2 bg-white border-2 border-gray-200 text-gray-600 font-semibold py-2.5 rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-all shadow-sm"
-                >
-                  <X className="w-4 h-4" />
-                  {translate("close") || "Close"}
-                </Button>
-                <Button
-                  onClick={onClose}
-                  className={`flex-1 flex items-center justify-center gap-2 bg-gradient-to-r ${config.primaryBtn} text-white font-semibold py-2.5 rounded-lg transition-all shadow-sm`}
-                >
-                  <RefreshCcw className="w-4 h-4" />
-                  {translate("try_again") || "Try Again"}
-                </Button>
-              </motion.div>
+                {translate("close") || "Close"}
+              </Button>
+              <Button
+                type="button"
+                onClick={onClose}
+                className={`w-full sm:w-auto h-10 px-6 text-sm font-semibold rounded-xl bg-gradient-to-r ${config.primaryBtn} text-white shadow-sm transition-all flex items-center justify-center gap-1.5`}
+              >
+                <RefreshCcw className="w-3.5 h-3.5" />
+                {translate("try_again") || "Try Again"}
+              </Button>
             </div>
           </motion.div>
         </div>

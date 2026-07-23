@@ -1,12 +1,12 @@
 "use client";
 
-import { useCommuneState } from '@/features/master-data/store/state/commune-state';
-import { setPageNo, setSearchFilter, setStatusFilter } from '@/features/master-data/store/slices/commune-slice';
-import { fetchAllCommuneService, createCommuneThunk, updateCommuneThunk, deleteCommuneThunk } from '@/features/master-data/store/thunks/commune-thunks';
-import { useAppDispatch } from '@/store/store';
+import { PageHeader } from "@/components/shared/common/page-header";
+import { useCommuneState } from "@/features/master-data/store/state/commune-state";
+import { setSearchFilter } from "@/features/master-data/store/slices/commune-slice";
+import { createCommuneThunk, updateCommuneThunk, deleteCommuneThunk } from "@/features/master-data/store/thunks/commune-thunks";
+import { useAppDispatch } from "@/store/store";
 
-
-import { Suspense } from "react";
+import { Suspense, startTransition, useCallback, useEffect, useState } from "react";
 import { DeleteConfirmationDialog } from "@/components/shared/dialog/dialog-delete";
 import { CustomPagination } from "@/components/shared/pagination/custom-pagination";
 import { DataTable } from "@/components/shared/table/data-table";
@@ -18,41 +18,39 @@ import { Separator } from "@/components/ui/separator";
 import { ROUTES } from "@/constants/AppRoutes/routes";
 import { usePagination } from "@/hooks/use-pagination";
 import { useDebounce } from "@/utils/debounce/debounce";
-import { Search } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { Search, MapPin } from "lucide-react";
 import { useSearchParams } from "next/navigation";
-import { startTransition, useCallback, useEffect, useState } from "react";
+import Loading from "@/components/shared/common/loading";
+import { ModalMode } from "@/constants/AppResource/display-list/enum/mode";
+import { createCommuneTableColumns } from "@/features/master-data/table/commune-content";
 import {
   AllCommuneModel,
   CommuneModel,
 } from "@/features/master-data/types/commune/commune.response";
-import Loading from "@/components/shared/common/loading";
-import { createCommuneTableColumns } from "@/features/master-data/table/commune-content";
+import {
+  CreateCommuneReq,
+  UpdateCommuneReq,
+} from "@/features/master-data/types/commune/commune.request";
+import {
+  getAllCommuneService,
+} from "@/features/master-data/services/commune/commune.service";
 import CommuneViewModal from "@/features/master-data/components/commune-detail-modal";
 import ModalCommune from "@/features/master-data/components/commune-modal";
-import { ModalMode } from "@/constants/AppResource/display-list/enum/mode";
-import { CreateCommuneReq, UpdateCommuneReq } from "@/features/master-data/types/commune/commune.request";
-import { createCommuneService, deleteCommuneService, getAllCommuneService, updateCommuneService } from "@/features/master-data/services/commune/commune.service";
 
 function CommunePageContent() {
   const dispatch = useAppDispatch();
   const { communeData: communes, isLoading, filters } = useCommuneState();
   const searchQuery = filters.search;
   const statusFilter = filters.status;
+  const [commune, setCommune] = useState<AllCommuneModel | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [selectedCommune, setSelectedCommune] = useState<CommuneModel | null>(
-    null
-  );
+  const [selectedCommune, setSelectedCommune] = useState<CommuneModel | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [mode, setMode] = useState<ModalMode>(ModalMode.CREATE_MODE);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isCommuneDetailOpen, setIsCommuneDetailOpen] = useState(false);
 
-  const t = useTranslations();
-
   const searchParams = useSearchParams();
-
-  // Debounced search query - Optimized api performance when search
   const debouncedSearchQuery = useDebounce(searchQuery, 400);
 
   const { currentPage, updateUrlWithPage, handlePageChange } = usePagination({
@@ -66,24 +64,23 @@ function CommunePageContent() {
     }
   }, [searchParams, updateUrlWithPage]);
 
-  const loadCommunes = useCallback(async () => {
+  const loadCommune = useCallback(async () => {
     try {
-      dispatch(fetchAllCommuneService({
+      const response = await getAllCommuneService({
         search: debouncedSearchQuery,
         pageNo: currentPage,
         pageSize: 15,
-      }));
+      });
+      setCommune(response);
     } catch (error: any) {
-      console.error("Failed to fetch communes: ", error);
-    } finally {
+      console.error("Failed to fetch commune: ", error);
     }
-  }, [debouncedSearchQuery, currentPage]);
+  }, [debouncedSearchQuery, statusFilter, currentPage]);
 
   useEffect(() => {
-    loadCommunes();
-  }, [loadCommunes, debouncedSearchQuery]);
+    loadCommune();
+  }, [loadCommune, debouncedSearchQuery, statusFilter]);
 
-  // Simplified search change handler - just updates the state, debouncing handles the rest
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     dispatch(setSearchFilter(e.target.value));
   };
@@ -121,7 +118,7 @@ function CommunePageContent() {
       }
       setIsModalOpen(false);
       setSelectedCommune(null);
-      loadCommunes();
+      loadCommune();
     } catch (err: any) {
       AppToast({
         type: "error",
@@ -143,7 +140,7 @@ function CommunePageContent() {
       });
       setIsDeleteDialogOpen(false);
       setSelectedCommune(null);
-      loadCommunes();
+      loadCommune();
     } catch (err: any) {
       AppToast({
         type: "error",
@@ -154,8 +151,8 @@ function CommunePageContent() {
     }
   };
 
-  const handleEditCommune = (commune: CommuneModel) => {
-    setSelectedCommune(commune);
+  const handleEditCommune = (communeItem: CommuneModel) => {
+    setSelectedCommune(communeItem);
     setMode(ModalMode.UPDATE_MODE);
     setIsModalOpen(true);
   };
@@ -166,23 +163,28 @@ function CommunePageContent() {
     setIsModalOpen(true);
   };
 
-  const handleViewCommuneDetail = (commune: CommuneModel) => {
-    setSelectedCommune(commune);
+  const handleViewCommuneDetail = (communeItem: CommuneModel) => {
+    setSelectedCommune(communeItem);
     setIsCommuneDetailOpen(true);
   };
 
-  const handleDeleteCommune = (commune: CommuneModel) => {
-    setSelectedCommune(commune);
+  const handleDeleteCommune = (communeItem: CommuneModel) => {
+    setSelectedCommune(communeItem);
     setIsDeleteDialogOpen(true);
   };
 
   return (
-    <Card className="h-full flex flex-col">
-      <CardContent className="space-y-6 p-6 flex flex-col h-full">
-        <div className="flex justify-between items-center gap-4">
-          <div />
-          <div className="flex items-center gap-3">
-            <div className="relative w-full sm:w-[280px]">
+    <div className="space-y-4">
+      <PageHeader
+        title="Communes"
+        subtitle="Manage commune database records"
+        icon={MapPin}
+        count={communes?.totalElements || 0}
+      />
+      <Card className="h-full flex flex-col">
+        <CardContent className="space-y-6 p-6 flex flex-col h-full">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+            <div className="relative w-full max-w-sm">
               <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 aria-label="search-commune"
@@ -195,82 +197,79 @@ function CommunePageContent() {
                 disabled={isSubmitting}
               />
             </div>
-            <Button onClick={handleAddCommune}>New</Button>
+            <Button size="sm" onClick={handleAddCommune}>New</Button>
           </div>
-        </div>
 
-        <div className="w-full">
-          <Separator className="bg-gray-300" />
-        </div>
+          <div className="w-full">
+            <Separator className="bg-gray-300" />
+          </div>
 
-        <div className="flex-1 flex flex-col min-h-0">
-          {/* Table container with proper overflow handling */}
-          <div className="flex-1 rounded-md border overflow-hidden flex flex-col">
-            <div className="flex-1 overflow-x-auto">
-              <DataTable
-                data={communes?.content || []}
-                columns={createCommuneTableColumns({
-                  data: communes,
-                  handlers: {
-                    handleEditCommune,
-                    handleViewCommuneDetail,
-                    handleDeleteCommune,
-                  },
-                })}
-                loading={isLoading}
-                emptyMessage="No communes found"
-                getRowKey={(commune) => commune.id}
-              />
-              {/* Pagination positioned to the right and outside the scrollable area */}
-              <div className="border-t bg-background p-2 flex justify-end">
-                <CustomPagination
-                  currentPage={currentPage}
-                  totalPages={communes?.totalPages || 1}
-                  onPageChange={handlePageChange}
-                  size="md"
+          <div className="flex-1 flex flex-col min-h-0">
+            <div className="flex-1 rounded-md border overflow-hidden flex flex-col">
+              <div className="flex-1 overflow-x-auto">
+                <DataTable
+                  data={communes?.content || []}
+                  columns={createCommuneTableColumns({
+                    data: communes,
+                    handlers: {
+                      handleEditCommune,
+                      handleViewCommuneDetail,
+                      handleDeleteCommune,
+                    },
+                  })}
+                  loading={isLoading}
+                  emptyMessage="No communes found"
+                  getRowKey={(communeItem) => communeItem.id}
                 />
+                <div className="border-t bg-background p-2 flex justify-end">
+                  <CustomPagination
+                    currentPage={currentPage}
+                    totalPages={communes?.totalPages || 1}
+                    onPageChange={handlePageChange}
+                    size="md"
+                  />
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-        <DeleteConfirmationDialog
-          isOpen={isDeleteDialogOpen}
-          onClose={() => {
-            setIsDeleteDialogOpen(false);
-            setSelectedCommune(null);
-          }}
-          onDelete={confirmDeleteCommune}
-          title="Delete Commune"
-          description={`Are you sure you want to delete this commune`}
-          itemName={selectedCommune?.communeEn || selectedCommune?.communeKh}
-          isSubmitting={isSubmitting}
-        />
+          <DeleteConfirmationDialog
+            isOpen={isDeleteDialogOpen}
+            onClose={() => {
+              setIsDeleteDialogOpen(false);
+              setSelectedCommune(null);
+            }}
+            onDelete={confirmDeleteCommune}
+            title="Delete Commune"
+            description={`Are you sure you want to delete this commune`}
+            itemName={selectedCommune?.communeEn || selectedCommune?.communeKh}
+            isSubmitting={isSubmitting}
+          />
 
-        <CommuneViewModal
-          isOpen={isCommuneDetailOpen}
-          onClose={() => {
-            setIsCommuneDetailOpen(false);
-            setSelectedCommune(null);
-          }}
-          commune={selectedCommune ?? undefined}
-          communeId={selectedCommune?.id ?? 0}
-        />
+          <CommuneViewModal
+            isOpen={isCommuneDetailOpen}
+            onClose={() => {
+              setIsCommuneDetailOpen(false);
+              setSelectedCommune(null);
+            }}
+            commune={selectedCommune ?? undefined}
+            communeId={selectedCommune?.id ?? 0}
+          />
 
-        <ModalCommune
-          isOpen={isModalOpen}
-          mode={mode}
-          onClose={() => {
-            setSelectedCommune(null);
-            setIsModalOpen(false);
-          }}
-          onSave={handleSaveCommune}
-          communeId={selectedCommune?.id ?? 0}
-          isSubmitting={isSubmitting}
-          districts={[]} // TODO: Add districts list from API
-        />
-      </CardContent>
-    </Card>
+          <ModalCommune
+            isOpen={isModalOpen}
+            mode={mode}
+            onClose={() => {
+              setSelectedCommune(null);
+              setIsModalOpen(false);
+            }}
+            onSave={handleSaveCommune}
+            communeId={selectedCommune?.id ?? 0}
+            isSubmitting={isSubmitting}
+          />
+        </CardContent>
+      </Card>
+    </div>
   );
 }
 

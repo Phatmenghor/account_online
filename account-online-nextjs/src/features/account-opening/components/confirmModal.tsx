@@ -25,74 +25,66 @@ const ConfirmationModal = ({
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onCancel}
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/50 backdrop-blur-xs"
           />
 
+          {/* Modal Container */}
           <motion.div
-            initial={{ opacity: 0, y: 60, scale: 0.97 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 60, scale: 0.97 }}
-            transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className="relative bg-white w-full sm:max-w-[520px] rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden z-10"
+            initial={{ opacity: 0, scale: 0.96, y: 12 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.96, y: 12 }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
+            className="relative bg-white w-full max-w-[480px] rounded-2xl shadow-xl overflow-hidden z-10 border border-gray-100"
           >
-            <div className="h-1.5 w-full bg-primary" />
-
-            <div className="px-6 pt-8 pb-6 flex flex-col items-center text-center">
-              {/* Icon */}
-              <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ type: "spring", damping: 15, stiffness: 200, delay: 0.1 }}
-                className="w-16 h-16 rounded-lg bg-primary/10 border-2 border-primary/20 flex items-center justify-center mb-5 shadow-sm"
+            {/* Header */}
+            <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between bg-white">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
+                  <ShieldCheck className="w-4 h-4" />
+                </div>
+                <h3 className="text-base font-bold text-gray-900 tracking-tight">{title}</h3>
+              </div>
+              <button
+                type="button"
+                onClick={onCancel}
+                className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
               >
-                <ShieldCheck className="text-primary" style={{ width: 30, height: 30 }} />
-              </motion.div>
+                <XCircle className="w-4.5 h-4.5" />
+              </button>
+            </div>
 
-              <motion.h2
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-                className="text-xl sm:text-2xl font-bold text-gray-800 mb-3"
-              >
-                {title}
-              </motion.h2>
-
-              <motion.p
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.25 }}
-                className="text-base sm:text-base text-gray-500 leading-relaxed mb-7"
-              >
+            {/* Body */}
+            <div className="p-6 text-center sm:text-left">
+              <p className="text-sm text-gray-600 leading-relaxed">
                 {message}
-              </motion.p>
+              </p>
+            </div>
 
-              <motion.div
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-                className="flex flex-col sm:flex-row sm:justify-center gap-3 w-full"
+            {/* Footer */}
+            <div className="px-6 py-4 border-t border-gray-100 bg-gray-50/80 flex flex-col sm:flex-row justify-end items-center gap-3 rounded-b-2xl">
+              <Button
+                type="button"
+                onClick={onCancel}
+                variant="outline"
+                className="w-full sm:w-auto h-10 px-5 text-sm font-medium rounded-xl border border-gray-200 bg-white text-gray-700 hover:bg-gray-100 transition-colors"
               >
-                <Button
-                  onClick={onCancel}
-                  className="w-full sm:flex-1 h-auto min-h-12 flex items-center justify-center gap-2 px-4 py-3 bg-white border-2 border-gray-200 text-gray-600 font-semibold text-base rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-all shadow-sm"
-                >
-                  <XCircle className="w-4 h-4 flex-shrink-0" />
-                  <span className="whitespace-normal leading-tight text-center">{translate("noIneed")}</span>
-                </Button>
-                <Button
-                  onClick={onConfirm}
-                  className="w-full sm:flex-1 h-auto min-h-12 flex items-center justify-center gap-2 px-4 py-3 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-base rounded-lg transition-all shadow-sm"
-                >
-                  <CheckCircle className="w-4 h-4 flex-shrink-0" />
-                  <span className="whitespace-normal leading-tight text-center">{translate("yesIhave")}</span>
-                </Button>
-              </motion.div>
+                {translate("noIneed")}
+              </Button>
+              <Button
+                type="button"
+                onClick={onConfirm}
+                className="w-full sm:w-auto h-10 px-6 text-sm font-semibold rounded-xl bg-primary hover:bg-primary/90 text-white shadow-sm flex items-center justify-center gap-1.5 transition-all"
+              >
+                <CheckCircle className="w-4 h-4" />
+                <span>{translate("yesIhave")}</span>
+              </Button>
             </div>
           </motion.div>
         </div>

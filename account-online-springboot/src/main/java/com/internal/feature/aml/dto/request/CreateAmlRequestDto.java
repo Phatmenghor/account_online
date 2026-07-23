@@ -25,6 +25,7 @@ public class CreateAmlRequestDto {
 
     // Contact / Personal
     private String phoneNumber;
+    private String branch;
     private String maritalStatus;
 
     // Document

@@ -14,14 +14,17 @@ import ConfirmationModal from "@/features/account-opening/components/confirmModa
 import LocationModal from "@/features/account-opening/components/addressModal";
 import AccountExistsModal from "@/features/account-opening/components/accountExistsModal";
 import LoadingModal from "@/features/master-data/components/extract-modal";
+import { SubmissionProgressModal } from "@/features/account-opening/components/submission-progress-modal";
 import SubmitSuccessModal from "@/features/account-opening/components/submit-success-modal";
 import SubmitErrorModal from "@/features/account-opening/components/submit-error-modal";
-import { HeaderSection } from "@/features/account-opening/components/header-section";
+
 import { ConfirmClearModal } from "@/features/account-opening/components/confirm-clear-modal";
 // Contexts
 import { FormStateProvider } from "@/providers/form-state-context";
 // Hooks
 import { useMemo, useCallback, useState } from "react";
+import { motion, type Variants } from "framer-motion";
+import { CheckCircle } from "lucide-react";
 import { useAccountImages } from "@/features/account-opening/hooks/use-account-images";
 import { useAccountOtp } from "@/features/account-opening/hooks/use-account-otp";
 import { useMasterData } from "@/features/account-opening/hooks/use-master-data";
@@ -32,14 +35,24 @@ import { useVerificationFlow } from "@/features/account-opening/hooks/use-verifi
 // Types
 import { LocationSubmitData } from "@/features/account-opening/types/address/open-acc-address.request.model";
 
+// Fade-up animation variant reused across sections
+const fadeUp: Variants = {
+  hidden: { opacity: 0, y: 18 },
+  show: (i: number = 0) => ({
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.42, ease: "easeOut" as const, delay: i * 0.08 },
+  }),
+};
+
 const SectionLabel = ({ label }: { label: string }) => (
-  <div className="flex items-center gap-2 mb-5">
-    <div className="w-1 h-4 rounded-full bg-primary flex-shrink-0" />
-    <p className="text-sm font-semibold uppercase tracking-wider text-gray-400">{label}</p>
+  <div className="flex items-center gap-2 mb-4 pb-2 border-b border-gray-200/80">
+    <div className="w-1 h-4 rounded-full bg-slate-400 flex-shrink-0" />
+    <p className="text-xs sm:text-sm font-bold uppercase tracking-wider text-gray-700">{label}</p>
   </div>
 );
 
-const Divider = () => <div className="border-t border-gray-100 mx-4 sm:mx-6 lg:mx-8" />;
+const Divider = () => <div className="border-t border-gray-200/70" />;
 
 interface OpenAccountContentProps {
   // true for the public self-service ("/") flow: hides category selection,
@@ -180,6 +193,7 @@ export function OpenAccountContent({ isPublic = false }: OpenAccountContentProps
     setShowAccountExistsModal,
     accountExistsData,
     loadingState,
+    progressPercent,
   } = useAccountSubmission({
     formData,
     uploadedImage,
@@ -373,24 +387,39 @@ export function OpenAccountContent({ isPublic = false }: OpenAccountContentProps
   // ========================================
   return (
     <FormStateProvider value={formStateContextValue}>
-      <div className="min-h-screen flex flex-col bg-gray-50/60">
+      {/* ── Page shell with mesh gradient background ── */}
+      <div className="min-h-screen w-full flex flex-col" style={{
+        background: "linear-gradient(160deg, #f8fafc 0%, #f1f5f9 40%, #f0fdf4 70%, #fafafa 100%)"
+      }}>
         <PageHeader />
 
         <main className="flex-1 pt-16 sm:pt-[60px]">
-          <div className="max-w-7xl mx-auto w-full px-3 sm:px-5 lg:px-8 py-4 sm:py-6 lg:py-8">
 
-            {/* Page title */}
-            <HeaderSection
-              title={translate("header_acc")}
-              onClear={() => setShowClearConfirm(true)}
-              translate={translate}
-            />
+          {/* ── Header Title Block — 2 Lines Only (Gradient Title + Subtitle) ── */}
+          <div className="max-w-5xl mx-auto w-full px-4 sm:px-6 lg:px-8 pt-5 sm:pt-7 pb-1">
+            {/* Line 1 */}
+            <h1
+              className="inline-block text-2xl sm:text-3xl font-bold tracking-tight pb-0.5"
+              style={{
+                background: "linear-gradient(135deg, #c8450a 0%, #ea580c 50%, #f59e0b 100%)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+              }}
+            >
+              {translate("header_acc")}
+            </h1>
+            {/* Line 2 */}
+            <p className="text-xs sm:text-sm text-gray-500 mt-1 font-medium leading-relaxed">
+              {translate("sub_header_acc")}
+            </p>
+          </div>
 
-            {/* Single form card */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100">
+          {/* ── Form Card ── */}
+          <div className="max-w-5xl mx-auto w-full px-3 sm:px-5 lg:px-8 py-4 sm:py-6">
+            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm">
 
               {/* ── Document Upload ── */}
-              <div className="p-4 sm:p-5 lg:p-6">
+              <div className="p-5 sm:p-6">
                 <SectionLabel label={translate("section_document_upload")} />
                 <AccountImages
                   uploadedImage={uploadedImage}
@@ -402,8 +431,8 @@ export function OpenAccountContent({ isPublic = false }: OpenAccountContentProps
 
               <Divider />
 
-              {/* ── Personal Details + Additional Information ── */}
-              <div className="p-4 sm:p-6 lg:p-8">
+              {/* ── Personal Details ── */}
+              <div className="p-5 sm:p-6">
                 <SectionLabel label={translate("section_personal_details")} />
                 <PersonalDetailsFields
                   formData={formData}
@@ -444,9 +473,9 @@ export function OpenAccountContent({ isPublic = false }: OpenAccountContentProps
               <Divider />
 
               {/* ── Phone Verification ── */}
-              <div className="p-4 sm:p-6 lg:p-8">
+              <div className="p-5 sm:p-6">
                 <SectionLabel label={translate("section_phone_verification")} />
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <OTPInput
                     phoneNumber={phoneNumber}
                     onPhoneChange={handlePhoneChange}
@@ -459,34 +488,43 @@ export function OpenAccountContent({ isPublic = false }: OpenAccountContentProps
                 </div>
               </div>
 
-              {/* ── Action buttons inside the card (flows with page, never fixed) ── */}
-              <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-5 border-t border-gray-100 bg-gray-50/50 rounded-b-2xl">
-                <div className="flex flex-col sm:flex-row sm:justify-end gap-3">
-                  <Button
-                    className="w-full sm:w-auto sm:min-w-[160px] h-auto min-h-12 py-3 font-semibold rounded-xl text-base sm:text-sm flex items-center justify-center gap-2 transition-all
-                      border-2 border-primary text-primary bg-white hover:bg-primary/5 active:bg-primary/10
-                      disabled:opacity-40 disabled:cursor-not-allowed"
-                    onClick={handleVerificationClick}
-                    disabled={isBusy || isVerified}
-                    variant="outline"
-                  >
-                    {isValidating ? (
-                      <><span className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin flex-shrink-0" /><span className="whitespace-normal leading-tight text-center">{translate("processing")}</span></>
-                    ) : <span className="whitespace-normal leading-tight text-center">{translate("verification")}</span>}
-                  </Button>
-                  <Button
-                    className="w-full sm:w-auto sm:min-w-[160px] h-auto min-h-12 py-3 font-semibold rounded-xl text-base sm:text-sm flex items-center justify-center gap-2 transition-all
-                      bg-primary hover:bg-primary/90 active:bg-primary/90 text-primary-foreground shadow-sm
-                      disabled:opacity-40 disabled:cursor-not-allowed"
-                    onClick={handleSubmitAccount}
-                    disabled={isBusy || !isVerified}
-                  >
-                    {loadingState.isLoading ? (
-                      <><span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin flex-shrink-0" /><span className="whitespace-normal leading-tight text-center">{translate("submitting") || "Submitting"}</span></>
-                    ) : <span className="whitespace-normal leading-tight text-center">{translate("submit")}</span>}
-                  </Button>
-                </div>
+              {/* ── Action Bar ── */}
+              <div className="px-5 sm:px-6 py-4 border-t border-gray-100 bg-gray-50/50 rounded-b-xl flex flex-col sm:flex-row sm:justify-end items-stretch sm:items-center gap-3">
+                {/* Verify button */}
+                <Button
+                  className={`w-full sm:w-auto min-w-[130px] h-10 font-semibold rounded-xl text-sm gap-1.5 transition-all ${
+                    !isVerified && !isBusy
+                      ? "border border-primary text-primary bg-white hover:bg-primary/5 shadow-sm cursor-pointer"
+                      : "border border-gray-200 text-gray-400 bg-gray-50 cursor-not-allowed opacity-60"
+                  }`}
+                  onClick={handleVerificationClick}
+                  disabled={isBusy || isVerified}
+                >
+                  {isValidating ? (
+                    <><span className="w-3.5 h-3.5 border-2 border-primary border-t-transparent rounded-full animate-spin" /><span>{translate("processing")}</span></>
+                  ) : (
+                    <span>{translate("verification")}</span>
+                  )}
+                </Button>
+
+                {/* Submit button */}
+                <Button
+                  className={`w-full sm:w-auto min-w-[130px] h-10 font-semibold rounded-xl text-sm gap-1.5 transition-all ${
+                    isVerified && !isBusy
+                      ? "bg-primary hover:bg-primary/90 text-white shadow-sm cursor-pointer"
+                      : "bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed opacity-60"
+                  }`}
+                  onClick={handleSubmitAccount}
+                  disabled={isBusy || !isVerified || loadingState.isLoading}
+                >
+                  {loadingState.isLoading ? (
+                    <><span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" /><span>{translate("submitting") || "Submitting"}</span></>
+                  ) : (
+                    <><CheckCircle className="w-4 h-4 flex-shrink-0" /><span>{translate("submit")}</span></>
+                  )}
+                </Button>
               </div>
+
             </div>
           </div>
 
@@ -502,9 +540,10 @@ export function OpenAccountContent({ isPublic = false }: OpenAccountContentProps
           message={translate("clearConfirmMessage")}
         />
 
-        {/* Submission loading */}
-        <LoadingModal
+        {/* Submission Real-time Progress Modal */}
+        <SubmissionProgressModal
           isOpen={loadingState.isLoading}
+          progress={progressPercent}
           title={loadingState.title}
           message={loadingState.message}
         />

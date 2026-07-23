@@ -482,25 +482,19 @@ const LocationModal = ({
   };
 
   return (
-    <AnimatePresence>
+    <>
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
-          {/* Backdrop */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 lg:p-8">
+          {/* Backdrop — Instant click response */}
+          <div
+            onClick={onClose}
+            className="absolute inset-0 bg-black/50 backdrop-blur-xs"
           />
 
-          {/* Modal */}
-          <motion.div
-            initial={{ opacity: 0, y: 80 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 80 }}
-            transition={{ type: "spring", damping: 28, stiffness: 300 }}
-            className="relative bg-white w-full sm:max-w-[900px] lg:max-w-[1050px] rounded-t-2xl sm:rounded-2xl shadow-2xl z-10 flex flex-col overflow-hidden"
-            style={{ maxHeight: "92vh" }}
+          {/* Modal — Instant open without scale/bounce animation */}
+          <div
+            className="relative bg-white w-full max-w-xl sm:max-w-[580px] lg:max-w-[640px] rounded-2xl shadow-xl z-10 flex flex-col overflow-hidden border border-gray-100"
+            style={{ maxHeight: "88vh" }}
           >
             {/* Primary top accent bar */}
             <div className="h-1.5 w-full bg-primary flex-shrink-0 rounded-t-2xl sm:rounded-t-2xl" />
@@ -532,44 +526,39 @@ const LocationModal = ({
             </div>
 
             {/* Auto-fill loading bar */}
-            <AnimatePresence>
-              {(isLoadingAddress || isLoadingPob) && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: "auto" }}
-                  exit={{ opacity: 0, height: 0 }}
-                  className="flex items-center gap-2 px-4 sm:px-6 py-2.5 bg-primary/5 border-b border-primary/20 flex-shrink-0"
-                >
-                  <Loader2 className="w-4 h-4 animate-spin text-primary flex-shrink-0" />
-                  <span className="text-sm sm:text-base text-primary font-medium">
-                    {translate("loading")}
-                  </span>
-                </motion.div>
-              )}
-            </AnimatePresence>
+            {(isLoadingAddress || isLoadingPob) && (
+              <div className="flex items-center gap-2 px-4 sm:px-6 py-2.5 bg-primary/5 border-b border-primary/20 flex-shrink-0">
+                <Loader2 className="w-4 h-4 animate-spin text-primary flex-shrink-0" />
+                <span className="text-sm sm:text-base text-primary font-medium">
+                  {translate("loading")}
+                </span>
+              </div>
+            )}
 
             {/* Scrollable Content */}
-            <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-4 sm:px-6 py-4 space-y-5">
+            <div
+              className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-4 sm:px-6 py-5 space-y-6"
+              onWheel={(e) => e.stopPropagation()}
+              onTouchMove={(e) => e.stopPropagation()}
+            >
               {/* === SECTION 1: Current Address === */}
               <div className="bg-primary/5 border border-primary/20 rounded-2xl p-4 sm:p-5">
-                <div className="flex items-center gap-2.5 mb-4">
+                <div className="flex items-center gap-2.5 mb-4 pb-2 border-b border-primary/10">
                   <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center flex-shrink-0">
                     <Home className="w-4 h-4 text-primary-foreground" />
                   </div>
-                  <h3 className="text-base sm:text-lg font-bold text-gray-700">
-                    <span className="text-red-500 mr-1">*</span>
+                  <h3 className="text-base font-bold text-gray-800">
                     {translate("selectAddress")}
                   </h3>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {/* Province */}
                   <div>
-                    <label className="flex items-center gap-1.5 text-sm sm:text-base font-medium text-gray-600 mb-1.5">
-                      <span className="text-red-400">*</span>
+                    <label className="flex items-center gap-1.5 text-sm font-semibold text-gray-700 mb-2">
                       {translate("province")}
                       {isLoadingProvinces && (
-                        <Loader2 className="w-3 h-3 animate-spin text-gray-400" />
+                        <Loader2 className="w-3.5 h-3.5 animate-spin text-gray-400" />
                       )}
                     </label>
                     <div
@@ -597,11 +586,10 @@ const LocationModal = ({
 
                   {/* District */}
                   <div>
-                    <label className="flex items-center gap-1.5 text-sm sm:text-base font-medium text-gray-600 mb-1.5">
-                      <span className="text-red-400">*</span>
+                    <label className="flex items-center gap-1.5 text-sm font-semibold text-gray-700 mb-2">
                       {currentLocale === "kh" ? "ស្រុក/ខណ្ឌ" : "District"}
                       {isLoadingDistricts && (
-                        <Loader2 className="w-3 h-3 animate-spin text-gray-400" />
+                        <Loader2 className="w-3.5 h-3.5 animate-spin text-gray-400" />
                       )}
                     </label>
                     <div
@@ -629,11 +617,10 @@ const LocationModal = ({
 
                   {/* Commune */}
                   <div>
-                    <label className="flex items-center gap-1.5 text-sm sm:text-base font-medium text-gray-600 mb-1.5">
-                      <span className="text-red-400">*</span>
+                    <label className="flex items-center gap-1.5 text-sm font-semibold text-gray-700 mb-2">
                       {translate("commune")}
                       {isLoadingCommunes && (
-                        <Loader2 className="w-3 h-3 animate-spin text-gray-400" />
+                        <Loader2 className="w-3.5 h-3.5 animate-spin text-gray-400" />
                       )}
                     </label>
                     <div
@@ -661,11 +648,10 @@ const LocationModal = ({
 
                   {/* Village */}
                   <div>
-                    <label className="flex items-center gap-1.5 text-sm sm:text-base font-medium text-gray-600 mb-1.5">
-                      <span className="text-red-400">*</span>
+                    <label className="flex items-center gap-1.5 text-sm font-semibold text-gray-700 mb-2">
                       {translate("village")}
                       {isLoadingVillages && (
-                        <Loader2 className="w-3 h-3 animate-spin text-gray-400" />
+                        <Loader2 className="w-3.5 h-3.5 animate-spin text-gray-400" />
                       )}
                     </label>
                     <div
@@ -695,21 +681,19 @@ const LocationModal = ({
 
               {/* === SECTION 2: Place of Birth === */}
               <div className="bg-primary/5 border border-primary/20 rounded-2xl p-4 sm:p-5">
-                <div className="flex items-center gap-2.5 mb-4">
+                <div className="flex items-center gap-2.5 mb-4 pb-2 border-b border-primary/10">
                   <div className="w-8 h-8 bg-primary/80 rounded-lg flex items-center justify-center flex-shrink-0">
                     <Navigation className="w-4 h-4 text-primary-foreground" />
                   </div>
-                  <h3 className="text-base sm:text-lg font-bold text-gray-700">
-                    <span className="text-red-500 mr-1">*</span>
+                  <h3 className="text-base font-bold text-gray-800">
                     {translate("selectPlaceOfBirth")}
                   </h3>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {/* Province */}
                   <div>
-                    <label className="flex items-center gap-1.5 text-sm sm:text-base font-medium text-gray-600 mb-1.5">
-                      <span className="text-red-400">*</span>
+                    <label className="flex items-center gap-1.5 text-sm font-semibold text-gray-700 mb-2">
                       {translate("province")}
                     </label>
                     <div
@@ -737,8 +721,7 @@ const LocationModal = ({
 
                   {/* District */}
                   <div>
-                    <label className="flex items-center gap-1.5 text-sm sm:text-base font-medium text-gray-600 mb-1.5">
-                      <span className="text-red-400">*</span>
+                    <label className="flex items-center gap-1.5 text-sm font-semibold text-gray-700 mb-2">
                       {translate("district")}
                     </label>
                     <div
@@ -766,8 +749,7 @@ const LocationModal = ({
 
                   {/* Commune */}
                   <div>
-                    <label className="flex items-center gap-1.5 text-sm sm:text-base font-medium text-gray-600 mb-1.5">
-                      <span className="text-red-400">*</span>
+                    <label className="flex items-center gap-1.5 text-sm font-semibold text-gray-700 mb-2">
                       {translate("commune")}
                     </label>
                     <div
@@ -795,8 +777,7 @@ const LocationModal = ({
 
                   {/* Village */}
                   <div>
-                    <label className="flex items-center gap-1.5 text-sm sm:text-base font-medium text-gray-600 mb-1.5">
-                      <span className="text-red-400">*</span>
+                    <label className="flex items-center gap-1.5 text-sm font-semibold text-gray-700 mb-2">
                       {translate("village")}
                     </label>
                     <div
@@ -826,24 +807,25 @@ const LocationModal = ({
             </div>
 
             {/* Footer Buttons */}
-            <div className="flex flex-col sm:flex-row sm:justify-end gap-3 px-4 sm:px-6 py-4 bg-gray-50/80 border-t border-gray-100 rounded-b-none sm:rounded-b-2xl flex-shrink-0">
+            <div className="flex flex-col sm:flex-row sm:justify-end items-center gap-3 px-6 py-4 bg-gray-50/80 border-t border-gray-100 rounded-b-2xl flex-shrink-0">
               <Button
                 onClick={onClose}
-                className="w-full sm:w-auto h-auto min-h-12 py-3 px-6 text-base bg-white border-2 border-gray-200 text-gray-600 font-semibold rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-all shadow-sm"
+                variant="outline"
+                className="w-full sm:w-auto h-10 px-5 text-sm font-medium rounded-xl border border-gray-200 bg-white text-gray-700 hover:bg-gray-100 transition-colors"
               >
-                <span className="whitespace-normal leading-tight text-center">{translate("close")}</span>
+                {translate("close")}
               </Button>
               <Button
                 onClick={handleSubmit}
-                className="w-full sm:w-auto h-auto min-h-12 py-3 px-8 text-base bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-lg transition-all shadow-sm"
+                className="w-full sm:w-auto h-10 px-6 text-sm font-semibold rounded-xl bg-primary hover:bg-primary/90 text-white shadow-sm transition-all"
               >
-                <span className="whitespace-normal leading-tight text-center">{translate("submit")}</span>
+                {translate("submit")}
               </Button>
             </div>
-          </motion.div>
+          </div>
         </div>
       )}
-    </AnimatePresence>
+    </>
   );
 };
 

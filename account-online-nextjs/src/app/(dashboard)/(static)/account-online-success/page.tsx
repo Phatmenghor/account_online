@@ -9,7 +9,8 @@ import { Separator } from "@/components/ui/separator";
 import { ROUTES } from "@/constants/AppRoutes/routes";
 import { usePagination } from "@/hooks/use-pagination";
 import { useDebounce } from "@/utils/debounce/debounce";
-import { Search } from "lucide-react";
+import { PageHeader } from "@/components/shared/common/page-header";
+import { Search, CheckCircle2 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import Loading from "@/components/shared/common/loading";
 import { createSuccessAccountTableColumns } from "@/features/account-opening/table/success-account-content";
@@ -75,7 +76,15 @@ function SuccessAccountPageContent() {
 
 
   return (
-    <Card className="h-full flex flex-col">
+    <div className="space-y-4">
+      <PageHeader
+        title="Successful Accounts"
+        subtitle="View and manage created online bank accounts"
+        icon={CheckCircle2}
+        count={accounts?.totalElements}
+        countLabel="accounts"
+      />
+      <Card className="h-full flex flex-col">
       <CardContent className="space-y-6 p-6 flex flex-col h-full">
         {/* Header */}
         <div className="flex justify-between">
@@ -135,6 +144,7 @@ function SuccessAccountPageContent() {
         />
       </CardContent>
     </Card>
+    </div>
   );
 }
 

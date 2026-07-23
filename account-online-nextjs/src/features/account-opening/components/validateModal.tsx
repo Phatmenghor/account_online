@@ -34,46 +34,50 @@ const ValidationErrorModal = ({
             className="absolute inset-0 bg-black/60 backdrop-blur-sm"
           />
 
+          {/* Modal Container */}
           <motion.div
-            initial={{ opacity: 0, y: 60, scale: 0.97 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 60, scale: 0.97 }}
-            transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className="relative bg-white w-full sm:max-w-[520px] rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden z-10"
+            initial={{ opacity: 0, scale: 0.96, y: 12 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.96, y: 12 }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
+            className="relative bg-white w-full max-w-lg sm:max-w-[480px] rounded-2xl shadow-xl overflow-hidden z-10 border border-gray-100"
           >
-            <div className="h-1.5 w-full bg-gradient-to-r from-red-400 via-red-500 to-rose-500" />
-
-            <div className="flex items-center justify-between px-5 pt-5 pb-3">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 bg-gradient-to-br from-red-400 to-rose-600 rounded-lg flex items-center justify-center shadow-sm flex-shrink-0">
-                  <ShieldAlert className="w-4.5 h-4.5 text-white" style={{ width: 18, height: 18 }} />
+            {/* Header */}
+            <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between bg-white">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-red-50 flex items-center justify-center text-red-600 flex-shrink-0">
+                  <ShieldAlert className="w-4 h-4" />
                 </div>
-                <h2 className="text-base sm:text-lg font-bold text-gray-800 leading-tight">
-                  {title}
-                </h2>
+                <h3 className="text-base font-bold text-gray-900 tracking-tight">{title}</h3>
               </div>
               <button
+                type="button"
                 onClick={onClose}
-                className="w-7 h-7 flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-all flex-shrink-0"
+                className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
               >
-                <X className="w-4 h-4" />
+                <X className="w-4.5 h-4.5" />
               </button>
             </div>
 
-            <div className="px-5 pb-5 space-y-3">
-              <div className="bg-red-50 border border-red-100 rounded-2xl p-4">
-                <div className="flex items-start gap-2.5">
-                  <AlertTriangle className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
-                  <div className="space-y-1.5">
-                    <p className="text-sm font-semibold text-red-700">{message}</p>
+            {/* Body */}
+            <div className="p-6">
+              <div className="bg-red-50/80 border border-red-100 rounded-xl p-4">
+                <div className="flex items-start gap-3">
+                  <AlertTriangle className="w-4.5 h-4.5 text-red-500 flex-shrink-0 mt-0.5" />
+                  <div className="space-y-1">
+                    <p className="text-sm font-semibold text-red-900">{message}</p>
                     <p className="text-sm text-gray-600 leading-relaxed">{description}</p>
                   </div>
                 </div>
               </div>
+            </div>
 
+            {/* Footer */}
+            <div className="px-6 py-4 border-t border-gray-100 bg-gray-50/80 flex justify-end items-center rounded-b-2xl">
               <Button
+                type="button"
                 onClick={onClose}
-                className="w-full bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white font-semibold py-2.5 rounded-lg shadow-sm transition-all"
+                className="w-full sm:w-auto h-10 px-6 text-sm font-semibold rounded-xl bg-red-600 hover:bg-red-700 text-white shadow-sm transition-all"
               >
                 {translate("close")}
               </Button>

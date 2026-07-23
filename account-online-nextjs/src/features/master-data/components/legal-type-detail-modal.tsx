@@ -7,7 +7,6 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -69,7 +68,7 @@ export default function LegalTypeViewModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[550px] max-h-[90vh] overflow-y-auto p-0 gap-0 flex flex-col">
+      <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto p-0 gap-0 flex flex-col">
         <DialogHeader className="px-6 py-4 border-b bg-muted/30 flex-shrink-0">
           <div className="flex items-center gap-4 pr-8">
             <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
@@ -86,9 +85,7 @@ export default function LegalTypeViewModal({
           {loading ? (
             <div className="text-center py-8 text-muted-foreground">Loading...</div>
           ) : legalType ? (
-            <div className="space-y-4">
-              <SectionHeader color="bg-blue-600" title="Legal Type Information" />
-              <div className="space-y-3">
+            <div className="space-y-3">
                 <InfoRow label="Name (EN)" value={legalType.nameEn} />
                 <InfoRow label="Name (KH)" value={legalType.nameKh} />
                 <InfoRow label="Legal Type Value" value={legalType.legalTypeValue} />
@@ -96,17 +93,10 @@ export default function LegalTypeViewModal({
                 <InfoRow label="Created At" value={DateTimeFormat(legalType.createdAt)} />
                 <InfoRow label="Updated At" value={DateTimeFormat(legalType.updatedAt)} />
               </div>
-            </div>
           ) : (
             <div className="text-center py-8 text-muted-foreground">No data available</div>
           )}
         </div>
-
-        <DialogFooter className="px-6 py-4 border-t bg-muted/30 flex-shrink-0">
-          <Button variant="outline" onClick={onClose}>
-            Close
-          </Button>
-        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

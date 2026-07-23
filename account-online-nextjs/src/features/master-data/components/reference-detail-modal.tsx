@@ -7,7 +7,6 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -86,26 +85,17 @@ export default function ReferenceViewModal({
           {loading ? (
             <div className="text-center py-8 text-muted-foreground">Loading...</div>
           ) : reference ? (
-            <div className="space-y-4">
-              <SectionHeader color="bg-purple-600" title="Reference Information" />
-              <div className="space-y-3">
+            <div className="space-y-3">
                 <InfoRow label="Name (EN)" value={reference.nameEn} />
                 <InfoRow label="Name (KH)" value={reference.nameKh} />
                 <InfoRow label="Status" value={<StatusBadge status={reference.status} />} />
                 <InfoRow label="Created At" value={DateTimeFormat(reference.createdAt)} />
                 <InfoRow label="Updated At" value={DateTimeFormat(reference.updatedAt)} />
               </div>
-            </div>
           ) : (
             <div className="text-center py-8 text-muted-foreground">No data available</div>
           )}
         </div>
-
-        <DialogFooter className="px-6 py-4 border-t bg-muted/30 flex-shrink-0">
-          <Button variant="outline" onClick={onClose}>
-            Close
-          </Button>
-        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

@@ -37,56 +37,55 @@ const ErrorModal = ({ isOpen, onClose, data }: ErrorModalProps) => {
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/50 backdrop-blur-xs"
           />
 
           <motion.div
-            initial={{ opacity: 0, y: 60, scale: 0.97 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 60, scale: 0.97 }}
-            transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className="relative bg-white w-full sm:max-w-[520px] rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden z-10 max-h-[90vh] flex flex-col"
+            initial={{ opacity: 0, scale: 0.96, y: 12 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.96, y: 12 }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
+            className="relative bg-white w-full max-w-lg sm:max-w-[480px] rounded-2xl shadow-xl overflow-hidden z-10 border border-gray-100 max-h-[88vh] flex flex-col"
           >
-            <div className="h-1.5 w-full bg-gradient-to-r from-red-400 via-red-500 to-rose-500 flex-shrink-0" />
-
-            <div className="flex items-center justify-between px-5 pt-5 pb-3 flex-shrink-0">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 bg-gradient-to-br from-red-400 to-rose-600 rounded-lg flex items-center justify-center shadow-sm flex-shrink-0">
-                  <AlertCircle style={{ width: 18, height: 18 }} className="text-white" />
+            {/* Header */}
+            <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between bg-white flex-shrink-0">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-red-50 flex items-center justify-center text-red-600 flex-shrink-0">
+                  <AlertCircle className="w-4 h-4" />
                 </div>
-                <h2 className="text-base sm:text-lg font-bold text-gray-800">
+                <h3 className="text-base font-bold text-gray-900 tracking-tight">
                   {translate("valid_fail")}
-                </h2>
+                </h3>
               </div>
               <button
+                type="button"
                 onClick={onClose}
-                className="w-7 h-7 flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-all flex-shrink-0"
+                className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
               >
-                <X className="w-4 h-4" />
+                <X className="w-4.5 h-4.5" />
               </button>
             </div>
 
-            <div className="px-5 pb-5 space-y-3 overflow-y-auto flex-1">
-              <p className="text-sm text-gray-500 leading-relaxed">{translate("not_match")}</p>
+            {/* Scrollable Body */}
+            <div className="px-6 py-5 space-y-4 overflow-y-auto flex-1">
+              <p className="text-sm text-gray-600 leading-relaxed">{translate("not_match")}</p>
 
               {/* Score card */}
-              <div className={`border rounded-2xl p-3.5 ${scoreBg}`}>
+              <div className={`border rounded-xl p-4 ${scoreBg}`}>
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-medium text-gray-600">{translate("score")}</span>
-                  <span className={`text-lg font-bold ${scoreColor}`}>{scorePercent}%</span>
+                  <span className="text-sm font-medium text-gray-700">{translate("score")}</span>
+                  <span className={`text-base font-bold ${scoreColor}`}>{scorePercent}%</span>
                 </div>
-                <div className="h-2 bg-white/60 rounded overflow-hidden">
-                  <motion.div
-                    initial={{ width: 0 }}
-                    animate={{ width: `${scorePercent}%` }}
-                    transition={{ duration: 0.8, ease: "easeOut", delay: 0.3 }}
-                    className={`h-full rounded ${
+                <div className="h-2 bg-white/80 rounded-full overflow-hidden">
+                  <div
+                    style={{ width: `${scorePercent}%` }}
+                    className={`h-full rounded-full transition-all duration-500 ${
                       scorePercent >= 70 ? "bg-amber-500" : scorePercent >= 40 ? "bg-orange-500" : "bg-red-500"
                     }`}
                   />
@@ -94,30 +93,31 @@ const ErrorModal = ({ isOpen, onClose, data }: ErrorModalProps) => {
               </div>
 
               {data?.incorrectFields && data.incorrectFields.length > 0 && (
-                <div className="bg-gray-50 border border-gray-200 rounded-2xl p-3.5">
-                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2.5">
+                <div className="bg-gray-50 border border-gray-100 rounded-xl p-4">
+                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
                     {translate("incorrect")}
                   </p>
-                  <div className="space-y-1.5">
+                  <div className="space-y-2">
                     {data.incorrectFields.map((field, index) => (
-                      <motion.div
+                      <div
                         key={index}
-                        initial={{ opacity: 0, x: -8 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.08 * index }}
-                        className="flex items-center gap-2.5 bg-white border border-red-100 rounded-lg px-3 py-2"
+                        className="flex items-center gap-2.5 bg-white border border-red-100 rounded-lg px-3 py-2 text-sm text-gray-700"
                       >
                         <XCircle className="w-4 h-4 text-red-500 flex-shrink-0" />
-                        <span className="text-sm text-gray-700">{getFieldLabel(field)}</span>
-                      </motion.div>
+                        <span>{getFieldLabel(field)}</span>
+                      </div>
                     ))}
                   </div>
                 </div>
               )}
+            </div>
 
+            {/* Footer */}
+            <div className="px-6 py-4 border-t border-gray-100 bg-gray-50/80 flex justify-end items-center rounded-b-2xl flex-shrink-0">
               <Button
+                type="button"
                 onClick={onClose}
-                className="w-full bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white font-semibold py-2.5 rounded-lg shadow-sm transition-all"
+                className="w-full sm:w-auto h-10 px-6 text-sm font-semibold rounded-xl bg-red-600 hover:bg-red-700 text-white shadow-sm transition-all"
               >
                 {translate("close")}
               </Button>

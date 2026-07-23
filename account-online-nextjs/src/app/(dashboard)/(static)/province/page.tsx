@@ -1,5 +1,7 @@
 "use client";
 
+import { PageHeader } from '@/components/shared/common/page-header';
+
 import { useProvinceState } from '@/features/master-data/store/state/province-state';
 import { setPageNo, setSearchFilter, setStatusFilter } from '@/features/master-data/store/slices/province-slice';
 import { fetchAllProvinceService, createProvinceThunk, updateProvinceThunk, deleteProvinceThunk } from '@/features/master-data/store/thunks/province-thunks';
@@ -18,7 +20,7 @@ import { Separator } from "@/components/ui/separator";
 import { ROUTES } from "@/constants/AppRoutes/routes";
 import { usePagination } from "@/hooks/use-pagination";
 import { useDebounce } from "@/utils/debounce/debounce";
-import { Search } from "lucide-react";
+import { Search, Map } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { startTransition, useCallback, useEffect, useState } from "react";
@@ -187,7 +189,14 @@ function ProvincePageContent() {
   };
 
   return (
-    <Card className="h-full flex flex-col">
+    <div className="space-y-4">
+      <PageHeader
+        title="Provinces"
+        subtitle="Manage province database records"
+        icon={Map}
+        count={provinces?.totalElements || 0}
+      />
+      <Card className="h-full flex flex-col">
       <CardContent className="space-y-6 p-6 flex flex-col h-full">
         <div className="flex justify-between items-center gap-4">
           <div />
@@ -205,7 +214,7 @@ function ProvincePageContent() {
                 disabled={isSubmitting}
               />
             </div>
-            <Button onClick={handleAddProvince}>New</Button>
+            <Button size="sm" onClick={handleAddProvince}>New</Button>
           </div>
         </div>
 
@@ -282,6 +291,7 @@ function ProvincePageContent() {
         />
       </CardContent>
     </Card>
+    </div>
   );
 }
 
