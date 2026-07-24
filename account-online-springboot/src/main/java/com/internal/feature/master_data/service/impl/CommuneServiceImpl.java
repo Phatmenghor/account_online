@@ -34,7 +34,7 @@ public class CommuneServiceImpl implements CommuneService {
     @Override
     public PaginationResponse<CommuneResponseDto> getAllCommunes(AllMasterDataRequest request) {
         log.info("Fetching all communes with search: {}", request.getSearch());
-        Pageable pageable = PageRequest.of(request.getPageNo() - 1, request.getPageSize(), Sort.by(Sort.Direction.DESC, "createdAt"));
+        Pageable pageable = com.internal.shared.pagination.PaginationUtil.createPageable(request);
 
         Page<Commune> page = communeRepository.findBySearch(request.getSearch(), pageable);
         List<CommuneResponseDto> content = communeMapper.toDtoList(page.getContent());
@@ -46,7 +46,7 @@ public class CommuneServiceImpl implements CommuneService {
     @Override
     public PaginationResponse<CommuneResponseDto> getCommunesByDistrict(AllMasterDataRequest request, String districtCode) {
         log.info("Fetching communes by district code: {} with search: {}", districtCode, request.getSearch());
-        Pageable pageable = PageRequest.of(request.getPageNo() - 1, request.getPageSize(), Sort.by(Sort.Direction.DESC, "createdAt"));
+        Pageable pageable = com.internal.shared.pagination.PaginationUtil.createPageable(request);
 
         Page<Commune> page = communeRepository.findByDistrictCodeAndSearch(districtCode, request.getSearch(), pageable);
         List<CommuneResponseDto> content = communeMapper.toDtoList(page.getContent());

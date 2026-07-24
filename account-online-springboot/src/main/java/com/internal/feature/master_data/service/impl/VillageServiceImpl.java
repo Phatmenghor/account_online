@@ -34,7 +34,7 @@ public class VillageServiceImpl implements VillageService {
     @Override
     public PaginationResponse<VillageResponseDto> getAllVillages(AllMasterDataRequest request) {
         log.info("Fetching all villages with search: {}", request.getSearch());
-        Pageable pageable = PageRequest.of(request.getPageNo() - 1, request.getPageSize(), Sort.by(Sort.Direction.DESC, "createdAt"));
+        Pageable pageable = com.internal.shared.pagination.PaginationUtil.createPageable(request);
 
         Page<Village> page = villageRepository.findBySearch(request.getSearch(), pageable);
         List<VillageResponseDto> content = villageMapper.toDtoList(page.getContent());
@@ -46,7 +46,7 @@ public class VillageServiceImpl implements VillageService {
     @Override
     public PaginationResponse<VillageResponseDto> getVillagesByCommune(AllMasterDataRequest request, String communeCode) {
         log.info("Fetching villages by commune code: {} with search: {}", communeCode, request.getSearch());
-        Pageable pageable = PageRequest.of(request.getPageNo() - 1, request.getPageSize(), Sort.by(Sort.Direction.DESC, "createdAt"));
+        Pageable pageable = com.internal.shared.pagination.PaginationUtil.createPageable(request);
 
         Page<Village> page = villageRepository.findByCommuneCodeAndSearch(communeCode, request.getSearch(), pageable);
         List<VillageResponseDto> content = villageMapper.toDtoList(page.getContent());

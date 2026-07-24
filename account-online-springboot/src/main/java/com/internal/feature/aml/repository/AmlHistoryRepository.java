@@ -1,13 +1,36 @@
 package com.internal.feature.aml.repository;
 
+import com.internal.enumation.AmlStatusEnum;
 import com.internal.feature.aml.models.AmlHistory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface AmlHistoryRepository extends JpaRepository<AmlHistory, Long>, JpaSpecificationExecutor<AmlHistory> {
+
+    @Query("SELECT a FROM AmlHistory a WHERE " +
+           "(:status IS NULL OR a.status = :status) AND " +
+           "(:fromDate IS NULL OR a.createdAt >= :fromDate) AND " +
+           "(:toDate IS NULL OR a.createdAt <= :toDate) AND " +
+           "(:search IS NULL OR LOWER(a.familyName) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+           "LOWER(a.givenName) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+           "LOWER(a.lastNameKh) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+           "LOWER(a.firstNameKh) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+           "LOWER(a.phoneNumber) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+           "LOWER(a.legalId) LIKE LOWER(CONCAT('%', :search, '%')))")
+    Page<AmlHistory> findByStatusAndSearch(
+            @Param("status") AmlStatusEnum status,
+            @Param("search") String search,
+            @Param("fromDate") LocalDateTime fromDate,
+            @Param("toDate") LocalDateTime toDate,
+            Pageable pageable
+    );
 
     @Query(value =
             "SELECT u.id, u.full_name, u.position, u.profile_url, u.branch, " +
@@ -25,7 +48,3 @@ public interface AmlHistoryRepository extends JpaRepository<AmlHistory, Long>, J
             nativeQuery = true)
     List<Object[]> findTopAmlActionUsers();
 }
-
-
-
-

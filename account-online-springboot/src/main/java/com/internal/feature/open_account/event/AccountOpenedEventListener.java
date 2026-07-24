@@ -51,9 +51,6 @@ public class AccountOpenedEventListener {
                 context.getMbActivationCode()
         );
 
-        // Step 12: Report log
-        reportingService.safeReportLog(context.getRequest().getLegalId());
-
         // Step 13: Notify monitoring channel
         safeSendAccountCreatedAlert(context);
 

@@ -11,6 +11,9 @@ import com.internal.feature.aml.dto.response.AllAmlResponseDto;
 import com.internal.feature.aml.dto.response.AmlHistoryDto;
 import com.internal.feature.aml.dto.response.AmlStatusDto;
 import com.internal.feature.aml.models.AmlStatus;
+import com.internal.feature.aml.models.JuniorAmlStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.Optional;
 
@@ -27,7 +30,3 @@ public interface AmlService {
 
     void updateExternalAmlStatus(String apiKey, String secretKey, ExternalAmlStatusUpdateDto request);
 }
-
-
-
-

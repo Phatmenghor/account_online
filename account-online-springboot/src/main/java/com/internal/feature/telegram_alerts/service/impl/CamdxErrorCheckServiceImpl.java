@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.internal.enumation.OpenAccStatusEnum;
 import com.internal.feature.camdx.dto.request.CamdxValidateNidRequest;
-import com.internal.feature.logs_report.service.AccountOnlineReportLogService;
 import com.internal.feature.telegram_alerts.service.TelegramService;
 import com.internal.feature.telegram_alerts.service.ErrorAlertsCamdxService;
 import com.internal.shared.constant.AppConstants;
@@ -25,7 +24,6 @@ import java.util.List;
 public class CamdxErrorCheckServiceImpl implements ErrorAlertsCamdxService {
 
     private final TelegramService telegramService;
-    private final AccountOnlineReportLogService accountOnlineReportLogService;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     // =====================================================
@@ -59,11 +57,6 @@ public class CamdxErrorCheckServiceImpl implements ErrorAlertsCamdxService {
             if (errorCode != 0) {
 
                 log.error("CAMDX API ERROR for ID {} - ErrorCode: {} | Message: {}", idNumber, errorCode, message);
-
-                accountOnlineReportLogService.saveLogReport(
-                        idNumber,
-                        OpenAccStatusEnum.FAILURE,
-                        ErrorMessage.CAMDX_VALIDATE);
                 return;
             }
 
@@ -85,11 +78,6 @@ public class CamdxErrorCheckServiceImpl implements ErrorAlertsCamdxService {
 
                 log.warn("CAMDX VALIDATION FAILURE for ID {} | Score: {} | IncorrectFields: {}",
                         idNumber, score, incorrectFields);
-
-                accountOnlineReportLogService.saveLogReport(
-                        idNumber,
-                        OpenAccStatusEnum.FAILURE,
-                        ErrorMessage.CAMDX_VALIDATE);
 
                 // Always send validation failures (score mismatch or field mismatches need review)
                 log.info("Sending Telegram alert for validation failure - requires human review");
@@ -113,11 +101,6 @@ public class CamdxErrorCheckServiceImpl implements ErrorAlertsCamdxService {
     public void sendInfraErrorAlertFromException(CamdxValidateNidRequest request, String rawMessage) {
 
         log.error("CAMDX EXCEPTION for ID {} | Message: {}", request.getIdNumber(), rawMessage);
-
-        accountOnlineReportLogService.saveLogReport(
-                request.getIdNumber(),
-                OpenAccStatusEnum.FAILURE,
-                ErrorMessage.CAMDX_VALIDATE);
     }
 
     // =====================================================

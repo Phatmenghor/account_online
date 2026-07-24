@@ -4,8 +4,7 @@ import com.internal.enumation.AmlStatusEnum;
 import com.internal.enumation.OpenAccStatusEnum;
 import com.internal.feature.aml.dto.response.AmlStatusDto;
 import com.internal.feature.customer_image.dto.response.CustomerImageUploadResponseDto;
-import com.internal.feature.logs_report.service.AccountOnlineOpenFinalService;
-import com.internal.feature.logs_report.service.AccountOnlineReportLogService;
+import com.internal.feature.logs_report.service.AccountFinalService;
 import com.internal.feature.open_account.dto.request.CustomerRequest;
 import com.internal.feature.open_account.dto.response.CustomerResponse;
 import com.internal.shared.constant.AppConstants;
@@ -20,8 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 public class ReportingService {
 
-    private final AccountOnlineReportLogService reportLogService;
-    private final AccountOnlineOpenFinalService accountOnlineOpenSuccessService;
+    private final AccountFinalService accountOnlineOpenSuccessService;
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void saveFailureLogs(CustomerRequest request, Exception e, String currentStep, String failureRemark,
@@ -30,8 +28,6 @@ public class ReportingService {
         if (currentStep.equals(AppConstants.PROCESS_AML)) {
             status = OpenAccStatusEnum.AML;
         }
-
-        reportLogService.createAccountOpeningLog(request.getLegalId(), status, failureRemark, e);
 
     }
 
@@ -87,16 +83,6 @@ public class ReportingService {
             log.info("Step 11 SUCCESS: Success log saved");
         } catch (Exception e) {
             log.warn("Step 11 WARNING: Failed to save success log (non-critical): {}", e.getMessage());
-        }
-    }
-
-    public void safeReportLog(String legalId) {
-        log.info("Step 12: SAVE_REPORT_LOG");
-        try {
-            reportLogService.saveLogReport(legalId, OpenAccStatusEnum.SUCCESS, "Open account online Successfully");
-            log.info("Step 12 SUCCESS: Report log saved");
-        } catch (Exception e) {
-            log.warn("Step 12 WARNING: Failed to save report log (non-critical): {}", e.getMessage());
         }
     }
 }

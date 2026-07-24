@@ -2,7 +2,6 @@ package com.internal.feature.aml.service.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.internal.enumation.AmlStatusEnum;
-import com.internal.shared.exception.custom.NotFoundException;
 import com.internal.feature.aml.dto.request.AllAmlHistoryRequestDto;
 import com.internal.feature.aml.dto.request.AllAmlRequestDto;
 import com.internal.feature.aml.dto.request.CreateAmlRequestDto;
@@ -23,26 +22,23 @@ import com.internal.feature.aml.service.AmlService;
 import com.internal.feature.auth.models.UserEntity;
 import com.internal.feature.master_data.dto.response.LocationCodesDto;
 import com.internal.feature.open_account.mapper.MasterDataServiceHelper;
+import com.internal.shared.component.AuditComponent;
 import com.internal.shared.constant.AppConstants;
+import com.internal.shared.exception.custom.NotFoundException;
+import com.internal.shared.pagination.PaginationUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.security.authentication.BadCredentialsException;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
-import com.internal.shared.component.AuditComponent;
 
 @Service
 @RequiredArgsConstructor
@@ -80,13 +76,10 @@ public class AmlServiceImpl implements AmlService {
             status.setRejectedBy(null);
         }
 
-        // Populate address fields using code-based lookup
         populateAddressFields(status, requestDto);
 
-        // Save AML record
         status = amlStatusRepository.save(status);
 
-        // Create history entry (PENDING)
         AmlHistory history = amlHistoryMapper.createHistoryFromStatusChange(status, null);
         amlHistoryRepository.save(history);
 
@@ -100,24 +93,19 @@ public class AmlServiceImpl implements AmlService {
         UserEntity currentUser = auditComponent.getCurrentUser();
 
         AmlStatus status = amlStatusRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("AML Status not found"));
+                .orElseThrow(() -> new NotFoundException("AML Status not found with id: " + id));
 
-        // Update based on new status
         updateStatusByEnum(status, req.getStatus(), currentUser);
 
         if (req.getRemark() != null) {
             status.setRemarks(req.getRemark());
         }
 
-        // Save & record history
         status = amlStatusRepository.save(status);
         AmlHistory history = amlHistoryMapper.createHistoryFromStatusChange(status, currentUser);
         amlHistoryRepository.save(history);
 
-        // Convert to DTO
         AmlStatusDto amlDto = amlStatusMapper.toStatusDto(status);
-
-        // Publish event for post-update side effects (Final Log, Telegram)
         eventPublisher.publishEvent(new AmlStatusChangedEvent(this, amlDto));
 
         return amlDto;
@@ -125,10 +113,10 @@ public class AmlServiceImpl implements AmlService {
 
     @Override
     public AllAmlResponseDto getAllAml(AllAmlRequestDto request) {
-        log.info("Fetching all AML statuses with status: {} and search: {}", request.getStatus(), request.getSearch());
-        Pageable pageable = PageRequest.of(request.getPageNo() - 1, request.getPageSize());
+        log.info("Fetching all AML statuses with status: {} and search: {}", request.getAmlStatus(), request.getSearch());
+        Pageable pageable = PaginationUtil.createPageable(request);
 
-        Page<AmlStatus> page = amlStatusRepository.findByStatusAndSearch(request.getStatus(), request.getSearch(), pageable);
+        Page<AmlStatus> page = amlStatusRepository.findByStatusAndSearch(request.getAmlStatus(), request.getSearch(), pageable);
 
         List<AmlStatusDto> content = page.stream()
                 .map(amlStatusMapper::toStatusDto)
@@ -141,51 +129,28 @@ public class AmlServiceImpl implements AmlService {
     @Override
     public AmlStatusDto getAmlById(Long id) {
         AmlStatus aml = amlStatusRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Aml not found with Id: " + id));
+                .orElseThrow(() -> new NotFoundException("AML status not found with Id: " + id));
         return amlStatusMapper.toStatusDto(aml);
     }
 
     @Override
     public AmlHistoryDto getAmlHistoryById(Long id) {
         AmlHistory aml = amlHistoryRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Aml history not found with Id: " + id));
+                .orElseThrow(() -> new NotFoundException("AML history not found with Id: " + id));
         return amlHistoryMapper.toDto(aml);
     }
 
     @Override
     public AllAmlHistoryResponseDto getAllAmlHistory(AllAmlHistoryRequestDto request) {
         log.info("Fetching AML history with status: {}, search: {}, startDate: {}, endDate: {}",
-                request.getStatus(), request.getSearch(), request.getStartDate(), request.getEndDate());
+                request.getAmlStatus(), request.getSearch(), request.getStartDate(), request.getEndDate());
 
-        LocalDateTime startDateTime = request.getStartDate() != null ? request.getStartDate().atStartOfDay() : null;
-        LocalDateTime endDateTime = request.getEndDate() != null ? request.getEndDate().atTime(23, 59, 59) : null;
-        String search = request.getSearch() != null ? request.getSearch().toLowerCase() : null;
+        Pageable pageable = PaginationUtil.createPageable(request);
+        LocalDateTime fromDateTime = request.getStartDate() != null ? request.getStartDate().atStartOfDay() : null;
+        LocalDateTime toDateTime = request.getEndDate() != null ? request.getEndDate().atTime(23, 59, 59) : null;
 
-        Specification<AmlHistory> spec = Specification.where(null);
-
-        if (startDateTime != null) {
-            spec = spec.and((root, q, cb) -> cb.greaterThanOrEqualTo(root.get("createdAt"), startDateTime));
-        }
-        if (endDateTime != null) {
-            spec = spec.and((root, q, cb) -> cb.lessThanOrEqualTo(root.get("createdAt"), endDateTime));
-        }
-        if (request.getStatus() != null) {
-            spec = spec.and((root, q, cb) -> cb.equal(root.get("status"), request.getStatus()));
-        }
-        if (search != null && !search.isEmpty()) {
-            String pattern = "%" + search + "%";
-            spec = spec.and((root, q, cb) -> cb.or(
-                    cb.like(cb.lower(root.get("familyName")), pattern),
-                    cb.like(cb.lower(root.get("givenName")), pattern),
-                    cb.like(cb.lower(root.get("lastNameKh")), pattern),
-                    cb.like(cb.lower(root.get("firstNameKh")), pattern),
-                    cb.like(cb.lower(root.get("phoneNumber")), pattern),
-                    cb.like(cb.lower(root.get("legalId")), pattern)
-            ));
-        }
-
-        Pageable pageable = PageRequest.of(request.getPageNo() - 1, request.getPageSize(), Sort.by(Sort.Direction.DESC, "createdAt"));
-        Page<AmlHistory> page = amlHistoryRepository.findAll(spec, pageable);
+        Page<AmlHistory> page = amlHistoryRepository.findByStatusAndSearch(
+                request.getAmlStatus(), request.getSearch(), fromDateTime, toDateTime, pageable);
 
         List<AmlHistoryDto> content = page.stream()
                 .map(amlHistoryMapper::toDto)
@@ -201,7 +166,7 @@ public class AmlServiceImpl implements AmlService {
         log.info("Updating external AML status for customerId: {}", request.getCustomerId());
         String legalId = request.getCustomerId();
         if (legalId != null && legalId.toUpperCase().startsWith("OAO")) {
-            legalId = legalId.substring(3); // Remove "OAO" prefix
+            legalId = legalId.substring(3);
         }
         Optional<AmlStatus> amlStatusOpt = amlStatusRepository.findByLegalId(legalId);
         if (amlStatusOpt.isPresent()) {
@@ -211,7 +176,12 @@ public class AmlServiceImpl implements AmlService {
             if (request.getUpdateFrom() != null) {
                 amlStatus.setAmlExternalServiceName(request.getUpdateFrom());
             }
-            amlStatusRepository.save(amlStatus);
+            amlStatus = amlStatusRepository.save(amlStatus);
+            AmlHistory history = amlHistoryMapper.createHistoryFromStatusChange(amlStatus, null);
+            amlHistoryRepository.save(history);
+
+            AmlStatusDto amlDto = amlStatusMapper.toStatusDto(amlStatus);
+            eventPublisher.publishEvent(new AmlStatusChangedEvent(this, amlDto));
             log.info("Successfully updated AML Status Risk Level to Low for Legal ID: {}", legalId);
         } else {
             log.warn("Attempted to update AML Status for non-existent Legal ID: {}", legalId);
@@ -220,14 +190,12 @@ public class AmlServiceImpl implements AmlService {
     }
 
     private void populateAddressFields(AmlStatus status, CreateAmlRequestDto requestDto) {
-        // ------------------ Current Address ------------------
         if (requestDto.getCustomerCurrentProvince() != null && !requestDto.getCustomerCurrentProvince().isEmpty()) {
             LocationCodesDto currentAddress = masterDataServiceHelper.resolveCurrentAddress(requestDto);
             status.setCurrentAddressName(masterDataServiceHelper.buildFullAddressName(currentAddress));
             status.setCurrentAddressCode(masterDataServiceHelper.buildFullAddressCode(currentAddress));
         }
 
-        // ------------------ Place of Birth ------------------
         if (requestDto.getCustomerPobProvince() != null && !requestDto.getCustomerPobProvince().isEmpty()) {
             LocationCodesDto pobAddress = masterDataServiceHelper.resolvePlaceOfBirth(requestDto);
             status.setPlaceOfBirthName(masterDataServiceHelper.buildFullAddressName(pobAddress));
@@ -253,10 +221,3 @@ public class AmlServiceImpl implements AmlService {
         }
     }
 }
-
-
-
-
-
-
-

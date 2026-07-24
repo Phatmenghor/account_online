@@ -1,34 +1,24 @@
 package com.internal.feature.auth.dto.request;
 
 import com.internal.enumation.StatusData;
-import io.swagger.v3.oas.annotations.media.Schema;
+import com.internal.shared.pagination.BasePaginationFilterRequest;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import lombok.extern.jackson.Jacksonized;
+import lombok.experimental.SuperBuilder;
 
 import java.util.Collections;
 import java.util.List;
 
-@AllArgsConstructor
-@NoArgsConstructor
 @Data
-@Builder
-@Jacksonized
-public class GetAllUserRequestDto {
+@EqualsAndHashCode(callSuper = true)
+@SuperBuilder
+@NoArgsConstructor
+@AllArgsConstructor
+public class GetAllUserRequestDto extends BasePaginationFilterRequest {
 
-    @Schema(example = "1", defaultValue = "1")
-    @Builder.Default
-    private int pageNo = 1;
-
-    @Schema(example = "10", defaultValue = "10")
-    @Builder.Default
-    private int pageSize = 10;
-
-    private String search;
-    @Builder.Default
-    private StatusData status = StatusData.ACTIVE;
+    private StatusData userStatus;
     private String role;
     private List<String> roles;
 
@@ -37,5 +27,14 @@ public class GetAllUserRequestDto {
         if (role != null && !role.isBlank()) return Collections.singletonList(role);
         return null;
     }
-}
 
+    public StatusData getStatusData() {
+        if (userStatus != null) return userStatus;
+        if (getStatus() != null && !getStatus().isBlank()) {
+            try {
+                return StatusData.valueOf(getStatus().toUpperCase());
+            } catch (IllegalArgumentException ignored) {}
+        }
+        return null;
+    }
+}

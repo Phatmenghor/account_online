@@ -1,27 +1,26 @@
 package com.internal.feature.aml.dto.request;
 
 import com.internal.enumation.AmlStatusEnum;
-import io.swagger.v3.oas.annotations.media.Schema;
+import com.internal.shared.pagination.BasePaginationFilterRequest;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
-@Builder
 @Data
+@EqualsAndHashCode(callSuper = true)
+@SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
-public class AllAmlRequestDto {
+public class AllAmlRequestDto extends BasePaginationFilterRequest {
+    private AmlStatusEnum amlStatus;
 
-    @Schema(example = "1", defaultValue = "1")
-    @Builder.Default
-    private int pageNo = 1;
-
-    @Schema(example = "10", defaultValue = "10")
-    @Builder.Default
-    private int pageSize = 10;
-
-    private String search;
-    private AmlStatusEnum status;
+    public String getAmlStatusString() {
+        if (amlStatus != null) return amlStatus.name();
+        if (getStatus() != null && !getStatus().isBlank()) {
+            return getStatus().toUpperCase();
+        }
+        return null;
+    }
 }
-

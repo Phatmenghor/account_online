@@ -39,11 +39,11 @@ public class ReferenceServiceImpl implements ReferenceService {
 
     @Override
     public AllReferenceResponseDto getAll(GetAllReferenceRequest request) {
-        Pageable pageable = PageRequest.of(request.getPageNo() - 1, request.getPageSize());
+        Pageable pageable = com.internal.shared.pagination.PaginationUtil.createPageable(request);
 
-        log.info("Fetching references - status: {}, search: {}", request.getStatus(), request.getSearch());
+        log.info("Fetching references - status: {}, search: {}", request.getStatusData(), request.getSearch());
 
-        Page<Reference> page = repository.findByStatusAndSearch(request.getStatus(), request.getSearch(), pageable);
+        Page<Reference> page = repository.findByStatusAndSearch(request.getStatusData(), request.getSearch(), pageable);
 
         List<ReferenceDto> content = page.stream()
                 .map(mapper::toDto)

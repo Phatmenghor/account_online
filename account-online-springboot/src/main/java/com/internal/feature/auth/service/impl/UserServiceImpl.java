@@ -1,5 +1,6 @@
 package com.internal.feature.auth.service.impl;
 
+import com.internal.enumation.RoleEnum;
 import com.internal.enumation.StatusData;
 import com.internal.shared.exception.custom.BadRequestException;
 import com.internal.shared.exception.custom.NotFoundException;
@@ -36,7 +37,11 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import com.internal.enumation.RoleEnum;
+import com.internal.feature.auth.models.RefreshToken;
+import com.internal.feature.auth.service.RefreshTokenService;
+import com.internal.shared.component.ClientIpComponent;
+
+import com.internal.shared.pagination.PaginationUtil;
 
 @Service
 @RequiredArgsConstructor
@@ -49,20 +54,14 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
     private final JWTGenerator jwtGenerator;
-    private final com.internal.feature.auth.service.RefreshTokenService refreshTokenService;
-    private final com.internal.shared.component.ClientIpComponent clientIpComponent;
+    private final RefreshTokenService refreshTokenService;
+    private final ClientIpComponent clientIpComponent;
 
     @Override
     public AllUserResponseDto getAllUser(GetAllUserRequestDto requestDto) {
-        GetAllUserRequestDto userRequestDto = new GetAllUserRequestDto(Math.max(requestDto.getPageNo() - 1, 0),
-                Math.max(requestDto.getPageSize(), 1),
-                requestDto.getSearch(),
-                requestDto.getStatus(),
-                null,
-                requestDto.getRoles());
-
-        Pageable pageable = PageRequest.of(userRequestDto.getPageNo(), userRequestDto.getPageSize(), Sort.by(Sort.Direction.DESC, "createdAt"));
-        Page<UserEntity> userPage = fetchUsers(userRequestDto.getSearch(), userRequestDto.getStatus(), userRequestDto.getRoles(), pageable);
+        log.info("Fetching users list with search: {}, status: {}", requestDto.getSearch(), requestDto.getStatusData());
+        Pageable pageable = PaginationUtil.createPageable(requestDto);
+        Page<UserEntity> userPage = fetchUsers(requestDto.getSearch(), requestDto.getStatusData(), requestDto.getRoles(), pageable);
 
         List<UserResponseDto> content = userPage.getContent().stream()
                 .map(userMapper::mapToDto)
@@ -170,7 +169,7 @@ public class UserServiceImpl implements UserService {
 
         UserResponseDto dto = userMapper.mapToDto(saved);
         String clientIp = clientIpComponent.getClientIp();
-        com.internal.feature.auth.models.RefreshToken refreshTokenEntity = refreshTokenService.createRefreshToken(saved, clientIp, null);
+        RefreshToken refreshTokenEntity = refreshTokenService.createRefreshToken(saved, clientIp, null);
 
         return new AuthResponseDTO(token, refreshTokenEntity.getToken(), dto);
     }

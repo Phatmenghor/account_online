@@ -46,11 +46,11 @@ public class OccupationServiceImpl implements OccupationService {
 
     @Override
     public AllOccupationResponseDto getAllOccupations(GetAllOccupationRequest request) {
-        Pageable pageable = PageRequest.of(request.getPageNo() - 1, request.getPageSize());
+        Pageable pageable = com.internal.shared.pagination.PaginationUtil.createPageable(request);
 
-        log.info("Fetching occupations - status: {}, search: {}", request.getStatus(), request.getSearch());
+        log.info("Fetching occupations - status: {}, search: {}", request.getStatusData(), request.getSearch());
 
-        Page<Occupation> page = repository.findByStatusAndSearch(request.getStatus(), request.getSearch(), pageable);
+        Page<Occupation> page = repository.findByStatusAndSearch(request.getStatusData(), request.getSearch(), pageable);
 
         List<OccupationDto> content = page.stream()
                 .map(mapper::toDto)

@@ -1,29 +1,21 @@
 package com.internal.feature.logs_report.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import io.swagger.v3.oas.annotations.media.Schema;
+import com.internal.shared.pagination.BasePaginationFilterRequest;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDate;
 
-@Builder
 @Data
+@EqualsAndHashCode(callSuper = true)
+@SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
-public class AllAccountOnlineSuccessRequestDto {
-
-    @Schema(example = "1", defaultValue = "1")
-    @Builder.Default
-    private int pageNo = 1;
-
-    @Schema(example = "10", defaultValue = "10")
-    @Builder.Default
-    private int pageSize = 10;
-
-    private String search;
+public class AllAccountOnlineSuccessRequestDto extends BasePaginationFilterRequest {
 
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate fromDate;
@@ -31,4 +23,3 @@ public class AllAccountOnlineSuccessRequestDto {
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate toDate;
 }
-

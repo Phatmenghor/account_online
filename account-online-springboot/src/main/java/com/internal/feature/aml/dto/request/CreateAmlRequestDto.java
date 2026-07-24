@@ -65,5 +65,8 @@ public class CreateAmlRequestDto {
     // Admin workflow
     private UserResponseDto approvedBy;
     private UserResponseDto rejectedBy;
+
+    // Raw JSON request payload submitted from frontend
+    private String requestPayload;
 }
 

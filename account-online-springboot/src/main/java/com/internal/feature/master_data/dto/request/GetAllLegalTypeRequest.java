@@ -1,23 +1,28 @@
 package com.internal.feature.master_data.dto.request;
 
 import com.internal.enumation.StatusData;
+import com.internal.shared.pagination.BasePaginationFilterRequest;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
-@Builder
 @Data
-@AllArgsConstructor
+@EqualsAndHashCode(callSuper = true)
+@SuperBuilder
 @NoArgsConstructor
-public class GetAllLegalTypeRequest {
-    @Builder.Default
-    private int pageNo = 1;
+@AllArgsConstructor
+public class GetAllLegalTypeRequest extends BasePaginationFilterRequest {
+    private StatusData statusData;
 
-    @Builder.Default
-    private int pageSize = 10;
-    private String search;
-    @Builder.Default
-    private StatusData status = StatusData.ACTIVE;
+    public StatusData getStatusData() {
+        if (statusData != null) return statusData;
+        if (getStatus() != null && !getStatus().isBlank()) {
+            try {
+                return StatusData.valueOf(getStatus().toUpperCase());
+            } catch (IllegalArgumentException ignored) {}
+        }
+        return StatusData.ACTIVE;
+    }
 }
-

@@ -1,13 +1,12 @@
 package com.internal.feature.sms_otp.dto.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
 
 @Data
 @Builder
@@ -20,4 +19,3 @@ public class SendOtpRequest {
     @Schema(description = "Phone number", example = "85512345678")
     private String phone;
 }
-

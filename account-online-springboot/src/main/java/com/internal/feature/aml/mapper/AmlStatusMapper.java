@@ -57,7 +57,8 @@ public interface AmlStatusMapper {
             @Mapping(target = "expiredDate", source = "expiredDate"),
             // Image filenames
             @Mapping(target = "nidImageName", source = "nidImageName"),
-            @Mapping(target = "selfieImageName", source = "selfieImageName")
+            @Mapping(target = "selfieImageName", source = "selfieImageName"),
+            @Mapping(target = "requestPayload", source = "requestPayload")
     })
     AmlStatus fromCreateDto(CreateAmlRequestDto request);
 
@@ -94,6 +95,7 @@ public interface AmlStatusMapper {
             @Mapping(target = "expiredDate", source = "expiredDate"),
             @Mapping(target = "nidImageName", source = "nidImageName"),
             @Mapping(target = "selfieImageName", source = "selfieImageName"),
+            @Mapping(target = "requestPayload", source = "requestPayload"),
             @Mapping(target = "remarks", ignore = true),
             @Mapping(target = "screeningResult", ignore = true),
             @Mapping(target = "currentAddressName", ignore = true),

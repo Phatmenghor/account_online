@@ -1,14 +1,16 @@
 package com.internal.feature.open_account.dto.request;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Builder;
+import lombok.experimental.SuperBuilder;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import jakarta.validation.constraints.NotBlank;
 
 @Data
-@Builder
-@JsonIgnoreProperties(ignoreUnknown = true)
+@SuperBuilder
+@NoArgsConstructor
+@AllArgsConstructor
 public class CustomerRequest {
 
     @JsonProperty("rec_id")

@@ -38,11 +38,11 @@ public class LegalTypeServiceImpl implements LegalTypeService {
 
     @Override
     public AllLegalTypeResponseDto getAllLegalType(GetAllLegalTypeRequest request) {
-        Pageable pageable = PageRequest.of(request.getPageNo() - 1, request.getPageSize());
+        Pageable pageable = com.internal.shared.pagination.PaginationUtil.createPageable(request);
 
-        log.info("Fetching legal types - status: {}, search: {}", request.getStatus(), request.getSearch());
+        log.info("Fetching legal types - status: {}, search: {}", request.getStatusData(), request.getSearch());
 
-        Page<LegalType> page = repository.findByStatusAndSearch(request.getStatus(), request.getSearch(), pageable);
+        Page<LegalType> page = repository.findByStatusAndSearch(request.getStatusData(), request.getSearch(), pageable);
         List<LegalTypeDto> content = page.stream()
                 .map(mapper::toDto)
                 .collect(Collectors.toList());

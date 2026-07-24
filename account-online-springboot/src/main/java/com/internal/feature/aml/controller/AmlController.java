@@ -1,7 +1,6 @@
 package com.internal.feature.aml.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.internal.shared.response.ApiResponse;
 import com.internal.feature.aml.dto.request.AllAmlHistoryRequestDto;
 import com.internal.feature.aml.dto.request.AllAmlRequestDto;
 import com.internal.feature.aml.dto.request.ExternalAmlStatusUpdateDto;
@@ -10,17 +9,19 @@ import com.internal.feature.aml.dto.response.AllAmlHistoryResponseDto;
 import com.internal.feature.aml.dto.response.AllAmlResponseDto;
 import com.internal.feature.aml.dto.response.AmlHistoryDto;
 import com.internal.feature.aml.dto.response.AmlStatusDto;
+import com.internal.feature.aml.models.JuniorAmlStatus;
 import com.internal.feature.aml.service.AmlService;
 import com.internal.shared.constant.ResponseMessage;
+import com.internal.shared.pagination.PaginationUtil;
+import com.internal.shared.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
 
@@ -77,7 +78,6 @@ public class AmlController {
         ));
     }
 
-
     @PostMapping("/external/update-status")
     public ResponseEntity<ApiResponse<String>> updateExternalAmlStatus(
             @RequestHeader("X-API-KEY") String apiKey,
@@ -90,8 +90,3 @@ public class AmlController {
         return ResponseEntity.ok(ApiResponse.success(ResponseMessage.AML_EXTERNAL_UPDATED, null));
     }
 }
-
-
-
-
-

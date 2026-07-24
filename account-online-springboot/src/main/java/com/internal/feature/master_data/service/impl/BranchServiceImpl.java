@@ -31,13 +31,13 @@ public class BranchServiceImpl implements BranchService {
     @Override
     public PaginationResponse<BranchResponseDto> getAllBranches(AllMasterDataRequest request) {
         log.info("Fetching all branches with search: {}", request.getSearch());
-        Pageable pageable = PageRequest.of(request.getPageNo() - 1, request.getPageSize(), Sort.by(Sort.Direction.DESC, "createdAt"));
+        Pageable pageable = com.internal.shared.pagination.PaginationUtil.createPageable(request);
 
         Page<Branch> page = branchRepository.findBySearch(request.getSearch(), pageable);
         List<BranchResponseDto> content = branchMapper.toDtoList(page.getContent());
 
         log.info("Found {} branches", page.getTotalElements());
-        return new PaginationResponse<>(content, page.getNumber() + 1, page.getSize(), page.getTotalElements());
+        return com.internal.shared.pagination.PaginationUtil.toPaginationResponse(page, b -> branchMapper.toDto(b));
     }
 
     @Override

@@ -39,11 +39,11 @@ public class MaritalStatusServiceImpl implements MaritalStatusService {
 
     @Override
     public AllMaritalStatusResponseDto getAll(GetAllMaritalStatusRequest request) {
-        Pageable pageable = PageRequest.of(request.getPageNo() - 1, request.getPageSize());
+        Pageable pageable = com.internal.shared.pagination.PaginationUtil.createPageable(request);
 
-        log.info("Fetching marital statuses - status: {}, search: {}", request.getStatus(), request.getSearch());
+        log.info("Fetching marital statuses - status: {}, search: {}", request.getStatusData(), request.getSearch());
 
-        Page<MaritalStatus> page = repository.findByStatusAndSearch(request.getStatus(), request.getSearch(), pageable);
+        Page<MaritalStatus> page = repository.findByStatusAndSearch(request.getStatusData(), request.getSearch(), pageable);
 
         List<MaritalStatusDto> content = page.stream()
                 .map(mapper::toDto)

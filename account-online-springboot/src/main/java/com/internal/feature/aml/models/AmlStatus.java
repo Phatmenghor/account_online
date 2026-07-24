@@ -141,6 +141,12 @@ public class AmlStatus extends BaseEntity {
     private String selfieImageName;
 
     // ============================================
+    // RAW SUBMISSION DATA FROM FRONTEND
+    // ============================================
+    @Column(name = "request_payload", columnDefinition = "TEXT")
+    private String requestPayload;
+
+    // ============================================
     // ADMIN REMARKS
     // ============================================
     @Column(name = "remarks", columnDefinition = "TEXT")

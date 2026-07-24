@@ -1,19 +1,15 @@
 package com.internal.feature.master_data.dto.request;
 
+import com.internal.shared.pagination.BasePaginationFilterRequest;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 @Data
+@EqualsAndHashCode(callSuper = true)
+@SuperBuilder
 @NoArgsConstructor
-@AllArgsConstructor
-@Builder
-public class AllMasterDataRequest {
-    @Builder.Default
-    private int pageNo = 1;
-    @Builder.Default
-    private int pageSize = 10;
-    private String search;
+public class AllMasterDataRequest extends BasePaginationFilterRequest {
 }
-

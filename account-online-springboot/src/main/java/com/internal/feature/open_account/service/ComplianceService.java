@@ -16,7 +16,6 @@ import com.internal.feature.open_account.dto.response.AmlExternalResponseDto;
 import com.internal.feature.open_account.dto.response.CustomerResponse;
 import com.internal.feature.open_account.mapper.OpenAccountAmlStatusMapper;
 import com.internal.integration.ports.AmlPort;
-import com.internal.integration.rest.aml.AmlRestAdapter;
 import com.internal.feature.telegram_alerts.service.MonitoringService;
 import com.internal.shared.util.SecurityUtils;
 import com.internal.shared.constant.AppConstants;
@@ -61,7 +60,7 @@ public class ComplianceService {
 
         // Map to CreateAmlRequestDto
         CreateAmlRequestDto createRequest = openAccountAmlStatusMapper.toCreateRequest(amlRequestDto, amlResponse,
-                request, occupationStatus, amlStatusEnum, objectMapper);
+                request, occupationStatus, amlStatusEnum);
 
         // Handle high-risk customers
         if (isHighRisk) {
@@ -139,9 +138,4 @@ public class ComplianceService {
     }
 
 }
-
-
-
-
-
 

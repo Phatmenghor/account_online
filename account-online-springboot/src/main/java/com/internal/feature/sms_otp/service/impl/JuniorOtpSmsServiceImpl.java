@@ -1,0 +1,164 @@
+package com.internal.feature.sms_otp.service.impl;
+
+import com.internal.config.CpbProperties;
+import com.internal.feature.sms_otp.dto.request.SendOtpRequest;
+import com.internal.feature.sms_otp.dto.request.VerifyOtpRequest;
+import com.internal.feature.sms_otp.dto.response.SendOtpResponse;
+import com.internal.feature.sms_otp.dto.response.VerifyOtpResponse;
+import com.internal.feature.sms_otp.models.JuniorOtpSms;
+import com.internal.feature.sms_otp.models.JuniorSmsLog;
+import com.internal.feature.sms_otp.repository.JuniorOtpSmsRepository;
+import com.internal.feature.sms_otp.repository.JuniorSmsLogRepository;
+import com.internal.feature.sms_otp.service.JuniorOtpSmsService;
+import com.internal.integration.ports.SmsPort;
+import com.internal.shared.component.OtpComponent;
+import com.internal.shared.exception.otp.OtpAttemptsExceededException;
+import com.internal.shared.exception.otp.OtpCooldownException;
+import com.internal.shared.exception.otp.OtpInvalidException;
+import com.internal.shared.exception.otp.OtpNotFoundException;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.Optional;
+
+@Service
+@RequiredArgsConstructor
+@Slf4j
+public class JuniorOtpSmsServiceImpl implements JuniorOtpSmsService {
+
+    private final JuniorOtpSmsRepository juniorOtpSmsRepository;
+    private final JuniorSmsLogRepository juniorSmsLogRepository;
+    private final OtpComponent otpComponent;
+    private final CpbProperties cpbProperties;
+    private final SmsPort smsPort;
+
+    @Override
+    @Transactional
+    public SendOtpResponse sendOtp(SendOtpRequest request) {
+        String phone = request.getPhone();
+        log.info("Processing Junior OTP request for phone: {}", phone);
+
+        checkCooldownPeriod(phone);
+        checkAttemptLockout(phone);
+
+        juniorOtpSmsRepository.findTopByPhoneAndStatusOrderByCreatedAtDesc(phone, 0)
+                .ifPresent(otp -> {
+                    otp.setStatus(2);
+                    juniorOtpSmsRepository.save(otp);
+                });
+
+        String otpCode = otpComponent.generate();
+        LocalDateTime expiresAt = LocalDateTime.now()
+                .plusMinutes(cpbProperties.getOtp().getExpiryMinutes());
+
+        JuniorOtpSms juniorOtpSms = JuniorOtpSms.builder()
+                .phone(phone)
+                .otpCode(otpCode)
+                .attempt(0)
+                .status(0)
+                .expiresAt(expiresAt)
+                .build();
+
+        juniorOtpSmsRepository.save(juniorOtpSms);
+        log.info("Saved Junior OTP for phone: {}, code: {}", phone, otpCode);
+
+        try {
+            smsPort.sendSms(phone, otpCode);
+            juniorSmsLogRepository.save(JuniorSmsLog.builder()
+                    .phone(phone)
+                    .message("Junior OTP: " + otpCode)
+                    .status("SUCCESS")
+                    .build());
+        } catch (Exception e) {
+            log.error("Failed to send Junior SMS to {}: {}", phone, e.getMessage());
+            juniorSmsLogRepository.save(JuniorSmsLog.builder()
+                    .phone(phone)
+                    .message("Junior OTP: " + otpCode)
+                    .status("FAILED")
+                    .errorMessage(e.getMessage())
+                    .build());
+        }
+
+        return SendOtpResponse.builder()
+                .phone(phone)
+                .message("Junior OTP sent successfully")
+                .expiresAt(expiresAt)
+                .build();
+    }
+
+    @Override
+    @Transactional
+    public VerifyOtpResponse verifyOtp(VerifyOtpRequest request) {
+        String phone = request.getPhone();
+        String inputOtp = request.getOtpCode();
+        log.info("Verifying Junior OTP for phone: {}", phone);
+
+        JuniorOtpSms juniorOtpSms = juniorOtpSmsRepository
+                .findTopByPhoneAndStatusOrderByCreatedAtDesc(phone, 0)
+                .orElseThrow(() -> new OtpNotFoundException("No active Junior OTP found for phone: " + phone));
+
+        if (LocalDateTime.now().isAfter(juniorOtpSms.getExpiresAt())) {
+            juniorOtpSms.setStatus(2);
+            juniorOtpSmsRepository.save(juniorOtpSms);
+            throw new OtpNotFoundException("Junior OTP has expired");
+        }
+
+        if (juniorOtpSms.getAttempt() >= cpbProperties.getOtp().getMaxAttempts()) {
+            throw new OtpAttemptsExceededException((long) (cpbProperties.getOtp().getLockMinutes() * 60));
+        }
+
+        if (!juniorOtpSms.getOtpCode().equals(inputOtp)) {
+            juniorOtpSms.setAttempt(juniorOtpSms.getAttempt() + 1);
+            juniorOtpSms.setLastAttempt(LocalDateTime.now());
+            juniorOtpSmsRepository.save(juniorOtpSms);
+            int remaining = cpbProperties.getOtp().getMaxAttempts() - juniorOtpSms.getAttempt();
+            throw new OtpInvalidException(remaining);
+        }
+
+        juniorOtpSms.setStatus(1);
+        juniorOtpSms.setVerifiedAt(LocalDateTime.now());
+        juniorOtpSmsRepository.save(juniorOtpSms);
+
+        log.info("Junior OTP successfully verified for phone: {}", phone);
+        return VerifyOtpResponse.builder()
+                .phone(phone)
+                .verified(true)
+                .message("Junior OTP verified successfully")
+                .build();
+    }
+
+    private void checkCooldownPeriod(String phone) {
+        Optional<JuniorOtpSms> latestOtpOpt = juniorOtpSmsRepository.findTopByPhoneOrderByCreatedAtDesc(phone);
+        if (latestOtpOpt.isPresent()) {
+            JuniorOtpSms latestOtp = latestOtpOpt.get();
+            LocalDateTime createdAt = latestOtp.getCreatedAt();
+            if (createdAt != null) {
+                long secondsSinceCreation = Duration.between(createdAt, LocalDateTime.now()).getSeconds();
+                int cooldownSeconds = cpbProperties.getOtp().getCooldownSeconds();
+                if (secondsSinceCreation < cooldownSeconds) {
+                    long remainingSeconds = cooldownSeconds - secondsSinceCreation;
+                    throw new OtpCooldownException((int) remainingSeconds);
+                }
+            }
+        }
+    }
+
+    private void checkAttemptLockout(String phone) {
+        Optional<JuniorOtpSms> latestOtpOpt = juniorOtpSmsRepository.findTopByPhoneOrderByCreatedAtDesc(phone);
+        if (latestOtpOpt.isPresent()) {
+            JuniorOtpSms latestOtp = latestOtpOpt.get();
+            if (latestOtp.getAttempt() >= cpbProperties.getOtp().getMaxAttempts() && latestOtp.getLastAttempt() != null) {
+                long minutesSinceLastAttempt = Duration.between(latestOtp.getLastAttempt(), LocalDateTime.now()).toMinutes();
+                int lockMinutes = cpbProperties.getOtp().getLockMinutes();
+                if (minutesSinceLastAttempt < lockMinutes) {
+                    long remainingSeconds = (lockMinutes - minutesSinceLastAttempt) * 60;
+                    throw new OtpAttemptsExceededException(remainingSeconds);
+                }
+            }
+        }
+    }
+}

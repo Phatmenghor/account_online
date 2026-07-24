@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 
 @EqualsAndHashCode(callSuper = true)
 @Entity
-@Table(name = "sms_log")
+@Table(name = "acc_online_sms_log")
 @Data
 @Builder
 @NoArgsConstructor

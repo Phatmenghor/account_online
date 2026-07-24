@@ -39,7 +39,7 @@ public class MasterDataServiceImpl implements MasterDataService {
     // ---------------------- Province ----------------------
     @Override
     public PaginationResponse<ClsProvinceDto> getProvince(AllMasterDataRequest request) {
-        Pageable pageable = PageRequest.of(Math.max(request.getPageNo(), 1) - 1, request.getPageSize(), Sort.by(Sort.Direction.DESC, MasterDataConstants.SORT_CREATED_AT));
+        Pageable pageable = com.internal.shared.pagination.PaginationUtil.createPageable(request);
 
         Page<Province> page = provinceRepository.findBySearch(request.getSearch(), pageable);
         List<ClsProvinceDto> content = provinceMapper.toClsDtoList(page.getContent());
@@ -50,7 +50,7 @@ public class MasterDataServiceImpl implements MasterDataService {
     // ---------------------- District ----------------------
     @Override
     public PaginationResponse<ClsDistrictDto> getDistrict(AllMasterDataRequest request, String provinceCode) {
-        Pageable pageable = PageRequest.of(Math.max(request.getPageNo(), 1) - 1, request.getPageSize(), Sort.by(Sort.Direction.DESC, MasterDataConstants.SORT_CREATED_AT));
+        Pageable pageable = com.internal.shared.pagination.PaginationUtil.createPageable(request);
 
         Page<District> page;
         if (provinceCode != null) {
@@ -66,7 +66,7 @@ public class MasterDataServiceImpl implements MasterDataService {
     // ---------------------- Commune ----------------------
     @Override
     public PaginationResponse<ClsCommuneDto> getCommune(AllMasterDataRequest request, String districtCode) {
-        Pageable pageable = PageRequest.of(Math.max(request.getPageNo(), 1) - 1, request.getPageSize(), Sort.by(Sort.Direction.DESC, MasterDataConstants.SORT_CREATED_AT));
+        Pageable pageable = com.internal.shared.pagination.PaginationUtil.createPageable(request);
 
         Page<Commune> page;
         if (districtCode != null) {
@@ -82,7 +82,7 @@ public class MasterDataServiceImpl implements MasterDataService {
     // ---------------------- Village ----------------------
     @Override
     public PaginationResponse<ClsVillageDto> getVillage(AllMasterDataRequest request, String communeCode) {
-        Pageable pageable = PageRequest.of(Math.max(request.getPageNo(), 1) - 1, request.getPageSize(), Sort.by(Sort.Direction.DESC, MasterDataConstants.SORT_CREATED_AT));
+        Pageable pageable = com.internal.shared.pagination.PaginationUtil.createPageable(request);
 
         Page<Village> page;
         if (communeCode != null) {
@@ -98,7 +98,7 @@ public class MasterDataServiceImpl implements MasterDataService {
     // ---------------------- Branch ----------------------
     @Override
     public PaginationResponse<ClsBranchDto> getBranch(AllMasterDataRequest request) {
-        Pageable pageable = PageRequest.of(Math.max(request.getPageNo(), 1) - 1, request.getPageSize(), Sort.by(Sort.Direction.DESC, MasterDataConstants.SORT_CREATED_AT));
+        Pageable pageable = com.internal.shared.pagination.PaginationUtil.createPageable(request);
 
         Page<Branch> page = branchRepository.findBySearch(request.getSearch(), pageable);
         List<ClsBranchDto> content = branchMapper.toClsDtoList(page.getContent());

@@ -34,7 +34,7 @@ public class DistrictServiceImpl implements DistrictService {
     @Override
     public PaginationResponse<DistrictResponseDto> getAllDistricts(AllMasterDataRequest request) {
         log.info("Fetching all districts with search: {}", request.getSearch());
-        Pageable pageable = PageRequest.of(request.getPageNo() - 1, request.getPageSize(), Sort.by(Sort.Direction.DESC, "createdAt"));
+        Pageable pageable = com.internal.shared.pagination.PaginationUtil.createPageable(request);
 
         Page<District> page = districtRepository.findBySearch(request.getSearch(), pageable);
         List<DistrictResponseDto> content = districtMapper.toDtoList(page.getContent());
@@ -46,7 +46,7 @@ public class DistrictServiceImpl implements DistrictService {
     @Override
     public PaginationResponse<DistrictResponseDto> getDistrictsByProvince(AllMasterDataRequest request, String provinceCode) {
         log.info("Fetching districts by province code: {} with search: {}", provinceCode, request.getSearch());
-        Pageable pageable = PageRequest.of(request.getPageNo() - 1, request.getPageSize(), Sort.by(Sort.Direction.DESC, "createdAt"));
+        Pageable pageable = com.internal.shared.pagination.PaginationUtil.createPageable(request);
 
         Page<District> page = districtRepository.findByProvinceCodeAndSearch(provinceCode, request.getSearch(), pageable);
         List<DistrictResponseDto> content = districtMapper.toDtoList(page.getContent());

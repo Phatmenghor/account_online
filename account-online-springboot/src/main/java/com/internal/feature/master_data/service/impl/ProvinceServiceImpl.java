@@ -31,7 +31,7 @@ public class ProvinceServiceImpl implements ProvinceService {
     @Override
     public PaginationResponse<ProvinceResponseDto> getAllProvinces(AllMasterDataRequest request) {
         log.info("Fetching all provinces with search: {}", request.getSearch());
-        Pageable pageable = PageRequest.of(request.getPageNo() - 1, request.getPageSize(), Sort.by(Sort.Direction.DESC, "createdAt"));
+        Pageable pageable = com.internal.shared.pagination.PaginationUtil.createPageable(request);
 
         Page<Province> page = provinceRepository.findBySearch(request.getSearch(), pageable);
         List<ProvinceResponseDto> content = provinceMapper.toDtoList(page.getContent());
