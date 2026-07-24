@@ -1,6 +1,7 @@
 "use client";
 
 import { PageHeader } from "@/components/shared/common/page-header";
+import { TableToolbar } from "@/components/shared/common/table-toolbar";
 import { useBranchState } from "@/features/master-data/store/state/branch-state";
 import { setSearchFilter } from "@/features/master-data/store/slices/branch-slice";
 import { createBranchThunk, updateBranchThunk, deleteBranchThunk } from "@/features/master-data/store/thunks/branch-thunks";
@@ -184,22 +185,14 @@ function BranchPageContent() {
       />
       <Card className="h-full flex flex-col">
         <CardContent className="space-y-6 p-6 flex flex-col h-full">
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
-            <div className="relative w-full max-w-sm">
-              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                aria-label="search-branch"
-                autoComplete="search-branch"
-                type="search"
-                placeholder="Search branch..."
-                value={searchQuery}
-                onChange={handleSearchChange}
-                className="pl-8 w-full text-xs h-9"
-                disabled={isSubmitting}
-              />
-            </div>
-            <Button size="sm" onClick={handleAddBranch}>New</Button>
-          </div>
+          <TableToolbar
+            searchQuery={searchQuery}
+            onSearchChange={handleSearchChange}
+            searchPlaceholder="Search branch..."
+            searchAriaLabel="search-branch"
+            disabled={isSubmitting}
+            actions={<Button size="sm" onClick={handleAddBranch}>New</Button>}
+          />
 
           <div className="w-full">
             <Separator className="bg-gray-300" />

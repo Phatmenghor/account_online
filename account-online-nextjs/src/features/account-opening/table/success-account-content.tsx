@@ -64,8 +64,8 @@ export const createSuccessAccountTableColumns = ({
       key: "cif",
       label: "CIF",
       truncate: true,
-      maxWidth: "150px",
-      minWidth: "120px",
+      maxWidth: "250px",
+      minWidth: "20px",
       render: (account) => (
         <span className="font-medium">{account.cif || "---"}</span>
       ),
@@ -94,7 +94,7 @@ export const createSuccessAccountTableColumns = ({
       key: "branchNameKh",
       label: "Branch",
       truncate: true,
-      maxWidth: "200px",
+      maxWidth: "250px",
       minWidth: "150px",
       render: (account) => (
         <span className="font-medium">{account.branchNameKh || "---"}</span>
@@ -104,7 +104,7 @@ export const createSuccessAccountTableColumns = ({
       key: "createdAt",
       label: "Created At",
       truncate: true,
-      maxWidth: "200px",
+      maxWidth: "250px",
       minWidth: "160px",
       render: (account) => (
         <span className="font-medium">

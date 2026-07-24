@@ -4,7 +4,7 @@ import com.internal.config.entity.BaseNoIdEntity;
 import com.internal.enumation.AmlStatusEnum;
 import com.internal.feature.auth.models.UserEntity;
 import lombok.*;
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.util.UUID;
 

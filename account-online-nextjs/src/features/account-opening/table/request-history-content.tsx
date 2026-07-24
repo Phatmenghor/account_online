@@ -34,7 +34,7 @@ export const createRequestHistoryTableColumns = ({
       label: "Status",
       truncate: true,
       maxWidth: "140px",
-      minWidth: "120px",
+      minWidth: "20px",
       render: (record) => {
         const status = record.status || "---";
         let badgeVariant: "default" | "secondary" | "destructive" | "outline" = "outline";
@@ -57,7 +57,7 @@ export const createRequestHistoryTableColumns = ({
       label: "Action By",
       truncate: true,
       maxWidth: "150px",
-      minWidth: "120px",
+      minWidth: "20px",
       render: (record) => (
         <span className="font-medium">{record.actionUsername || "---"}</span>
       ),

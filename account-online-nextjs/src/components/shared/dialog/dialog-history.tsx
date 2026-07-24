@@ -46,7 +46,7 @@ const AmlConfirmDialog = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="bg-white rounded-2xl shadow-xl max-w-[520px] w-full p-6">
+      <div className="bg-white rounded-2xl shadow-xl max-w-3xl w-full p-6">
         {/* Header */}
         <div className="flex items-center gap-4 mb-4">
           {dialogProps.icon}

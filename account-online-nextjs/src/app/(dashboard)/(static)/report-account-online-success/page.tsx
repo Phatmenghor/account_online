@@ -2,6 +2,7 @@
 
 import { Suspense } from "react";
 import { PageHeader } from "@/components/shared/common/page-header";
+import { TableToolbar } from "@/components/shared/common/table-toolbar";
 import { CustomPagination } from "@/components/shared/pagination/custom-pagination";
 import { DataTable } from "@/components/shared/table/data-table";
 import { Card, CardContent } from "@/components/ui/card";
@@ -114,33 +115,29 @@ function ReportSuccessAccountPageContent() {
             />
             <Card className="h-full flex flex-col">
                 <CardContent className="space-y-6 p-6 flex flex-col h-full">
-                    {/* Header */}
-                    <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                        <div className="relative w-full md:w-[350px]">
-                            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                            <Input
-                                aria-label="search-report-account"
-                                type="search"
-                                placeholder="Search by Legal ID or CIF"
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                className="pl-8 w-full min-w-[200px] text-xs md:min-w-[300px] h-9"
-                            />
-                        </div>
-
-                        <div className="flex flex-wrap items-center justify-end gap-2">
-                            <CustomDatePicker
-                                value={fromDate}
-                                onChange={setFromDate}
-                                placeholder="From Date"
-                                className="h-9 text-xs w-[130px]"
-                            />
-                            <CustomDatePicker
-                                value={toDate}
-                                onChange={setToDate}
-                                placeholder="To Date"
-                                className="h-9 text-xs w-[130px]"
-                            />
+                    <TableToolbar
+                        searchQuery={searchQuery}
+                        onSearchChange={(e) => setSearchQuery(e.target.value)}
+                        searchPlaceholder="Search by Legal ID or CIF"
+                        searchAriaLabel="search-report-account"
+                        disabled={isLoading}
+                        leftFilters={
+                            <>
+                                <CustomDatePicker
+                                    value={fromDate}
+                                    onChange={setFromDate}
+                                    placeholder="From Date"
+                                    className="h-9 text-xs w-[130px]"
+                                />
+                                <CustomDatePicker
+                                    value={toDate}
+                                    onChange={setToDate}
+                                    placeholder="To Date"
+                                    className="h-9 text-xs w-[130px]"
+                                />
+                            </>
+                        }
+                        actions={
                             <Button
                                 size="sm"
                                 onClick={handleExportExcel}
@@ -159,8 +156,8 @@ function ReportSuccessAccountPageContent() {
                                     </>
                                 )}
                             </Button>
-                        </div>
-                    </div>
+                        }
+                    />
 
                     <Separator className="bg-gray-300" />
 

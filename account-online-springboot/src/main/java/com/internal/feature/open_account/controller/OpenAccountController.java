@@ -9,7 +9,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
+import reactor.core.publisher.Mono;
+
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/v1/open-account")
@@ -20,16 +22,16 @@ public class OpenAccountController {
     private final OpenAccountService openAccountService;
 
     @PostMapping("/process")
-    public ResponseEntity<ApiResponse<OpenAccountResponseDto>> processAccountOpening(
-            @Valid @RequestBody CustomerRequest request) throws Exception {
+    public Mono<ResponseEntity<ApiResponse<OpenAccountResponseDto>>> processAccountOpening(
+            @Valid @RequestBody CustomerRequest request) {
         log.info("Received account opening request | Legal ID: {}", request.getLegalId());
 
-        OpenAccountResponseDto response = openAccountService.processAccountOpening(request);
-
-        log.info("Account opened successfully | Legal ID: {} | CIF: {} | By: {}",
-                response.getLegalId(), response.getCif(), response.getSubmittedBy());
-
-        return ResponseEntity.ok(ApiResponse.success("Account opened successfully", response));
+        return openAccountService.processAccountOpeningReactive(request)
+                .map(response -> {
+                    log.info("Account opened successfully | Legal ID: {} | CIF: {} | By: {}",
+                            response.getLegalId(), response.getCif(), response.getSubmittedBy());
+                    return ResponseEntity.ok(ApiResponse.success("Account opened successfully", response));
+                });
     }
 }
 

@@ -51,8 +51,8 @@ export const createSuccessAccountExcelTableColumns = ({
       key: "cif",
       label: "CIF",
       truncate: true,
-      maxWidth: "150px",
-      minWidth: "120px",
+      maxWidth: "250px",
+      minWidth: "20px",
       render: (account) => (
         <span className="font-medium">{account.cif || "---"}</span>
       ),
@@ -61,7 +61,7 @@ export const createSuccessAccountExcelTableColumns = ({
       key: "khrAccount",
       label: "KHR Account",
       truncate: true,
-      maxWidth: "200px",
+      maxWidth: "250px",
       minWidth: "160px",
       render: (account) => (
         <span className="font-medium">{account.khrAccount || "---"}</span>
@@ -71,7 +71,7 @@ export const createSuccessAccountExcelTableColumns = ({
       key: "usdAccount",
       label: "USD Account",
       truncate: true,
-      maxWidth: "200px",
+      maxWidth: "250px",
       minWidth: "160px",
       render: (account) => (
         <span className="font-medium">{account.usdAccount || "---"}</span>
@@ -101,7 +101,7 @@ export const createSuccessAccountExcelTableColumns = ({
       key: "branchNameKh",
       label: "Branch NameKh",
       truncate: true,
-      maxWidth: "200px",
+      maxWidth: "250px",
       minWidth: "160px",
       render: (account) => (
         <span className="font-medium">{account.branchNameKh || "---"}</span>
@@ -111,8 +111,8 @@ export const createSuccessAccountExcelTableColumns = ({
       key: "categoryAccount",
       label: "Category",
       truncate: true,
-      maxWidth: "150px",
-      minWidth: "120px",
+      maxWidth: "250px",
+      minWidth: "20px",
       render: (account) => (
         <span className="font-medium">{account.categoryAccount || "---"}</span>
       ),
@@ -121,7 +121,7 @@ export const createSuccessAccountExcelTableColumns = ({
       key: "createdAt",
       label: "Created At",
       truncate: true,
-      maxWidth: "200px",
+      maxWidth: "250px",
       minWidth: "160px",
       render: (account) => (
         <span className="font-medium">

@@ -1,9 +1,9 @@
 package com.internal.shared.logging;
 
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 import org.springframework.core.Ordered;
@@ -31,12 +31,16 @@ public class RequestIdFilter extends OncePerRequestFilter {
     private static final String REQUEST_ID_HEADER = "X-Request-ID";
     private static final String TRACE_ID_HEADER   = "X-Trace-ID";
 
-    // Skip noisy health/metrics probes from access logs
-    private static final Set<String> SKIP_PATHS = Set.of(
-            "/actuator/health",
-            "/actuator/health/liveness",
-            "/actuator/health/readiness",
-            "/actuator/prometheus"
+    // Skip noisy health/metrics probes and static image requests from access logs
+    private static final java.util.List<String> SKIP_PATH_PREFIXES = java.util.List.of(
+            "/actuator/",
+            "/api/images/",
+            "/api/customer-images/",
+            "/api/v1/customer-images/",
+            "/customer-images/",
+            "/images/",
+            "/favicon.ico",
+            "/webjars/"
     );
 
     @Override
@@ -46,8 +50,8 @@ public class RequestIdFilter extends OncePerRequestFilter {
 
         String path = request.getRequestURI();
 
-        // Pass through silently for probe paths
-        if (SKIP_PATHS.contains(path)) {
+        // Pass through silently for image and probe paths
+        if (shouldSkipLogging(path)) {
             chain.doFilter(request, response);
             return;
         }
@@ -88,6 +92,16 @@ public class RequestIdFilter extends OncePerRequestFilter {
 
             MDC.clear();
         }
+    }
+
+    private boolean shouldSkipLogging(String path) {
+        if (path == null) return false;
+        for (String prefix : SKIP_PATH_PREFIXES) {
+            if (path.startsWith(prefix)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private String resolveOrGenerate(HttpServletRequest request) {

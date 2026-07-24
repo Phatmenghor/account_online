@@ -3,7 +3,7 @@ package com.internal.feature.sms_otp.models;
 import com.internal.config.entity.BaseEntity;
 import lombok.*;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity

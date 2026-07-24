@@ -87,8 +87,8 @@ export const createOpeningRequestHistoryTableColumns =
         key: "remark",
         label: "Remark",
         truncate: true,
-        maxWidth: "200px",
-        minWidth: "150px",
+        maxWidth: "250px",
+        minWidth: "20px",
         render: (record) => (
           <span className="text-sm text-gray-600">
             {record.remark || "---"}

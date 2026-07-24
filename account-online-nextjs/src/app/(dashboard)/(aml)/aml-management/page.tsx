@@ -16,6 +16,7 @@ import { ROUTES } from "@/constants/AppRoutes/routes";
 import { usePagination } from "@/hooks/use-pagination";
 import { useDebounce } from "@/utils/debounce/debounce";
 import { PageHeader } from "@/components/shared/common/page-header";
+import { TableToolbar } from "@/components/shared/common/table-toolbar";
 import { Search, ShieldAlert } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -185,22 +186,13 @@ function Management() {
       />
       <Card className="h-full flex flex-col">
         <CardContent className="space-y-6 p-6 flex flex-col h-full">
-          {/* Header */}
-          <div className="flex justify-between">
-            <div className="flex flex-wrap items-center justify-start gap-4 w-full">
-              <div className="relative w-full md:w-[350px]">
-                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  aria-label="search-management"
-                  type="search"
-                  placeholder={"Search management"}
-                  value={searchQuery}
-                  onChange={handleSearchChange}
-                  className="pl-8 w-full min-w-[200px] text-xs md:min-w-[300px] h-9"
-                />
-              </div>
-            </div>
-          </div>
+          <TableToolbar
+            searchQuery={searchQuery}
+            onSearchChange={handleSearchChange}
+            searchPlaceholder="Search management"
+            searchAriaLabel="search-management"
+            disabled={isLoading}
+          />
 
           <Separator className="bg-gray-300" />
 

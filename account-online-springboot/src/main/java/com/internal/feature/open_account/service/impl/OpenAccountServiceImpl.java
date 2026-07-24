@@ -123,6 +123,28 @@ public class OpenAccountServiceImpl implements OpenAccountService {
             throw e;
         }
     }
+
+    @Override
+    public reactor.core.publisher.Mono<OpenAccountResponseDto> processAccountOpeningReactive(CustomerRequest request) {
+        String legalId = request.getLegalId();
+        return reactor.core.publisher.Mono.fromCallable(() -> processAccountOpening(request))
+                .subscribeOn(reactor.core.scheduler.Schedulers.boundedElastic())
+                .doOnCancel(() -> {
+                    log.warn("Account opening process CANCELLED by client/user connection drop | Legal ID: {}", legalId);
+                    try {
+                        reportingService.saveFailureLogs(request,
+                                new RuntimeException("CLIENT_CANCELLED: Account opening cancelled due to client connection drop"),
+                                "CANCELLED_BY_CLIENT",
+                                "User disconnected or closed connection before account opening completed",
+                                false);
+                    } catch (Exception ex) {
+                        log.error("Failed to save cancellation log for Legal ID: {}", legalId, ex);
+                    }
+                })
+                .doOnDiscard(OpenAccountResponseDto.class, response -> {
+                    log.info("Discarding account opening response because connection was terminated prematurely for Legal ID: {}", legalId);
+                });
+    }
 }
 
 

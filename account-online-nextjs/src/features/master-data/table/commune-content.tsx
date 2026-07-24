@@ -61,8 +61,8 @@ export const createCommuneTableColumns = ({
       key: "communeKh",
       label: "Commune (KH)",
       truncate: true,
-      maxWidth: "200px",
-      minWidth: "120px",
+      maxWidth: "250px",
+      minWidth: "20px",
       render: (commune) => (
         <span className="font-medium">{commune.communeKh || "---"}</span>
       ),
@@ -81,7 +81,7 @@ export const createCommuneTableColumns = ({
       key: "districtEn",
       label: "District (EN)",
       truncate: true,
-      maxWidth: "200px",
+      maxWidth: "250px",
       minWidth: "150px",
       render: (commune) => (
         <span className="font-medium">
@@ -93,7 +93,7 @@ export const createCommuneTableColumns = ({
       key: "provinceEn",
       label: "Province (EN)",
       truncate: true,
-      maxWidth: "200px",
+      maxWidth: "250px",
       minWidth: "150px",
       render: (commune) => (
         <span className="font-medium">

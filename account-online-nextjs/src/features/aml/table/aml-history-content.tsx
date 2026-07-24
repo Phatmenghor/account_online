@@ -74,7 +74,7 @@ export const createHistoryTableColumns = ({
     {
       key: "totalRulesScore",
       label: "Score",
-      minWidth: "120px",
+      minWidth: "20px",
       render: (h) => (
         <span className="font-semibold text-gray-700">{h.totalRulesScore || "---"}</span>
       ),

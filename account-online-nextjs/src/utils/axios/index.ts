@@ -307,25 +307,19 @@ const createAxiosInstance = (requiresAuth = false): AxiosInstance => {
 
       // Handle authentication
       if (requiresAuth) {
-        // If this is a retried request that already has a new Authorization header set, do not overwrite it
-        const currentAuth = config.headers?.["Authorization"] || (typeof (config.headers as any)?.get === "function" ? (config.headers as any).get("Authorization") : undefined);
-        const isRetried = (config as any)._retry;
-
-        if (!isRetried || !currentAuth) {
-          const token = getToken();
-          if (token) {
-            if (typeof (config.headers as any)?.set === "function") {
-              (config.headers as any).set("Authorization", `Bearer ${token}`);
-            } else {
-              config.headers["Authorization"] = `Bearer ${token}`;
-            }
+        const token = getToken();
+        if (token) {
+          if (typeof (config.headers as any)?.set === "function") {
+            (config.headers as any).set("Authorization", `Bearer ${token}`);
           } else {
-            logger.warn(
-              "No authentication token for protected route",
-              undefined,
-              requestId,
-            );
+            config.headers["Authorization"] = `Bearer ${token}`;
           }
+        } else {
+          logger.warn(
+            "No authentication token for protected route",
+            undefined,
+            requestId,
+          );
         }
       }
 
@@ -478,12 +472,16 @@ const createAxiosInstance = (requiresAuth = false): AxiosInstance => {
       // Handle 401 Unauthorized with Token Refresh
       if (err.response?.status === 401 && originalRequest && !(originalRequest as any)._retry) {
         if (originalRequest.url?.includes("/api/auth/refresh") || originalRequest.url?.includes("/api/v1/auth/refresh")) {
+          isRefreshing = false;
+          processQueue(error, null);
           logoutToken();
           if (typeof window !== "undefined") {
             window.location.href = "/login";
           }
           return Promise.reject(error);
         }
+
+        (originalRequest as any)._retry = true;
 
         if (isRefreshing) {
           return new Promise((resolve, reject) => {
@@ -503,7 +501,6 @@ const createAxiosInstance = (requiresAuth = false): AxiosInstance => {
             });
         }
 
-        (originalRequest as any)._retry = true;
         isRefreshing = true;
 
         const refreshToken = getRefreshToken();
@@ -524,8 +521,13 @@ const createAxiosInstance = (requiresAuth = false): AxiosInstance => {
           );
 
           // Standard response wrapper from Spring Boot wraps in "data" property
-          const newTokens = response.data.data || response.data;
-          const { accessToken: newAccessToken, refreshToken: newRefreshToken } = newTokens;
+          const newTokens = response.data?.data || response.data;
+          const newAccessToken = newTokens?.accessToken || newTokens?.token;
+          const newRefreshToken = newTokens?.refreshToken || refreshToken;
+
+          if (!newAccessToken) {
+            throw new Error("No access token returned from refresh endpoint");
+          }
 
           storeTokens(newAccessToken, newRefreshToken);
 

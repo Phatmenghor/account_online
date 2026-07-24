@@ -26,10 +26,20 @@ export const PageHeader = () => {
   const [open, setOpen] = useState(false);
   const [showLogout, setShowLogout] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setUser(getUserInfo());
+  }, []);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 10);
+    };
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   useEffect(() => {
@@ -57,8 +67,18 @@ export const PageHeader = () => {
 
   return (
     <>
-      <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-sm">
-        <div className="max-w-5xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-2.5 sm:py-3 flex items-center justify-between gap-3">
+      <header
+        className={`fixed top-0 left-0 right-0 z-50 bg-white transition-all duration-300 ${
+          scrolled
+            ? "shadow-md shadow-slate-200/50 border-b border-slate-200/60"
+            : "border-b border-slate-100"
+        }`}
+      >
+        <div
+          className={`max-w-5xl mx-auto w-full px-4 sm:px-6 flex items-center justify-between gap-3 transition-all duration-300 ${
+            scrolled ? "py-2 sm:py-2.5" : "py-2.5 sm:py-3.5"
+          }`}
+        >
           {/* Logo */}
           <div className="flex items-center flex-shrink-0">
             <img src="/app/CP-bank-Logo.png" alt="CP Bank" className="h-9 sm:h-11 w-auto object-contain" />
@@ -72,7 +92,7 @@ export const PageHeader = () => {
               <div className="relative" ref={dropdownRef}>
                 <button
                   onClick={() => setOpen((v) => !v)}
-                  className="flex items-center gap-2 pl-2 pr-2.5 py-1.5 rounded-xl border border-gray-200 bg-gray-50 hover:bg-gray-100 hover:border-gray-300 transition-all duration-200 group"
+                  className="flex items-center gap-2 pl-2 pr-2.5 py-1.5 rounded-xl border border-slate-200/80 bg-slate-50/60 hover:bg-slate-100/80 hover:border-slate-300 transition-all duration-200 group"
                 >
                   <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-primary flex items-center justify-center flex-shrink-0">
                     <span className="text-xs font-bold text-primary-foreground">{initials}</span>
@@ -88,9 +108,9 @@ export const PageHeader = () => {
 
                 {/* Dropdown */}
                 {open && (
-                  <div className="absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+                  <div className="absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-150">
                     {/* User info header */}
-                    <div className="px-4 py-3.5 bg-gradient-to-br from-primary/5 to-primary/10 border-b border-gray-100">
+                    <div className="px-4 py-3.5 bg-gradient-to-br from-primary/5 to-primary/10 border-b border-slate-100">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center flex-shrink-0 shadow-sm">
                           <span className="text-sm font-bold text-primary-foreground">{initials}</span>
@@ -102,7 +122,7 @@ export const PageHeader = () => {
                     </div>
 
                     {/* Navigation items */}
-                    <div className="p-2 border-b border-gray-100 space-y-0.5">
+                    <div className="p-2 border-b border-slate-100 space-y-0.5">
                       <Link
                         href={ROUTES.MY_PROFILE}
                         onClick={() => setOpen(false)}

@@ -61,8 +61,8 @@ export const createVillageTableColumns = ({
       key: "villageKh",
       label: "Village (KH)",
       truncate: true,
-      maxWidth: "200px",
-      minWidth: "120px",
+      maxWidth: "250px",
+      minWidth: "20px",
       render: (village) => (
         <span className="font-medium">{village.villageKh || "---"}</span>
       ),
@@ -81,7 +81,7 @@ export const createVillageTableColumns = ({
       key: "communeEn",
       label: "Commune (EN)",
       truncate: true,
-      maxWidth: "200px",
+      maxWidth: "250px",
       minWidth: "150px",
       render: (village) => (
         <span className="font-medium">
@@ -93,7 +93,7 @@ export const createVillageTableColumns = ({
       key: "districtEn",
       label: "District (EN)",
       truncate: true,
-      maxWidth: "200px",
+      maxWidth: "250px",
       minWidth: "150px",
       render: (village) => (
         <span className="font-medium">
@@ -105,7 +105,7 @@ export const createVillageTableColumns = ({
       key: "provinceEn",
       label: "Province (EN)",
       truncate: true,
-      maxWidth: "200px",
+      maxWidth: "250px",
       minWidth: "150px",
       render: (village) => (
         <span className="font-medium">

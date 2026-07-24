@@ -11,6 +11,7 @@ import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import java.util.Map;
 
 @Component
@@ -131,7 +132,7 @@ public class HttpClientUtil {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(new MediaType(MediaType.APPLICATION_JSON.getType(),
                 MediaType.APPLICATION_JSON.getSubtype(), StandardCharsets.UTF_8));
-        headers.setAcceptCharset(java.util.Collections.singletonList(StandardCharsets.UTF_8));
+        headers.setAcceptCharset(Collections.singletonList(StandardCharsets.UTF_8));
 
         // Add custom headers if provided
         if (customHeaders != null && !customHeaders.isEmpty()) {

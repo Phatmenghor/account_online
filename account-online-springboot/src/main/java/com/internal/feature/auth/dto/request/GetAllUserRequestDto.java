@@ -6,11 +6,16 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.extern.jackson.Jacksonized;
+
+import java.util.Collections;
+import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
 @Builder
+@Jacksonized
 public class GetAllUserRequestDto {
 
     @Schema(example = "1", defaultValue = "1")
@@ -25,11 +30,11 @@ public class GetAllUserRequestDto {
     @Builder.Default
     private StatusData status = StatusData.ACTIVE;
     private String role;
-    private java.util.List<String> roles;
+    private List<String> roles;
 
-    public java.util.List<String> getRoles() {
+    public List<String> getRoles() {
         if (roles != null && !roles.isEmpty()) return roles;
-        if (role != null && !role.isBlank()) return java.util.Collections.singletonList(role);
+        if (role != null && !role.isBlank()) return Collections.singletonList(role);
         return null;
     }
 }

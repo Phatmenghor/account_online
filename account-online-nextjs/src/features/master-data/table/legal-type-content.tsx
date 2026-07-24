@@ -81,8 +81,8 @@ export const createLegalTypeTableColumns = ({
       key: "legalTypeValue",
       label: "Legal Type Value",
       truncate: true,
-      maxWidth: "200px",
-      minWidth: "120px",
+      maxWidth: "250px",
+      minWidth: "20px",
       render: (legalType) => (
         <span className="font-medium">{legalType.legalTypeValue || "---"}</span>
       ),

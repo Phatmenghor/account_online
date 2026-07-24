@@ -93,8 +93,8 @@ export function DashboardSidebar({
 
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-50 flex flex-col border-r bg-card shadow-lg transition-all duration-300 ease-in-out",
-          isMobile ? "w-64" : isOpen ? "w-64" : "w-16",
+          "flex flex-col border-r bg-card shadow-sm transition-all duration-300 ease-in-out flex-shrink-0 h-screen z-40 relative",
+          isMobile ? "fixed inset-y-0 left-0 z-50 w-64" : isOpen ? "w-64" : "w-16",
         )}
       >
         {/* Header */}
@@ -118,11 +118,7 @@ export function DashboardSidebar({
               href={ROUTES.DASHBOARD.INDEX}
               className="flex items-center justify-center w-full"
             >
-              <img
-                src={AppIcons.APP.APP_LOGO}
-                alt="Logo"
-                className="w-9 h-9"
-              />
+              <img src={AppIcons.APP.APP_LOGO} alt="Logo" className="w-9 h-9" />
             </Link>
           )}
 
@@ -162,13 +158,16 @@ export function DashboardSidebar({
                           <ChevronRight
                             className={cn(
                               "h-3.5 w-3.5 transition-transform duration-200 text-muted-foreground",
-                              openSubmenus[item.title] && "rotate-90 text-primary",
+                              openSubmenus[item.title] &&
+                                "rotate-90 text-primary",
                             )}
                           />
                         </div>
                       ) : (
                         <div className="flex h-9 w-full items-center justify-center rounded-lg px-2 hover:bg-primary/10 hover:text-primary transition-colors group relative">
-                          {item.icon && <item.icon className="h-4 w-4 text-muted-foreground" />}
+                          {item.icon && (
+                            <item.icon className="h-4 w-4 text-muted-foreground" />
+                          )}
                           <div className="absolute left-full ml-2 px-2.5 py-1 bg-popover text-popover-foreground text-xs rounded-md shadow-md opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50">
                             {item.title}
                           </div>
@@ -197,7 +196,7 @@ export function DashboardSidebar({
                                     "absolute -left-2 top-1/2 -translate-y-1/2 w-1.5 border-t-[1.5px] border-dashed transition-colors",
                                     isActive
                                       ? "border-primary"
-                                      : "border-primary/45 group-hover:border-primary"
+                                      : "border-primary/45 group-hover:border-primary",
                                   )}
                                 />
                                 {/* Primary Bullet Dot Indicator */}
@@ -206,7 +205,7 @@ export function DashboardSidebar({
                                     "w-1.5 h-1.5 rounded-full shrink-0 mr-1.5 transition-all duration-150",
                                     isActive
                                       ? "bg-white scale-110"
-                                      : "bg-primary/50 group-hover:bg-primary group-hover:scale-110"
+                                      : "bg-primary/50 group-hover:bg-primary group-hover:scale-110",
                                   )}
                                 />
                                 <span className="truncate">{child.title}</span>
@@ -232,9 +231,18 @@ export function DashboardSidebar({
                           )}
                         >
                           {item.icon && (
-                            <item.icon className={cn("h-4 w-4 shrink-0", isActive ? "text-white" : "text-muted-foreground")} />
+                            <item.icon
+                              className={cn(
+                                "h-4 w-4 shrink-0",
+                                isActive
+                                  ? "text-white"
+                                  : "text-muted-foreground",
+                              )}
+                            />
                           )}
-                          {isOpen && <span className="truncate">{item.title}</span>}
+                          {isOpen && (
+                            <span className="truncate">{item.title}</span>
+                          )}
                           {!isOpen && (
                             <div className="absolute left-full ml-2 px-2.5 py-1 bg-popover text-popover-foreground text-xs rounded-md shadow-md opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50">
                               {item.title}
@@ -252,5 +260,3 @@ export function DashboardSidebar({
     </>
   );
 }
-
-

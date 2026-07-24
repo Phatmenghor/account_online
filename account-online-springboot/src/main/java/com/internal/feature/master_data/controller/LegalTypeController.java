@@ -1,7 +1,9 @@
 package com.internal.feature.master_data.controller;
 
 import com.internal.shared.response.ApiResponse;
-import com.internal.feature.master_data.dto.request.*;
+import com.internal.feature.master_data.dto.request.GetAllLegalTypeRequest;
+import com.internal.feature.master_data.dto.request.LegalTypeCreateRequestDto;
+import com.internal.feature.master_data.dto.request.LegalTypeUpdateRequestDto;
 import com.internal.feature.master_data.dto.response.AllLegalTypeResponseDto;
 import com.internal.feature.master_data.dto.response.LegalTypeDto;
 import com.internal.feature.master_data.service.LegalTypeService;

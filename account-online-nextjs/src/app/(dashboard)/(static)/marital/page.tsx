@@ -1,6 +1,7 @@
 "use client";
 
 import { PageHeader } from "@/components/shared/common/page-header";
+import { TableToolbar } from "@/components/shared/common/table-toolbar";
 import { useMaritalState } from "@/features/master-data/store/state/marital-state";
 import { setSearchFilter } from "@/features/master-data/store/slices/marital-slice";
 import { createMaritalThunk, updateMaritalThunk, deleteMaritalThunk } from "@/features/master-data/store/thunks/marital-thunks";
@@ -184,22 +185,14 @@ function MaritalPageContent() {
       />
       <Card className="h-full flex flex-col">
         <CardContent className="space-y-6 p-6 flex flex-col h-full">
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
-            <div className="relative w-full max-w-sm">
-              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                aria-label="search-marital"
-                autoComplete="search-marital"
-                type="search"
-                placeholder="Search marital status..."
-                value={searchQuery}
-                onChange={handleSearchChange}
-                className="pl-8 w-full text-xs h-9"
-                disabled={isSubmitting}
-              />
-            </div>
-            <Button size="sm" onClick={handleAddMarital}>New</Button>
-          </div>
+          <TableToolbar
+            searchQuery={searchQuery}
+            onSearchChange={handleSearchChange}
+            searchPlaceholder="Search marital status..."
+            searchAriaLabel="search-marital"
+            disabled={isSubmitting}
+            actions={<Button size="sm" onClick={handleAddMarital}>New</Button>}
+          />
 
           <div className="w-full">
             <Separator className="bg-gray-300" />

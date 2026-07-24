@@ -53,28 +53,22 @@ export default function DashboardLayout({
 
   return (
     <div className="flex h-screen w-full overflow-hidden bg-background">
-      {/* Sidebar - Fixed, no scroll */}
+      {/* Sidebar - Flex sidebar */}
       <DashboardSidebar
         isOpen={isSidebarOpen}
         onToggle={() => setIsSidebarOpen(!isSidebarOpen)}
       />
 
-      {/* Main Content Area - Flex column with scroll only in content */}
-      <div
-        className={cn(
-          "flex flex-1 flex-col h-screen overflow-hidden transition-all duration-300 ease-in-out",
-          isMobile ? "ml-0" : isSidebarOpen ? "ml-64" : "ml-16"
-        )}
-      >
+      {/* Main Content Area - Flex column taking full remaining width without right overflow */}
+      <div className="flex flex-1 flex-col h-screen overflow-hidden min-w-0">
         {/* TopBar - Fixed at top, no scroll */}
         <TopBar onMenuClick={() => setIsSidebarOpen(!isSidebarOpen)} />
 
         {/* Main Content - ONLY THIS SCROLLS */}
-        <main className="flex-1 overflow-y-auto overflow-x-hidden px-2.5 py-2.5 sm:px-4 sm:py-3">
-          <div className="mx-auto text-xs sm:text-xs md:text-sm max-w-[1600px] [zoom:0.9] sm:[zoom:0.92] md:[zoom:0.95]">{children}</div>
+        <main className="flex-1 overflow-y-auto overflow-x-hidden p-4 sm:p-6">
+          <div className="w-full text-xs sm:text-xs md:text-sm">{children}</div>
         </main>
       </div>
     </div>
   );
 }
-

@@ -5,14 +5,14 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "refresh_tokens",
+@Table(name = "acc_online_refresh_tokens",
         indexes = {
-                @Index(name = "idx_refresh_tokens_user_id",    columnList = "user_id"),
-                @Index(name = "idx_refresh_tokens_expiry_date", columnList = "expiry_date")
+                @Index(name = "idx_acc_online_refresh_tokens_user_id",    columnList = "user_id"),
+                @Index(name = "idx_acc_online_refresh_tokens_expiry_date", columnList = "expiry_date")
         }
 )
 @Data

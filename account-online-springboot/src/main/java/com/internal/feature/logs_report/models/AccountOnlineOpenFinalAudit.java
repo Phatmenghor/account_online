@@ -4,7 +4,7 @@ import com.internal.config.entity.BaseNoIdEntity;
 import com.internal.feature.auth.models.UserEntity;
 import lombok.*;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.util.UUID;
 
 @EqualsAndHashCode(callSuper = true)

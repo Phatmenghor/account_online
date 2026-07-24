@@ -46,13 +46,13 @@ const fadeUp: Variants = {
 };
 
 const SectionLabel = ({ label }: { label: string }) => (
-  <div className="flex items-center gap-2 mb-4 pb-2 border-b border-gray-200/80">
-    <div className="w-1 h-4 rounded-full bg-slate-400 flex-shrink-0" />
-    <p className="text-xs sm:text-sm font-bold uppercase tracking-wider text-gray-700">{label}</p>
+  <div className="flex items-center gap-2 mb-4 pb-2 border-b border-slate-100">
+    <div className="w-1 h-4 rounded-full bg-slate-300 flex-shrink-0" />
+    <p className="text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-700">{label}</p>
   </div>
 );
 
-const Divider = () => <div className="border-t border-gray-200/70" />;
+const Divider = () => <div className="border-t border-slate-100" />;
 
 interface OpenAccountContentProps {
   // true for the public self-service ("/") flow: hides category selection,
@@ -416,7 +416,7 @@ export function OpenAccountContent({ isPublic = false }: OpenAccountContentProps
 
           {/* ── Form Card ── */}
           <div className="max-w-5xl mx-auto w-full px-3 sm:px-5 lg:px-8 py-4 sm:py-6">
-            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm">
+            <div className="bg-white rounded-2xl border border-slate-100 shadow-sm shadow-slate-100/60">
 
               {/* ── Document Upload ── */}
               <div className="p-5 sm:p-6">
@@ -489,7 +489,7 @@ export function OpenAccountContent({ isPublic = false }: OpenAccountContentProps
               </div>
 
               {/* ── Action Bar ── */}
-              <div className="px-5 sm:px-6 py-4 border-t border-gray-100 bg-gray-50/50 rounded-b-xl flex flex-col sm:flex-row sm:justify-end items-stretch sm:items-center gap-3">
+              <div className="px-5 sm:px-6 py-4 border-t border-slate-100 bg-slate-50/50 rounded-b-2xl flex flex-col sm:flex-row sm:justify-end items-stretch sm:items-center gap-3">
                 {/* Verify button */}
                 <Button
                   className={`w-full sm:w-auto min-w-[130px] h-10 font-semibold rounded-xl text-sm gap-1.5 transition-all ${

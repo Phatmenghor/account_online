@@ -58,8 +58,8 @@ export const AccountImages: React.FC<AccountImagesProps> = ({
             ? "border-red-300 bg-red-50/40 hover:border-red-400"
             : preview
             ? "border-primary/30 bg-gray-50 hover:border-primary"
-            : "border-gray-200 bg-gray-50/60 hover:border-primary hover:bg-primary/5",
-          disabled ? "opacity-60 cursor-not-allowed" : "active:scale-[0.995]",
+            : "border-slate-200/80 bg-slate-50/50 hover:border-primary hover:bg-primary/5",
+          disabled ? "opacity-60 cursor-not-allowed" : "",
         ].join(" ")}
       >
         {preview ? (

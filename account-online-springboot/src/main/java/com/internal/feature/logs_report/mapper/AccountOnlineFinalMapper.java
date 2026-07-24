@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Mapper(componentModel = "spring", uses = {UserMapper.class})
 public interface AccountOnlineFinalMapper {
@@ -36,7 +37,7 @@ public interface AccountOnlineFinalMapper {
                 .userRole(user.getRoles() != null && !user.getRoles().isEmpty()
                         ? user.getRoles().stream()
                             .map(r -> r.getName().name())
-                            .collect(java.util.stream.Collectors.joining(", "))
+                            .collect(Collectors.joining(", "))
                         : null)
                 .build();
     }

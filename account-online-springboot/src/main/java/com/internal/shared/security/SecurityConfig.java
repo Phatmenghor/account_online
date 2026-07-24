@@ -5,7 +5,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
@@ -18,11 +18,11 @@ import org.springframework.security.web.firewall.HttpFirewall;
 import org.springframework.security.web.firewall.StrictHttpFirewall;
 
 /**
- * Security configuration with JWT authentication and request logging.
+ * Security configuration with JWT authentication and request logging for Spring Boot 3 / Spring Security 6.
  */
 @Configuration
 @EnableWebSecurity
-@EnableGlobalMethodSecurity(prePostEnabled = true)
+@EnableMethodSecurity(prePostEnabled = true)
 @RequiredArgsConstructor
 public class SecurityConfig {
 
@@ -32,27 +32,25 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http, JWTAuthenticationFilter jwtAuthenticationFilter) throws Exception {
         http
-                .cors().and()
-                .csrf().disable()
-                .exceptionHandling()
-                .authenticationEntryPoint(authEntryPoint)
-                .and()
-                .sessionManagement()
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                .and()
-                .authorizeRequests()
-                .antMatchers("/api/v1/auth/**").permitAll()
-                .antMatchers("/api/v1/public/**").permitAll()
-                .antMatchers("/api/public/**").permitAll()
-                .antMatchers("/api/v1/enum/**").permitAll()
-                .antMatchers("/api/images/**").permitAll()
-                .antMatchers("/api/customer-images/**").permitAll()
-                .antMatchers("/api/v1/staff/**").permitAll()
-                .antMatchers("/api/v1/open-account/process").permitAll()
-                .antMatchers("/swagger-ui/**","/swagger-ui.html" , "/v3/api-docs/**").permitAll()
-                .anyRequest().authenticated()
-                .and()
-                .httpBasic();
+                .cors(cors -> cors.configure(http))
+                .csrf(csrf -> csrf.disable())
+                .exceptionHandling(ex -> ex.authenticationEntryPoint(authEntryPoint))
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/api/v1/auth/**").permitAll()
+                        .requestMatchers("/api/v1/public/**").permitAll()
+                        .requestMatchers("/api/public/**").permitAll()
+                        .requestMatchers("/api/v1/enum/**").permitAll()
+                        .requestMatchers("/api/images/**").permitAll()
+                        .requestMatchers("/api/customer-images/**").permitAll()
+                        .requestMatchers("/api/v1/customer-images/**").permitAll()
+                        .requestMatchers("/customer-images/**").permitAll()
+                        .requestMatchers("/images/**").permitAll()
+                        .requestMatchers("/api/v1/staff/**").permitAll()
+                        .requestMatchers("/api/v1/open-account/process").permitAll()
+                        .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()
+                        .anyRequest().authenticated()
+                );
 
         // Add request logging filter first to capture all requests
         http.addFilterBefore(requestLoggingFilter, UsernamePasswordAuthenticationFilter.class);

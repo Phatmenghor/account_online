@@ -1,6 +1,7 @@
 "use client";
 
 import { PageHeader } from "@/components/shared/common/page-header";
+import { TableToolbar } from "@/components/shared/common/table-toolbar";
 import { useCommuneState } from "@/features/master-data/store/state/commune-state";
 import { setSearchFilter } from "@/features/master-data/store/slices/commune-slice";
 import { createCommuneThunk, updateCommuneThunk, deleteCommuneThunk } from "@/features/master-data/store/thunks/commune-thunks";
@@ -183,22 +184,14 @@ function CommunePageContent() {
       />
       <Card className="h-full flex flex-col">
         <CardContent className="space-y-6 p-6 flex flex-col h-full">
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
-            <div className="relative w-full max-w-sm">
-              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                aria-label="search-commune"
-                autoComplete="search-commune"
-                type="search"
-                placeholder="Search communes..."
-                value={searchQuery}
-                onChange={handleSearchChange}
-                className="pl-8 w-full text-xs h-9"
-                disabled={isSubmitting}
-              />
-            </div>
-            <Button size="sm" onClick={handleAddCommune}>New</Button>
-          </div>
+          <TableToolbar
+            searchQuery={searchQuery}
+            onSearchChange={handleSearchChange}
+            searchPlaceholder="Search communes..."
+            searchAriaLabel="search-commune"
+            disabled={isSubmitting}
+            actions={<Button size="sm" onClick={handleAddCommune}>New</Button>}
+          />
 
           <div className="w-full">
             <Separator className="bg-gray-300" />

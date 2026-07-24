@@ -2,7 +2,7 @@ package com.internal.feature.auth.dto.request;
 
 import lombok.Data;
 
-import javax.validation.constraints.*;
+import jakarta.validation.constraints.*;
 
 @Data
 public class RegisterInitiateDto {

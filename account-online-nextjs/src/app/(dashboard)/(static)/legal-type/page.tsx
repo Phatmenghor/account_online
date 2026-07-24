@@ -1,6 +1,7 @@
 "use client";
 
 import { PageHeader } from '@/components/shared/common/page-header';
+import { TableToolbar } from "@/components/shared/common/table-toolbar";
 
 import { useLegalTypeState } from '@/features/master-data/store/state/legaltype-state';
 import { setPageNo, setSearchFilter, setStatusFilter } from '@/features/master-data/store/slices/legaltype-slice';
@@ -212,22 +213,14 @@ function LegalTypePageContent() {
       />
       <Card className="h-full flex flex-col">
       <CardContent className="space-y-6 p-6 flex flex-col h-full">
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
-          <div className="relative w-full max-w-sm">
-            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              aria-label="search-legaltype"
-              autoComplete="search-legaltype"
-              type="search"
-              placeholder="Search legal type..."
-              value={searchQuery}
-              onChange={handleSearchChange}
-              className="pl-8 w-full text-xs h-9"
-              disabled={isSubmitting}
-            />
-          </div>
-          <Button size="sm" onClick={handleAddLegalType}>New</Button>
-        </div>
+        <TableToolbar
+            searchQuery={searchQuery}
+            onSearchChange={handleSearchChange}
+            searchPlaceholder="Search legal type..."
+            searchAriaLabel="search-legaltype"
+            disabled={isSubmitting}
+            actions={<Button size="sm" onClick={handleAddLegalType}>New</Button>}
+          />
 
         <div className="w-full">
           <Separator className="bg-gray-300" />

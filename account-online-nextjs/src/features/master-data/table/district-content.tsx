@@ -61,8 +61,8 @@ export const createDistrictTableColumns = ({
       key: "districtKh",
       label: "District (KH)",
       truncate: true,
-      maxWidth: "200px",
-      minWidth: "120px",
+      maxWidth: "250px",
+      minWidth: "20px",
       render: (district) => (
         <span className="font-medium">{district.districtKh || "---"}</span>
       ),
@@ -81,7 +81,7 @@ export const createDistrictTableColumns = ({
       key: "provinceEn",
       label: "Province (EN)",
       truncate: true,
-      maxWidth: "200px",
+      maxWidth: "250px",
       minWidth: "150px",
       render: (district) => (
         <span className="font-medium">

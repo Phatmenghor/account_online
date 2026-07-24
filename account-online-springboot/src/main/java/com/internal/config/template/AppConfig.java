@@ -1,17 +1,22 @@
 package com.internal.config.template;
 
-import org.apache.http.conn.ssl.NoopHostnameVerifier;
-import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.ssl.SSLContextBuilder;
+import org.apache.hc.client5.http.config.RequestConfig;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
+import org.apache.hc.client5.http.ssl.NoopHostnameVerifier;
+import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactoryBuilder;
+import org.apache.hc.core5.http.io.SocketConfig;
+import org.apache.hc.core5.ssl.SSLContextBuilder;
+import org.apache.hc.core5.util.Timeout;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.BufferingClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.client.config.RequestConfig;
+
+import javax.net.ssl.SSLContext;
 
 @Configuration
 public class AppConfig {
@@ -19,21 +24,28 @@ public class AppConfig {
     @Bean
     public RestTemplate restTemplate() {
         try {
-            // 5 minutes (300s) timeout for slow operations: Account Opening, T24, CAMDX
-            RequestConfig requestConfig = RequestConfig.custom()
-                    .setConnectTimeout(300000)
-                    .setSocketTimeout(300000)
-                    .setConnectionRequestTimeout(300000)
+            SSLContext sslContext = SSLContextBuilder.create()
+                    .loadTrustMaterial(null, (chain, authType) -> true)
                     .build();
 
-            // Trust all certificates for internal servers that use self-signed certs
-            SSLConnectionSocketFactory sslSocketFactory = new SSLConnectionSocketFactory(
-                    SSLContextBuilder.create().loadTrustMaterial(null, (chain, authType) -> true).build(),
-                    NoopHostnameVerifier.INSTANCE);
+            var connectionManager = PoolingHttpClientConnectionManagerBuilder.create()
+                    .setSSLSocketFactory(SSLConnectionSocketFactoryBuilder.create()
+                            .setSslContext(sslContext)
+                            .setHostnameVerifier(NoopHostnameVerifier.INSTANCE)
+                            .build())
+                    .setDefaultSocketConfig(SocketConfig.custom()
+                            .setSoTimeout(Timeout.ofMinutes(5))
+                            .build())
+                    .build();
 
-            CloseableHttpClient httpClient = HttpClientBuilder.create()
+            RequestConfig requestConfig = RequestConfig.custom()
+                    .setConnectTimeout(Timeout.ofMinutes(5))
+                    .setConnectionRequestTimeout(Timeout.ofMinutes(5))
+                    .build();
+
+            CloseableHttpClient httpClient = HttpClients.custom()
+                    .setConnectionManager(connectionManager)
                     .setDefaultRequestConfig(requestConfig)
-                    .setSSLSocketFactory(sslSocketFactory)
                     .build();
 
             ClientHttpRequestFactory factory = new BufferingClientHttpRequestFactory(
@@ -51,19 +63,28 @@ public class AppConfig {
     @Bean(name = "mobileBankingRestTemplate")
     public RestTemplate mobileBankingRestTemplate() {
         try {
-            RequestConfig requestConfig = RequestConfig.custom()
-                    .setConnectTimeout(30000)
-                    .setSocketTimeout(30000)
-                    .setConnectionRequestTimeout(30000)
+            SSLContext sslContext = SSLContextBuilder.create()
+                    .loadTrustMaterial(null, (chain, authType) -> true)
                     .build();
 
-            SSLConnectionSocketFactory sslSocketFactory = new SSLConnectionSocketFactory(
-                    SSLContextBuilder.create().loadTrustMaterial(null, (chain, authType) -> true).build(),
-                    NoopHostnameVerifier.INSTANCE);
+            var connectionManager = PoolingHttpClientConnectionManagerBuilder.create()
+                    .setSSLSocketFactory(SSLConnectionSocketFactoryBuilder.create()
+                            .setSslContext(sslContext)
+                            .setHostnameVerifier(NoopHostnameVerifier.INSTANCE)
+                            .build())
+                    .setDefaultSocketConfig(SocketConfig.custom()
+                            .setSoTimeout(Timeout.ofSeconds(30))
+                            .build())
+                    .build();
 
-            CloseableHttpClient httpClient = HttpClientBuilder.create()
+            RequestConfig requestConfig = RequestConfig.custom()
+                    .setConnectTimeout(Timeout.ofSeconds(30))
+                    .setConnectionRequestTimeout(Timeout.ofSeconds(30))
+                    .build();
+
+            CloseableHttpClient httpClient = HttpClients.custom()
+                    .setConnectionManager(connectionManager)
                     .setDefaultRequestConfig(requestConfig)
-                    .setSSLSocketFactory(sslSocketFactory)
                     .build();
 
             ClientHttpRequestFactory factory = new BufferingClientHttpRequestFactory(

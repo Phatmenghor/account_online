@@ -2,10 +2,19 @@ package com.internal.feature.auth.service.impl;
 
 import com.internal.enumation.RoleEnum;
 import com.internal.enumation.StatusData;
-import com.internal.shared.exception.custom.*;
-import com.internal.feature.auth.dto.request.*;
+import com.internal.feature.auth.dto.request.ChangePasswordByAdminRequestDto;
+import com.internal.feature.auth.dto.request.ChangePasswordRequestDto;
+import com.internal.feature.auth.dto.request.ForceChangePasswordRequestDto;
+import com.internal.feature.auth.dto.request.LoginRequestDto;
+import com.internal.feature.auth.dto.request.RegisterInitiateDto;
+import com.internal.feature.auth.dto.request.RegisterRequestDto;
+import com.internal.feature.auth.dto.request.UpdateUserRequestDto;
 import com.internal.feature.auth.dto.response.AuthResponseDTO;
 import com.internal.feature.auth.dto.response.UserResponseDto;
+import com.internal.shared.exception.custom.BadRequestException;
+import com.internal.shared.exception.custom.DuplicateNameException;
+import com.internal.shared.exception.custom.ResourceNotFoundException;
+import com.internal.shared.exception.custom.UnauthorizedException;
 import com.internal.feature.auth.mapper.AuthMapper;
 import com.internal.feature.auth.mapper.UserMapper;
 import com.internal.feature.auth.models.Role;
@@ -26,11 +35,18 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service

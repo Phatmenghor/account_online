@@ -1147,7 +1147,14 @@ gmp-placeautocomplete {
   --radius-modal: 1.25rem; /* rounded-t-2xl */
 }
 
-/* Reset layout constraints for mobile apps */
+/* Reset layout constraints & prevent layout shifts when Radix Select/Popover opens */
+body[data-scroll-locked],
+html[data-scroll-locked] {
+  padding-right: 0px !important;
+  margin-right: 0px !important;
+  overflow: auto !important;
+}
+
 html, body {
   -webkit-tap-highlight-color: transparent !important;
 }

@@ -5,6 +5,13 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { PageSizeSelectField } from "@/components/shared/form-field/page-size-select-field";
 import { cn } from "@/lib/utils";
 import { CustomButton } from "@/components/shared/button/custom-button";
+import { DEFAULT_TABLE_CONFIG } from "@/config/table-config";
+
+const getColumnStyle = (column: TableColumn<any>) => ({
+  ...(column.width ? { width: column.width } : {}),
+  maxWidth: column.maxWidth || DEFAULT_TABLE_CONFIG.maxWidth,
+  minWidth: column.minWidth || DEFAULT_TABLE_CONFIG.minWidth,
+});
 
 const PAGINATION_ITEMS_THRESHOLD = 7;
 const PAGINATION_START_OFFSET = 2;
@@ -192,11 +199,7 @@ export function DataTableWithPagination<T = any>({
                     className={`px-3 py-2 text-left font-semibold text-xs text-muted-foreground border-b border-border ${
                       column.className || ""
                     }`}
-                    style={{
-                      ...(column.width && { width: column.width }),
-                      ...(column.maxWidth && { maxWidth: column.maxWidth }),
-                      ...(column.minWidth && { minWidth: column.minWidth }),
-                    }}
+                    style={getColumnStyle(column)}
                   >
                     {column.label}
                   </th>
@@ -210,11 +213,7 @@ export function DataTableWithPagination<T = any>({
                     <td
                       key={column.key}
                       className="px-3 py-2 border-b border-border/50"
-                      style={{
-                        ...(column.width && { width: column.width }),
-                        ...(column.maxWidth && { maxWidth: column.maxWidth }),
-                        ...(column.minWidth && { minWidth: column.minWidth }),
-                      }}
+                        style={getColumnStyle(column)}
                     >
                       <div className="h-3 bg-muted animate-pulse rounded" />
                     </td>
@@ -290,11 +289,7 @@ export function DataTableWithPagination<T = any>({
                   className={`px-3 py-2 text-left font-semibold text-xs text-muted-foreground border-b border-border ${
                     column.className || ""
                   }`}
-                  style={{
-                    ...(column.width && { width: column.width }),
-                    ...(column.maxWidth && { maxWidth: column.maxWidth }),
-                    ...(column.minWidth && { minWidth: column.minWidth }),
-                  }}
+                  style={getColumnStyle(column)}
                 >
                   {column.label}
                 </th>
@@ -331,11 +326,7 @@ export function DataTableWithPagination<T = any>({
                         className={`px-3 py-2 border-b border-border/50 ${
                           column.className || ""
                         }`}
-                        style={{
-                          ...(column.width && { width: column.width }),
-                          ...(column.maxWidth && { maxWidth: column.maxWidth }),
-                          ...(column.minWidth && { minWidth: column.minWidth }),
-                        }}
+                        style={getColumnStyle(column)}
                       >
                         <div
                           className={`whitespace-nowrap ${

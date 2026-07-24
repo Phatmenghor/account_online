@@ -32,7 +32,7 @@ import org.springframework.web.client.ResourceAccessException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.multipart.MultipartException;
 
-import javax.validation.ConstraintViolationException;
+import jakarta.validation.ConstraintViolationException;
 import java.io.EOFException;
 import java.net.SocketTimeoutException;
 import java.sql.SQLException;
@@ -252,19 +252,25 @@ public class GlobalExceptionHandler {
         return buildErrorResponse(HttpStatus.NOT_FOUND, "No active OTP found. Please request a new OTP.", details);
     }
 
+    @ExceptionHandler(org.springframework.dao.DataAccessException.class)
+    public ResponseEntity<ApiResponse<Object>> handleDatabaseExceptions(org.springframework.dao.DataAccessException ex) {
+        log.error("Database error occurred: {}", ex.getMessage());
+        return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Database operation error. Please verify table schema.");
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Object>> handleAllExceptions(Exception ex) {
         Throwable cause = ex;
         while (cause != null) {
             if (cause instanceof AccountCreationException) {
                 String msg = cause.getMessage();
-                log.error("Account creation exception propagated: {}", msg, ex);
+                log.error("Account creation exception propagated: {}", msg);
                 return buildErrorResponse(HttpStatus.BAD_REQUEST, msg);
             }
             cause = cause.getCause();
         }
 
-        log.error("Unhandled exception: {}", ex.getMessage(), ex);
+        log.error("Unhandled exception: {}", ex.getMessage());
         return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, AppConstants.MSG_GENERIC_ERROR);
     }
 

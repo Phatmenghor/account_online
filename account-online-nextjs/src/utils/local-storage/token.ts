@@ -25,7 +25,7 @@ function getMaxAgeFromToken(
     if (decoded?.exp) {
       const now = Math.floor(Date.now() / 1000);
       const remaining = decoded.exp - now;
-      if (remaining > 0) return remaining;
+      if (remaining > 60) return remaining;
     }
   } catch {
     // ignore

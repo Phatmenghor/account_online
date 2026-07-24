@@ -86,8 +86,8 @@ export const createOccupationTableColumns = ({
       key: "occupationCode",
       label: "Occupation Code",
       truncate: true,
-      maxWidth: "200px",
-      minWidth: "120px",
+      maxWidth: "250px",
+      minWidth: "20px",
       render: (occupation) => (
         <span className="font-medium">
           {occupation.occupationCode || "---"}

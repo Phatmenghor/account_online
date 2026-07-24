@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -29,7 +30,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     public RefreshToken createRefreshToken(UserEntity user, String ipAddress, String deviceInfo) {
         List<String> roles = user.getRoles().stream()
                 .map(r -> "ROLE_" + r.getName().name().toUpperCase())
-                .collect(java.util.stream.Collectors.toList());
+                .collect(Collectors.toList());
 
         String tokenString = jwtGenerator.generateRefreshTokenForUser(user.getUsername(), roles);
         LocalDateTime expiryDate = LocalDateTime.now().plusMinutes(jwtProperties.getRefreshTokenExpirationMin());
@@ -56,14 +57,19 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
             return Optional.empty();
         }
 
-        Optional<RefreshToken> opt = refreshTokenRepository.findByTokenAndIsValidTrue(token);
+        Optional<RefreshToken> opt = refreshTokenRepository.findByToken(token);
         if (opt.isEmpty()) {
-            log.warn("Refresh token verification failed - token not found in database or expired/revoked");
+            log.warn("Refresh token verification failed - token not found in database");
             return Optional.empty();
         }
 
         RefreshToken refreshToken = opt.get();
-        if (!refreshToken.isValid()) {
+        // Allow a 30-second grace window for token rotation race conditions (concurrent requests)
+        boolean isRecentlyRotated = Boolean.TRUE.equals(refreshToken.getIsRevoked())
+                && refreshToken.getRevokedAt() != null
+                && refreshToken.getRevokedAt().isAfter(LocalDateTime.now().minusSeconds(30));
+
+        if (!isRecentlyRotated && !refreshToken.isValid()) {
             log.warn("Refresh token verification failed - invalid state: expired={}, revoked={}",
                     refreshToken.isExpired(), refreshToken.getIsRevoked());
             return Optional.empty();

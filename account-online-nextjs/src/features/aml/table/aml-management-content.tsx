@@ -54,8 +54,8 @@ export const createManagementTableColumns = ({
       key: "legalId",
       label: "ID Number",
       truncate: true,
-      maxWidth: "200px",
-      minWidth: "150px",
+      maxWidth: "250px",
+      minWidth: "20px",
       render: (m) => (
         <span className="font-medium">{m.customerInfo?.legalId || "---"}</span>
       ),
@@ -80,8 +80,8 @@ export const createManagementTableColumns = ({
       key: "riskLevel",
       label: "Risk Level",
       truncate: true,
-      maxWidth: "120px",
-      minWidth: "120px",
+      maxWidth: "250px",
+      minWidth: "20px",
       render: (m) => <RiskBadge riskLevel={m.riskLevel || "---"} />,
     },
 

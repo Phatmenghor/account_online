@@ -1,6 +1,6 @@
 package com.internal.shared.logging;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -41,7 +41,7 @@ public class LoggingAspect {
             return result;
         } catch (Throwable ex) {
             long duration = System.currentTimeMillis() - start;
-            log.error("Request failed endpoint={} [duration={}ms, user={}] with message={}", uri, duration, username, ex.getMessage());
+            log.warn("Request failed endpoint={} [duration={}ms, user={}] - {}", uri, duration, username, ex.getMessage());
             throw ex;
         }
     }
@@ -62,7 +62,7 @@ public class LoggingAspect {
             return result;
         } catch (Throwable ex) {
             long duration = System.currentTimeMillis() - start;
-            log.error("Exception in service method: {} [duration={}ms] with message={}", methodName, duration, ex.getMessage());
+            log.debug("Exception in service method: {} [duration={}ms] - {}", methodName, duration, ex.getMessage());
             throw ex;
         }
     }

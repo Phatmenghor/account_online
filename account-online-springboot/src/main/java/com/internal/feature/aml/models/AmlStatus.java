@@ -6,7 +6,7 @@ import com.internal.feature.auth.models.UserEntity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 @EqualsAndHashCode(callSuper = true)
 @Entity

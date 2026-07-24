@@ -11,6 +11,7 @@ import { ROUTES } from "@/constants/AppRoutes/routes";
 import { usePagination } from "@/hooks/use-pagination";
 import { useDebounce } from "@/utils/debounce/debounce";
 import { PageHeader } from "@/components/shared/common/page-header";
+import { TableToolbar } from "@/components/shared/common/table-toolbar";
 import { Search, History as HistoryIcon } from "lucide-react";
 import Loading from "@/components/shared/common/loading";
 import { createHistoryTableColumns } from "@/features/aml/table/aml-history-content";
@@ -101,56 +102,39 @@ function History() {
       />
       <Card className="h-full flex flex-col">
         <CardContent className="space-y-6 p-6 flex flex-col h-full">
-          {/* HEADER */}
-          <div className="flex flex-wrap gap-4 items-end">
-            {/* Search */}
-            <div className="relative w-full max-w-sm">
-              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                aria-label="search-history"
-                type="search"
-                placeholder="Search history..."
-                value={searchQuery}
-                onChange={handleSearchChange}
-                className="pl-8 w-full text-xs h-9"
-              />
-            </div>
-
-            {/* Status Filter */}
-            <div className="w-[150px]">
-              <AmlStatusFilter
-                selectedStatus={statusFilter}
-                onChange={handleStatusChange}
-              />
-            </div>
-
-            {/* Start Date */}
-            <div className="w-[170px]">
-              <span className="text-[10px] text-muted-foreground block mb-1">
-                Start Date
-              </span>
-              <CustomDatePicker
-                value={startDate || ""}
-                onChange={setStartDate}
-                placeholder="Start Date"
-                className="w-full"
-              />
-            </div>
-
-            {/* End Date */}
-            <div className="w-[170px]">
-              <span className="text-[10px] text-muted-foreground block mb-1">
-                End Date
-              </span>
-              <CustomDatePicker
-                value={endDate || ""}
-                onChange={setEndDate}
-                placeholder="End Date"
-                className="w-full"
-              />
-            </div>
-
-          </div>
+          <TableToolbar
+            searchQuery={searchQuery}
+            onSearchChange={handleSearchChange}
+            searchPlaceholder="Search history..."
+            searchAriaLabel="search-history"
+            disabled={isLoading}
+            leftFilters={
+              <div className="flex flex-wrap items-center gap-3">
+                <div className="w-[150px]">
+                  <AmlStatusFilter
+                    selectedStatus={statusFilter}
+                    onChange={handleStatusChange}
+                  />
+                </div>
+                <div className="w-[160px]">
+                  <CustomDatePicker
+                    value={startDate || ""}
+                    onChange={setStartDate}
+                    placeholder="Start Date"
+                    className="w-full"
+                  />
+                </div>
+                <div className="w-[160px]">
+                  <CustomDatePicker
+                    value={endDate || ""}
+                    onChange={setEndDate}
+                    placeholder="End Date"
+                    className="w-full"
+                  />
+                </div>
+              </div>
+            }
+          />
 
           <Separator className="bg-gray-300" />
 
