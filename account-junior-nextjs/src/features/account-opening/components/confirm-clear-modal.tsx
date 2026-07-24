@@ -1,0 +1,87 @@
+"use client";
+
+import { motion, AnimatePresence } from "framer-motion";
+import { Trash2, X } from "lucide-react";
+
+interface ConfirmClearModalProps {
+    isOpen: boolean;
+    onClose: () => void;
+    onConfirm: () => void;
+    title: string;
+    message?: string;
+}
+
+export const ConfirmClearModal = ({
+    isOpen,
+    onClose,
+    onConfirm,
+    title,
+    message,
+}: ConfirmClearModalProps) => {
+    return (
+        <AnimatePresence>
+            {isOpen && (
+                <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        onClick={onClose}
+                        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+                    />
+
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.96, y: 12 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.96, y: 12 }}
+                        transition={{ duration: 0.2, ease: "easeOut" }}
+                        className="relative bg-white w-full max-w-[480px] rounded-2xl shadow-xl overflow-hidden z-10 border border-gray-100"
+                    >
+                        {/* Header */}
+                        <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between bg-white">
+                            <div className="flex items-center gap-2.5">
+                                <div className="w-8 h-8 rounded-lg bg-red-50 flex items-center justify-center text-red-500 flex-shrink-0">
+                                    <Trash2 className="w-4 h-4" />
+                                </div>
+                                <h3 className="text-base font-bold text-gray-900 tracking-tight">{title || "Clear Form?"}</h3>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={onClose}
+                                className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+                            >
+                                <X className="w-4.5 h-4.5" />
+                            </button>
+                        </div>
+
+                        {/* Body */}
+                        <div className="p-6 text-center sm:text-left">
+                            <p className="text-sm text-gray-600 leading-relaxed">
+                                {message || "Are you sure you want to clear all fields? This action cannot be undone."}
+                            </p>
+                        </div>
+
+                        {/* Footer */}
+                        <div className="px-6 py-4 border-t border-gray-100 bg-gray-50/80 flex flex-col sm:flex-row justify-end items-center gap-3 rounded-b-2xl">
+                            <button
+                                type="button"
+                                onClick={onClose}
+                                className="w-full sm:w-auto h-10 px-5 text-sm font-medium rounded-xl border border-gray-200 bg-white text-gray-700 hover:bg-gray-100 transition-colors"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                type="button"
+                                onClick={onConfirm}
+                                className="w-full sm:w-auto h-10 px-6 text-sm font-semibold rounded-xl bg-red-600 hover:bg-red-700 text-white shadow-sm flex items-center justify-center gap-1.5 transition-all"
+                            >
+                                <Trash2 className="w-4 h-4" />
+                                <span>Clear All</span>
+                            </button>
+                        </div>
+                    </motion.div>
+                </div>
+            )}
+        </AnimatePresence>
+    );
+};

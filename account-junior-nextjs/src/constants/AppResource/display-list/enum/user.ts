@@ -1,0 +1,12 @@
+export enum Role {
+  DEVELOPER = "DEVELOPER",
+  BUSINESS = "BUSINESS",
+  COMPLIANCE = "COMPLIANCE",
+  STAFF = "STAFF",
+  CALLCENTER = "CALLCENTER",
+}
+
+export enum UserPermission {
+  NORMAL = "NORMAL",
+  APPROVED = "APPROVED",
+}

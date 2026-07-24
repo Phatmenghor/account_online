@@ -1,6 +1,6 @@
 import {
   LayoutDashboard, User2, IdCard, FolderClosed,
-  Calendar1, MapPin, LucideIcon,
+  Calendar1, MapPin, Baby, LucideIcon,
 } from "lucide-react";
 
 export type RoleEnum = "STAFF" | "COMPLIANCE" | "BUSINESS" | "DEVELOPER" | "CALLCENTER";
@@ -31,7 +31,7 @@ export const STATIC_MENU: StaticMenuItem[] = [
     icon: IdCard,
     roles: ["COMPLIANCE", "BUSINESS", "DEVELOPER", "CALLCENTER"],
     children: [
-{
+      {
         title: "Success Accounts",
         href: "/account-online-success",
         roles: ["COMPLIANCE", "BUSINESS", "DEVELOPER", "CALLCENTER"],
@@ -39,6 +39,23 @@ export const STATIC_MENU: StaticMenuItem[] = [
       {
         title: "Report Success Account",
         href: "/report-account-online-success",
+        roles: ["COMPLIANCE", "BUSINESS", "DEVELOPER", "CALLCENTER"],
+      },
+    ],
+  },
+  {
+    title: "Junior Account",
+    icon: Baby,
+    roles: ["COMPLIANCE", "BUSINESS", "DEVELOPER", "CALLCENTER"],
+    children: [
+      {
+        title: "Junior Success Accounts",
+        href: "/junior-account-success",
+        roles: ["COMPLIANCE", "BUSINESS", "DEVELOPER", "CALLCENTER"],
+      },
+      {
+        title: "Junior AML Status",
+        href: "/junior-aml-management",
         roles: ["COMPLIANCE", "BUSINESS", "DEVELOPER", "CALLCENTER"],
       },
     ],

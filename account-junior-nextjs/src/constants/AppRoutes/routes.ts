@@ -1,4 +1,4 @@
-import { User2 } from "lucide-react";
+import { Calendar, Code, Dock, User2 } from "lucide-react";
 
 export const ROUTES = {
   AUTH: {
@@ -23,9 +23,11 @@ export const ROUTES = {
       DISTRICT: "/district",
       COMMUNE: "/commune",
       VILLAGE: "/village",
-      LEGAL_TYPE: "/legal-type",
       ACCOUNT_ONLINE_SUCCESS: "/account-online-success",
       ACCOUNT_ONLINE_SUCCESS_REPORT: "/report-account-online-success",
+      LEGAL_TYPE: "/legal-type",
+      JUNIOR_ACCOUNT_SUCCESS: "/junior-account-success",
+      JUNIOR_AML_MANAGEMENT: "/junior-aml-management",
     },
     AML: {
       MANAGEMENT: "/aml-management",

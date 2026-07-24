@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { processJuniorAccountOpening, fetchBranches, JuniorCustomerPayload, JuniorAccountResponse } from '../services/junior-account-service';
-import { CreditCard, Sparkles, FileText, CheckCircle2, ArrowRight, ArrowLeft, RefreshCw, Baby, AlertCircle } from 'lucide-react';
+import { ShieldCheck, UserCheck, CreditCard, Sparkles, FileText, CheckCircle2, ArrowRight, ArrowLeft, RefreshCw, Upload, Baby, AlertCircle } from 'lucide-react';
 
 export function JuniorAccountWizard() {
   // Step navigation: 1 = Mode Selection, 2 = Personal & Guardian Info, 3 = Address & Branch, 4 = Review & Submit, 5 = Success
@@ -45,7 +45,9 @@ export function JuniorAccountWizard() {
     fetchBranches().then((data) => {
       if (Array.isArray(data) && data.length > 0) {
         setBranches(data);
-        setFormData((prev) => (prev.branch_code ? prev : { ...prev, branch_code: data[0].code }));
+        if (!formData.branch_code && data[0]?.code) {
+          setFormData((prev) => ({ ...prev, branch_code: data[0].code }));
+        }
       }
     });
   }, []);

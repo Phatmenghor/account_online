@@ -7,6 +7,7 @@ import axios, {
 import {
   getToken,
   logoutToken,
+  storeToken,
   getRefreshToken,
   storeTokens,
 } from "../local-storage/token";

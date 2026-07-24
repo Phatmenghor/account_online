@@ -1,5 +1,5 @@
-import { JuniorAccountWizard } from '@/features/junior-account/components/junior-account-wizard';
+import { JuniorAccountContent } from '@/features/junior-account/components/junior-account-content';
 
 export default function JuniorAccountPage() {
-  return <JuniorAccountWizard />;
+  return <JuniorAccountContent />;
 }

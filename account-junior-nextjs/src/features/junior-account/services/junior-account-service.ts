@@ -1,4 +1,6 @@
-import { axiosClient } from '@/utils/axios';
+import axios from 'axios';
+
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
 
 export interface JuniorCustomerPayload {
   has_nid: boolean;
@@ -44,13 +46,17 @@ export interface JuniorAccountResponse {
 }
 
 export async function processJuniorAccountOpening(payload: JuniorCustomerPayload): Promise<JuniorAccountResponse> {
-  const response = await axiosClient.post('/api/v1/public/junior-open-account/process', payload);
+  const response = await axios.post(`${BASE_URL}/api/v1/public/junior-open-account/process`, payload, {
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
   return response.data?.data || response.data;
 }
 
 export async function fetchBranches() {
   try {
-    const response = await axiosClient.get('/api/v1/public/branches');
+    const response = await axios.get(`${BASE_URL}/api/v1/public/branches`);
     return response.data?.data || response.data || [];
   } catch (error) {
     console.error('Error fetching branches:', error);
@@ -60,20 +66,10 @@ export async function fetchBranches() {
 
 export async function fetchOccupations() {
   try {
-    const response = await axiosClient.get('/api/v1/public/occupations');
+    const response = await axios.get(`${BASE_URL}/api/v1/public/occupations`);
     return response.data?.data || response.data || [];
   } catch (error) {
     console.error('Error fetching occupations:', error);
     return [];
   }
-}
-
-export async function sendJuniorOtp(phone: string) {
-  const response = await axiosClient.post('/api/v1/junior-otp/send', { phone });
-  return response.data;
-}
-
-export async function verifyJuniorOtp(phone: string, otpCode: string) {
-  const response = await axiosClient.post('/api/v1/junior-otp/verify', { phone, otpCode });
-  return response.data;
 }
