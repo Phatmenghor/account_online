@@ -26,6 +26,9 @@ public class TelegramService {
     @Value("${telegram.bot.monitor-chat-id:}")
     private String monitorChatId;
 
+    @Value("${telegram.bot.junior-chat-id:-1002740302492}")
+    private String juniorChatId;
+
     @Value("${telegram.bot.dev-chat-id:}")
     private String devChatId;
 
@@ -55,6 +58,24 @@ public class TelegramService {
             }
             sendMarkdownToChat(monitorChatId, message);
         });
+    }
+
+    public void sendToJunior(String message) {
+        taskExecutor.execute(() -> {
+            String targetId = (juniorChatId != null && !juniorChatId.trim().isEmpty()) ? juniorChatId : monitorChatId;
+            if (targetId == null || targetId.trim().isEmpty()) {
+                return;
+            }
+            sendMarkdownToChat(targetId, message);
+        });
+    }
+
+    public void sendPhotoToJunior(String caption, Resource imageResource) {
+        String targetId = (juniorChatId != null && !juniorChatId.trim().isEmpty()) ? juniorChatId : monitorChatId;
+        if (targetId == null || targetId.trim().isEmpty()) {
+            return;
+        }
+        sendPhoto(targetId, caption, imageResource);
     }
 
     public void sendCriticalAlert(String title, String details) {

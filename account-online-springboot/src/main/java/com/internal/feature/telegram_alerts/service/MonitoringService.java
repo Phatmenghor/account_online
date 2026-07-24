@@ -151,6 +151,56 @@ public class MonitoringService {
         }
     }
 
+    @Async
+    public void sendJuniorAccountCreatedAlert(String fullName, String fullAddress, String legalId,
+            String cif, String usdAccount, String khrAccount, String branchName,
+            String guardianName, String guardianLegalId) {
+        try {
+            StringBuilder msg = new StringBuilder();
+            msg.append("*Junior Account - Customer CREATED*\n")
+                    .append("--------------------\n");
+
+            appendIfNotEmpty(msg, "Junior Full Name", fullName);
+            appendIfNotEmpty(msg, "Legal Address", fullAddress);
+            appendIfNotEmpty(msg, "Junior Legal ID", legalId);
+            appendIfNotEmpty(msg, "Guardian Name", guardianName);
+            appendIfNotEmpty(msg, "Guardian Legal ID", guardianLegalId);
+            appendIfNotEmpty(msg, "CIF", cif);
+            appendIfNotEmpty(msg, "Account USD", usdAccount);
+            appendIfNotEmpty(msg, "Account KHR", khrAccount);
+            appendIfNotEmpty(msg, "Branch", branchName);
+
+            telegramService.sendToJunior(msg.toString());
+
+            if (legalId != null && !legalId.isBlank()) {
+                try {
+                    Thread.sleep(ACCOUNT_CREATED_PHOTO_DELAY_MS);
+                } catch (InterruptedException ignored) {
+                    Thread.currentThread().interrupt();
+                }
+
+                try {
+                    Resource nidImage = customerImageService.getNidImageResourceForEmail(legalId);
+                    if (nidImage != null && nidImage.exists()) {
+                        telegramService.sendPhotoToJunior("*Junior NID Photo*\nLegal ID: `" + escape(legalId) + "`",
+                                nidImage);
+                    }
+                } catch (Exception ignored) {
+                }
+                try {
+                    Resource selfieImage = customerImageService.getSelfieImageResourceForEmail(legalId);
+                    if (selfieImage != null && selfieImage.exists()) {
+                        telegramService.sendPhotoToJunior("*Junior Face Photo*\nLegal ID: `" + escape(legalId) + "`",
+                                selfieImage);
+                    }
+                } catch (Exception ignored) {
+                }
+            }
+        } catch (Exception e) {
+            log.error("Failed to send Junior account created alert: {}", e.getMessage());
+        }
+    }
+
     public void sendAmlActionAlert(AmlStatusDto amlDto) {
         if (amlDto == null || amlDto.getStatus() == null)
             return;

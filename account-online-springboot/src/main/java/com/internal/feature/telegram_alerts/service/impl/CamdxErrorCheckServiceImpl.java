@@ -137,7 +137,11 @@ public class CamdxErrorCheckServiceImpl implements ErrorAlertsCamdxService {
                 .append("Time: ").append(now.format(formatter)).append("\n")
                 .append("Please recheck NID / submission.");
 
-        telegramService.sendToMonitor(simpleMsg.toString());
+        if (request != null && request.getApplicationName() != null && request.getApplicationName().toUpperCase().contains("JUNIOR")) {
+            telegramService.sendToJunior(simpleMsg.toString());
+        } else {
+            telegramService.sendToMonitor(simpleMsg.toString());
+        }
     }
 
     // =====================================================

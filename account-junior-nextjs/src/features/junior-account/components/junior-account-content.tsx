@@ -7,7 +7,7 @@ import { AccountImages } from "@/features/account-opening/components/account-ima
 import { PersonalDetailsFields } from "@/features/account-opening/components/form-sections/personal-details-fields";
 import { MasterDataFields } from "@/features/account-opening/components/form-sections/master-data-fields";
 import OTPInput from "@/features/account-opening/components/form-field/form-otp";
-import { PageHeader } from "@/features/account-opening/components/page-header";
+import { JuniorPageHeader } from "@/features/junior-account/components/junior-page-header";
 import ValidationErrorModal from "@/features/account-opening/components/validateModal";
 import ErrorModal from "@/features/account-opening/components/errorModal";
 import ConfirmationModal from "@/features/account-opening/components/confirmModal";
@@ -64,13 +64,7 @@ export function JuniorAccountContent({ isPublic = false }: OpenAccountContentPro
   // Top 2 navigation mode tabs (With NID default vs Without NID)
   const [hasNid, setHasNid] = useState<boolean>(true);
 
-  // Parent / Guardian details for Junior flow
-  const [guardianInfo, setGuardianInfo] = useState({
-    guardian_legal_id: "",
-    guardian_name: "",
-    guardian_phone: "",
-    guardian_relationship: "FATHER",
-  });
+
 
   // ========================================
   // Hooks Setup
@@ -302,12 +296,6 @@ export function JuniorAccountContent({ isPublic = false }: OpenAccountContentPro
     setStaffCode("");
     setIsVerified(false);
     setShowClearConfirm(false);
-    setGuardianInfo({
-      guardian_legal_id: "",
-      guardian_name: "",
-      guardian_phone: "",
-      guardian_relationship: "FATHER",
-    });
   }, [
     clearValidation,
     clearImages,
@@ -406,13 +394,13 @@ export function JuniorAccountContent({ isPublic = false }: OpenAccountContentPro
       <div className="min-h-screen w-full flex flex-col" style={{
         background: "linear-gradient(160deg, #f8fafc 0%, #f1f5f9 40%, #f0fdf4 70%, #fafafa 100%)"
       }}>
-        <PageHeader />
+        <JuniorPageHeader />
 
         <main className="flex-1 pt-16 sm:pt-[60px]">
 
-          {/* ── Header Title Block — 2 Lines Only (Gradient Title + Subtitle) ── */}
-          <div className="max-w-5xl mx-auto w-full px-4 sm:px-6 lg:px-8 pt-5 sm:pt-7 pb-1">
-            {/* Line 1 */}
+          {/* ── Header Title Block ── */}
+          <div className="max-w-5xl mx-auto w-full px-4 sm:px-6 lg:px-8 pt-5 sm:pt-7 pb-3">
+            {/* Title */}
             <h1
               className="inline-block text-2xl sm:text-3xl font-bold tracking-tight pb-0.5"
               style={{
@@ -421,44 +409,38 @@ export function JuniorAccountContent({ isPublic = false }: OpenAccountContentPro
                 WebkitTextFillColor: "transparent",
               }}
             >
-              CPBank Junior Account Opening
+              {translate("header_junior")}
             </h1>
-            {/* Line 2 */}
+            {/* Subtitle */}
             <p className="text-xs sm:text-sm text-gray-500 mt-1 font-medium leading-relaxed">
-              Open an instant digital account for minors and students with or without National ID
+              {translate("sub_header_junior")}
             </p>
-          </div>
 
-          {/* ── Top Mode Navigation Tabs (With NID vs Without NID) ── */}
-          <div className="max-w-5xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-3">
-            <div className="bg-slate-200/70 p-1.5 rounded-2xl border border-slate-300/60 grid grid-cols-2 gap-2 shadow-inner">
+            {/* ── NID / No-NID Tabs ── */}
+            <div className="mt-4 inline-flex bg-slate-100 p-1 rounded-xl border border-slate-200 gap-1 shadow-inner">
               <button
                 type="button"
                 onClick={() => setHasNid(true)}
-                className={`flex items-center justify-center gap-2.5 py-3 px-4 rounded-xl text-xs sm:text-sm font-bold transition-all duration-200 ${
+                className={`flex items-center gap-1.5 py-1.5 px-4 rounded-lg text-xs font-semibold transition-all duration-200 ${
                   hasNid
-                    ? "bg-white text-orange-600 shadow-md border border-orange-200"
-                    : "text-slate-600 hover:text-slate-900 hover:bg-white/50 font-medium"
+                    ? "bg-white text-primary shadow-sm border border-primary/20"
+                    : "text-slate-500 hover:text-slate-700 hover:bg-white/60"
                 }`}
               >
-                <CreditCard className="w-4 h-4 shrink-0 text-orange-500" />
-                <span>With National ID (NID)</span>
-                <span className="hidden sm:inline-block text-[10px] bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full uppercase font-bold">
-                  Default
-                </span>
+                <CreditCard className="w-3.5 h-3.5 shrink-0" />
+                <span>{translate("tab_with_nid")}</span>
               </button>
-
               <button
                 type="button"
                 onClick={() => setHasNid(false)}
-                className={`flex items-center justify-center gap-2.5 py-3 px-4 rounded-xl text-xs sm:text-sm font-bold transition-all duration-200 ${
+                className={`flex items-center gap-1.5 py-1.5 px-4 rounded-lg text-xs font-semibold transition-all duration-200 ${
                   !hasNid
-                    ? "bg-white text-orange-600 shadow-md border border-orange-200"
-                    : "text-slate-600 hover:text-slate-900 hover:bg-white/50 font-medium"
+                    ? "bg-white text-primary shadow-sm border border-primary/20"
+                    : "text-slate-500 hover:text-slate-700 hover:bg-white/60"
                 }`}
               >
-                <FileText className="w-4 h-4 shrink-0 text-orange-500" />
-                <span>Without NID (No NID)</span>
+                <FileText className="w-3.5 h-3.5 shrink-0" />
+                <span>{translate("tab_no_nid")}</span>
               </button>
             </div>
           </div>
@@ -518,72 +500,8 @@ export function JuniorAccountContent({ isPublic = false }: OpenAccountContentPro
                   setSelectedCategory={setSelectedCategory}
                   isLoadingCategories={isLoadingCategories}
                   isVerified={isVerified}
-                  isPublic={isPublic}
+                  isPublic={true}
                 />
-              </div>
-
-              <Divider />
-
-              {/* ── Parent / Guardian Details Section ── */}
-              <div className="p-5 sm:p-6">
-                <SectionLabel label="Parent / Legal Guardian Information" />
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">
-                      Guardian National ID Number *
-                    </label>
-                    <input
-                      type="text"
-                      value={guardianInfo.guardian_legal_id}
-                      onChange={(e) =>
-                        setGuardianInfo((prev) => ({ ...prev, guardian_legal_id: e.target.value }))
-                      }
-                      placeholder="Guardian NID e.g. 0101928374"
-                      className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-sm focus:border-orange-500 focus:bg-white focus:outline-none transition-colors"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">Guardian Full Name *</label>
-                    <input
-                      type="text"
-                      value={guardianInfo.guardian_name}
-                      onChange={(e) =>
-                        setGuardianInfo((prev) => ({ ...prev, guardian_name: e.target.value }))
-                      }
-                      placeholder="Guardian Full Name"
-                      className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-sm focus:border-orange-500 focus:bg-white focus:outline-none transition-colors"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">Guardian Phone Number *</label>
-                    <input
-                      type="tel"
-                      value={guardianInfo.guardian_phone}
-                      onChange={(e) =>
-                        setGuardianInfo((prev) => ({ ...prev, guardian_phone: e.target.value }))
-                      }
-                      placeholder="012345678"
-                      className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-sm focus:border-orange-500 focus:bg-white focus:outline-none transition-colors"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">Relationship to Child *</label>
-                    <select
-                      value={guardianInfo.guardian_relationship}
-                      onChange={(e) =>
-                        setGuardianInfo((prev) => ({ ...prev, guardian_relationship: e.target.value }))
-                      }
-                      className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-sm focus:border-orange-500 focus:bg-white focus:outline-none transition-colors"
-                    >
-                      <option value="FATHER">Father</option>
-                      <option value="MOTHER">Mother</option>
-                      <option value="LEGAL_GUARDIAN">Legal Guardian</option>
-                    </select>
-                  </div>
-                </div>
               </div>
 
               <Divider />

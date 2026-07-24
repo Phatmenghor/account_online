@@ -9,7 +9,9 @@ public final class DefaultConstants {
 
     // === Constants - Updated to match production example ===
     public static final String DEFAULT_BRANCH_CODE = "KH0012011";
-    public static final String DEFAULT_SECTOR = "4501";
+    public static final String DEFAULT_SECTOR = "6011";
+    public static final String JUNIOR_SECTOR = "6012";
+    public static final String JUNIOR_PRODUCT = "SAVE.JUNIOR.SAVING";
     public static final String DEFAULT_COST_CENTER = "1000";
     public static final String DEFAULT_INDUSTRY = "4500";
     public static final String DEFAULT_TARGET = "220";

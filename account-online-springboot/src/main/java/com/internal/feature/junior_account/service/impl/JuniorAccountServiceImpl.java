@@ -32,17 +32,21 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+import com.internal.feature.junior_account.mapper.JuniorAccountMapper;
+import com.internal.feature.junior_account.service.JuniorBankingService;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class JuniorAccountServiceImpl implements JuniorAccountService {
 
-    private final BankingService bankingService;
+    private final JuniorBankingService juniorBankingService;
     private final ComplianceService complianceService;
     private final ReportingService reportingService;
     private final JuniorAccountFinalRepository juniorAccountFinalRepository;
     private final JuniorAmlStatusRepository juniorAmlStatusRepository;
     private final JuniorCustomerImageService juniorCustomerImageService;
+    private final JuniorAccountMapper juniorAccountMapper;
     private final MonitoringService monitoringService;
     private final ObjectMapper objectMapper;
 
@@ -56,6 +60,14 @@ public class JuniorAccountServiceImpl implements JuniorAccountService {
         if (!hasNid && (legalId == null || legalId.isBlank())) {
             legalId = "JNR-" + System.currentTimeMillis();
             request.setLegalId(legalId);
+        }
+
+        // Ensure Junior-specific product and sector defaults
+        if (request.getSector() == null || request.getSector().isBlank()) {
+            request.setSector("6012");
+        }
+        if (request.getProductAccount() == null || request.getProductAccount().isBlank()) {
+            request.setProductAccount("SAVE.JUNIOR.SAVING");
         }
 
         String currentStep = "START";
@@ -75,18 +87,18 @@ public class JuniorAccountServiceImpl implements JuniorAccountService {
         try {
             log.info("Step 1: Testing connection | Legal ID: {}", legalId);
             currentStep = AppConstants.TEST_CONNECTION;
-            bankingService.testConnection();
+            juniorBankingService.testConnection();
 
             Map<String, String> customerInfo = null;
             if (hasNid) {
                 log.info("Step 2: Retrieving customer info | Legal ID: {}", legalId);
                 currentStep = AppConstants.GET_CUSTOMER_INFO;
-                customerInfo = bankingService.getCustomerInfo(legalId);
+                customerInfo = juniorBankingService.getCustomerInfo(legalId);
                 context.setCustomerInfo(customerInfo);
 
                 log.info("Step 3: Validating existing accounts | Legal ID: {}", legalId);
                 currentStep = AppConstants.VALIDATE_EXISTING_ACCOUNT;
-                bankingService.validateExistingAccounts(customerInfo);
+                juniorBankingService.validateExistingAccounts(customerInfo);
             }
 
             log.info("Step 4: Processing Junior AML | Legal ID: {}", legalId);
@@ -101,28 +113,28 @@ public class JuniorAccountServiceImpl implements JuniorAccountService {
 
             log.info("Step 5: Creating customer in Core Banking | Legal ID: {}", legalId);
             currentStep = AppConstants.CREATE_CUSTOMER;
-            CustomerCreationResult customerResult = bankingService.createCustomerIfNeeded(request, customerInfo);
+            CustomerCreationResult customerResult = juniorBankingService.createCustomerIfNeeded(request, customerInfo);
             context.setCif(customerResult.getCif());
             context.setMnemonic(customerResult.getMnemonic());
 
             log.info("Step 6: Creating KHR account | CIF: {}", context.getCif());
             currentStep = AppConstants.CREATE_KHR_ACCOUNT;
-            context.setKhrAccount(bankingService.createAccountIfNeeded(request, customerInfo,
+            context.setKhrAccount(juniorBankingService.createAccountIfNeeded(request, customerInfo,
                     context.getCif(), AppConstants.CURRENCY_KHR));
 
             log.info("Step 7: Creating USD account | CIF: {}", context.getCif());
             currentStep = AppConstants.CREATE_USD_ACCOUNT;
-            context.setUsdAccount(bankingService.createAccountIfNeeded(request, customerInfo,
+            context.setUsdAccount(juniorBankingService.createAccountIfNeeded(request, customerInfo,
                     context.getCif(), AppConstants.CURRENCY_USD));
 
             log.info("Step 8: Validating accounts created | CIF: {}", context.getCif());
             currentStep = AppConstants.VALIDATE_ACCOUNT_CREATION;
-            bankingService.validateAllRequiredAccountsCreated(context.getCif(),
+            juniorBankingService.validateAllRequiredAccountsCreated(context.getCif(),
                     context.getKhrAccount(), context.getUsdAccount(), context.getCustomerInfo());
 
             log.info("Step 9: Activating mobile banking | CIF: {}", context.getCif());
             currentStep = AppConstants.ACTIVATE_MOBILE_BANKING;
-            context.setMbActivationCode(bankingService.activateMobileBanking(request, context.getCif(),
+            context.setMbActivationCode(juniorBankingService.activateMobileBanking(request, context.getCif(),
                     context.getKhrAccount(), context.getUsdAccount()));
 
             log.info("Step 10: Saving Junior Account Final record into acc_junior_open_final | Legal ID: {}", legalId);
@@ -166,59 +178,33 @@ public class JuniorAccountServiceImpl implements JuniorAccountService {
 
     private void saveJuniorAccountFinal(JuniorCustomerRequest request, OpenAccountContext context, String amlStatusStr, boolean hasNid) {
         try {
-            LocalDate dob = parseDate(request.getDateOfBirth());
-            LocalDate issueDate = parseDate(request.getLegalIssueDate());
-            LocalDate expireDate = parseDate(request.getLegalExpireDate());
+            JuniorAccountFinal juniorFinal = juniorAccountMapper.toJuniorAccountFinal(request, context, hasNid);
 
-            AmlStatusEnum amlStatusEnum = AmlStatusEnum.APPROVE;
+            juniorFinal.setLegalDateOfBirth(parseDate(request.getDateOfBirth()));
+            juniorFinal.setLegalIssuedDate(parseDate(request.getLegalIssueDate()));
+            juniorFinal.setLegalExpiredDate(parseDate(request.getLegalExpireDate()));
+
+            if (juniorFinal.getNationality() == null) {
+                juniorFinal.setNationality("KH");
+            }
+
             try {
                 if (amlStatusStr != null) {
-                    amlStatusEnum = AmlStatusEnum.valueOf(amlStatusStr);
+                    juniorFinal.setAmlStatus(AmlStatusEnum.valueOf(amlStatusStr));
+                } else {
+                    juniorFinal.setAmlStatus(AmlStatusEnum.APPROVE);
                 }
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+                juniorFinal.setAmlStatus(AmlStatusEnum.APPROVE);
+            }
 
-            String payloadJson = null;
             try {
-                payloadJson = objectMapper.writeValueAsString(request);
+                juniorFinal.setRequestPayload(objectMapper.writeValueAsString(request));
             } catch (Exception ignored) {}
-
-            JuniorAccountFinal juniorFinal = JuniorAccountFinal.builder()
-                    .cif(context.getCif())
-                    .khrAccount(context.getKhrAccount())
-                    .usdAccount(context.getUsdAccount())
-                    .mnemonic(context.getMnemonic())
-                    .hasNid(hasNid)
-                    .legalId(request.getLegalId())
-                    .legalDocName("NATIONAL.ID")
-                    .legalFirstNameEn(request.getGivenName())
-                    .legalLastNameEn(request.getFamilyName())
-                    .legalFirstNameKh(request.getFirstNameKh())
-                    .legalLastNameKh(request.getLastNameKh())
-                    .legalDateOfBirth(dob)
-                    .legalGender(request.getGender())
-                    .legalAddress(request.getLegalAddress())
-                    .legalIssuedDate(issueDate)
-                    .legalExpiredDate(expireDate)
-                    .guardianLegalId(request.getGuardianLegalId())
-                    .guardianName(request.getGuardianName())
-                    .guardianPhone(request.getGuardianPhone())
-                    .guardianRelationship(request.getGuardianRelationship())
-                    .maritalStatus(request.getMaritalStatus())
-                    .nationality(request.getNationality() != null ? request.getNationality() : "KH")
-                    .occupation(request.getOccupation())
-                    .branchCode(request.getBranchCode())
-                    .phoneNumber(request.getPhoneNumber())
-                    .amlStatus(amlStatusEnum)
-                    .status("COMPLETED")
-                    .nidImageName(request.getNidImageName())
-                    .selfieImageName(request.getSelfieImageName())
-                    .requestPayload(payloadJson)
-                    .build();
 
             juniorAccountFinalRepository.save(juniorFinal);
             log.info("Saved JuniorAccountFinal record successfully for Legal ID: {}", request.getLegalId());
 
-            // Save image references into dedicated junior_customer_images table via JuniorCustomerImageService
             juniorCustomerImageService.saveImage("NID", request.getNidImageName(), request.getLegalId(), request.getGuardianLegalId());
             juniorCustomerImageService.saveImage("SELFIE", request.getSelfieImageName(), request.getLegalId(), request.getGuardianLegalId());
         } catch (Exception e) {
@@ -231,27 +217,7 @@ public class JuniorAccountServiceImpl implements JuniorAccountService {
             Optional<JuniorAmlStatus> existingOpt = juniorAmlStatusRepository.findByLegalId(request.getLegalId());
             JuniorAmlStatus amlStatus = existingOpt.orElseGet(JuniorAmlStatus::new);
 
-            amlStatus.setLegalId(request.getLegalId());
-            amlStatus.setHasNid(hasNid);
-            amlStatus.setFamilyName(request.getFamilyName());
-            amlStatus.setGivenName(request.getGivenName());
-            amlStatus.setFirstNameKh(request.getFirstNameKh());
-            amlStatus.setLastNameKh(request.getLastNameKh());
-            amlStatus.setDateOfBirth(request.getDateOfBirth());
-            amlStatus.setGender(request.getGender());
-            amlStatus.setPhoneNumber(request.getPhoneNumber());
-            amlStatus.setBranch(request.getBranchCode());
-            amlStatus.setMaritalStatus(request.getMaritalStatus());
-            amlStatus.setGuardianLegalId(request.getGuardianLegalId());
-            amlStatus.setGuardianName(request.getGuardianName());
-            amlStatus.setGuardianPhone(request.getGuardianPhone());
-            amlStatus.setGuardianRelationship(request.getGuardianRelationship());
-            amlStatus.setIssuedDate(request.getLegalIssueDate());
-            amlStatus.setExpiredDate(request.getLegalExpireDate());
-            amlStatus.setOccupationCode(request.getOccupation());
-            amlStatus.setNidImageName(request.getNidImageName());
-            amlStatus.setSelfieImageName(request.getSelfieImageName());
-            amlStatus.setStatus(AmlStatusEnum.APPROVE.name());
+            juniorAccountMapper.updateJuniorAmlStatusFromRequest(request, hasNid, amlStatus);
 
             try {
                 amlStatus.setRequestPayload(objectMapper.writeValueAsString(request));

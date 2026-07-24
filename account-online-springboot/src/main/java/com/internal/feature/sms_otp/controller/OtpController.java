@@ -3,19 +3,24 @@ package com.internal.feature.sms_otp.controller;
 import com.internal.shared.response.ApiResponse;
 import com.internal.feature.sms_otp.dto.request.SendOtpRequest;
 import com.internal.feature.sms_otp.dto.request.VerifyOtpRequest;
+import com.internal.feature.sms_otp.dto.response.PhoneCheckResponse;
 import com.internal.feature.sms_otp.dto.response.SendOtpResponse;
 import com.internal.feature.sms_otp.dto.response.VerifyOtpResponse;
 import com.internal.feature.sms_otp.service.OtpService;
+import com.internal.feature.sms_otp.service.PhoneCheckService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 
 @RestController
 @RequestMapping("/api/v1/public/otp")
@@ -25,6 +30,30 @@ import jakarta.validation.Valid;
 public class OtpController {
 
     private final OtpService otpService;
+    private final PhoneCheckService phoneCheckService;
+
+    /**
+     * Check if a phone number is already registered in MB Core.
+     *
+     * GET /api/v1/public/otp/check-phone?phone=070411260
+     *
+     * Response:
+     *   hasAccount = true  → phone already registered, show warning to user
+     *   hasAccount = false → phone not registered, safe to proceed
+     */
+    @GetMapping("/check-phone")
+    public ResponseEntity<ApiResponse<PhoneCheckResponse>> checkPhone(
+            @RequestParam @NotBlank String phone) {
+
+        log.info("API: Phone pre-check request");
+        PhoneCheckResponse response = phoneCheckService.checkPhone(phone);
+
+        String message = response.getHasAccount()
+                ? "Phone number is already registered."
+                : "Phone number is not registered.";
+
+        return ResponseEntity.ok(ApiResponse.success(message, response));
+    }
 
     @PostMapping("/send")
     public ResponseEntity<ApiResponse<SendOtpResponse>> sendOtp(

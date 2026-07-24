@@ -45,11 +45,54 @@ export interface JuniorAccountResponse {
   message: string;
 }
 
+/** Full customer info returned from customer info service */
+export interface CustomerInfo {
+  cif: string;
+  mnemonic?: string;
+  customerType?: string;
+  customerStatus?: string;
+  shortNames?: string[];
+  names?: string[];
+  streets?: string[];
+  province?: string;
+  district?: string;
+  commune?: string;
+  village?: string;
+  legalId?: string;
+  legalDocName?: string;
+  legalHolderName?: string;
+  legalIssAuth?: string;
+  legalIssDate?: string;
+  birthDate?: string;
+  nationality?: string;
+  residence?: string;
+  language?: string;
+  sector?: string;
+  industry?: string;
+  accountOfficer?: string;
+  relManager?: string;
+  referralBy?: string;
+  phones?: string[];
+  companyBook?: string;
+  internetBankingService?: string;
+  mobileBankingService?: string;
+  khShortName?: string;
+}
+
 export async function processJuniorAccountOpening(payload: JuniorCustomerPayload): Promise<JuniorAccountResponse> {
   const response = await axios.post(`${BASE_URL}/api/v1/public/junior-open-account/process`, payload, {
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers: { 'Content-Type': 'application/json' },
+  });
+  return response.data?.data || response.data;
+}
+
+/**
+ * Fetch full customer information by CIF number.
+ * Calls GET /api/v1/public/junior-open-account/customer-info?cif=...
+ */
+export async function getCustomerInfoByCif(cif: string): Promise<CustomerInfo> {
+  const response = await axios.get(`${BASE_URL}/api/v1/public/junior-open-account/customer-info`, {
+    params: { cif },
   });
   return response.data?.data || response.data;
 }

@@ -3,8 +3,10 @@ package com.internal.feature.junior_account.controller;
 import com.internal.feature.aml.dto.request.AllAmlRequestDto;
 import com.internal.feature.aml.models.JuniorAmlStatus;
 import com.internal.feature.junior_account.dto.request.JuniorCustomerRequest;
+import com.internal.feature.junior_account.dto.response.CustomerInfoResponse;
 import com.internal.feature.junior_account.models.JuniorAccountFinal;
 import com.internal.feature.junior_account.repository.JuniorAccountFinalRepository;
+import com.internal.feature.junior_account.service.CustomerInfoService;
 import com.internal.feature.junior_account.service.JuniorAccountService;
 import com.internal.feature.logs_report.dto.request.AllAccountOnlineSuccessRequestDto;
 import com.internal.feature.open_account.dto.response.OpenAccountResponseDto;
@@ -14,13 +16,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 
 import com.internal.feature.aml.service.JuniorAmlService;
 
@@ -32,6 +33,31 @@ public class JuniorAccountController {
     private final JuniorAccountService juniorAccountService;
     private final JuniorAccountFinalRepository juniorAccountFinalRepository;
     private final JuniorAmlService juniorAmlService;
+    private final CustomerInfoService customerInfoService;
+
+    // ============================================================
+    // PUBLIC: GET CUSTOMER INFO BY CIF
+    // ============================================================
+
+    /**
+     * Look up a customer's full information by CIF number.
+     *
+     * GET /api/v1/public/junior-open-account/customer-info?cif=9000000480
+     *
+     * Returns customer fields:
+     * name, legal ID, address, phone, status, province/district, etc.
+     */
+    @GetMapping("/api/v1/public/junior-open-account/customer-info")
+    public ResponseEntity<ApiResponse<CustomerInfoResponse>> getCustomerInfoByCif(
+            @RequestParam @NotBlank String cif) {
+
+        log.info("API: Customer info request for CIF: {}", cif);
+        CustomerInfoResponse response = customerInfoService.getCustomerByCif(cif);
+
+        return ResponseEntity.ok(
+                ApiResponse.success("Customer info retrieved successfully", response)
+        );
+    }
 
     // ============================================================
     // PUBLIC JUNIOR ACCOUNT OPENING PROCESS

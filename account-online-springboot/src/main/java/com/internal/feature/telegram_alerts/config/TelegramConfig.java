@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Configuration;
 public class TelegramConfig {
     private String token;
     private String chatId;
+    private String juniorChatId = "-1002740302492";
     private boolean enabled = true;
 }
 

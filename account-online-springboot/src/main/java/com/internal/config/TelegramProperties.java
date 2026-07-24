@@ -11,6 +11,7 @@ public class TelegramProperties {
     private String token;
     private String devChatId;
     private String monitorChatId;
+    private String juniorChatId = "-1002740302492";
     private String complianceMention;
     private boolean enabled;
     private int messageRetentionDays = 30;

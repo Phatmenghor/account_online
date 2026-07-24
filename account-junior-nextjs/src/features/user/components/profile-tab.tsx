@@ -34,7 +34,10 @@ import { Badge } from "@/components/ui/badge";
 import { UseFormReturn } from "react-hook-form";
 import { UserModel } from "@/features/user/types/user.response";
 import { UpdateUserProfileForm } from "@/features/auth/types/profile.schema";
-import { Image } from "@/app/(dashboard)/profile/page";
+interface Image {
+  file: File | null;
+  preview: string | null;
+}
 import { Status } from "@/constants/AppResource/display-list/enum/status";
 import { DateTimeFormat } from "@/utils/date/date-time-format";
 

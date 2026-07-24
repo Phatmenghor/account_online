@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 public class DefaultProperties {
 
     private String branchCode = "KH0012011";
-    private String sector = "4501";
+    private String sector = "6011";
     private String costCenter = "";
     private String industry = "4500";
     private String target = "220";
