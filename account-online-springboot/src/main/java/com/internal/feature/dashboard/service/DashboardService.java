@@ -5,7 +5,7 @@ import com.internal.feature.aml.repository.AmlStatusRepository;
 import com.internal.feature.dashboard.dto.response.DailyCountResponse;
 import com.internal.feature.dashboard.dto.response.TopAmlActionUserResponse;
 import com.internal.feature.dashboard.dto.response.TopUserOpenAccountResponse;
-import com.internal.feature.logs_report.repository.AccountOnlineFinalRepository;
+import com.internal.feature.open_account.repository.AccountOnlineFinalRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

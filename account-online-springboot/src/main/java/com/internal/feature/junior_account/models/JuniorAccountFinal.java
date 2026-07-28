@@ -80,6 +80,12 @@ public class JuniorAccountFinal extends BaseNoIdEntity {
     @Column(name = "guardian_legal_id")
     private String guardianLegalId;
 
+    @Column(name = "reference_doc_type")
+    private String referenceDocType;
+
+    @Column(name = "reference_doc_name")
+    private String referenceDocName;
+
     @Column(name = "guardian_name")
     private String guardianName;
 
@@ -88,6 +94,21 @@ public class JuniorAccountFinal extends BaseNoIdEntity {
 
     @Column(name = "guardian_relationship")
     private String guardianRelationship;
+
+    @Column(name = "guardian_cif")
+    private String guardianCif;
+
+    @Column(name = "guardian_doc_type")
+    private String guardianDocType;
+
+    @Column(name = "guardian_dob")
+    private String guardianDob;
+
+    @Column(name = "guardian_address", columnDefinition = "TEXT")
+    private String guardianAddress;
+
+    @Column(name = "guardian_info_json", columnDefinition = "TEXT")
+    private String guardianInfoJson;
 
     // === CUSTOMER INFO ===
     @Column(name = "marital_status")

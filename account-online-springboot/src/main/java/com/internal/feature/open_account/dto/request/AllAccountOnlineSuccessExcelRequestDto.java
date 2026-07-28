@@ -1,4 +1,4 @@
-package com.internal.feature.logs_report.dto.request;
+package com.internal.feature.open_account.dto.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -22,4 +22,3 @@ public class AllAccountOnlineSuccessExcelRequestDto {
 
     private String search;
 }
-

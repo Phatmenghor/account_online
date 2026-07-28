@@ -232,7 +232,7 @@ export function CustomDateTimePicker({
             "focus:outline-none focus:ring-1 focus:ring-ring",
             isOpen && "border-primary text-primary",
             error && "border-red-400 focus:border-red-400",
-            disabled && "opacity-50 cursor-not-allowed",
+            disabled && "cursor-not-allowed bg-slate-50/80 text-slate-900 opacity-100",
             className
           )}
           disabled={disabled}

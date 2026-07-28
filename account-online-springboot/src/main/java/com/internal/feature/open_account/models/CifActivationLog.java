@@ -1,4 +1,4 @@
-package com.internal.feature.logs_report.models;
+package com.internal.feature.open_account.models;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "acc_cif_activation_log")
+@Table(name = "acc_online_cif_activation_log")
 @Data
 @Builder
 @NoArgsConstructor
@@ -61,7 +61,7 @@ public class CifActivationLog {
     @Column(name = "duration_ms")
     private Long durationMs;
 
-    @Column(name = "created_at", nullable = false)
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
 
     @PrePersist
@@ -71,5 +71,3 @@ public class CifActivationLog {
         }
     }
 }
-
-

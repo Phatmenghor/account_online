@@ -12,7 +12,7 @@ import java.time.ZonedDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "junior_customer_images")
+@Table(name = "junior_customer_image")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

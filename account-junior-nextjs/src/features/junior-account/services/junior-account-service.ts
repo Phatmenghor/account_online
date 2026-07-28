@@ -32,6 +32,15 @@ export interface JuniorCustomerPayload {
   guardian_name?: string;
   guardian_phone?: string;
   guardian_relationship?: string;
+  guardian_cif?: string;
+  guardian_doc_type?: string;
+  guardian_dob?: string;
+  guardian_address?: string;
+  guardian_info_json?: string;
+  referral_id?: string;
+  reference_doc_type?: string;
+  reference_doc_name?: string;
+  reference_doc_image?: string;
 }
 
 export interface JuniorAccountResponse {
@@ -45,7 +54,12 @@ export interface JuniorAccountResponse {
   message: string;
 }
 
-/** Full customer info returned from customer info service */
+export interface PhoneCheckResult {
+  hasAccount: boolean;
+  cif?: string;
+  mobile?: string;
+}
+
 export interface CustomerInfo {
   cif: string;
   mnemonic?: string;
@@ -70,7 +84,7 @@ export interface CustomerInfo {
   sector?: string;
   industry?: string;
   accountOfficer?: string;
-  relManager?: string;
+  relManager?: String;
   referralBy?: string;
   phones?: string[];
   companyBook?: string;
@@ -79,19 +93,30 @@ export interface CustomerInfo {
   khShortName?: string;
 }
 
+export async function checkPhone(phone: string): Promise<PhoneCheckResult> {
+  const response = await axios.post(`${BASE_URL}/api/v1/public/otp/check-phone`, { phone });
+  return response.data?.data || response.data;
+}
+
+export async function sendOtp(phone: string) {
+  const response = await axios.post(`${BASE_URL}/api/v1/public/otp/send`, { phone });
+  return response.data?.data || response.data;
+}
+
+export async function verifyOtp(phone: string, otpCode: string) {
+  const response = await axios.post(`${BASE_URL}/api/v1/public/otp/verify`, { phone, otpCode });
+  return response.data?.data || response.data;
+}
+
+export async function getCustomerInfoByCif(cif: string): Promise<CustomerInfo> {
+  const response = await axios.post(`${BASE_URL}/api/v1/public/junior-open-account/customer-info`, { cif });
+  return response.data?.data || response.data;
+}
+
 export async function processJuniorAccountOpening(payload: JuniorCustomerPayload): Promise<JuniorAccountResponse> {
   const response = await axios.post(`${BASE_URL}/api/v1/public/junior-open-account/process`, payload, {
     headers: { 'Content-Type': 'application/json' },
   });
-  return response.data?.data || response.data;
-}
-
-/**
- * Fetch full customer information by CIF number.
- * Calls POST /api/v1/public/junior-open-account/customer-info
- */
-export async function getCustomerInfoByCif(cif: string): Promise<CustomerInfo> {
-  const response = await axios.post(`${BASE_URL}/api/v1/public/junior-open-account/customer-info`, { cif });
   return response.data?.data || response.data;
 }
 

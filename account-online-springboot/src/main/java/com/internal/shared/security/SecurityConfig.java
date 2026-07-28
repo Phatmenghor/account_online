@@ -27,7 +27,6 @@ import org.springframework.security.web.firewall.StrictHttpFirewall;
 public class SecurityConfig {
 
     private final JwtAuthEntryPoint authEntryPoint;
-    private final RequestLoggingFilter requestLoggingFilter;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http, JWTAuthenticationFilter jwtAuthenticationFilter) throws Exception {
@@ -39,6 +38,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/v1/auth/**").permitAll()
                         .requestMatchers("/api/v1/public/**").permitAll()
+                        .requestMatchers("/api/v1/junior-otp/**").permitAll()
                         .requestMatchers("/api/public/**").permitAll()
                         .requestMatchers("/api/v1/enum/**").permitAll()
                         .requestMatchers("/api/images/**").permitAll()
@@ -51,9 +51,6 @@ public class SecurityConfig {
                         .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()
                         .anyRequest().authenticated()
                 );
-
-        // Add request logging filter first to capture all requests
-        http.addFilterBefore(requestLoggingFilter, UsernamePasswordAuthenticationFilter.class);
 
         // Add JWT authentication filter
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

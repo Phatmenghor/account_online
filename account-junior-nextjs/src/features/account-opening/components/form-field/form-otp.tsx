@@ -2,11 +2,13 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { Input } from "@/components/ui/input";
-import { Loader2, CheckCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Loader2, CheckCircle, AlertTriangle, XCircle } from "lucide-react";
 import { AppToast } from "@/components/shared/toast/app-toast";
 import { sendOtpService, verifiedOtpService } from "@/features/account-opening/services/otp.service";
+import { checkPhone } from "@/features/junior-account/services/junior-account-service";
 import { SendOtpReq, VerifyOtpReq } from "@/features/account-opening/types/otp.request";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 
 interface OTPInputProps {
   phoneNumber: string;
@@ -36,7 +38,9 @@ export default function OTPInput({
   const [countdown, setCountdown] = useState<number>(0);
   const [lastVerifiedOtp, setLastVerifiedOtp] = useState<string>("");
 
+  const [phoneRegisteredModal, setPhoneRegisteredModal] = useState<boolean>(false);
   const translate = useTranslations("NIDPage");
+  const locale = useLocale();
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -115,6 +119,14 @@ export default function OTPInput({
 
     setIsSendingOtp(true);
     try {
+      // Pre-check if phone number is ALREADY registered with CPBank Mobile Banking
+      const checkRes = await checkPhone(phoneNumber.replace(/\s/g, ""));
+      if (checkRes.hasAccount) {
+        setPhoneRegisteredModal(true);
+        setIsSendingOtp(false);
+        return;
+      }
+
       const requestData: SendOtpReq = { phone: phoneNumber.replace(/\s/g, "") };
       const response = await sendOtpService(requestData);
 
@@ -142,15 +154,6 @@ export default function OTPInput({
       setIsSendingOtp(false);
     }
   }, [phoneNumber, isValidPhoneNumber, countdown, validateField, translate]);
-
-  const handlePhoneBlur = async () => {
-    if (!phoneNumber.trim() || isOtpVerified || countdown > 0) return;
-    if (isValidPhoneNumber(phoneNumber)) {
-      await handleSendOtp();
-    } else {
-      validateField("phoneNumber", phoneNumber, translate("err_phoneNumber_regex"));
-    }
-  };
 
   const handleOtpChange = (value: string) => {
     if (!phoneNumber.trim()) {
@@ -249,6 +252,7 @@ export default function OTPInput({
     [isOtpSent, phoneNumber, onVerificationSuccess, validateField, translate]
   );
 
+  // Auto-verify when 6 digits are typed
   useEffect(() => {
     if (
       phoneNumber.trim() &&
@@ -256,24 +260,12 @@ export default function OTPInput({
       /^\d{6}$/.test(otpCode) &&
       !isOtpVerified &&
       !isVerifyingOtp &&
+      isOtpSent &&
       otpCode !== lastVerifiedOtp
     ) {
       handleVerifyOtp(otpCode);
     }
-  }, [otpCode, phoneNumber, isOtpVerified, isVerifyingOtp, lastVerifiedOtp, handleVerifyOtp]);
-
-  useEffect(() => {
-    if (reset) {
-      setOtpCode("");
-      setIsOtpSent(false);
-      setIsOtpVerified(false);
-      setOtpExpiresAt("");
-      setCountdown(0);
-      setLastVerifiedOtp("");
-      setIsSendingOtp(false);
-      setIsVerifyingOtp(false);
-    }
-  }, [reset]);
+  }, [otpCode, phoneNumber, isOtpVerified, isVerifyingOtp, isOtpSent, lastVerifiedOtp, handleVerifyOtp]);
 
   return (
     <>
@@ -281,50 +273,34 @@ export default function OTPInput({
       <div className="space-y-1">
         <div className="flex items-center justify-between mb-1">
           <label className="text-sm font-medium text-gray-700">
-            {translate("contactNumber")}
+            {translate("contactNumber")} <span className="text-red-500 ml-0.5">*</span>
           </label>
           {isOtpVerified && (
             <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0" />
           )}
         </div>
-        <div className="relative">
+        <div className="relative flex items-center">
           <Input
             placeholder={translate("contactNumber")}
             value={phoneNumber}
             onChange={(e) => handlePhoneChange(e.target.value)}
-            onBlur={handlePhoneBlur}
-            className={`w-full h-9 text-sm rounded-xl ${validationErrors.phoneNumber ? "border-red-400" : ""}`}
+            className={`w-full h-10 text-sm rounded-xl pr-28 ${validationErrors.phoneNumber ? "border-red-400" : ""}`}
             disabled={disabled || isSendingOtp}
             maxLength={15}
           />
-          {isSendingOtp && (
-            <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-primary pointer-events-none" />
-          )}
-        </div>
-        {validationErrors.phoneNumber && (
-          <p className="text-xs text-red-500 mt-1">{translate("err_phoneNumber_regex")}</p>
-        )}
-      </div>
-
-      {/* OTP Code */}
-      <div className="space-y-1">
-        <div className="flex items-center justify-between mb-1">
-          <label className="text-sm font-medium text-gray-700">
-            {translate("otpCode")}
-          </label>
-          <button
+          <Button
             type="button"
             onClick={handleSendOtp}
-            disabled={countdown > 0 || disabled || isSendingOtp || isOtpVerified}
-            className={`text-xs font-semibold bg-transparent border-none p-0 transition-colors duration-200 ${
-              countdown > 0 || disabled || isSendingOtp || isOtpVerified
-                ? "text-gray-400 cursor-not-allowed"
-                : "text-primary hover:text-primary/70 cursor-pointer"
+            disabled={countdown > 0 || disabled || isSendingOtp || isOtpVerified || !phoneNumber}
+            className={`absolute right-1.5 h-7 px-3 text-xs font-bold rounded-lg transition-all ${
+              countdown > 0 || disabled || isSendingOtp || isOtpVerified || !phoneNumber
+                ? "bg-slate-100 text-slate-400 cursor-not-allowed"
+                : "bg-primary hover:bg-primary/90 text-white shadow-xs cursor-pointer"
             }`}
           >
             {isSendingOtp ? (
               <span className="flex items-center gap-1">
-                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                <Loader2 className="h-3 w-3 animate-spin" />
                 {translate("loading")}
               </span>
             ) : countdown > 0 ? (
@@ -334,26 +310,71 @@ export default function OTPInput({
             ) : (
               translate("sendOtp")
             )}
-          </button>
+          </Button>
         </div>
-        <div className="relative">
+        {validationErrors.phoneNumber && (
+          <p className="text-xs text-red-500 mt-1">{translate("err_phoneNumber_regex")}</p>
+        )}
+      </div>
+
+      {/* OTP Code with Auto-verify on 6 digits typed */}
+      <div className="space-y-1">
+        <div className="flex items-center justify-between mb-1">
+          <label className="text-sm font-medium text-gray-700">
+            {translate("otpCode")} <span className="text-red-500 ml-0.5">*</span>
+          </label>
+          {isOtpVerified && (
+            <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0" />
+          )}
+        </div>
+        <div className="relative flex items-center">
           <Input
             placeholder={translate("otp6Digit")}
             value={otpCode}
             onChange={(e) => handleOtpChange(e.target.value)}
             maxLength={6}
-            className={`w-full h-9 text-sm rounded-xl ${validationErrors.isPhoneVerified ? "border-red-400" : ""}`}
+            className={`w-full h-10 text-sm rounded-xl font-mono tracking-wider pr-10 ${validationErrors.isPhoneVerified ? "border-red-400" : ""}`}
           />
           {isVerifyingOtp && (
             <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-primary pointer-events-none" />
+          )}
+          {isOtpVerified && (
+            <CheckCircle className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-green-600 pointer-events-none" />
           )}
         </div>
         {validationErrors.isPhoneVerified && (
           <p className="text-xs text-red-500 mt-1">{translate("err_isPhoneVerified")}</p>
         )}
       </div>
+
+      {/* PHONE ALREADY REGISTERED WARNING MODAL */}
+      {phoneRegisteredModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs">
+          <div className="relative bg-white border border-slate-200 w-full max-w-md rounded-2xl p-6 shadow-2xl space-y-4 text-center">
+            <div className="w-12 h-12 rounded-full bg-amber-100 border border-amber-200 text-amber-600 flex items-center justify-center mx-auto">
+              <AlertTriangle className="w-6 h-6" />
+            </div>
+
+            <h3 className="text-base font-bold text-slate-900">
+              {translate("account_exists_title")}
+            </h3>
+
+            <p className="text-xs text-slate-600 leading-relaxed text-left bg-slate-50 p-4 rounded-xl border border-slate-200">
+              {translate("account_exists_message")}
+            </p>
+
+            <div className="pt-2">
+              <Button
+                type="button"
+                onClick={() => setPhoneRegisteredModal(false)}
+                className="w-full h-10 bg-primary hover:bg-primary/90 text-white font-bold text-xs rounded-xl"
+              >
+                {locale === "kh" ? "យល់ព្រម" : "OK"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
-
-

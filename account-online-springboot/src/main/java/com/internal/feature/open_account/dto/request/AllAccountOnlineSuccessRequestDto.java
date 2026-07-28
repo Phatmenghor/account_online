@@ -1,4 +1,4 @@
-package com.internal.feature.logs_report.dto.request;
+package com.internal.feature.open_account.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.internal.shared.pagination.BasePaginationFilterRequest;

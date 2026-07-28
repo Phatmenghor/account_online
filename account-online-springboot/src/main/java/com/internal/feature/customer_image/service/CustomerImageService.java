@@ -2,7 +2,7 @@ package com.internal.feature.customer_image.service;
 
 import com.internal.feature.customer_image.dto.response.CustomerImageFileDto;
 import com.internal.feature.customer_image.dto.response.CustomerImageUploadResponseDto;
-import com.internal.feature.logs_report.dto.request.CustomerFileUploadRequestDto;
+import com.internal.feature.open_account.dto.request.CustomerFileUploadRequestDto;
 import org.springframework.core.io.Resource;
 import org.springframework.web.multipart.MultipartFile;
 

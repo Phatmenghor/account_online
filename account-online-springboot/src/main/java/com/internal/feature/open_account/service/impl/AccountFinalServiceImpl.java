@@ -1,19 +1,19 @@
-package com.internal.feature.logs_report.service.impl;
+package com.internal.feature.open_account.service.impl;
 
 import com.internal.shared.exception.custom.NotFoundException;
 import com.internal.feature.aml.dto.response.AmlStatusDto;
-import com.internal.feature.logs_report.dto.request.AccountOnlineFinalLogRequestDto;
-import com.internal.feature.logs_report.dto.request.AllAccountOnlineSuccessExcelRequestDto;
-import com.internal.feature.logs_report.dto.request.AllAccountOnlineSuccessRequestDto;
-import com.internal.feature.logs_report.dto.response.AllAccountOnlineFinalResponseDto;
-import com.internal.feature.logs_report.dto.response.AccountOnlineFinalResponseDto;
-import com.internal.feature.logs_report.dto.response.AllAccountOnlineFinalExcelResponseDto;
-import com.internal.feature.logs_report.dto.response.AccountOnlineFinalExcelResponseDto;
+import com.internal.feature.open_account.dto.request.AccountOnlineFinalLogRequestDto;
+import com.internal.feature.open_account.dto.request.AllAccountOnlineSuccessExcelRequestDto;
+import com.internal.feature.open_account.dto.request.AllAccountOnlineSuccessRequestDto;
+import com.internal.feature.open_account.dto.response.AllAccountOnlineFinalResponseDto;
+import com.internal.feature.open_account.dto.response.AccountOnlineFinalResponseDto;
+import com.internal.feature.open_account.dto.response.AllAccountOnlineFinalExcelResponseDto;
+import com.internal.feature.open_account.dto.response.AccountOnlineFinalExcelResponseDto;
 import com.internal.feature.customer_image.dto.response.CustomerImageUploadResponseDto;
-import com.internal.feature.logs_report.mapper.AccountOnlineFinalMapper;
-import com.internal.feature.logs_report.models.AccountOnlineFinal;
-import com.internal.feature.logs_report.repository.AccountOnlineFinalRepository;
-import com.internal.feature.logs_report.service.AccountFinalService;
+import com.internal.feature.open_account.mapper.AccountOnlineFinalMapper;
+import com.internal.feature.open_account.models.AccountOnlineFinal;
+import com.internal.feature.open_account.repository.AccountOnlineFinalRepository;
+import com.internal.feature.open_account.service.AccountFinalService;
 import com.internal.feature.master_data.dto.response.ClsProvinceDto;
 import com.internal.feature.master_data.dto.response.ClsDistrictDto;
 import com.internal.feature.master_data.dto.response.ClsCommuneDto;
@@ -28,9 +28,7 @@ import com.internal.shared.pagination.PaginationUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -58,7 +56,6 @@ public class AccountFinalServiceImpl implements AccountFinalService {
             AmlStatusDto amlProcessResult,
             CustomerImageUploadResponseDto imagePaths,
             String mbActivationCode
-
     ) {
         try {
             log.info("Attempting to save AccountOnlineFinal for Legal ID: {}", request.getLegalId());
@@ -86,7 +83,6 @@ public class AccountFinalServiceImpl implements AccountFinalService {
             ClsVillageDto pobVillage = safeVillageLookup(request.getCustomerPobVillage());
 
             ClsBranchDto branch = safeBranchLookup(request.getBranchCode());
-
 
             if (branch == null) {
                 log.warn("Branch lookup returned null for code: {}", request.getBranchCode());
@@ -183,7 +179,8 @@ public class AccountFinalServiceImpl implements AccountFinalService {
                     .smsSentUsdAccount(accountInfo.getUsdAccount())
                     .smsSentKhrAccount(accountInfo.getKhrAccount())
                     .smsSentCif(accountInfo.getCif())
-                    .mbActivationCode(mbActivationCode).mbAppDownloadLink("http://onelink.to/cpbank")
+                    .mbActivationCode(mbActivationCode)
+                    .mbAppDownloadLink("http://onelink.to/cpbank")
 
                     // Images
                     .nidImageName(imagePaths != null ? imagePaths.getNidImagePath() : request.getNidImageName())
@@ -199,7 +196,6 @@ public class AccountFinalServiceImpl implements AccountFinalService {
         } catch (Exception e) {
             log.error("Failed to save AccountOnlineFinal for Legal ID {}: {}",
                     request.getLegalId(), e.getMessage(), e);
-            // Return null instead of throwing exception - this makes it non-blocking
             return null;
         }
     }
@@ -209,12 +205,12 @@ public class AccountFinalServiceImpl implements AccountFinalService {
         log.info("Fetching success open accounts - Search: {}, Page: {}, Size: {}",
                 request.getSearch(), request.getPageNo(), request.getPageSize());
 
-        Pageable pageable = com.internal.shared.pagination.PaginationUtil.createPageable(request);
+        Pageable pageable = PaginationUtil.createPageable(request);
 
         LocalDateTime fromDateTime = request.getFromDate() != null ? request.getFromDate().atStartOfDay() : null;
         LocalDateTime toDateTime = request.getToDate() != null ? request.getToDate().plusDays(1).atStartOfDay() : null;
 
-        Page<AccountOnlineFinal> page = accountOnlineFinalRepository.findBySearch(request.getSearch(), fromDateTime, toDateTime, pageable);
+        Page<AccountOnlineFinal> page = accountOnlineFinalRepository.findBySearch(fromDateTime, toDateTime, request.getSearch(), pageable);
 
         log.info("Found {} accounts on page {} of {}", page.getNumberOfElements(),
                 request.getPageNo(), page.getTotalPages());
@@ -226,7 +222,6 @@ public class AccountFinalServiceImpl implements AccountFinalService {
         return mapper.mapToListDto(content, page);
     }
 
-    // Excel
     @Override
     public AllAccountOnlineFinalExcelResponseDto getSuccessOpenAccountExcel(AllAccountOnlineSuccessExcelRequestDto request) {
         log.info("Fetching success open accounts - Search: {}, From: {}, To: {}",
@@ -237,10 +232,10 @@ public class AccountFinalServiceImpl implements AccountFinalService {
                 : null;
 
         LocalDateTime toDateTime = request.getToDate() != null
-                ? request.getToDate().plusDays(1).atStartOfDay()   // exclusive upper bound → covers full toDate
+                ? request.getToDate().plusDays(1).atStartOfDay()
                 : null;
 
-        List<AccountOnlineFinal> accountOnline = accountOnlineFinalRepository.findBySearchExcel(request.getSearch(), fromDateTime, toDateTime);
+        List<AccountOnlineFinal> accountOnline = accountOnlineFinalRepository.findBySearchExcel(fromDateTime, toDateTime, request.getSearch());
 
         List<AccountOnlineFinalExcelResponseDto> content = accountOnline.stream()
                 .map(mapper::toExcelDto)
@@ -344,11 +339,3 @@ public class AccountFinalServiceImpl implements AccountFinalService {
         }
     }
 }
-
-
-
-
-
-
-
-

@@ -90,4 +90,39 @@ public class OracleDataSourceConfig {
         log.info("✔ STG Oracle JdbcTemplate created");
         return new JdbcTemplate(dataSource);
     }
+
+    // ==================== MB Link Database Configuration ====================
+
+    @Bean(name = "mblinkHikariConfig")
+    @ConfigurationProperties(prefix = "oracle.mblink.datasource")
+    public HikariConfig mblinkHikariConfig() {
+        return new HikariConfig();
+    }
+
+    @Bean(name = "mblinkDataSource")
+    public DataSource mblinkDataSource(@Qualifier("mblinkHikariConfig") HikariConfig config) {
+        if (config.getJdbcUrl() == null || config.getJdbcUrl().isEmpty()) {
+            log.warn("MB Link Oracle JDBC URL not configured, fallback to simple driver");
+            return new org.springframework.jdbc.datasource.SimpleDriverDataSource();
+        }
+
+        log.info("✔ Creating MB Link Oracle DataSource");
+        log.info("   URL: {}", config.getJdbcUrl());
+        log.info("   Username: {}", config.getUsername());
+        log.info("   Driver: {}", config.getDriverClassName());
+        log.info("   Pool: {}", config.getPoolName());
+
+        try {
+            return new HikariDataSource(config);
+        } catch (Exception e) {
+            log.warn("⚠ Failed to initialize MB Link datasource: {}", e.getMessage());
+            return new org.springframework.jdbc.datasource.SimpleDriverDataSource();
+        }
+    }
+
+    @Bean(name = "mblinkJdbcTemplate")
+    public JdbcTemplate mblinkJdbcTemplate(@Qualifier("mblinkDataSource") DataSource dataSource) {
+        log.info("✔ MB Link Oracle JdbcTemplate created");
+        return new JdbcTemplate(dataSource);
+    }
 }

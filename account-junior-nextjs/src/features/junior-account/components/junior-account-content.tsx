@@ -8,6 +8,7 @@ import { PersonalDetailsFields } from "@/features/account-opening/components/for
 import { MasterDataFields } from "@/features/account-opening/components/form-sections/master-data-fields";
 import OTPInput from "@/features/account-opening/components/form-field/form-otp";
 import { JuniorPageHeader } from "@/features/junior-account/components/junior-page-header";
+import { JuniorNoNidForm } from "@/features/junior-account/components/junior-no-nid-form";
 import ValidationErrorModal from "@/features/account-opening/components/validateModal";
 import ErrorModal from "@/features/account-opening/components/errorModal";
 import ConfirmationModal from "@/features/account-opening/components/confirmModal";
@@ -416,150 +417,156 @@ export function JuniorAccountContent({ isPublic = false }: OpenAccountContentPro
               {translate("sub_header_junior")}
             </p>
 
-            {/* ── NID / No-NID Tabs ── */}
-            <div className="mt-4 inline-flex bg-slate-100 p-1 rounded-xl border border-slate-200 gap-1 shadow-inner">
-              <button
-                type="button"
-                onClick={() => setHasNid(true)}
-                className={`flex items-center gap-1.5 py-1.5 px-4 rounded-lg text-xs font-semibold transition-all duration-200 ${
-                  hasNid
-                    ? "bg-white text-primary shadow-sm border border-primary/20"
-                    : "text-slate-500 hover:text-slate-700 hover:bg-white/60"
-                }`}
-              >
-                <CreditCard className="w-3.5 h-3.5 shrink-0" />
-                <span>{translate("tab_with_nid")}</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setHasNid(false)}
-                className={`flex items-center gap-1.5 py-1.5 px-4 rounded-lg text-xs font-semibold transition-all duration-200 ${
-                  !hasNid
-                    ? "bg-white text-primary shadow-sm border border-primary/20"
-                    : "text-slate-500 hover:text-slate-700 hover:bg-white/60"
-                }`}
-              >
-                <FileText className="w-3.5 h-3.5 shrink-0" />
-                <span>{translate("tab_no_nid")}</span>
-              </button>
-            </div>
           </div>
 
-          {/* ── Form Card ── */}
+          {/* ── Form Card Container with Header Tabs ── */}
           <div className="max-w-5xl mx-auto w-full px-3 sm:px-5 lg:px-8 py-4 sm:py-6">
-            <div className="bg-white rounded-2xl border border-slate-100 shadow-sm shadow-slate-100/60">
 
-              {/* ── Document Upload (if NID mode) ── */}
-              {hasNid && (
-                <>
-                  <div className="p-5 sm:p-6">
-                    <SectionLabel label={translate("section_document_upload")} />
-                    <AccountImages
-                      uploadedImage={uploadedImage}
-                      selfiePreview={selfiePreview}
-                      handleImageUpload={handleImageUpload}
-                      handleSelfieUpload={handleSelfieUpload}
-                    />
-                  </div>
-                  <Divider />
-                </>
-              )}
+            {/* ── Modern Premium Form Header Tab Bar ── */}
+            <div className="mb-6 p-1.5 rounded-2xl bg-gradient-to-b from-slate-100/90 to-slate-200/50 border border-slate-200/90 shadow-xs shadow-slate-200/50">
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setHasNid(true)}
+                  className={`relative flex items-center justify-center gap-2.5 h-12 sm:h-13 px-4 rounded-xl text-sm sm:text-base font-extrabold transition-all duration-300 cursor-pointer ${
+                    hasNid
+                      ? "bg-white text-primary shadow-md shadow-primary/10 border-2 border-primary/40 ring-4 ring-primary/5 translate-y-[-1px]"
+                      : "text-slate-500 hover:text-slate-800 hover:bg-white/50 border border-transparent"
+                  }`}
+                >
+                  <CreditCard className={`w-5 h-5 shrink-0 transition-transform duration-200 ${hasNid ? "text-primary scale-110" : "text-slate-400"}`} />
+                  <span>{translate("tab_with_nid")}</span>
+                </button>
 
-              {/* ── Personal Details ── */}
-              <div className="p-5 sm:p-6">
-                <SectionLabel label={translate("section_personal_details")} />
-                <PersonalDetailsFields
-                  formData={formData}
-                  handleInputChange={handleInputChangeWrapper}
-                  datePickerKey={datePickerKey}
-                  legalTypes={legalTypes}
-                  selectedLegalType={selectedLegalType}
-                  setSelectedLegalType={handleSetSelectedLegalType}
-                  isLegalTypeLoading={isLegalTypeLoading}
-                  getLegalTypeName={getLegalTypeName}
-                  isVerified={isVerified}
-                  isNidExtracted={!!uploadedImage}
-                />
-                <MasterDataFields
-                  maritalStatuses={maritalStatuses}
-                  selectedMaritalStatus={selectedMaritalStatus}
-                  setSelectedMaritalStatus={handleSetSelectedMaritalStatus}
-                  isLoadingMarital={isLoadingMarital}
-                  getMaritalName={getMaritalName}
-                  occupations={occupations}
-                  selectedOccupation={selectedOccupation}
-                  setSelectedOccupation={handleSetSelectedOccupation}
-                  isLoadingOccupations={isLoadingOccupations}
-                  getOccupationName={getOccupationName}
-                  selectedBranch={selectedBranch}
-                  onBranchChange={handleBranchChange}
-                  staffCode={staffCode}
-                  setStaffCode={handleSetStaffCode}
-                  accOnlineCategories={accOnlineCategories}
-                  selectedCategory={selectedCategory}
-                  setSelectedCategory={setSelectedCategory}
-                  isLoadingCategories={isLoadingCategories}
-                  isVerified={isVerified}
-                  isPublic={true}
-                />
+                <button
+                  type="button"
+                  onClick={() => setHasNid(false)}
+                  className={`relative flex items-center justify-center gap-2.5 h-12 sm:h-13 px-4 rounded-xl text-sm sm:text-base font-extrabold transition-all duration-300 cursor-pointer ${
+                    !hasNid
+                      ? "bg-white text-primary shadow-md shadow-primary/10 border-2 border-primary/40 ring-4 ring-primary/5 translate-y-[-1px]"
+                      : "text-slate-500 hover:text-slate-800 hover:bg-white/50 border border-transparent"
+                  }`}
+                >
+                  <FileText className={`w-5 h-5 shrink-0 transition-transform duration-200 ${!hasNid ? "text-primary scale-110" : "text-slate-400"}`} />
+                  <span>{translate("tab_no_nid")}</span>
+                </button>
               </div>
+            </div>
 
-              <Divider />
+            {/* ── Form Content ── */}
+            {!hasNid ? (
+              <JuniorNoNidForm branches={referenceBanks || []} occupations={occupations || []} />
+            ) : (
+              <div className="bg-white rounded-2xl border border-slate-100 shadow-sm shadow-slate-100/60">
 
-              {/* ── Phone Verification ── */}
-              <div className="p-5 sm:p-6">
-                <SectionLabel label={translate("section_phone_verification")} />
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <OTPInput
-                    phoneNumber={phoneNumber}
-                    onPhoneChange={handlePhoneChange}
-                    onVerificationSuccess={handleVerificationSuccess}
-                    disabled={isBusy}
-                    validationErrors={validationErrors}
-                    onValidationChange={handleValidationChange}
-                    reset={resetOtp}
+                {/* ── Document Upload (if NID mode) ── */}
+                <div className="p-5 sm:p-6">
+                  <SectionLabel label={translate("section_document_upload")} />
+                  <AccountImages
+                    uploadedImage={uploadedImage}
+                    selfiePreview={selfiePreview}
+                    handleImageUpload={handleImageUpload}
+                    handleSelfieUpload={handleSelfieUpload}
                   />
                 </div>
+                <Divider />
+
+                {/* ── Personal Details ── */}
+                <div className="p-5 sm:p-6">
+                  <SectionLabel label={translate("section_personal_details")} />
+                  <PersonalDetailsFields
+                    formData={formData}
+                    handleInputChange={handleInputChangeWrapper}
+                    datePickerKey={datePickerKey}
+                    legalTypes={legalTypes}
+                    selectedLegalType={selectedLegalType}
+                    setSelectedLegalType={handleSetSelectedLegalType}
+                    isLegalTypeLoading={isLegalTypeLoading}
+                    getLegalTypeName={getLegalTypeName}
+                    isVerified={isVerified}
+                    isNidExtracted={!!uploadedImage}
+                  />
+                  <MasterDataFields
+                    maritalStatuses={maritalStatuses}
+                    selectedMaritalStatus={selectedMaritalStatus}
+                    setSelectedMaritalStatus={handleSetSelectedMaritalStatus}
+                    isLoadingMarital={isLoadingMarital}
+                    getMaritalName={getMaritalName}
+                    occupations={occupations}
+                    selectedOccupation={selectedOccupation}
+                    setSelectedOccupation={handleSetSelectedOccupation}
+                    isLoadingOccupations={isLoadingOccupations}
+                    getOccupationName={getOccupationName}
+                    selectedBranch={selectedBranch}
+                    onBranchChange={handleBranchChange}
+                    staffCode={staffCode}
+                    setStaffCode={handleSetStaffCode}
+                    accOnlineCategories={accOnlineCategories}
+                    selectedCategory={selectedCategory}
+                    setSelectedCategory={setSelectedCategory}
+                    isLoadingCategories={isLoadingCategories}
+                    isVerified={isVerified}
+                    isPublic={true}
+                  />
+                </div>
+
+                <Divider />
+
+                {/* ── Phone Verification ── */}
+                <div className="p-5 sm:p-6">
+                  <SectionLabel label={translate("section_phone_verification")} />
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <OTPInput
+                      phoneNumber={phoneNumber}
+                      onPhoneChange={handlePhoneChange}
+                      onVerificationSuccess={handleVerificationSuccess}
+                      disabled={isBusy}
+                      validationErrors={validationErrors}
+                      onValidationChange={handleValidationChange}
+                      reset={resetOtp}
+                    />
+                  </div>
+                </div>
+
+                {/* ── Action Bar ── */}
+                <div className="px-5 sm:px-6 py-4 border-t border-slate-100 bg-slate-50/50 rounded-b-2xl flex flex-col sm:flex-row sm:justify-end items-stretch sm:items-center gap-3">
+                  {/* Verify button */}
+                  <Button
+                    className={`w-full sm:w-auto min-w-[130px] h-10 font-semibold rounded-xl text-sm gap-1.5 transition-all ${
+                      !isVerified && !isBusy
+                        ? "border border-primary text-primary bg-white hover:bg-primary/5 shadow-sm cursor-pointer"
+                        : "border border-gray-200 text-gray-400 bg-gray-50 cursor-not-allowed opacity-60"
+                    }`}
+                    onClick={handleVerificationClick}
+                    disabled={isBusy || isVerified}
+                  >
+                    {isValidating ? (
+                      <><span className="w-3.5 h-3.5 border-2 border-primary border-t-transparent rounded-full animate-spin" /><span>{translate("processing")}</span></>
+                    ) : (
+                      <span>{translate("verification")}</span>
+                    )}
+                  </Button>
+
+                  {/* Submit button */}
+                  <Button
+                    className={`w-full sm:w-auto min-w-[130px] h-10 font-semibold rounded-xl text-sm gap-1.5 transition-all ${
+                      isVerified && !isBusy
+                        ? "bg-primary hover:bg-primary/90 text-white shadow-sm cursor-pointer"
+                        : "bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed opacity-60"
+                    }`}
+                    onClick={handleSubmitAccount}
+                    disabled={isBusy || !isVerified || loadingState.isLoading}
+                  >
+                    {loadingState.isLoading ? (
+                      <><span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" /><span>{translate("submitting") || "Submitting"}</span></>
+                    ) : (
+                      <><CheckCircle className="w-4 h-4 flex-shrink-0" /><span>{translate("submit")}</span></>
+                    )}
+                  </Button>
+                </div>
+
               </div>
-
-              {/* ── Action Bar ── */}
-              <div className="px-5 sm:px-6 py-4 border-t border-slate-100 bg-slate-50/50 rounded-b-2xl flex flex-col sm:flex-row sm:justify-end items-stretch sm:items-center gap-3">
-                {/* Verify button */}
-                <Button
-                  className={`w-full sm:w-auto min-w-[130px] h-10 font-semibold rounded-xl text-sm gap-1.5 transition-all ${
-                    !isVerified && !isBusy
-                      ? "border border-primary text-primary bg-white hover:bg-primary/5 shadow-sm cursor-pointer"
-                      : "border border-gray-200 text-gray-400 bg-gray-50 cursor-not-allowed opacity-60"
-                  }`}
-                  onClick={handleVerificationClick}
-                  disabled={isBusy || isVerified}
-                >
-                  {isValidating ? (
-                    <><span className="w-3.5 h-3.5 border-2 border-primary border-t-transparent rounded-full animate-spin" /><span>{translate("processing")}</span></>
-                  ) : (
-                    <span>{translate("verification")}</span>
-                  )}
-                </Button>
-
-                {/* Submit button */}
-                <Button
-                  className={`w-full sm:w-auto min-w-[130px] h-10 font-semibold rounded-xl text-sm gap-1.5 transition-all ${
-                    isVerified && !isBusy
-                      ? "bg-primary hover:bg-primary/90 text-white shadow-sm cursor-pointer"
-                      : "bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed opacity-60"
-                  }`}
-                  onClick={handleSubmitAccount}
-                  disabled={isBusy || !isVerified || loadingState.isLoading}
-                >
-                  {loadingState.isLoading ? (
-                    <><span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" /><span>{translate("submitting") || "Submitting"}</span></>
-                  ) : (
-                    <><CheckCircle className="w-4 h-4 flex-shrink-0" /><span>{translate("submit")}</span></>
-                  )}
-                </Button>
-              </div>
-
-            </div>
+            )}
           </div>
 
           <Footer />

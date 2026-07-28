@@ -203,6 +203,10 @@ public class JuniorAccountServiceImpl implements JuniorAccountService {
 
             juniorCustomerImageService.saveImage("NID", request.getNidImageName(), request.getLegalId(), request.getGuardianLegalId());
             juniorCustomerImageService.saveImage("SELFIE", request.getSelfieImageName(), request.getLegalId(), request.getGuardianLegalId());
+            if (request.getReferenceDocName() != null || request.getReferenceDocImage() != null) {
+                String docName = request.getReferenceDocName() != null ? request.getReferenceDocName() : "reference_document.png";
+                juniorCustomerImageService.saveImage("REF_DOC", docName, request.getLegalId(), request.getGuardianLegalId());
+            }
         } catch (Exception e) {
             log.error("Failed to save JuniorAccountFinal record for Legal ID: {}. Error: {}", request.getLegalId(), e.getMessage(), e);
         }

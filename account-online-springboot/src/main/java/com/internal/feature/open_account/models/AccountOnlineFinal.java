@@ -1,4 +1,4 @@
-package com.internal.feature.logs_report.models;
+package com.internal.feature.open_account.models;
 
 import com.internal.config.entity.BaseNoIdEntity;
 import com.internal.enumation.AmlStatusEnum;
@@ -242,10 +242,3 @@ public class AccountOnlineFinal extends BaseNoIdEntity {
     @Column(name = "mb_app_download_link")
     private String mbAppDownloadLink;
 }
-
-
-
-
-
-
-

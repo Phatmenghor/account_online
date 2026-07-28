@@ -1,4 +1,4 @@
-package com.internal.feature.logs_report.dto.response;
+package com.internal.feature.open_account.dto.response;
 
 import com.internal.feature.auth.dto.response.UserResponseDto;
 import lombok.AllArgsConstructor;
@@ -94,4 +94,3 @@ public class AccountOnlineFinalResponseDto {
     // === TRACE FIELDS ===
     private LocalDateTime createdAt;
 }
-

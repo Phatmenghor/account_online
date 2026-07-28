@@ -53,6 +53,13 @@ public class JuniorAccountXmlBuilder {
         String englishFullName = xmlUtils.safe(request.getFamilyName()) + " " + xmlUtils.safe(request.getGivenName());
         String khmerFullName = xmlUtils.safe(request.getLastNameKh()) + " " + xmlUtils.safe(request.getFirstNameKh());
 
+        String legalDocType = request.getLegalDocType();
+        if (legalDocType == null || legalDocType.isBlank()) {
+            legalDocType = xmlUtils.getOrDefault(request.getReferenceDocType(), "BIRTH.CERTIFICATE");
+        }
+
+        String referralBy = xmlUtils.getOrDefault(request.getReferralId(), xmlUtils.getOrDefault(request.getReferralBy(), ""));
+
         return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
                 + "<soapenv:Envelope xmlns:soapenv=\"" + AppConstants.SOAP_ENV_NS + "\" "
                 + "xmlns:oaow=\"" + AppConstants.OAOW_NS + "\" "
@@ -83,8 +90,8 @@ public class JuniorAccountXmlBuilder {
                 // STREET
                 + "<cus:gSTREET g=\"1\"><cus:STREET>" + legalAddress + "</cus:STREET></cus:gSTREET>"
 
-                // Organizational fields — Configurable Sector via defaultProperties.getSector()
-                + "<cus:Sector>" + defaultProperties.getSector() + "</cus:Sector>"
+                // Organizational fields — Always Sector 6012 for Junior Account
+                + "<cus:Sector>" + AppConstants.JUNIOR_SECTOR + "</cus:Sector>"
                 + "<cus:CostCenter>" + defaultProperties.getCostCenter() + "</cus:CostCenter>"
                 + "<cus:Industry>" + defaultProperties.getIndustry() + "</cus:Industry>"
                 + "<cus:Target>" + defaultProperties.getTarget() + "</cus:Target>"
@@ -95,7 +102,7 @@ public class JuniorAccountXmlBuilder {
                 // Legal identification
                 + "<cus:gLEGALID g=\"1\"><cus:mLEGALID m=\"1\">"
                 + "<cus:LegalId>" + request.getLegalId() + "</cus:LegalId>"
-                + "<cus:LegalDocName>" + request.getLegalDocType() + "</cus:LegalDocName>"
+                + "<cus:LegalDocName>" + legalDocType + "</cus:LegalDocName>"
                 + "<cus:LegalHolderName>" + defaultProperties.getLegalHolderName() + "</cus:LegalHolderName>"
                 + "<cus:LegalIssAuth>" + xmlUtils.getOrDefault(request.getLegalIssAuth(), request.getGivenName()) + "</cus:LegalIssAuth>"
                 + "<cus:LegalIssDate>" + legalIssueDate + "</cus:LegalIssDate>"
@@ -137,7 +144,7 @@ public class JuniorAccountXmlBuilder {
                 + "<cus:RelationManager>" + relationManager + "</cus:RelationManager>"
                 + "<cus:LoanOfficer></cus:LoanOfficer>"
                 + "<cus:Staff></cus:Staff>"
-                + "<cus:ReferralBy></cus:ReferralBy>"
+                + "<cus:ReferralBy>" + referralBy + "</cus:ReferralBy>"
 
                 // Place of birth address
                 + "<cus:CUSTPROVINCEP>" + pobProvince + "</cus:CUSTPROVINCEP>"
@@ -181,13 +188,13 @@ public class JuniorAccountXmlBuilder {
                 + "<aaar:Arrangement>" + defaultProperties.getNewArrangement() + "</aaar:Arrangement>"
                 + "<aaar:Activity>" + defaultProperties.getAccountActivity() + "</aaar:Activity>"
 
-                // CUSTOMER & JOINT OWNER (GUARDIAN)
+                // CUSTOMER & JOINT OWNER (GUARDIAN LINKED ONLY FOR NO-NID MODE)
                 + "<aaar:gCUSTOMER g=\"1\">"
                 + "<aaar:mCUSTOMER m=\"1\">"
                 + "<aaar:Customer>" + cif + "</aaar:Customer>"
                 + "<aaar:CustomerRole>OWNER</aaar:CustomerRole>"
                 + "</aaar:mCUSTOMER>"
-                + (request.getGuardianCif() != null && !request.getGuardianCif().isBlank()
+                + (!Boolean.TRUE.equals(request.getHasNid()) && request.getGuardianCif() != null && !request.getGuardianCif().isBlank()
                         ? "<aaar:mCUSTOMER m=\"2\">"
                         + "<aaar:Customer>" + request.getGuardianCif() + "</aaar:Customer>"
                         + "<aaar:CustomerRole>JOINT.OWNER</aaar:CustomerRole>"

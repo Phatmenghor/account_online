@@ -1,13 +1,13 @@
-package com.internal.feature.logs_report.controller;
+package com.internal.feature.open_account.controller;
 
-import com.internal.feature.logs_report.dto.request.AccountOnlineFinalLogRequestDto;
-import com.internal.feature.logs_report.dto.request.AllAccountOnlineSuccessExcelRequestDto;
-import com.internal.feature.logs_report.dto.request.AllAccountOnlineSuccessRequestDto;
-import com.internal.feature.logs_report.dto.response.AccountOnlineFinalExcelResponseDto;
-import com.internal.feature.logs_report.dto.response.AccountOnlineFinalResponseDto;
-import com.internal.feature.logs_report.dto.response.AllAccountOnlineFinalExcelResponseDto;
-import com.internal.feature.logs_report.dto.response.AllAccountOnlineFinalResponseDto;
-import com.internal.feature.logs_report.service.AccountFinalService;
+import com.internal.feature.open_account.dto.request.AccountOnlineFinalLogRequestDto;
+import com.internal.feature.open_account.dto.request.AllAccountOnlineSuccessExcelRequestDto;
+import com.internal.feature.open_account.dto.request.AllAccountOnlineSuccessRequestDto;
+import com.internal.feature.open_account.dto.response.AccountOnlineFinalExcelResponseDto;
+import com.internal.feature.open_account.dto.response.AccountOnlineFinalResponseDto;
+import com.internal.feature.open_account.dto.response.AllAccountOnlineFinalExcelResponseDto;
+import com.internal.feature.open_account.dto.response.AllAccountOnlineFinalResponseDto;
+import com.internal.feature.open_account.service.AccountFinalService;
 import com.internal.shared.constant.ResponseMessage;
 import com.internal.shared.response.ApiResponse;
 import lombok.RequiredArgsConstructor;

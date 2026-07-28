@@ -2,8 +2,8 @@ package com.internal.integration.rest.mb;
 
 import com.internal.config.CpbProperties;
 import com.internal.config.DefaultProperties;
-import com.internal.feature.logs_report.models.CifActivationLog;
-import com.internal.feature.logs_report.service.CifActivationLogService;
+import com.internal.feature.open_account.models.CifActivationLog;
+import com.internal.feature.open_account.service.CifActivationLogService;
 import com.internal.feature.open_account.dto.request.CustomerRequest;
 import com.internal.feature.open_account.dto.request.MobileBankingRequest;
 import com.internal.feature.open_account.dto.response.MobileBankingResponse;

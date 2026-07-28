@@ -64,7 +64,8 @@ export const MasterDataFields: React.FC<MasterDataFieldsProps> = ({
   isLoadingCategories,
   isVerified = false,
   isPublic = false,
-}) => {
+  showBranch = true,
+}: MasterDataFieldsProps & { showBranch?: boolean }) => {
   // Get values from FormStateContext
   const {
     validationErrors,
@@ -133,10 +134,11 @@ export const MasterDataFields: React.FC<MasterDataFieldsProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const renderLabel = (labelKey: string) => (
+  const renderLabel = (labelKey: string, required = true) => (
     <div className="flex items-center justify-between mb-1">
       <Label htmlFor={labelKey} className="text-sm font-medium text-gray-700">
         {translate(labelKey)}
+        {required && <span className="text-red-500 ml-0.5">*</span>}
       </Label>
       {isVerified && (
         <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0" />
@@ -228,23 +230,25 @@ export const MasterDataFields: React.FC<MasterDataFieldsProps> = ({
       </div>
 
       {/* Branch */}
-      <div className="space-y-1">
-        {renderLabel("branch")}
-        <div
-          className={
-            validationErrors.branch ? "border border-red-400 rounded-xl" : ""
-          }
-        >
-          <ComboboxSelectBranch
-            dataSelect={selectedBranch}
-            onChangeSelected={onBranchChange}
-            disabled={isLoading || isValidating || isSubmitting}
-          />
+      {showBranch && (
+        <div className="space-y-1">
+          {renderLabel("branch")}
+          <div
+            className={
+              validationErrors.branch ? "border border-red-400 rounded-xl" : ""
+            }
+          >
+            <ComboboxSelectBranch
+              dataSelect={selectedBranch}
+              onChangeSelected={onBranchChange}
+              disabled={isLoading || isValidating || isSubmitting}
+            />
+          </div>
+          {validationErrors.branch && (
+            <p className="text-xs text-red-500">{translate("err_branch")}</p>
+          )}
         </div>
-        {validationErrors.branch && (
-          <p className="text-xs text-red-500">{translate("err_branch")}</p>
-        )}
-      </div>
+      )}
 
       {/* Account Type */}
       {!isPublic && (
@@ -282,7 +286,7 @@ export const MasterDataFields: React.FC<MasterDataFieldsProps> = ({
 
       {/* Relationship Manager / Staff ID */}
       <div className={`${isPublic ? "" : "md:col-span-2"} space-y-1`}>
-        {renderLabel(isPublic ? "referralId" : "relationshipManager")}
+        {renderLabel(isPublic ? "referralId" : "relationshipManager", false)}
         <div className="relative">
           <Input
             placeholder={translate(isPublic ? "referralIdPlaceholder" : "staffCode")}

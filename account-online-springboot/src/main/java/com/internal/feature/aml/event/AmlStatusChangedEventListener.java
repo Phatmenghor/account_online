@@ -4,7 +4,7 @@ import com.internal.enumation.AmlStatusEnum;
 import com.internal.feature.aml.dto.response.AmlStatusDto;
 import com.internal.feature.aml.models.AmlStatus;
 import com.internal.feature.aml.repository.AmlStatusRepository;
-import com.internal.feature.logs_report.service.AccountFinalService;
+import com.internal.feature.open_account.service.AccountFinalService;
 import com.internal.feature.open_account.dto.request.CustomerRequest;
 import com.internal.feature.open_account.mapper.OpenAccountAmlStatusMapper;
 import com.internal.feature.open_account.service.OpenAccountService;

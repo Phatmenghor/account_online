@@ -1,4 +1,4 @@
-package com.internal.feature.logs_report.dto.response;
+package com.internal.feature.open_account.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,4 +15,3 @@ public class AllAccountOnlineFinalExcelResponseDto {
     private List<AccountOnlineFinalExcelResponseDto> content;
     private int countAll;
 }
-

@@ -1,14 +1,15 @@
-package com.internal.feature.logs_report.dto.request;
+package com.internal.feature.open_account.dto.request;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@AllArgsConstructor
+@Builder
 @NoArgsConstructor
+@AllArgsConstructor
 public class AccountOnlineFinalLogRequestDto {
-    private String cif;
     private String legalId;
+    private String cif;
 }
-

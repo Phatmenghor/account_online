@@ -1,18 +1,16 @@
-package com.internal.feature.logs_report.mapper;
-
+package com.internal.feature.open_account.mapper;
 
 import com.internal.feature.auth.dto.response.UserResponseDto;
 import com.internal.feature.auth.mapper.UserMapper;
 import com.internal.feature.auth.models.UserEntity;
-import com.internal.feature.logs_report.dto.response.AccountOnlineFinalExcelResponseDto;
-import com.internal.feature.logs_report.dto.response.AccountOnlineFinalResponseDto;
-import com.internal.feature.logs_report.dto.response.AllAccountOnlineFinalExcelResponseDto;
-import com.internal.feature.logs_report.dto.response.AllAccountOnlineFinalResponseDto;
-import com.internal.feature.logs_report.models.AccountOnlineFinal;
+import com.internal.feature.open_account.dto.response.AccountOnlineFinalExcelResponseDto;
+import com.internal.feature.open_account.dto.response.AccountOnlineFinalResponseDto;
+import com.internal.feature.open_account.dto.response.AllAccountOnlineFinalExcelResponseDto;
+import com.internal.feature.open_account.dto.response.AllAccountOnlineFinalResponseDto;
+import com.internal.feature.open_account.models.AccountOnlineFinal;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 
 import java.util.List;
@@ -75,9 +73,3 @@ public interface AccountOnlineFinalMapper {
         return response;
     }
 }
-
-
-
-
-
-

@@ -58,10 +58,11 @@ export const PersonalDetailsFields: React.FC<PersonalDetailsFieldsProps> = ({
     }
   }, [legalTypes, selectedLegalType]);
 
-  const renderLabel = (labelKey: string) => (
+  const renderLabel = (labelKey: string, required = true) => (
     <div className="flex items-center justify-between mb-1">
       <Label htmlFor={labelKey} className="text-sm font-medium text-gray-700">
         {translate(labelKey)}
+        {required && <span className="text-red-500 ml-0.5">*</span>}
       </Label>
       {isVerified && (
         <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0" />

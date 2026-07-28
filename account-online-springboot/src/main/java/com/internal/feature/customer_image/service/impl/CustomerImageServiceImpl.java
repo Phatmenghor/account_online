@@ -6,7 +6,7 @@ import com.internal.feature.customer_image.dto.response.CustomerImageUploadRespo
 import com.internal.feature.customer_image.models.CustomerImage;
 import com.internal.feature.customer_image.repository.CustomerImageRepository;
 import com.internal.feature.customer_image.service.CustomerImageService;
-import com.internal.feature.logs_report.dto.request.CustomerFileUploadRequestDto;
+import com.internal.feature.open_account.dto.request.CustomerFileUploadRequestDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;

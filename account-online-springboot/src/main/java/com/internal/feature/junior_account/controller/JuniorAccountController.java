@@ -9,7 +9,7 @@ import com.internal.feature.junior_account.models.JuniorAccountFinal;
 import com.internal.feature.junior_account.repository.JuniorAccountFinalRepository;
 import com.internal.feature.junior_account.service.CustomerInfoService;
 import com.internal.feature.junior_account.service.JuniorAccountService;
-import com.internal.feature.logs_report.dto.request.AllAccountOnlineSuccessRequestDto;
+import com.internal.feature.open_account.dto.request.AllAccountOnlineSuccessRequestDto;
 import com.internal.feature.open_account.dto.response.OpenAccountResponseDto;
 import com.internal.shared.pagination.PaginationUtil;
 import com.internal.shared.response.ApiResponse;
