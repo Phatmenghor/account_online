@@ -157,8 +157,8 @@ public class TelegramService {
                     if (result.has("chat") && result.get("chat").has("id")) {
                         chatId = String.valueOf(result.get("chat").get("id").asLong());
                     }
-                    // Save only messages sent to the monitor chat ID
-                    if (monitorChatId != null && !monitorChatId.trim().isEmpty() && chatId.equals(monitorChatId.trim())) {
+                    // Save message log for all sent messages (Monitor, Junior, Dev) for 30-day retention cleanup
+                    if (chatId != null && !chatId.trim().isEmpty()) {
                         TelegramMessageLog logEntity = TelegramMessageLog.builder()
                                 .chatId(chatId)
                                 .messageId(messageId)

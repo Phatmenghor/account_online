@@ -62,13 +62,9 @@ public class JuniorAccountServiceImpl implements JuniorAccountService {
             request.setLegalId(legalId);
         }
 
-        // Ensure Junior-specific product and sector defaults
-        if (request.getSector() == null || request.getSector().isBlank()) {
-            request.setSector("6012");
-        }
-        if (request.getProductAccount() == null || request.getProductAccount().isBlank()) {
-            request.setProductAccount("SAVE.JUNIOR.SAVING");
-        }
+        // Junior account uses DEFAULT_SECTOR (6011) for T24 Customer Creation and JUNIOR_PRODUCT (SAVE.JUNIOR.SAVING) for Account Creation
+        request.setSector(AppConstants.DEFAULT_SECTOR);
+        request.setProductAccount(AppConstants.JUNIOR_PRODUCT);
 
         String currentStep = "START";
         String submittedBy = "Customer";

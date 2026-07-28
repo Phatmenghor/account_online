@@ -5,7 +5,7 @@ import axios from "axios";
 export async function createOpenAccountService(request: CreateOpenAccountReq) {
   try {
     const response = await axiosClientWithAuth.post(
-      "/api/v1/open-account/process",
+      "/api/v1/public/junior-open-account/process",
       request,
       { timeout: ACCOUNT_CREATION_TIMEOUT }
     );
@@ -13,7 +13,19 @@ export async function createOpenAccountService(request: CreateOpenAccountReq) {
   } catch (error) {
     if (axios.isAxiosError(error)) {
       const raw = error.response?.data;
-      const message = raw?.message;
+      let backendMessage: string | null = null;
+      if (typeof raw === "string" && raw.trim().length > 0) {
+        backendMessage = raw;
+      } else if (raw && typeof raw === "object") {
+        backendMessage = raw.message || raw.error || raw.details?.message || null;
+      }
+
+      const message =
+        backendMessage ||
+        (error.response?.status === 409
+          ? "លោកអ្នកមានគណនីជាមួយធនាគាររួចហើយ។ សូមប្រើប្រាស់ជាមួយគណនីរបស់លោកអ្នក។"
+          : error.message);
+
       console.error("Axios error:", message);
       throw {
         errorMessage: message,
@@ -22,9 +34,7 @@ export async function createOpenAccountService(request: CreateOpenAccountReq) {
       };
     } else {
       console.error("Unexpected error:", error);
-      throw { rawError: error };
+      throw { errorMessage: (error as any)?.message || "Unexpected error occurred", rawError: error };
     }
   }
 }
-
-

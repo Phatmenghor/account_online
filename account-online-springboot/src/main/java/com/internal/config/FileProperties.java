@@ -15,5 +15,6 @@ public class FileProperties {
         private String directory = "/app/customer-image";
         private String nid = "/nid";
         private String selfie = "/selfie";
+        private String junior = "/junior";
     }
 }

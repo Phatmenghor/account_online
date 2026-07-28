@@ -45,8 +45,13 @@ public class MobileBankingRestAdapter implements MobileBankingPort {
         try {
             MobileBankingRequest mbRequest = buildRequest(request, cif, khrAccount, usdAccount);
             MobileBankingResponse mbResponse = callActivatorApi(mbRequest, cif);
-            log.info("Mobile banking activation successful for CIF: {}", cif);
-            activationCode = mbResponse != null ? mbResponse.getContent() : null;
+            if (mbResponse != null && "06".equals(mbResponse.getCode())) {
+                log.info("Mobile banking username already registered for CIF: {}. Account creation completed successfully.", cif);
+                activationCode = "ALREADY_REGISTERED";
+            } else {
+                log.info("Mobile banking activation successful for CIF: {}", cif);
+                activationCode = mbResponse != null ? mbResponse.getContent() : null;
+            }
         } catch (Exception e) {
             log.error("Mobile banking activation failed (non-critical): {}", e.getMessage());
         }
@@ -73,8 +78,12 @@ public class MobileBankingRestAdapter implements MobileBankingPort {
                 message.append("CIF: ").append(cif).append("\r\n");
             }
             if (activationCode != null && !activationCode.isEmpty()) {
-                activationCode = activationCode.replaceAll("(?i)registCode:\\s*", "").trim();
-                message.append("MB Activation Code: ").append(activationCode).append("\r\n");
+                if ("ALREADY_REGISTERED".equalsIgnoreCase(activationCode)) {
+                    message.append("MB Status: Already Registered\r\n");
+                } else {
+                    activationCode = activationCode.replaceAll("(?i)registCode:\\s*", "").trim();
+                    message.append("MB Activation Code: ").append(activationCode).append("\r\n");
+                }
             }
             message.append("Download CPBank App: http://onelink.to/cpbank");
 
@@ -202,6 +211,12 @@ public class MobileBankingRestAdapter implements MobileBankingPort {
             if (parsed.getCode() != null && !"00".equals(parsed.getCode())) {
                 errorCode = parsed.getCode();
                 errorMessage = parsed.getMessage();
+                if ("06".equals(parsed.getCode())) {
+                    log.warn("Mobile banking username already exists for CIF {}: code={}, message={}",
+                            cif, parsed.getCode(), parsed.getMessage());
+                    success = true;
+                    return parsed;
+                }
                 throw new RuntimeException(
                         "Mobile banking API error - code: " + parsed.getCode() + ", message: " + parsed.getMessage());
             }

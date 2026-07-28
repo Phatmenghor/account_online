@@ -44,7 +44,7 @@ export default function SubmitSuccessModal({ isOpen, onClose }: SuccessModalProp
                 សូមស្វាគមន៍មកកាន់ Cambodia Post Bank!
               </h2>
 
-              <div className="w-full bg-primary/5 border border-primary/15 rounded-xl p-4 mt-3 text-center space-y-2">
+              <div className="w-full bg-primary/5 border border-primary/15 rounded-xl p-4 mt-3 text-left space-y-2">
                 <p className="text-sm text-gray-700 leading-relaxed">
                   គណនីធនាគាររបស់លោក/លោកស្រី
                   <span className="font-bold text-primary"> ត្រូវបានបង្កើតដោយជោគជ័យ</span> រួចរាល់ហើយ។

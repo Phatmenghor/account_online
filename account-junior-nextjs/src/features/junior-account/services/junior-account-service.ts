@@ -88,12 +88,10 @@ export async function processJuniorAccountOpening(payload: JuniorCustomerPayload
 
 /**
  * Fetch full customer information by CIF number.
- * Calls GET /api/v1/public/junior-open-account/customer-info?cif=...
+ * Calls POST /api/v1/public/junior-open-account/customer-info
  */
 export async function getCustomerInfoByCif(cif: string): Promise<CustomerInfo> {
-  const response = await axios.get(`${BASE_URL}/api/v1/public/junior-open-account/customer-info`, {
-    params: { cif },
-  });
+  const response = await axios.post(`${BASE_URL}/api/v1/public/junior-open-account/customer-info`, { cif });
   return response.data?.data || response.data;
 }
 

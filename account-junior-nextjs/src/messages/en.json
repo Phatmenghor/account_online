@@ -220,7 +220,7 @@
     "submitting_wait": "Creating account... Please wait",
     "loading_images": "Uploading images...",
     "err_generic_title": "Something went wrong",
-    "err_generic_message": "Technical error. Please check your internet connection and try again.",
+    "err_generic_message": "Your request could not be processed. Please try again.",
     "err_nid_missing_title": "Missing NID Image",
     "err_nid_missing_message": "NID image is missing. Please take the photo again and retry.",
     "err_selfie_missing_title": "Missing Selfie Image",

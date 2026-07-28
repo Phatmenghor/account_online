@@ -41,12 +41,12 @@ public class OtpController {
      *   hasAccount = true  → phone already registered, show warning to user
      *   hasAccount = false → phone not registered, safe to proceed
      */
-    @GetMapping("/check-phone")
+    @PostMapping("/check-phone")
     public ResponseEntity<ApiResponse<PhoneCheckResponse>> checkPhone(
-            @RequestParam @NotBlank String phone) {
+            @Valid @RequestBody com.internal.feature.sms_otp.dto.request.PhoneCheckRequest request) {
 
-        log.info("API: Phone pre-check request");
-        PhoneCheckResponse response = phoneCheckService.checkPhone(phone);
+        log.info("API: Phone pre-check request for phone: {}", request.getPhone());
+        PhoneCheckResponse response = phoneCheckService.checkPhone(request.getPhone());
 
         String message = response.getHasAccount()
                 ? "Phone number is already registered."

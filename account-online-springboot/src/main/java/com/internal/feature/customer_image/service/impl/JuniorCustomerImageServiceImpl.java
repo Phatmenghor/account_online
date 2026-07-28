@@ -1,5 +1,6 @@
 package com.internal.feature.customer_image.service.impl;
 
+import com.internal.config.FileProperties;
 import com.internal.feature.customer_image.models.JuniorCustomerImage;
 import com.internal.feature.customer_image.repository.JuniorCustomerImageRepository;
 import com.internal.feature.customer_image.service.JuniorCustomerImageService;
@@ -10,12 +11,17 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
+/**
+ * Service implementation for saving and querying JuniorCustomerImage database records.
+ * Uses FileProperties to store files under /app/customer-image/junior subfolder.
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class JuniorCustomerImageServiceImpl implements JuniorCustomerImageService {
 
     private final JuniorCustomerImageRepository juniorCustomerImageRepository;
+    private final FileProperties fileProperties;
 
     @Override
     @Transactional
@@ -24,16 +30,19 @@ public class JuniorCustomerImageServiceImpl implements JuniorCustomerImageServic
             return null;
         }
 
+        String juniorPath = fileProperties.getUpload().getJunior().replaceFirst("^/", "");
+        String fullRelativePath = juniorPath + "/" + imageName;
+
         JuniorCustomerImage image = JuniorCustomerImage.builder()
                 .type(type)
                 .name(imageName)
-                .filePath("customer-images/" + imageName)
+                .filePath(fullRelativePath)
                 .legal_id(legalId)
                 .guardianLegalId(guardianLegalId)
                 .build();
 
         JuniorCustomerImage saved = juniorCustomerImageRepository.save(image);
-        log.info("Saved JuniorCustomerImage record ID: {} | Type: {} | Name: {}", saved.getId(), type, imageName);
+        log.info("Saved JuniorCustomerImage record ID: {} | Type: {} | Name: {} | Path: {}", saved.getId(), type, imageName, fullRelativePath);
         return saved;
     }
 

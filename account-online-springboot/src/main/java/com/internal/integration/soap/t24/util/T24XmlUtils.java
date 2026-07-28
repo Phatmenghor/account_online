@@ -1,37 +1,36 @@
 package com.internal.integration.soap.t24.util;
 
-import com.internal.shared.constant.DefaultConstants;
+import com.internal.shared.constant.AppConstants;
 import com.internal.shared.exception.openaccount.OpenAccountException;
 import com.internal.shared.util.SecurityUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 
 /**
- * Reusable utility class for T24 XML building, sanitization, date formatting, and escaping.
- * Shared across OpenAccountXmlBuilder and JuniorAccountXmlBuilder to eliminate duplicate code.
+ * Spring Component helper for T24 XML building, sanitization, date parsing, and escaping.
+ * Injected into XML builders to eliminate direct static calls.
  */
+@Component
 @Slf4j
-public final class T24XmlUtils {
+public class T24XmlUtils {
 
     public static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     public static final DateTimeFormatter T24_DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd");
 
-    private T24XmlUtils() {
-        throw new UnsupportedOperationException("Utility class");
-    }
-
-    public static String safe(String value) {
+    public String safe(String value) {
         return value == null ? "" : xmlEscape(value.trim());
     }
 
-    public static String getOrDefault(String value, String defaultValue) {
+    public String getOrDefault(String value, String defaultValue) {
         return (value != null && !value.trim().isEmpty()) ? value.trim() : defaultValue;
     }
 
-    public static String xmlEscape(String value) {
+    public String xmlEscape(String value) {
         if (value == null) return "";
         return value.replace("&", "&amp;")   // must be first
                     .replace("<", "&lt;")
@@ -40,7 +39,7 @@ public final class T24XmlUtils {
                     .replace("'", "&apos;");
     }
 
-    public static String toSwiftSafe(String input) {
+    public String toSwiftSafe(String input) {
         if (input == null) return "";
         String original = input.trim();
         if (original.isEmpty()) return "";
@@ -55,11 +54,11 @@ public final class T24XmlUtils {
         return sanitized.isEmpty() ? "Address" : sanitized;
     }
 
-    public static String mapMaritalStatus(String status) {
+    public String mapMaritalStatus(String status) {
         if (status == null || status.trim().isEmpty()) {
             return "SINGLE";
         }
-        String upper = status.trim().toUpperCase();
+        String upper = status.trim().toUpperCase(Locale.ROOT);
         return switch (upper) {
             case "MARRIED" -> "MARRIED";
             case "DIVORCED" -> "DIVORCED";
@@ -68,18 +67,18 @@ public final class T24XmlUtils {
         };
     }
 
-    public static String determineTitle(String gender) {
+    public String determineTitle(String gender) {
         if (gender == null || gender.trim().isEmpty()) return "";
-        String genderUpper = gender.toUpperCase();
-        if (genderUpper.contains(DefaultConstants.MALE) && !genderUpper.contains(DefaultConstants.FEMALE)) {
-            return DefaultConstants.MR;
-        } else if (genderUpper.contains(DefaultConstants.FEMALE)) {
-            return DefaultConstants.MS;
+        String genderUpper = gender.toUpperCase(Locale.ROOT);
+        if (genderUpper.contains(AppConstants.MALE) && !genderUpper.contains(AppConstants.FEMALE)) {
+            return AppConstants.MR;
+        } else if (genderUpper.contains(AppConstants.FEMALE)) {
+            return AppConstants.MS;
         }
         return "";
     }
 
-    public static String formatDateForT24(String date) {
+    public String formatDateForT24(String date) {
         if (date == null || date.trim().isEmpty()) {
             throw new OpenAccountException("INVALID_DATE_OF_BIRTH", "Date of birth is required");
         }
@@ -100,7 +99,7 @@ public final class T24XmlUtils {
         }
     }
 
-    public static String formatDateForT24NoFutureCheck(String date) {
+    public String formatDateForT24NoFutureCheck(String date) {
         if (date != null && !date.trim().isEmpty()) {
             try {
                 LocalDate localDate = parseDate(date.trim());
@@ -112,7 +111,7 @@ public final class T24XmlUtils {
         return LocalDate.now().plusYears(10).format(T24_DATE_FORMATTER);
     }
 
-    public static String formatLegalIssueDateWithDefault(String date) {
+    public String formatLegalIssueDateWithDefault(String date) {
         LocalDate today = LocalDate.now(ZoneId.of("Asia/Phnom_Penh"));
         LocalDate maxAllowed = today.minusYears(1);
         if (date != null && !date.trim().isEmpty()) {
@@ -126,7 +125,7 @@ public final class T24XmlUtils {
         return maxAllowed.format(T24_DATE_FORMATTER);
     }
 
-    public static LocalDate parseDate(String dateStr) {
+    public LocalDate parseDate(String dateStr) {
         try {
             if (dateStr.matches("\\d{8}")) {
                 return LocalDate.parse(dateStr, T24_DATE_FORMATTER);
@@ -137,7 +136,7 @@ public final class T24XmlUtils {
         }
     }
 
-    public static boolean isAuthenticated() {
+    public boolean isAuthenticated() {
         return SecurityUtils.getCurrentUsername() != null;
     }
 }

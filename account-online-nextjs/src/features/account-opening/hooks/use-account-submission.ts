@@ -242,36 +242,56 @@ export const useAccountSubmission = ({
       // Clean up cache on failure so retry doesn't reuse partial/failed files
       resetUploadCache();
 
-      const errorMessage = error?.errorMessage || error?.message;
-      const errorResponse = error?.rawError;
+      const rawErr = error?.rawError || error?.response?.data;
+      const statusCode = error?.status || error?.response?.status || rawErr?.code || rawErr?.statusCode;
+
+      let extractedMsg =
+        error?.errorMessage ||
+        (typeof rawErr === "object" ? (rawErr?.message || rawErr?.error) : (typeof rawErr === "string" ? rawErr : null)) ||
+        error?.message;
+
+      if (extractedMsg && extractedMsg.includes("Request failed with status code")) {
+        const detailMsg = typeof rawErr === "object" ? (rawErr?.message || rawErr?.error) : (typeof rawErr === "string" ? rawErr : null);
+        extractedMsg = detailMsg || (statusCode === 409 ? "លោកអ្នកមានគណនីជាមួយធនាគាររួចហើយ។ សូមប្រើប្រាស់ជាមួយគណនីរបស់លោកអ្នក។" : null);
+      }
+
+      const errorMessage = extractedMsg;
+      const errorResponse = rawErr;
 
       const isAccountExists =
-        errorMessage?.toLowerCase().includes("exist") ||
-        errorMessage?.toLowerCase().includes("already") ||
-        errorMessage?.includes("រួចហើយ") ||
-        errorMessage?.includes("គណនីមាន") ||
-        errorMessage?.includes("មានគណនី") ||
-        errorResponse?.message?.toLowerCase().includes("exist") ||
-        errorResponse?.message?.toLowerCase().includes("already") ||
-        errorResponse?.message?.includes("រួចហើយ") ||
-        errorMessage?.toLowerCase().includes("username") ||
-        errorMessage?.toLowerCase().includes("mobile banking");
+        statusCode === 409 ||
+        statusCode === "409" ||
+        (errorMessage != null && (
+          errorMessage.toLowerCase().includes("exist") ||
+          errorMessage.toLowerCase().includes("already") ||
+          errorMessage.includes("រួចហើយ") ||
+          errorMessage.includes("គណនីមាន") ||
+          errorMessage.includes("មានគណនី")
+        ));
 
       if (isAccountExists) {
+        const friendlyMessage =
+          errorMessage ||
+          "លោកអ្នកមានគណនីជាមួយធនាគាររួចហើយ។ សូមប្រើប្រាស់ជាមួយគណនីរបស់លោកអ្នក។";
+
         setAccountExistsData({
-          cif: errorResponse?.data?.cif,
-          accountNumber: errorResponse?.data?.accountNumber || errorResponse?.data?.khrAccount,
-          accountName: errorResponse?.data?.accountName || errorResponse?.data?.legalHolderName,
-          message: errorMessage || translate("account_exists_message"),
+          cif: errorResponse?.details?.cif || errorResponse?.data?.cif,
+          accountNumber: errorResponse?.details?.accountNumber || errorResponse?.data?.khrAccount,
+          accountName: errorResponse?.details?.accountName || errorResponse?.data?.legalHolderName,
+          message: friendlyMessage,
         });
         setShowAccountExistsModal(true);
-      } else if (errorMessage) {
-        showError({
-          title: translate("err_generic_title"),
-          message: errorMessage,
-        });
       } else {
-        showError();
+        const fullMsg =
+          errorMessage ||
+          (typeof error === "string" ? error : error?.message) ||
+          translate("err_generic_message") ||
+          "មានបញ្ហាកើតឡើងក្នុងការស្នើសុំគណនី។ សូមព្យាយាមម្តងទៀត។";
+
+        showError({
+          title: translate("err_generic_title") || "ការស្នើសុំមិនជោគជ័យ",
+          message: fullMsg,
+        });
       }
     } finally {
       setTimeout(() => {

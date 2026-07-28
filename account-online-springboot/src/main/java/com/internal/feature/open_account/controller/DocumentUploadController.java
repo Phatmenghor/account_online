@@ -25,15 +25,11 @@ public class DocumentUploadController {
     private final CustomerImageService customerImageService;
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Map<String, String>> uploadBase64(
-            @RequestBody Base64UploadRequest request) {
-
-        log.info("Received base64 upload. Type: {}, LegalId: {}",
-                request.getType(), request.getLegalId());
+    public ResponseEntity<Map<String, String>> uploadBase64(@RequestBody Base64UploadRequest request) {
+        log.info("Received base64 upload. Type: {}, LegalId: {}", request.getType(), request.getLegalId());
 
         if (request.getFileBase64() == null || request.getFileBase64().isBlank()) {
-            return ResponseEntity.badRequest()
-                    .body(Collections.singletonMap("error", "File data is empty"));
+            return ResponseEntity.badRequest().body(Collections.singletonMap("error", "File data is empty"));
         }
 
         if (request.getLegalId() == null || request.getLegalId().isBlank()) {
@@ -64,8 +60,7 @@ public class DocumentUploadController {
         log.info("Received multipart upload. Type: {}, LegalId: {}", type, legalId);
 
         if (file.isEmpty()) {
-            return ResponseEntity.badRequest()
-                    .body(Collections.singletonMap("error", "File is empty"));
+            return ResponseEntity.badRequest().body(Collections.singletonMap("error", "File is empty"));
         }
 
         try {
@@ -82,27 +77,11 @@ public class DocumentUploadController {
         }
     }
 
-    /**
-     * Builds a unique filename.
-     * Pattern: {type}_{legalId}_{yyyyMMddHHmmssSSS}_{6charRandom}.jpg
-     * Example: nid_250319613_20260313043535123_a3f9c1.jpg
-     */
     private String buildFilename(String type, String legalId) {
-        String identifier = (legalId != null && !legalId.isBlank())
-                ? legalId
-                : UUID.randomUUID().toString();
-        String prefix = "selfie".equalsIgnoreCase(type) ? "selfie_" : "nid_";
-        String timestamp = LocalDateTime.now()
-                .format(DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS"));
-        String random = UUID.randomUUID().toString()
-                .replace("-", "")
-                .substring(0, 6);
+        String identifier = (legalId != null && !legalId.isBlank()) ? legalId : UUID.randomUUID().toString();
+        String prefix = (type != null && type.toLowerCase().contains("selfie")) ? "selfie_" : "nid_";
+        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS"));
+        String random = UUID.randomUUID().toString().replace("-", "").substring(0, 6);
         return prefix + identifier + "_" + timestamp + "_" + random + ".jpg";
     }
 }
-
-
-
-
-
-

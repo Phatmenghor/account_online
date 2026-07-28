@@ -54,6 +54,11 @@ export async function processJuniorAccountOpening(payload: JuniorCustomerPayload
   return response.data?.data || response.data;
 }
 
+export async function getCustomerInfoByCif(cif: string): Promise<any> {
+  const response = await axios.post(`${BASE_URL}/api/v1/public/junior-open-account/customer-info`, { cif });
+  return response.data?.data || response.data;
+}
+
 export async function fetchBranches() {
   try {
     const response = await axios.get(`${BASE_URL}/api/v1/public/branches`);

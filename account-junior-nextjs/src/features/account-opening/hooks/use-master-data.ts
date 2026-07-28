@@ -40,10 +40,13 @@ export const useMasterData = () => {
   const { data: accOnlineCategories, isLoading: isLoadingCategories } = useAccOnlineCategories();
   const [selectedCategory, setSelectedCategory] = useState<AccOnlineCategoryModel | null>(null);
 
-  // Default to first item with lookupId === "6011" once list loads
+  // Default to item with lookupId === "6012" (Junior) or first available category
   useEffect(() => {
     if (accOnlineCategories.length > 0 && !selectedCategory) {
-      const defaultItem = accOnlineCategories.find((c) => c.lookupId === "6011");
+      const defaultItem =
+        accOnlineCategories.find((c) => c.lookupId === "6012") ||
+        accOnlineCategories.find((c) => c.lookupId === "6011") ||
+        accOnlineCategories[0];
       if (defaultItem) setSelectedCategory(defaultItem);
     }
   }, [accOnlineCategories]);

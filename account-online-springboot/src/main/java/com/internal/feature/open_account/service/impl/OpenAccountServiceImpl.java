@@ -17,6 +17,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 @Service
 @RequiredArgsConstructor
@@ -33,6 +35,10 @@ public class OpenAccountServiceImpl implements OpenAccountService {
     public OpenAccountResponseDto processAccountOpening(CustomerRequest request) throws Exception {
         String legalId = request.getLegalId();
         String currentStep = "START";
+
+        // Always enforce Standard account sector (6011) and product (SAVE.ACCT.ONLINE) on backend
+        request.setSector(AppConstants.DEFAULT_SECTOR);
+        request.setProductAccount(AppConstants.PRODUCT_CODE);
 
         String submittedBy = "Customer";
         try {
@@ -125,10 +131,10 @@ public class OpenAccountServiceImpl implements OpenAccountService {
     }
 
     @Override
-    public reactor.core.publisher.Mono<OpenAccountResponseDto> processAccountOpeningReactive(CustomerRequest request) {
+    public Mono<OpenAccountResponseDto> processAccountOpeningReactive(CustomerRequest request) {
         String legalId = request.getLegalId();
-        return reactor.core.publisher.Mono.fromCallable(() -> processAccountOpening(request))
-                .subscribeOn(reactor.core.scheduler.Schedulers.boundedElastic())
+        return Mono.fromCallable(() -> processAccountOpening(request))
+                .subscribeOn(Schedulers.boundedElastic())
                 .doOnCancel(() -> {
                     log.warn("Account opening process CANCELLED by client/user connection drop | Legal ID: {}", legalId);
                     try {

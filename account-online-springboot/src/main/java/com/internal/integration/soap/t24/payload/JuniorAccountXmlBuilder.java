@@ -2,22 +2,13 @@ package com.internal.integration.soap.t24.payload;
 
 import com.internal.config.CpbProperties;
 import com.internal.config.DefaultProperties;
-import com.internal.feature.open_account.dto.request.CustomerRequest;
+import com.internal.feature.junior_account.dto.request.JuniorCustomerRequest;
 import com.internal.integration.soap.t24.util.T24XmlUtils;
-import com.internal.shared.constant.DefaultConstants;
+import com.internal.shared.constant.AppConstants;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import static com.internal.integration.soap.t24.util.T24XmlUtils.*;
-
-/**
- * Dedicated XML builder for Junior Account Opening T24 SOAP requests.
- * Uses Junior-specific defaults:
- *   - Sector: 6012
- *   - Product: SAVE.JUNIOR.SAVING
- * Shared helpers (toSwiftSafe, xmlEscape, date formatting) delegated to T24XmlUtils.
- */
 @Component
 @RequiredArgsConstructor
 @Slf4j
@@ -25,74 +16,75 @@ public class JuniorAccountXmlBuilder {
 
     private final CpbProperties cpbProperties;
     private final DefaultProperties defaultProperties;
+    private final T24XmlUtils xmlUtils;
 
-    public static final String JUNIOR_SECTOR = DefaultConstants.JUNIOR_SECTOR;
-    public static final String JUNIOR_PRODUCT = DefaultConstants.JUNIOR_PRODUCT;
+    public static final String JUNIOR_SECTOR = AppConstants.JUNIOR_SECTOR;
+    public static final String JUNIOR_PRODUCT = AppConstants.JUNIOR_PRODUCT;
 
-    public String buildCustomerCreationXml(CustomerRequest request) {
+    public String buildCustomerCreationXml(JuniorCustomerRequest request) {
         log.info("Building Junior Customer Creation XML for Legal ID: {}", request.getLegalId());
 
         String username = cpbProperties.getT24().getUsername();
         String password = cpbProperties.getT24().getPassword();
 
-        String branchCode = getOrDefault(request.getBranchCode(), defaultProperties.getBranchCode());
-        String maritalStatus = mapMaritalStatus(request.getMaritalStatus());
+        String branchCode = xmlUtils.getOrDefault(request.getBranchCode(), defaultProperties.getBranchCode());
+        String maritalStatus = xmlUtils.mapMaritalStatus(request.getMaritalStatus());
 
-        boolean isStaffRequest = isAuthenticated();
-        String relationManager = isStaffRequest ? getOrDefault(request.getRelationManager(), "") : "";
+        boolean isStaffRequest = xmlUtils.isAuthenticated();
+        String relationManager = isStaffRequest ? xmlUtils.getOrDefault(request.getRelationManager(), "") : "";
 
-        String legalAddress = toSwiftSafe(getOrDefault(request.getLegalAddress(), ""));
+        String legalAddress = xmlUtils.toSwiftSafe(xmlUtils.getOrDefault(request.getLegalAddress(), ""));
 
-        String custProvince = getOrDefault(request.getCustomerCurrentProvince(), "");
-        String custDistrict = getOrDefault(request.getCustomerCurrentDistrict(), "");
-        String custCommune = getOrDefault(request.getCustomerCurrentCommune(), "");
-        String custVillage = getOrDefault(request.getCustomerCurrentVillage(), "");
+        String custProvince = xmlUtils.getOrDefault(request.getCustomerCurrentProvince(), "12");
+        String custDistrict = xmlUtils.getOrDefault(request.getCustomerCurrentDistrict(), "1201");
+        String custCommune = xmlUtils.getOrDefault(request.getCustomerCurrentCommune(), "120101");
+        String custVillage = xmlUtils.getOrDefault(request.getCustomerCurrentVillage(), "12010101");
 
-        String pobProvince = getOrDefault(request.getCustomerPobProvince(), "");
-        String pobDistrict = getOrDefault(request.getCustomerPobDistrict(), "");
-        String pobCommune = getOrDefault(request.getCustomerPobCommune(), "");
-        String pobVillage = getOrDefault(request.getCustomerPobVillage(), "");
+        String pobProvince = xmlUtils.getOrDefault(request.getCustomerPobProvince(), custProvince);
+        String pobDistrict = xmlUtils.getOrDefault(request.getCustomerPobDistrict(), custDistrict);
+        String pobCommune = xmlUtils.getOrDefault(request.getCustomerPobCommune(), custCommune);
+        String pobVillage = xmlUtils.getOrDefault(request.getCustomerPobVillage(), custVillage);
 
-        String dateOfBirth = formatDateForT24(request.getDateOfBirth());
-        String legalIssueDate = formatLegalIssueDateWithDefault(request.getLegalIssueDate());
+        String dateOfBirth = xmlUtils.formatDateForT24(request.getDateOfBirth());
+        String legalIssueDate = xmlUtils.formatLegalIssueDateWithDefault(request.getLegalIssueDate());
 
-        String title = getOrDefault(request.getTitle(), determineTitle(request.getGender()));
+        String title = xmlUtils.getOrDefault(request.getTitle(), xmlUtils.determineTitle(request.getGender()));
 
-        String englishFullName = safe(request.getFamilyName()) + " " + safe(request.getGivenName());
-        String khmerFullName = safe(request.getLastNameKh()) + " " + safe(request.getFirstNameKh());
+        String englishFullName = xmlUtils.safe(request.getFamilyName()) + " " + xmlUtils.safe(request.getGivenName());
+        String khmerFullName = xmlUtils.safe(request.getLastNameKh()) + " " + xmlUtils.safe(request.getFirstNameKh());
 
         return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-                + "<soapenv:Envelope xmlns:soapenv=\"" + DefaultConstants.SOAP_ENV_NS + "\" "
-                + "xmlns:oaow=\"" + DefaultConstants.OAOW_NS + "\" "
-                + "xmlns:cus=\"" + DefaultConstants.CUSTOMER_NS + "\">"
+                + "<soapenv:Envelope xmlns:soapenv=\"" + AppConstants.SOAP_ENV_NS + "\" "
+                + "xmlns:oaow=\"" + AppConstants.OAOW_NS + "\" "
+                + "xmlns:cus=\"" + AppConstants.CUSTOMER_NS + "\">"
                 + "<soapenv:Header/>"
                 + "<soapenv:Body>"
                 + "<oaow:OAOCUSTOMERCREATION>"
                 + "<WebRequestCommon>"
                 + "<company>" + branchCode + "</company>"
-                + "<password>" + xmlEscape(password) + "</password>"
+                + "<password>" + xmlUtils.xmlEscape(password) + "</password>"
                 + "<userName>" + username + "</userName>"
                 + "</WebRequestCommon>"
                 + "<OfsFunction/>"
                 + "<CUSTOMERCPBCREATEOAOType id=\"\">"
 
-                // gSHORTNAME — two entries: English + Khmer
+                // gSHORTNAME
                 + "<cus:gSHORTNAME g=\"1\">"
                 + "<cus:ShortName>" + englishFullName + "</cus:ShortName>"
                 + "<cus:ShortName>" + khmerFullName + "</cus:ShortName>"
                 + "</cus:gSHORTNAME>"
 
-                // gNAME1 — two entries: English + Khmer
+                // gNAME1
                 + "<cus:gNAME1 g=\"1\">"
                 + "<cus:FullName>" + englishFullName + "</cus:FullName>"
                 + "<cus:FullName>" + khmerFullName + "</cus:FullName>"
                 + "</cus:gNAME1>"
 
-                // STREET — sanitized to SWIFT-safe characters
+                // STREET
                 + "<cus:gSTREET g=\"1\"><cus:STREET>" + legalAddress + "</cus:STREET></cus:gSTREET>"
 
-                // Organizational fields — Junior Sector 6012
-                + "<cus:Sector>" + JUNIOR_SECTOR + "</cus:Sector>"
+                // Organizational fields — Configurable Sector via defaultProperties.getSector()
+                + "<cus:Sector>" + defaultProperties.getSector() + "</cus:Sector>"
                 + "<cus:CostCenter>" + defaultProperties.getCostCenter() + "</cus:CostCenter>"
                 + "<cus:Industry>" + defaultProperties.getIndustry() + "</cus:Industry>"
                 + "<cus:Target>" + defaultProperties.getTarget() + "</cus:Target>"
@@ -105,7 +97,7 @@ public class JuniorAccountXmlBuilder {
                 + "<cus:LegalId>" + request.getLegalId() + "</cus:LegalId>"
                 + "<cus:LegalDocName>" + request.getLegalDocType() + "</cus:LegalDocName>"
                 + "<cus:LegalHolderName>" + defaultProperties.getLegalHolderName() + "</cus:LegalHolderName>"
-                + "<cus:LegalIssAuth>" + getOrDefault(request.getLegalIssAuth(), request.getGivenName()) + "</cus:LegalIssAuth>"
+                + "<cus:LegalIssAuth>" + xmlUtils.getOrDefault(request.getLegalIssAuth(), request.getGivenName()) + "</cus:LegalIssAuth>"
                 + "<cus:LegalIssDate>" + legalIssueDate + "</cus:LegalIssDate>"
                 + "<cus:LegalExpDate>" + request.getLegalExpireDate() + "</cus:LegalExpDate>"
                 + "</cus:mLEGALID></cus:gLEGALID>"
@@ -134,7 +126,7 @@ public class JuniorAccountXmlBuilder {
                 // Customer type
                 + "<cus:CustomerType>" + defaultProperties.getCustomerType() + "</cus:CustomerType>"
 
-                // Current address (administrative codes)
+                // Current address
                 + "<cus:CustProvince>" + custProvince + "</cus:CustProvince>"
                 + "<cus:CustDistrict>" + custDistrict + "</cus:CustDistrict>"
                 + "<cus:CustCommune>" + custCommune + "</cus:CustCommune>"
@@ -147,7 +139,7 @@ public class JuniorAccountXmlBuilder {
                 + "<cus:Staff></cus:Staff>"
                 + "<cus:ReferralBy></cus:ReferralBy>"
 
-                // Place of birth address (Primary P fields)
+                // Place of birth address
                 + "<cus:CUSTPROVINCEP>" + pobProvince + "</cus:CUSTPROVINCEP>"
                 + "<cus:CUSTDISTRICTP>" + pobDistrict + "</cus:CUSTDISTRICTP>"
                 + "<cus:CUSTCOMMUNEP>" + pobCommune + "</cus:CUSTCOMMUNEP>"
@@ -159,28 +151,27 @@ public class JuniorAccountXmlBuilder {
                 + "</soapenv:Envelope>";
     }
 
-    public String buildAccountCreationXml(CustomerRequest request, String cif, String currency) {
+    public String buildAccountCreationXml(JuniorCustomerRequest request, String cif, String currency) {
         log.info("Building Junior Account Creation XML for CIF: {} | Currency: {}", cif, currency);
 
         String username = cpbProperties.getT24().getUsername();
         String password = cpbProperties.getT24().getPassword();
-        String branchCode = getOrDefault(request.getBranchCode(), defaultProperties.getBranchCode());
+        String branchCode = xmlUtils.getOrDefault(request.getBranchCode(), defaultProperties.getBranchCode());
 
-        String englishFullName = safe(request.getFamilyName()) + " " + safe(request.getGivenName());
-        String khmerFullName = safe(request.getLastNameKh() + " " + request.getFirstNameKh());
+        String englishFullName = xmlUtils.safe(request.getFamilyName()) + " " + xmlUtils.safe(request.getGivenName());
+        String khmerFullName = xmlUtils.safe(request.getLastNameKh() + " " + request.getFirstNameKh());
 
         return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-                + "<soapenv:Envelope xmlns:soapenv=\"" + DefaultConstants.SOAP_ENV_NS + "\" "
-                + "xmlns:oaow=\"" + DefaultConstants.OAOW_NS + "\" "
-                + "xmlns:aaar=\"" + DefaultConstants.ACCOUNT_NS + "\">"
-
+                + "<soapenv:Envelope xmlns:soapenv=\"" + AppConstants.SOAP_ENV_NS + "\" "
+                + "xmlns:oaow=\"" + AppConstants.OAOW_NS + "\" "
+                + "xmlns:aaar=\"" + AppConstants.ACCOUNT_NS + "\">"
                 + "<soapenv:Header/>"
                 + "<soapenv:Body>"
                 + "<oaow:ACCREATIONOAO>"
 
                 + "<WebRequestCommon>"
                 + "<company>" + branchCode + "</company>"
-                + "<password>" + xmlEscape(password) + "</password>"
+                + "<password>" + xmlUtils.xmlEscape(password) + "</password>"
                 + "<userName>" + username + "</userName>"
                 + "</WebRequestCommon>"
 
@@ -190,16 +181,22 @@ public class JuniorAccountXmlBuilder {
                 + "<aaar:Arrangement>" + defaultProperties.getNewArrangement() + "</aaar:Arrangement>"
                 + "<aaar:Activity>" + defaultProperties.getAccountActivity() + "</aaar:Activity>"
 
-                // CUSTOMER
+                // CUSTOMER & JOINT OWNER (GUARDIAN)
                 + "<aaar:gCUSTOMER g=\"1\">"
                 + "<aaar:mCUSTOMER m=\"1\">"
                 + "<aaar:Customer>" + cif + "</aaar:Customer>"
                 + "<aaar:CustomerRole>OWNER</aaar:CustomerRole>"
                 + "</aaar:mCUSTOMER>"
+                + (request.getGuardianCif() != null && !request.getGuardianCif().isBlank()
+                        ? "<aaar:mCUSTOMER m=\"2\">"
+                        + "<aaar:Customer>" + request.getGuardianCif() + "</aaar:Customer>"
+                        + "<aaar:CustomerRole>JOINT.OWNER</aaar:CustomerRole>"
+                        + "</aaar:mCUSTOMER>"
+                        : "")
                 + "</aaar:gCUSTOMER>"
 
-                // PRODUCT + CURRENCY — Junior product: SAVE.JUNIOR.SAVING
-                + "<aaar:Product>" + JUNIOR_PRODUCT + "</aaar:Product>"
+                // PRODUCT + CURRENCY — Direct Junior Product (SAVE.JUNIOR.SAVING)
+                + "<aaar:Product>" + AppConstants.JUNIOR_PRODUCT + "</aaar:Product>"
                 + "<aaar:Currency>" + currency + "</aaar:Currency>"
 
                 // PROPERTY BLOCK
@@ -227,8 +224,13 @@ public class JuniorAccountXmlBuilder {
                 + "<aaar:FieldValue>" + englishFullName + "</aaar:FieldValue>"
                 + "</aaar:FieldName>"
 
-                + "</aaar:sgFIELDNAME>"
+                // ACCOUNT.TITLE.1:2 — Khmer
+                + "<aaar:FieldName s=\"1\">"
+                + "<aaar:FieldName>ACCOUNT.TITLE.1:2</aaar:FieldName>"
+                + "<aaar:FieldValue>" + khmerFullName + "</aaar:FieldValue>"
+                + "</aaar:FieldName>"
 
+                + "</aaar:sgFIELDNAME>"
                 + "</aaar:mPROPERTY>"
                 + "</aaar:gPROPERTY>"
 

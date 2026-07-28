@@ -12,9 +12,9 @@ export interface PhoneCheckResult {
  * Call this BEFORE sendOtpService to warn the user.
  */
 export async function checkPhoneService(phone: string): Promise<PhoneCheckResult> {
-  const response = await axiosClientWithAuth.get(
+  const response = await axiosClientWithAuth.post(
     `/api/v1/public/otp/check-phone`,
-    { params: { phone } }
+    { phone }
   );
   return response.data.data as PhoneCheckResult;
 }

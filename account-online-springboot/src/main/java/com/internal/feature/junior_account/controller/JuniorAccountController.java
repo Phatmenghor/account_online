@@ -2,6 +2,7 @@ package com.internal.feature.junior_account.controller;
 
 import com.internal.feature.aml.dto.request.AllAmlRequestDto;
 import com.internal.feature.aml.models.JuniorAmlStatus;
+import com.internal.feature.aml.service.JuniorAmlService;
 import com.internal.feature.junior_account.dto.request.JuniorCustomerRequest;
 import com.internal.feature.junior_account.dto.response.CustomerInfoResponse;
 import com.internal.feature.junior_account.models.JuniorAccountFinal;
@@ -12,6 +13,9 @@ import com.internal.feature.logs_report.dto.request.AllAccountOnlineSuccessReque
 import com.internal.feature.open_account.dto.response.OpenAccountResponseDto;
 import com.internal.shared.pagination.PaginationUtil;
 import com.internal.shared.response.ApiResponse;
+
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -19,11 +23,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
-
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
-
-import com.internal.feature.aml.service.JuniorAmlService;
 
 @RestController
 @RequiredArgsConstructor
@@ -35,33 +34,14 @@ public class JuniorAccountController {
     private final JuniorAmlService juniorAmlService;
     private final CustomerInfoService customerInfoService;
 
-    // ============================================================
-    // PUBLIC: GET CUSTOMER INFO BY CIF
-    // ============================================================
-
-    /**
-     * Look up a customer's full information by CIF number.
-     *
-     * GET /api/v1/public/junior-open-account/customer-info?cif=9000000480
-     *
-     * Returns customer fields:
-     * name, legal ID, address, phone, status, province/district, etc.
-     */
-    @GetMapping("/api/v1/public/junior-open-account/customer-info")
+    @PostMapping("/api/v1/public/junior-open-account/customer-info")
     public ResponseEntity<ApiResponse<CustomerInfoResponse>> getCustomerInfoByCif(
-            @RequestParam @NotBlank String cif) {
-
-        log.info("API: Customer info request for CIF: {}", cif);
-        CustomerInfoResponse response = customerInfoService.getCustomerByCif(cif);
-
-        return ResponseEntity.ok(
-                ApiResponse.success("Customer info retrieved successfully", response)
-        );
+            @Valid @RequestBody com.internal.feature.junior_account.dto.request.CustomerInfoRequestDto request) {
+        log.info("API: Customer info request for CIF: {}", request.getCif());
+        CustomerInfoResponse response = customerInfoService.getCustomerByCif(request.getCif());
+        return ResponseEntity.ok(ApiResponse.success("Customer info retrieved successfully", response));
     }
 
-    // ============================================================
-    // PUBLIC JUNIOR ACCOUNT OPENING PROCESS
-    // ============================================================
     @PostMapping("/api/v1/public/junior-open-account/process")
     public Mono<ResponseEntity<ApiResponse<OpenAccountResponseDto>>> processJuniorAccountOpening(
             @Valid @RequestBody JuniorCustomerRequest request) {
@@ -76,9 +56,6 @@ public class JuniorAccountController {
                 });
     }
 
-    // ============================================================
-    // ADMIN LISTING: JUNIOR ACCOUNT FINALS
-    // ============================================================
     @PostMapping("/api/v1/junior-account/all-final")
     public ResponseEntity<ApiResponse<Page<JuniorAccountFinal>>> getAllJuniorAccountFinals(
             @RequestBody AllAccountOnlineSuccessRequestDto request) {
@@ -88,9 +65,6 @@ public class JuniorAccountController {
         return ResponseEntity.ok(ApiResponse.success("Junior account records retrieved", page));
     }
 
-    // ============================================================
-    // ADMIN LISTING: JUNIOR AML STATUS
-    // ============================================================
     @PostMapping("/api/v1/junior-account/all-aml")
     public ResponseEntity<ApiResponse<Page<JuniorAmlStatus>>> getAllJuniorAmlStatuses(
             @RequestBody AllAmlRequestDto request) {

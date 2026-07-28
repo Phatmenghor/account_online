@@ -3,7 +3,7 @@ package com.internal.feature.junior_account.service.impl;
 import com.internal.config.CpbProperties;
 import com.internal.feature.junior_account.dto.response.CustomerInfoResponse;
 import com.internal.feature.junior_account.service.CustomerInfoService;
-import com.internal.shared.constant.DefaultConstants;
+import com.internal.shared.constant.AppConstants;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;
@@ -46,7 +46,7 @@ public class CustomerInfoServiceImpl implements CustomerInfoService {
         CpbProperties.T24 t24 = cpbProperties.getT24();
         String company = (cpbProperties.getDefaults() != null && cpbProperties.getDefaults().getBranchCode() != null)
                 ? cpbProperties.getDefaults().getBranchCode()
-                : DefaultConstants.DEFAULT_BRANCH_CODE;
+                : AppConstants.DEFAULT_BRANCH_CODE;
 
         return """
             <?xml version="1.0" encoding="UTF-8"?>
@@ -120,32 +120,67 @@ public class CustomerInfoServiceImpl implements CustomerInfoService {
                     .mnemonic(getText(doc, "MNEMONIC"))
                     .customerType(getText(doc, "CUSTOMERTYPE"))
                     .customerStatus(getText(doc, "CUSTOMERSTATUS"))
+
+                    // Names
                     .shortNames(getTexts(doc, "SHORTNAME"))
                     .names(getTexts(doc, "NAME1"))
+                    .khShortName(getText(doc, "CUKHSHRTNAME"))
+
+                    // Address (Current)
                     .streets(getTexts(doc, "STREET"))
                     .province(getText(doc, "CUSTPROVINCE"))
                     .district(getText(doc, "CUSTDISTRICT"))
                     .commune(getText(doc, "CUSTCOMMUNE"))
                     .village(getText(doc, "CUSTVILLAGE"))
+
+                    // Address (Place of Birth)
+                    .pobProvince(getText(doc, "CUSTPROVINCEP"))
+                    .pobDistrict(getText(doc, "CUSTDISTRICTP"))
+                    .pobCommune(getText(doc, "CUSTCOMMUNEP"))
+                    .pobVillage(getText(doc, "CUSTVILLAGEP"))
+
+                    // Legal ID
                     .legalId(getText(doc, "LEGALID"))
                     .legalDocName(getText(doc, "LEGALDOCNAME"))
                     .legalHolderName(getText(doc, "LEGALHOLDERNAME"))
                     .legalIssAuth(getText(doc, "LEGALISSAUTH"))
                     .legalIssDate(getText(doc, "LEGALISSDATE"))
+                    .legalIdDocName(getText(doc, "LEGALIDDOCNAME"))
+
+                    // Personal & Organizational
                     .birthDate(getText(doc, "BIRTHINCORPDATE"))
                     .nationality(getText(doc, "NATIONALITY"))
                     .residence(getText(doc, "RESIDENCE"))
                     .language(getText(doc, "LANGUAGE"))
                     .sector(getText(doc, "SECTOR"))
                     .industry(getText(doc, "INDUSTRY"))
+                    .target(getText(doc, "TARGET"))
+                    .customerRating(getText(doc, "CUSTOMERRATING"))
+                    .custOwnership(getText(doc, "CUSTOWNERSHIP"))
+
+                    // Staff & Referral
                     .accountOfficer(getText(doc, "ACCOUNTOFFICER"))
                     .relManager(getText(doc, "RELMANAGER"))
                     .referralBy(getText(doc, "REFERRALBY"))
+
+                    // Contact
                     .phones(getTexts(doc, "PHONE1"))
+
+                    // Banking & Compliance
                     .companyBook(getText(doc, "COMPANYBOOK"))
+                    .coCode(getText(doc, "COCODE"))
+                    .deptCode(getText(doc, "DEPTCODE"))
                     .internetBankingService(getText(doc, "INTERNETBANKINGSERVICE"))
                     .mobileBankingService(getText(doc, "MOBILEBANKINGSERVICE"))
-                    .khShortName(getText(doc, "CUKHSHRTNAME"))
+                    .amlCheck(getText(doc, "AMLCHECK"))
+                    .amlResult(getText(doc, "AMLRESULT"))
+                    .lcpbCusAsset(getText(doc, "LCPBCUSASSET"))
+
+                    // Audit Info
+                    .currNo(getText(doc, "CURRNO"))
+                    .inputter(getText(doc, "INPUTTER"))
+                    .dateTime(getText(doc, "DATETIME"))
+                    .authoriser(getText(doc, "AUTHORISER"))
                     .build();
 
         } catch (Exception e) {

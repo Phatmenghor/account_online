@@ -7,6 +7,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import jakarta.validation.constraints.NotBlank;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
+
 @Data
 @SuperBuilder
 @NoArgsConstructor
@@ -17,6 +19,7 @@ public class CustomerRequest {
     private String recId;
 
     @JsonProperty("branch_code")
+    @JsonAlias({"branchCode", "branch_code"})
     private String branchCode;
 
     @JsonProperty("short_name")
@@ -51,9 +54,11 @@ public class CustomerRequest {
 
     @NotBlank(message = "Legal ID is required")
     @JsonProperty("legal_id")
+    @JsonAlias({"legalId", "idNumber", "legal_id"})
     private String legalId;
 
     @JsonProperty("legal_doc_name")
+    @JsonAlias({"legalDocType", "legalDocName", "legal_doc_name"})
     private String legalDocType;
 
     @JsonProperty("legal_holder_name")
@@ -63,12 +68,15 @@ public class CustomerRequest {
     private String legalIssAuth;
 
     @JsonProperty("legal_iss_date")
+    @JsonAlias({"legalIssueDate", "issuedDate", "legal_iss_date"})
     private String legalIssueDate;
 
     @JsonProperty("legal_exp_date")
+    @JsonAlias({"legalExpireDate", "expiredDate", "legal_exp_date"})
     private String legalExpireDate;
 
     @JsonProperty("address")
+    @JsonAlias({"legalAddress", "address"})
     private String legalAddress;
 
     @JsonProperty("language")
@@ -82,25 +90,31 @@ public class CustomerRequest {
 
     @NotBlank(message = "Given name is required")
     @JsonProperty("given_name")
+    @JsonAlias({"givenName", "firstNameEn", "given_name"})
     private String givenName;
 
     @NotBlank(message = "Family name is required")
     @JsonProperty("family_name")
+    @JsonAlias({"familyName", "lastNameEn", "family_name"})
     private String familyName;
 
     @NotBlank(message = "Gender is required")
     @JsonProperty("gender")
+    @JsonAlias({"gender"})
     private String gender;
 
     @NotBlank(message = "Date of birth is required")
     @JsonProperty("date_of_birth")
+    @JsonAlias({"dateOfBirth", "dob", "date_of_birth"})
     private String dateOfBirth;
 
     @JsonProperty("marital_status")
+    @JsonAlias({"maritalStatus", "marital_status"})
     private String maritalStatus;
 
     @NotBlank(message = "Phone number is required")
     @JsonProperty("sms")
+    @JsonAlias({"phoneNumber", "phone_number", "sms"})
     private String phoneNumber;
 
     @JsonProperty("customer_type")
