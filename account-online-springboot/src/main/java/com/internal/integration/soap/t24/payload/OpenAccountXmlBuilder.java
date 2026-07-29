@@ -24,7 +24,7 @@ public class OpenAccountXmlBuilder {
         String username = cpbProperties.getT24().getUsername();
         String password = cpbProperties.getT24().getPassword();
 
-        String branchCode = xmlUtils.getOrDefault(request.getBranchCode(), defaultProperties.getBranchCode());
+        String branchCode = xmlUtils.formatCompanyCode(request.getBranchCode(), defaultProperties.getBranchCode());
         String maritalStatus = xmlUtils.mapMaritalStatus(request.getMaritalStatus());
 
         boolean isStaffRequest = xmlUtils.isAuthenticated();

@@ -13,6 +13,7 @@ import {
   JuniorAccountResponse,
   CustomerInfo,
 } from '../services/junior-account-service';
+import { showToast } from '@/components/shared/common/show-toast';
 import {
   ShieldCheck,
   UserCheck,
@@ -167,15 +168,19 @@ export function JuniorAccountWizard() {
         try {
           const info = await getCustomerInfoByCif(res.cif);
           setParentInfo(info);
-          if (info.names && info.names.length > 0) {
-            setFormData((prev) => ({ ...prev, guardian_name: info.names![0] }));
-          }
-          if (info.legalId) {
-            setFormData((prev) => ({ ...prev, guardian_legal_id: info.legalId }));
-          }
-          if (info.streets && info.streets.length > 0) {
-            setFormData((prev) => ({ ...prev, legal_address: info.streets![0] }));
-          }
+          const parentBranch = info.coCode || info.companyBook || "KH0012011";
+          setFormData((prev) => ({
+            ...prev,
+            guardian_cif: res.cif,
+            guardian_name: (info.names && info.names.length > 0) ? info.names[0] : (info.shortNames && info.shortNames.length > 0 ? info.shortNames[0] : prev.guardian_name),
+            guardian_legal_id: info.legalId || prev.guardian_legal_id,
+            guardian_doc_type: info.legalDocName || "NATIONAL.ID",
+            guardian_dob: info.birthDate || "",
+            guardian_address: (info.streets && info.streets.length > 0) ? info.streets[0] : (prev.legal_address || ""),
+            guardian_info_json: JSON.stringify(info),
+            branch_code: parentBranch,
+            legal_address: (info.streets && info.streets.length > 0) ? info.streets[0] : (prev.legal_address || ""),
+          }));
         } catch (e) {
           console.warn('Parent info lookup non-critical error', e);
         }
@@ -184,9 +189,12 @@ export function JuniorAccountWizard() {
       // Send OTP to parent
       await sendOtp(formData.guardian_phone);
       setParentOtpSent(true);
+      showToast.success('OTP sent to parent phone successfully!');
     } catch (err: any) {
       console.error(err);
-      setErrorMsg(err.response?.data?.message || err.message || 'Failed to verify parent phone number.');
+      const msg = err.response?.data?.message || err.message || 'Failed to verify parent phone number.';
+      setErrorMsg(msg);
+      showToast.error(msg);
     } finally {
       setLoading(false);
     }
@@ -194,7 +202,9 @@ export function JuniorAccountWizard() {
 
   const handleVerifyParentOtp = async () => {
     if (!parentOtpCode || parentOtpCode.length !== 6) {
-      setErrorMsg('Please enter valid 6-digit OTP code.');
+      const msg = 'Please enter valid 6-digit OTP code.';
+      setErrorMsg(msg);
+      showToast.error(msg);
       return;
     }
     setLoading(true);
@@ -202,10 +212,13 @@ export function JuniorAccountWizard() {
     try {
       await verifyOtp(formData.guardian_phone || '', parentOtpCode);
       setParentVerified(true);
+      showToast.success('Parent OTP verified successfully!');
       setStep(3); // Proceed to Junior Personal Details
     } catch (err: any) {
       console.error(err);
-      setErrorMsg(err.response?.data?.message || err.message || 'Invalid OTP code. Please try again.');
+      const msg = err.response?.data?.message || err.message || 'Invalid OTP code. Please try again.';
+      setErrorMsg(msg);
+      showToast.error(msg);
     } finally {
       setLoading(false);
     }
@@ -216,7 +229,9 @@ export function JuniorAccountWizard() {
   // ==========================================
   const handleSendJuniorOtp = async () => {
     if (!formData.phone_number) {
-      setErrorMsg('Please enter junior contact phone number.');
+      const msg = 'Please enter junior contact phone number.';
+      setErrorMsg(msg);
+      showToast.error(msg);
       return;
     }
     setLoading(true);
@@ -224,9 +239,12 @@ export function JuniorAccountWizard() {
     try {
       await sendOtp(formData.phone_number);
       setJuniorOtpSent(true);
+      showToast.success('OTP sent to junior phone successfully!');
     } catch (err: any) {
       console.error(err);
-      setErrorMsg(err.response?.data?.message || err.message || 'Failed to send OTP to junior phone.');
+      const msg = err.response?.data?.message || err.message || 'Failed to send OTP to junior phone.';
+      setErrorMsg(msg);
+      showToast.error(msg);
     } finally {
       setLoading(false);
     }
@@ -234,7 +252,9 @@ export function JuniorAccountWizard() {
 
   const handleVerifyJuniorOtp = async () => {
     if (!juniorOtpCode || juniorOtpCode.length !== 6) {
-      setErrorMsg('Please enter valid 6-digit OTP code.');
+      const msg = 'Please enter valid 6-digit OTP code.';
+      setErrorMsg(msg);
+      showToast.error(msg);
       return;
     }
     setLoading(true);
@@ -242,10 +262,13 @@ export function JuniorAccountWizard() {
     try {
       await verifyOtp(formData.phone_number || '', juniorOtpCode);
       setJuniorVerified(true);
+      showToast.success('Junior OTP verified successfully!');
       setStep(6); // Proceed to Branch & Location Selection
     } catch (err: any) {
       console.error(err);
-      setErrorMsg(err.response?.data?.message || err.message || 'Invalid OTP code. Please try again.');
+      const msg = err.response?.data?.message || err.message || 'Invalid OTP code. Please try again.';
+      setErrorMsg(msg);
+      showToast.error(msg);
     } finally {
       setLoading(false);
     }
@@ -987,6 +1010,36 @@ export function JuniorAccountWizard() {
                   setJuniorVerified(false);
                   setParentOtpSent(false);
                   setJuniorOtpSent(false);
+                  setParentOtpCode('');
+                  setJuniorOtpCode('');
+                  setParentInfo(null);
+                  setRefDocFileName('');
+                  setErrorMsg('');
+                  setFormData({
+                    has_nid: true,
+                    legal_id: '',
+                    family_name: '',
+                    given_name: '',
+                    last_name_kh: '',
+                    first_name_kh: '',
+                    date_of_birth: '',
+                    gender: 'Male',
+                    phone_number: '',
+                    branch_code: branches.length > 0 ? branches[0].code : 'KH0012011',
+                    marital_status: 'Single',
+                    occupation: '',
+                    legal_address: '',
+                    guardian_legal_id: '',
+                    guardian_name: '',
+                    guardian_phone: '',
+                    guardian_relationship: 'FATHER',
+                    guardian_cif: '',
+                    referral_id: '',
+                    reference_doc_type: 'NATIONAL.ID',
+                    reference_doc_name: '',
+                    reference_doc_image: '',
+                    selfie_image_name: '',
+                  });
                 }}
                 className="px-6 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-sm font-semibold transition-colors"
               >

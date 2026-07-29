@@ -69,4 +69,8 @@ public class JuniorCustomerRequest extends CustomerRequest {
     @JsonProperty("reference_doc_image")
     @JsonAlias({"referenceDocImage", "reference_doc_image", "reference_doc_base64", "referenceDocBase64"})
     private String referenceDocImage;
+
+    @JsonProperty("selfie_image_base64")
+    @JsonAlias({"selfieImageBase64", "selfie_image_base64"})
+    private String selfieImageBase64;
 }

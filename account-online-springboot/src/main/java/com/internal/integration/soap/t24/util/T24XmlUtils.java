@@ -30,6 +30,24 @@ public class T24XmlUtils {
         return (value != null && !value.trim().isEmpty()) ? value.trim() : defaultValue;
     }
 
+    public String formatCompanyCode(String code, String defaultCompanyCode) {
+        if (code == null || code.isBlank()) {
+            return (defaultCompanyCode != null && !defaultCompanyCode.isBlank())
+                    ? defaultCompanyCode.trim()
+                    : AppConstants.DEFAULT_BRANCH_CODE;
+        }
+        String trimmed = code.trim();
+        if (trimmed.startsWith("KH")) {
+            return trimmed;
+        }
+        if (trimmed.length() <= 3) {
+            return (defaultCompanyCode != null && !defaultCompanyCode.isBlank())
+                    ? defaultCompanyCode.trim()
+                    : AppConstants.DEFAULT_BRANCH_CODE;
+        }
+        return "KH001" + trimmed;
+    }
+
     public String xmlEscape(String value) {
         if (value == null) return "";
         return value.replace("&", "&amp;")   // must be first
@@ -65,6 +83,24 @@ public class T24XmlUtils {
             case "WIDOWED" -> "WIDOWED";
             default -> "SINGLE";
         };
+    }
+
+    public String mapGender(String gender) {
+        if (gender == null || gender.isBlank()) return "MALE";
+        String g = gender.trim().toUpperCase(Locale.ROOT);
+        if (g.startsWith("F") || g.contains("FEMALE") || g.contains("ស្រី")) return "FEMALE";
+        return "MALE";
+    }
+
+    public String mapLegalDocType(String type, Boolean hasNid) {
+        if (type != null && !type.isBlank()) {
+            String t = type.trim().toUpperCase(Locale.ROOT);
+            if (t.contains("NID") || t.contains("NATIONAL")) return "NATIONAL.ID";
+            if (t.contains("BIRTH") || t.contains("CERTIFICATE")) return "BIRTH.CERTIFICATE";
+            if (t.contains("PASSPORT")) return "PASSPORT";
+            if (t.contains("FAMILY")) return "FAMILY.BOOK";
+        }
+        return Boolean.TRUE.equals(hasNid) ? "NATIONAL.ID" : "BIRTH.CERTIFICATE";
     }
 
     public String determineTitle(String gender) {
@@ -123,6 +159,16 @@ public class T24XmlUtils {
             } catch (Exception ignored) {}
         }
         return maxAllowed.format(T24_DATE_FORMATTER);
+    }
+
+    public String formatLegalExpireDateWithDefault(String date) {
+        if (date != null && !date.trim().isEmpty()) {
+            try {
+                LocalDate localDate = parseDate(date.trim());
+                return localDate.format(T24_DATE_FORMATTER);
+            } catch (Exception ignored) {}
+        }
+        return LocalDate.now(ZoneId.of("Asia/Phnom_Penh")).plusYears(10).format(T24_DATE_FORMATTER);
     }
 
     public LocalDate parseDate(String dateStr) {

@@ -95,6 +95,7 @@ public class AccountOpenedEventListener {
                     fullName,
                     fullAddress,
                     request.getLegalId(),
+                    request.getPhoneNumber(),
                     context.getCif(),
                     context.getUsdAccount(),
                     context.getKhrAccount(),

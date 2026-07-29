@@ -56,6 +56,29 @@ export default function JuniorAccountViewModal({
   const docImage = account.nidImageName || account.referenceDocName;
   const selfieImage = account.selfieImageName;
 
+  // Format Address with slash separation
+  const formatAddress = (addr?: string) => {
+    if (!addr || addr === "N/A") return "N/A";
+    return addr.split(/,|\s{2,}/).map(s => s.trim()).filter(Boolean).join(" / ");
+  };
+
+  const formattedLegalAddress = formatAddress(account.legalAddress);
+  const formattedPob = formatAddress(account.legalPlaceOfBirth);
+
+  const addressCodes = [
+    account.customerVillageCode,
+    account.customerCommuneCode,
+    account.customerDistrictCode,
+    account.customerProvinceCode
+  ].filter(Boolean).join(" / ");
+
+  const pobCodes = [
+    account.customerPobVillageCode,
+    account.customerPobCommuneCode,
+    account.customerPobDistrictCode,
+    account.customerPobProvinceCode
+  ].filter(Boolean).join(" / ");
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-5xl sm:max-w-5xl w-full max-h-[90vh] overflow-hidden p-0 gap-0 flex flex-col">
@@ -98,7 +121,7 @@ export default function JuniorAccountViewModal({
         {/* Content */}
         <div className="flex-1 min-h-0 overflow-y-auto">
           <div className="p-6 space-y-6">
-            {/* ── 1. Document Images (at TOP like Account Online) ── */}
+            {/* ── 1. Document Images ── */}
             {(docImage || selfieImage) && (
               <>
                 <div className="space-y-4">
@@ -144,8 +167,8 @@ export default function JuniorAccountViewModal({
                 <InfoRow label="Mnemonic" value={account.mnemonic} />
                 <InfoRow label="Category Account" value={account.categoryAccount || "CPBank Junior Savings"} />
                 <InfoRow label="Branch Code" value={account.branchCode} />
-                <InfoRow label="Branch Name" value={account.branchNameKh} />
-                <InfoRow label="Staff Referral Code" value={account.staffCode || account.referralCode} />
+                <InfoRow label="Branch Name" value={account.branchNameKh || account.branchName} />
+                <InfoRow label="Staff Referral Code" value={account.staffCode || account.referralCode || account.referralId} />
               </div>
             </div>
 
@@ -170,51 +193,66 @@ export default function JuniorAccountViewModal({
                 <InfoRow label="Last Name (KH)" value={account.legalLastNameKh} />
                 <InfoRow label="Date of Birth" value={account.legalDateOfBirth || account.dob} />
                 <InfoRow label="Gender" value={account.legalGender || account.gender} />
-                <InfoRow label="Marital Status" value={account.maritalStatus || "Single"} />
-                <InfoRow label="Nationality" value={account.nationality || "Cambodian"} />
-                <InfoRow label="Occupation" value={account.occupation || "Student / Minor"} />
+                <InfoRow label="Phone Number" value={account.phoneNumber || account.guardianPhone} />
+                <InfoRow label="Marital Status" value={account.maritalStatus || "SINGLE"} />
+                <InfoRow label="Nationality" value={account.nationality || "KH"} />
+                <InfoRow label="Occupation" value={account.occupation || "320"} />
+
                 <div className="flex justify-between border-b pb-2 gap-4 md:col-span-2">
                   <Label className="text-sm font-medium text-muted-foreground shrink-0">Full Address:</Label>
-                  <span className="text-sm font-semibold text-right">{account.legalAddress || "N/A"}</span>
+                  <span className="text-sm font-semibold text-right">{formattedLegalAddress}</span>
                 </div>
+                {addressCodes && (
+                  <div className="flex justify-between border-b pb-2 gap-4 md:col-span-2">
+                    <Label className="text-sm font-medium text-muted-foreground shrink-0">Full Address Code:</Label>
+                    <span className="text-sm font-mono font-semibold text-right text-teal-700 dark:text-teal-400">{addressCodes}</span>
+                  </div>
+                )}
+
                 <div className="flex justify-between border-b pb-2 gap-4 md:col-span-2">
                   <Label className="text-sm font-medium text-muted-foreground shrink-0">Full Place of Birth:</Label>
-                  <span className="text-sm font-semibold text-right">{account.legalPlaceOfBirth || "N/A"}</span>
+                  <span className="text-sm font-semibold text-right">{formattedPob}</span>
                 </div>
+                {pobCodes && (
+                  <div className="flex justify-between border-b pb-2 gap-4 md:col-span-2">
+                    <Label className="text-sm font-medium text-muted-foreground shrink-0">Full POB Code:</Label>
+                    <span className="text-sm font-mono font-semibold text-right text-teal-700 dark:text-teal-400">{pobCodes}</span>
+                  </div>
+                )}
               </div>
             </div>
 
-            <Separator />
-
-            {/* ── 4. Parent / Guardian Information ── */}
-            <div className="space-y-4">
-              <SectionHeader color="bg-primary" title="Parent / Guardian Information" />
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <InfoRow label="Guardian Name" value={account.guardianName} />
-                <InfoRow label="Guardian NID" value={account.guardianLegalId || account.guardianNid} />
-                <InfoRow label="Guardian Phone" value={account.guardianPhone || account.phoneNumber} />
-                <InfoRow label="Relationship" value={account.guardianRelationship || "Parent / Legal Guardian"} />
-                <InfoRow
-                  label="Guardian CIF Link"
-                  value={
-                    account.guardianCif ? (
-                      <span className="font-mono font-bold text-teal-700">
-                        {account.guardianCif}{" "}
-                        {!hasNid ? "(Linked JOINT.OWNER)" : "(Primary Sole Owner)"}
-                      </span>
-                    ) : !hasNid ? (
-                      <span className="text-amber-700 text-xs font-semibold">Will Link Parent CIF</span>
-                    ) : (
-                      <span className="text-gray-500 text-xs">Sole Primary Owner</span>
-                    )
-                  }
-                />
-                <div className="flex justify-between border-b pb-2 gap-4 md:col-span-2">
-                  <Label className="text-sm font-medium text-muted-foreground shrink-0">Guardian Address:</Label>
-                  <span className="text-sm font-semibold text-right">{account.guardianAddress || "N/A"}</span>
+            {/* ── 4. Parent / Guardian Information (ONLY FOR NO-NID MODE) ── */}
+            {!hasNid && (
+              <>
+                <Separator />
+                <div className="space-y-4">
+                  <SectionHeader color="bg-primary" title="Parent / Guardian Information" />
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <InfoRow label="Guardian Name" value={account.guardianName} />
+                    <InfoRow label="Guardian NID" value={account.guardianLegalId || account.guardianNid} />
+                    <InfoRow label="Guardian Phone" value={account.guardianPhone || account.phoneNumber} />
+                    <InfoRow label="Relationship" value={account.guardianRelationship || "Parent / Legal Guardian"} />
+                    <InfoRow
+                      label="Guardian CIF Link"
+                      value={
+                        account.guardianCif ? (
+                          <span className="font-mono font-bold text-teal-700">
+                            {account.guardianCif} (Linked JOINT.OWNER)
+                          </span>
+                        ) : (
+                          <span className="text-amber-700 text-xs font-semibold">Will Link Parent CIF</span>
+                        )
+                      }
+                    />
+                    <div className="flex justify-between border-b pb-2 gap-4 md:col-span-2">
+                      <Label className="text-sm font-medium text-muted-foreground shrink-0">Guardian Address:</Label>
+                      <span className="text-sm font-semibold text-right">{formatAddress(account.guardianAddress)}</span>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
+              </>
+            )}
 
             <Separator />
 
@@ -222,7 +260,7 @@ export default function JuniorAccountViewModal({
             <div className="space-y-4">
               <SectionHeader color="bg-primary" title="System Information" />
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <InfoRow label="Submitted By" value={account.submittedBy} />
+                <InfoRow label="Submitted By" value={account.submittedBy || "Customer"} />
                 <InfoRow label="Created At" value={DateTimeFormat(account.createdAt)} />
                 {account.submittedByUser && (
                   <>

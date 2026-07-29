@@ -88,6 +88,7 @@ export interface CustomerInfo {
   referralBy?: string;
   phones?: string[];
   companyBook?: string;
+  coCode?: string;
   internetBankingService?: string;
   mobileBankingService?: string;
   khShortName?: string;
@@ -132,10 +133,30 @@ export async function fetchBranches() {
 
 export async function fetchOccupations() {
   try {
-    const response = await axios.get(`${BASE_URL}/api/v1/public/occupations`);
+    const response = await axios.post(`${BASE_URL}/api/v1/public/master-data/occupation/all`, {});
     return response.data?.data || response.data || [];
   } catch (error) {
     console.error('Error fetching occupations:', error);
-    return [];
+    try {
+      const altRes = await axios.get(`${BASE_URL}/api/v1/public/occupations`);
+      return altRes.data?.data || altRes.data || [];
+    } catch (ignored) {
+      return [];
+    }
+  }
+}
+
+export async function fetchMaritalStatuses() {
+  try {
+    const response = await axios.post(`${BASE_URL}/api/v1/public/master-data/marital-status/all`, {});
+    return response.data?.data || response.data || [];
+  } catch (error) {
+    console.error('Error fetching marital statuses:', error);
+    try {
+      const altRes = await axios.get(`${BASE_URL}/api/v1/public/marital-statuses`);
+      return altRes.data?.data || altRes.data || [];
+    } catch (ignored) {
+      return [];
+    }
   }
 }

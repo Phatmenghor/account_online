@@ -46,7 +46,7 @@ spring:
 
   datasource:
     username: postgres
-    password: 123cp!@#
+    password: ${DB_POSTGRES_PASSWORD:123cp!@#}
     driver-class-name: org.postgresql.Driver
     hikari:
       auto-commit: false
@@ -63,7 +63,7 @@ spring:
     host: 10.18.1.204
     port: 25
     username: ithelpdesk@cambodiapostbank.com.kh
-    password:
+    password: ${SMTP_PASSWORD:}
     properties:
       mail:
         smtp:
@@ -135,7 +135,7 @@ cpb:
     new-arrangement: NEW
   camdx:
     auth:
-      token: d8a7f9e2-3c4b-4f10-9d75-1c9f2b84a7ec
+      token: ${CAMDX_AUTH_TOKEN:d8a7f9e2-3c4b-4f10-9d75-1c9f2b84a7ec}
       tokenHeaderName: X-CPB-CamDx-Auth
   otp:
     length: 6
@@ -155,12 +155,12 @@ test:
 
 aml:
   api:
-    key: 34acefcd-6e4e-4a81-a553-852b21000c8a
-    secret-key: zH9iyS42JWYh4Ol+FeSGsuREwRJmoaDYBbZhgL4lBG0=
+    key: ${AML_API_KEY:34acefcd-6e4e-4a81-a553-852b21000c8a}
+    secret-key: ${AML_SECRET_KEY:zH9iyS42JWYh4Ol+FeSGsuREwRJmoaDYBbZhgL4lBG0=}
 
 jwt:
   secret:
-    key: f7e8d9c6b5a4938271605f4de3d2c1b0a9f8e7d6c5b4a392817f6e5d4c3b2a1908f7e6d5c4b3a29180716f5e4d3c2b1a001
+    key: ${JWT_SECRET_KEY:f7e8d9c6b5a4938271605f4de3d2c1b0a9f8e7d6c5b4a392817f6e5d4c3b2a1908f7e6d5c4b3a29180716f5e4d3c2b1a001}
 
 app:
   default-users:

@@ -107,7 +107,14 @@ public class CustomerImageServiceImpl implements CustomerImageService {
 
     @Override
     public String saveBase64File(String base64, String filename, String type) throws Exception {
-        String baseType = (type != null && type.toLowerCase().contains("selfie")) ? "selfie" : "nid";
+        String baseType;
+        if (type != null && type.toLowerCase().contains("selfie")) {
+            baseType = "selfie";
+        } else if (type != null && (type.toLowerCase().contains("doc") || type.toLowerCase().contains("ref"))) {
+            baseType = "document";
+        } else {
+            baseType = "nid";
+        }
         boolean isJunior = (type != null && type.toLowerCase().contains("junior"));
         String subFolder = isJunior ? "junior/" + baseType : baseType;
 
@@ -171,6 +178,10 @@ public class CustomerImageServiceImpl implements CustomerImageService {
             }
             if (imagePath == null) {
                 imagePath = storageComponent.findLatestFileRecursive(
+                        getJuniorParentPath().resolve("junior/document"), "ref_doc_" + customerId);
+            }
+            if (imagePath == null) {
+                imagePath = storageComponent.findLatestFileRecursive(
                         getJuniorParentPath().resolve("junior"), "nid_" + customerId + "_");
             }
             if (imagePath == null) {
@@ -208,14 +219,14 @@ public class CustomerImageServiceImpl implements CustomerImageService {
         try {
             String uploadDir = storageComponent.getUploadDir();
             Path imagePath = storageComponent.findLatestFileRecursive(
-                    Paths.get(uploadDir, "selfie"), "selfie_" + customerId + "_");
+                    Paths.get(uploadDir, "selfie"), "selfie_" + customerId);
             if (imagePath == null) {
                 imagePath = storageComponent.findLatestFileRecursive(
-                        getJuniorParentPath().resolve("junior/selfie"), "selfie_" + customerId + "_");
+                        getJuniorParentPath().resolve("junior/selfie"), "selfie_" + customerId);
             }
             if (imagePath == null) {
                 imagePath = storageComponent.findLatestFileRecursive(
-                        getJuniorParentPath().resolve("junior"), "selfie_" + customerId + "_");
+                        getJuniorParentPath().resolve("junior"), "selfie_" + customerId);
             }
             if (imagePath == null) {
                 return null;

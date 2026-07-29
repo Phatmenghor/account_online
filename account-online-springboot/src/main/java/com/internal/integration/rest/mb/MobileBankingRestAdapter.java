@@ -4,6 +4,7 @@ import com.internal.config.CpbProperties;
 import com.internal.config.DefaultProperties;
 import com.internal.feature.open_account.models.CifActivationLog;
 import com.internal.feature.open_account.service.CifActivationLogService;
+import com.internal.feature.junior_account.dto.request.JuniorCustomerRequest;
 import com.internal.feature.open_account.dto.request.CustomerRequest;
 import com.internal.feature.open_account.dto.request.MobileBankingRequest;
 import com.internal.feature.open_account.dto.response.MobileBankingResponse;
@@ -103,32 +104,54 @@ public class MobileBankingRestAdapter implements MobileBankingPort {
 
     private MobileBankingRequest buildRequest(CustomerRequest request, String cif,
                                               String khrAccount, String usdAccount) {
+        String customerName = (request.getFamilyName() != null ? request.getFamilyName() : "") + " " + (request.getGivenName() != null ? request.getGivenName() : "");
+        String identityNumber = request.getLegalId() != null ? request.getLegalId().trim() : "";
+        String address = request.getLegalAddress();
         String formattedDob = formatDateOfBirth(request.getDateOfBirth());
         String formattedPhone = formatPhoneNumber(request.getPhoneNumber());
-        String signData = generateSignature(cif, formattedPhone);
-        String branchCode = request.getBranchCode() != null ? request.getBranchCode()
-                : defaultProperties.getBranchCode();
+        String cifNo = cif;
+        String accountType = (request.getAccountType() != null && !request.getAccountType().isBlank()) ? request.getAccountType() : "6011";
+
+        if (request instanceof JuniorCustomerRequest jnr) {
+            accountType = AppConstants.JUNIOR_SECTOR; // "6012"
+            if (address == null || address.isBlank()) {
+                address = (jnr.getGuardianAddress() != null && !jnr.getGuardianAddress().isBlank())
+                        ? jnr.getGuardianAddress().trim()
+                        : "Phnom Penh";
+            }
+        }
+
+        if (address == null || address.isBlank()) {
+            address = "Phnom Penh";
+        }
+
+        String signData = generateSignature(cifNo, formattedPhone);
+        String rawBranch = request.getBranchCode();
+        String branchCode = (rawBranch != null && rawBranch.startsWith("KH"))
+                ? rawBranch
+                : ((defaultProperties.getBranchCode() != null && defaultProperties.getBranchCode().startsWith("KH"))
+                        ? defaultProperties.getBranchCode()
+                        : "KH0012011");
         String accountNumber = usdAccount != null ? usdAccount : khrAccount;
         String currency = usdAccount != null ? AppConstants.CURRENCY_USD : AppConstants.CURRENCY_KHR;
 
         return MobileBankingRequest.builder()
-                .customerName(request.getFamilyName() + " " + request.getGivenName())
+                .customerName(customerName)
                 .customerType("100")
-                .identityNumber(request.getLegalId().trim())
+                .identityNumber(identityNumber)
                 .email(request.getEmail() != null ? request.getEmail() : "NA@gmail.com")
-                .address(request.getLegalAddress())
-                .cifNo(cif)
+                .address(address)
+                .cifNo(cifNo)
                 .branchCodeCreatedUser(branchCode)
                 .posCodeCreatedUser("POS01")
-                .createdUser(request.getGivenName())
+                .createdUser(request.getGivenName() != null ? request.getGivenName() : "Customer")
                 .dateOfBirth(formattedDob)
                 .telephone(formattedPhone)
                 .cifBranchCode(branchCode)
                 .gender(request.getGender())
                 .residence(request.getResidence() != null ? request.getResidence() : "1")
                 .accountNumber(accountNumber)
-                .accountType(request.getAccountType() != null && !request.getAccountType().isBlank()
-                        ? request.getAccountType() : "6011")
+                .accountType(accountType)
                 .currency(currency)
                 .branchCode(branchCode)
                 .packageCode("BASIC")
@@ -290,7 +313,8 @@ public class MobileBankingRestAdapter implements MobileBankingPort {
     private String generateSignature(String cif, String sms) {
         try {
             String dateNow = LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-            String value = "mobilebankingCPB@#%123" + cif + sms + dateNow;
+            String secretKey = "mobilebankingCPB@#%123";
+            String value = secretKey + cif + sms + dateNow;
 
             MessageDigest md5 = MessageDigest.getInstance("MD5");
             byte[] hashBytes = md5.digest(value.getBytes(StandardCharsets.US_ASCII));

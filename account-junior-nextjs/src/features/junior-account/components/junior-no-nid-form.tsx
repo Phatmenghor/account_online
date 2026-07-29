@@ -1,19 +1,24 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { Button } from "@/components/ui/button";
-import { CheckCircle } from "lucide-react";
+import { CheckCircle, Camera } from "lucide-react";
+import { z } from "zod";
 import {
   checkPhone,
   sendOtp,
   verifyOtp,
   getCustomerInfoByCif,
   processJuniorAccountOpening,
+  fetchOccupations,
+  fetchMaritalStatuses,
   JuniorCustomerPayload,
   CustomerInfo,
 } from "../services/junior-account-service";
+import { showToast } from "@/components/shared/common/show-toast";
 import SubmitSuccessModal from "@/features/account-opening/components/submit-success-modal";
+import { SubmissionProgressModal } from "@/features/account-opening/components/submission-progress-modal";
 
 // Modular Form Sections
 import { ParentVerificationSection } from "./form-sections/parent-verification-section";
@@ -45,14 +50,41 @@ const Divider = () => <div className="border-t border-slate-100" />;
 interface JuniorNoNidFormProps {
   branches?: any[];
   occupations?: any[];
+  maritalStatuses?: any[];
 }
 
-export function JuniorNoNidForm({ occupations = [] }: JuniorNoNidFormProps) {
+export function JuniorNoNidForm({ occupations = [], branches = [], maritalStatuses = [] }: JuniorNoNidFormProps) {
   const translate = useTranslations("NIDPage");
   const translateCommon = useTranslations("common");
   const locale = useLocale();
 
   const [loading, setLoading] = useState(false);
+  const [apiOccupations, setApiOccupations] = useState<any[]>(occupations);
+  const [apiMaritalStatuses, setApiMaritalStatuses] = useState<any[]>(maritalStatuses);
+
+  useEffect(() => {
+    if (occupations && occupations.length > 0) {
+      setApiOccupations(occupations);
+    } else {
+      fetchOccupations().then((data) => {
+        if (data && Array.isArray(data) && data.length > 0) {
+          setApiOccupations(data);
+        }
+      });
+    }
+  }, [occupations]);
+
+  useEffect(() => {
+    if (maritalStatuses && maritalStatuses.length > 0) {
+      setApiMaritalStatuses(maritalStatuses);
+    } else {
+      fetchMaritalStatuses().then((data) => {
+        if (data && Array.isArray(data) && data.length > 0) {
+          setApiMaritalStatuses(data);
+        }
+      });
+    }
+  }, [maritalStatuses]);
 
   // Modals & States
   const [parentWarningModal, setParentWarningModal] = useState(false);
@@ -104,9 +136,30 @@ export function JuniorNoNidForm({ occupations = [] }: JuniorNoNidFormProps) {
     return () => clearInterval(interval);
   }, [juniorCountdown]);
 
-  // Reference document state
+  // Reference document & child face photo state
   const [refDocType, setRefDocType] = useState("PARENT_NID");
   const [refDocFileName, setRefDocFileName] = useState("");
+  const [refDocImagePreview, setRefDocImagePreview] = useState<string | null>(null);
+  const [selfieFileName, setSelfieFileName] = useState("");
+  const [selfiePreview, setSelfiePreview] = useState<string | null>(null);
+
+  const handleSelfieUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setSelfieFileName(file.name);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64String = reader.result as string;
+        setSelfiePreview(base64String);
+        setFormData((prev) => ({
+          ...prev,
+          selfie_image_name: file.name,
+          selfie_image_base64: base64String,
+        }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   // Form State (default branch_code: 001)
   const [formData, setFormData] = useState<JuniorCustomerPayload>({
@@ -119,8 +172,8 @@ export function JuniorNoNidForm({ occupations = [] }: JuniorNoNidFormProps) {
     date_of_birth: "",
     gender: "Male",
     phone_number: "",
-    branch_code: "001",
-    marital_status: "Single",
+    branch_code: "KH0012011",
+    marital_status: "",
     occupation: "",
     legal_address: "",
     guardian_legal_id: "",
@@ -135,6 +188,7 @@ export function JuniorNoNidForm({ occupations = [] }: JuniorNoNidFormProps) {
 
   const [successData, setSuccessData] = useState<any>(null);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [isSubmittingModal, setIsSubmittingModal] = useState(false);
 
   const handleInputChange = (field: keyof JuniorCustomerPayload, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -154,9 +208,16 @@ export function JuniorNoNidForm({ occupations = [] }: JuniorNoNidFormProps) {
 
   const getOccupationName = (occ: any) => {
     if (locale === "kh") {
-      return occ.nameKh || occ.lookupKhmerName || occ.name || occ.code || String(occ.id || "");
+      return occ.nameKh || occ.lookupKhmerName || occ.nameEn || occ.name || occ.occupationCode || occ.code || String(occ.id || "");
     }
-    return occ.nameEn || occ.lookupName || occ.name || occ.code || String(occ.id || "");
+    return occ.nameEn || occ.lookupName || occ.nameKh || occ.name || occ.occupationCode || occ.code || String(occ.id || "");
+  };
+
+  const getMaritalStatusName = (ms: any) => {
+    if (locale === "kh") {
+      return ms.nameKh || ms.lookupKhmerName || ms.nameEn || ms.name || ms.maritalCode || ms.code || String(ms.id || "");
+    }
+    return ms.nameEn || ms.lookupName || ms.nameKh || ms.name || ms.maritalCode || ms.code || String(ms.id || "");
   };
 
   // 1. Parent Phone Check & OTP
@@ -182,15 +243,17 @@ export function JuniorNoNidForm({ occupations = [] }: JuniorNoNidFormProps) {
         try {
           const info = await getCustomerInfoByCif(res.cif);
           setParentInfo(info);
+          const parentBranch = info.coCode || info.companyBook || "KH0012011";
           setFormData((prev) => ({
             ...prev,
             guardian_cif: res.cif,
-            guardian_name: (info.names && info.names.length > 0) ? info.names[0] : prev.guardian_name,
+            guardian_name: (info.names && info.names.length > 0) ? info.names[0] : (info.shortNames && info.shortNames.length > 0 ? info.shortNames[0] : prev.guardian_name),
             guardian_legal_id: info.legalId || prev.guardian_legal_id,
             guardian_doc_type: info.legalDocName || "NATIONAL.ID",
             guardian_dob: info.birthDate || "",
             guardian_address: (info.streets && info.streets.length > 0) ? info.streets[0] : (prev.legal_address || ""),
             guardian_info_json: JSON.stringify(info),
+            branch_code: parentBranch,
             legal_address: (info.streets && info.streets.length > 0) ? info.streets[0] : (prev.legal_address || ""),
           }));
         } catch (e) {
@@ -201,6 +264,7 @@ export function JuniorNoNidForm({ occupations = [] }: JuniorNoNidFormProps) {
       await sendOtp(formData.guardian_phone);
       setParentOtpSent(true);
       setParentCountdown(60);
+      showToast.success(locale === "kh" ? "បានផ្ញើលេខកូដ OTP ទៅទូរស័ព្ទអាណាព្យាបាលដោយជោគជ័យ!" : "OTP sent to parent phone successfully!");
     } catch (err: any) {
       const msg = err.response?.data?.message || err.message || "Failed to verify parent phone.";
       showAlertModal(locale === "kh" ? "ការផ្ទៀងផ្ទាត់បរាជ័យ!" : "Verification Failed!", msg);
@@ -208,6 +272,10 @@ export function JuniorNoNidForm({ occupations = [] }: JuniorNoNidFormProps) {
       setLoading(false);
     }
   };
+
+  // Refs to prevent infinite auto-verify loops
+  const lastTriedParentOtpRef = useRef<string>("");
+  const lastTriedJuniorOtpRef = useRef<string>("");
 
   const handleVerifyParentOtp = async () => {
     if (!parentOtpCode || parentOtpCode.length !== 6) {
@@ -222,7 +290,9 @@ export function JuniorNoNidForm({ occupations = [] }: JuniorNoNidFormProps) {
       await verifyOtp(formData.guardian_phone || "", parentOtpCode);
       setParentVerified(true);
       setParentCountdown(0);
+      showToast.success(locale === "kh" ? "បានផ្ទៀងផ្ទាត់ OTP អាណាព្យាបាលដោយជោគជ័យ!" : "Parent OTP verified successfully!");
     } catch (err: any) {
+      lastTriedParentOtpRef.current = "";
       const msg = err.response?.data?.message || err.message || "Invalid OTP code.";
       showAlertModal(locale === "kh" ? "ការផ្ទៀងផ្ទាត់ OTP បរាជ័យ!" : "OTP Verification Failed!", msg);
     } finally {
@@ -253,6 +323,7 @@ export function JuniorNoNidForm({ occupations = [] }: JuniorNoNidFormProps) {
       await sendOtp(formData.phone_number);
       setJuniorOtpSent(true);
       setJuniorCountdown(60);
+      showToast.success(locale === "kh" ? "បានផ្ញើលេខកូដ OTP ទៅទូរស័ព្ទកុមារដោយជោគជ័យ!" : "OTP sent to junior phone successfully!");
     } catch (err: any) {
       const msg = err.response?.data?.message || err.message || "Failed to send junior OTP.";
       showAlertModal(locale === "kh" ? "ការផ្ញើ OTP បរាជ័យ!" : "Failed to Send OTP!", msg);
@@ -274,7 +345,9 @@ export function JuniorNoNidForm({ occupations = [] }: JuniorNoNidFormProps) {
       await verifyOtp(formData.phone_number || "", juniorOtpCode);
       setJuniorVerified(true);
       setJuniorCountdown(0);
+      showToast.success(locale === "kh" ? "បានផ្ទៀងផ្ទាត់ OTP កុមារដោយជោគជ័យ!" : "Junior OTP verified successfully!");
     } catch (err: any) {
+      lastTriedJuniorOtpRef.current = "";
       const msg = err.response?.data?.message || err.message || "Invalid OTP code.";
       showAlertModal(locale === "kh" ? "ការផ្ទៀងផ្ទាត់ OTP បរាជ័យ!" : "OTP Verification Failed!", msg);
     } finally {
@@ -282,28 +355,32 @@ export function JuniorNoNidForm({ occupations = [] }: JuniorNoNidFormProps) {
     }
   };
 
-  // Auto-verify Parent OTP
+  // Auto-verify Parent OTP (runs ONLY ONCE per 6-digit code entry)
   useEffect(() => {
     if (
       formData.guardian_phone &&
       parentOtpCode.length === 6 &&
       /^\d{6}$/.test(parentOtpCode) &&
       !parentVerified &&
-      !loading
+      !loading &&
+      lastTriedParentOtpRef.current !== parentOtpCode
     ) {
+      lastTriedParentOtpRef.current = parentOtpCode;
       handleVerifyParentOtp();
     }
   }, [parentOtpCode, formData.guardian_phone, parentVerified, loading]);
 
-  // Auto-verify Junior OTP
+  // Auto-verify Junior OTP (runs ONLY ONCE per 6-digit code entry)
   useEffect(() => {
     if (
       formData.phone_number &&
       juniorOtpCode.length === 6 &&
       /^\d{6}$/.test(juniorOtpCode) &&
       !juniorVerified &&
-      !loading
+      !loading &&
+      lastTriedJuniorOtpRef.current !== juniorOtpCode
     ) {
+      lastTriedJuniorOtpRef.current = juniorOtpCode;
       handleVerifyJuniorOtp();
     }
   }, [juniorOtpCode, formData.phone_number, juniorVerified, loading]);
@@ -316,6 +393,7 @@ export function JuniorNoNidForm({ occupations = [] }: JuniorNoNidFormProps) {
       const reader = new FileReader();
       reader.onloadend = () => {
         const base64String = reader.result as string;
+        setRefDocImagePreview(base64String);
         setFormData((prev) => ({
           ...prev,
           reference_doc_type: refDocType,
@@ -327,31 +405,123 @@ export function JuniorNoNidForm({ occupations = [] }: JuniorNoNidFormProps) {
     }
   };
 
+  const resetForm = () => {
+    setShowSuccessModal(false);
+    setSuccessData(null);
+    setFormData({
+      has_nid: false,
+      legal_id: "",
+      family_name: "",
+      given_name: "",
+      last_name_kh: "",
+      first_name_kh: "",
+      date_of_birth: "",
+      gender: "Male",
+      phone_number: "",
+      branch_code: "KH0012011",
+      marital_status: "",
+      occupation: "",
+      legal_address: "",
+      guardian_legal_id: "",
+      guardian_name: "",
+      guardian_phone: "",
+      guardian_relationship: "FATHER",
+      guardian_cif: "",
+      referral_id: "",
+      reference_doc_type: "PARENT_NID",
+      reference_doc_name: "",
+      reference_doc_image: "",
+      selfie_image_name: "",
+    });
+    setParentVerified(false);
+    setParentOtpSent(false);
+    setParentOtpCode("");
+    setParentInfo(null);
+    setJuniorVerified(false);
+    setJuniorOtpSent(false);
+    setJuniorOtpCode("");
+    setParentCountdown(0);
+    setJuniorCountdown(0);
+    setRefDocFileName("");
+    lastTriedParentOtpRef.current = "";
+    lastTriedJuniorOtpRef.current = "";
+  };
+
+  // Zod Validation Schema
+  const validateFormWithZod = (): boolean => {
+    // 1. Parent Verification Check
+    if (!parentVerified) {
+      const msg = locale === "kh" ? "សូមផ្ទៀងផ្ទាត់លេខទូរស័ព្ទ និង OTP អាណាព្យាបាលជាមុនសិន" : "Please verify parent phone and OTP first";
+      showToast.error(msg);
+      showAlertModal(locale === "kh" ? "មិនទាន់ផ្ទៀងផ្ទាត់អាណាព្យាបាល!" : "Parent Not Verified!", msg);
+      return false;
+    }
+
+    // 2. Child Face Photo Check
+    if (!selfieFileName && !formData.selfie_image_name && !selfiePreview) {
+      const msg = locale === "kh" ? "សូមថត ឬផ្ទុកឡើងរូបថតផ្ទាល់ខ្លួនកុមារ" : "Please upload child face photo";
+      showToast.error(msg);
+      showAlertModal(locale === "kh" ? "សូមថត ឬផ្ទុកឡើងរូបថតកុមារ!" : "Please Upload Child Face Photo!", msg);
+      return false;
+    }
+
+    // 3. Reference Document Check
+    if (!formData.reference_doc_name && !formData.reference_doc_image) {
+      const msg = locale === "kh" ? "សូមផ្ទុកឡើងរូបភាពឯកសារយោង (សំបុត្រកំណើត ឬអត្តសញ្ញាណប័ណ្ណ)" : "Please upload reference document image";
+      showToast.error(msg);
+      showAlertModal(locale === "kh" ? "សូមផ្ទុកឡើងរូបភាពឯកសារយោង!" : "Please Upload Reference Document!", msg);
+      return false;
+    }
+
+    // 4. Junior Phone Verification Check
+    if (!juniorVerified) {
+      const msg = locale === "kh" ? "សូមផ្ទៀងផ្ទាត់លេខទូរស័ព្ទ និង OTP របស់កុមារជាមុនសិន" : "Please verify junior phone and OTP first";
+      showToast.error(msg);
+      showAlertModal(locale === "kh" ? "មិនទាន់ផ្ទៀងផ្ទាត់ទូរស័ព្ទកុមារ!" : "Junior Phone Not Verified!", msg);
+      return false;
+    }
+
+    // 5. Zod Schema Validation
+    const schema = z.object({
+      guardian_phone: z.string().min(8, locale === "kh" ? "សូមបញ្ចូលលេខទូរស័ព្ទអាណាព្យាបាលឲ្យបានត្រឹមត្រូវ" : "Please enter valid parent phone number"),
+      first_name_kh: z.string().min(1, locale === "kh" ? "សូមបញ្ចូលនាមខ្លួនជាភាសាខ្មែរ" : "Please enter First Name in Khmer"),
+      last_name_kh: z.string().min(1, locale === "kh" ? "សូមបញ្ចូលគោត្តនាមជាភាសាខ្មែរ" : "Please enter Last Name in Khmer"),
+      given_name: z.string().min(1, locale === "kh" ? "សូមបញ្ចូលនាមខ្លួនជាអក្សរឡាតាំង (Given Name)" : "Please enter Given Name in English"),
+      family_name: z.string().min(1, locale === "kh" ? "សូមបញ្ចូលគោត្តនាមជាអក្សរឡាតាំង (Family Name)" : "Please enter Family Name in English"),
+      date_of_birth: z.string().min(1, locale === "kh" ? "សូមជ្រើសរើសថ្ងៃខែឆ្នាំកំណើតកុមារ" : "Please select Date of Birth"),
+      gender: z.string().min(1, locale === "kh" ? "សូមជ្រើសរើសភេទ" : "Please select Gender"),
+      phone_number: z.string().min(8, locale === "kh" ? "សូមបញ្ចូលលេខទូរស័ព្ទកុមារឲ្យបានត្រឹមត្រូវ" : "Please enter valid Junior phone number"),
+    });
+
+    const result = schema.safeParse(formData);
+    if (!result.success) {
+      const firstError = result.error.issues[0]?.message || "Please complete all required fields correctly.";
+      showToast.error(firstError);
+      showAlertModal(locale === "kh" ? "ព័ត៌មានមិនទាន់គ្រប់គ្រាន់!" : "Incomplete Information!", firstError);
+      return false;
+    }
+
+    return true;
+  };
+
   // Form Submit
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!parentVerified) {
-      showAlertModal(
-        locale === "kh" ? "មិនទាន់ផ្ទៀងផ្ទាត់អាណាព្យាបាល!" : "Parent Not Verified!",
-        locale === "kh" ? "សូមផ្ទៀងផ្ទាត់លេខទូរស័ព្ទ និងលេខកូដ OTP របស់អាណាព្យាបាលជាមុនសិន។" : "Please verify parent phone and OTP first."
-      );
-      return;
-    }
-    if (!formData.reference_doc_name && !formData.reference_doc_image) {
-      showAlertModal(
-        locale === "kh" ? "សូមផ្ទុកឡើងរូបភាពឯកសារយោង!" : "Please Upload Reference Document!",
-        locale === "kh" ? "សូមផ្ទុកឡើងរូបភាពឯកសារយោង (សំបុត្រកំណើត ឬអត្តសញ្ញាណប័ណ្ណ) ជាមុនសិន។" : "Please upload a reference document image first."
-      );
+    if (!validateFormWithZod()) {
       return;
     }
     setLoading(true);
+    setIsSubmittingModal(true);
 
     try {
       const res = await processJuniorAccountOpening(formData);
+      setIsSubmittingModal(false);
       setSuccessData(res);
       setShowSuccessModal(true);
     } catch (err: any) {
+      setIsSubmittingModal(false);
       const msg = err.response?.data?.message || err.message || "Account opening failed.";
+      showToast.error(msg);
       showAlertModal(locale === "kh" ? "ការបង្កើតគណនីបរាជ័យ!" : "Account Creation Failed!", msg);
     } finally {
       setLoading(false);
@@ -468,15 +638,35 @@ export function JuniorNoNidForm({ occupations = [] }: JuniorNoNidFormProps) {
               {translate("marital")} <span className="text-red-500 ml-0.5">*</span>
             </Label>
             <Select
-              value={formData.marital_status || "Single"}
+              value={formData.marital_status || ""}
               onValueChange={(val) => handleInputChange("marital_status", val)}
             >
               <SelectTrigger className="w-full h-9 text-sm rounded-xl">
                 <SelectValue placeholder={translateCommon("selectMarital")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="Single">{locale === "kh" ? "នៅលីវ (Single)" : "Single"}</SelectItem>
-                <SelectItem value="Married">{locale === "kh" ? "រៀបការរួច (Married)" : "Married"}</SelectItem>
+                {apiMaritalStatuses.length > 0 ? (
+                  apiMaritalStatuses.map((ms, idx) => {
+                    const label = getMaritalStatusName(ms);
+                    const val = String(
+                      ms.maritalCode ||
+                      ms.code ||
+                      (ms.id !== undefined && ms.id !== null ? ms.id : "") ||
+                      ms.lookupId ||
+                      `ms-${idx}`
+                    );
+                    return (
+                      <SelectItem key={val} value={val}>
+                        {label}
+                      </SelectItem>
+                    );
+                  })
+                ) : (
+                  <>
+                    <SelectItem value="Single">{locale === "kh" ? "នៅលីវ (Single)" : "Single"}</SelectItem>
+                    <SelectItem value="Married">{locale === "kh" ? "រៀបការរួច (Married)" : "Married"}</SelectItem>
+                  </>
+                )}
               </SelectContent>
             </Select>
           </div>
@@ -493,12 +683,18 @@ export function JuniorNoNidForm({ occupations = [] }: JuniorNoNidFormProps) {
                 <SelectValue placeholder={translateCommon("selectOccupation")} />
               </SelectTrigger>
               <SelectContent>
-                {occupations.length > 0 ? (
-                  occupations.map((occ) => {
+                {apiOccupations.length > 0 ? (
+                  apiOccupations.map((occ, idx) => {
                     const label = getOccupationName(occ);
-                    const val = occ.code || occ.lookupId || String(occ.id);
+                    const val = String(
+                      occ.occupationCode ||
+                      (occ.id !== undefined && occ.id !== null ? occ.id : "") ||
+                      occ.code ||
+                      occ.lookupId ||
+                      `occ-${idx}`
+                    );
                     return (
-                      <SelectItem key={occ.id || occ.code || occ.lookupId} value={val}>
+                      <SelectItem key={val} value={val}>
                         {label}
                       </SelectItem>
                     );
@@ -527,8 +723,55 @@ export function JuniorNoNidForm({ occupations = [] }: JuniorNoNidFormProps) {
 
       <Divider />
 
-      {/* ── SECTION 3: Modular Reference Document Upload ── */}
-      <div className="p-5 sm:p-6">
+      {/* ── SECTION 3: Documents & Child Face Photo ── */}
+      <div className="p-5 sm:p-6 space-y-5">
+        <SectionLabel label={locale === "kh" ? "3. រូបថត និងឯកសារយោងកុមារ" : "3. Child Face Photo & Reference Document"} />
+
+        {/* 1. Child Face Photo (Selfie) */}
+        <div className="space-y-1.5">
+          <Label className="text-xs font-medium text-slate-700 block">
+            {locale === "kh" ? "រូបថតផ្ទាល់ខ្លួនកុមារ (Child Face Photo)" : "Child Face Photo"} <span className="text-red-500 ml-0.5">*</span>
+          </Label>
+          <label
+            htmlFor="child-selfie-upload-input"
+            className={`group relative flex flex-col items-center justify-center h-36 sm:h-40 rounded-2xl border-2 border-dashed cursor-pointer overflow-hidden transition-all duration-200 ${
+              selfiePreview
+                ? "border-emerald-500/50 bg-emerald-50/20 hover:border-emerald-500"
+                : "border-slate-200 bg-slate-50/50 hover:border-primary hover:bg-primary/5"
+            }`}
+          >
+            {selfiePreview ? (
+              <>
+                <img src={selfiePreview} alt="Child Face Photo" className="w-full h-full object-cover" />
+                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center text-white text-xs font-semibold gap-2">
+                  <Camera className="w-4 h-4" />
+                  <span>{locale === "kh" ? "ផ្លាស់ប្តូររូបថត" : "Change Photo"}</span>
+                </div>
+              </>
+            ) : (
+              <div className="flex flex-col items-center gap-2 text-center p-3">
+                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary group-hover:scale-105 transition-transform">
+                  <Camera className="w-5 h-5" />
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-slate-700">
+                    {selfieFileName || (locale === "kh" ? "ចុចទីនេះដើម្បីថត ឬជ្រើសរើសរូបថតកុមារ" : "Click to Take or Upload Child Face Photo")}
+                  </p>
+                  <p className="text-[11px] text-slate-400 mt-0.5">JPG, PNG (Max 10MB)</p>
+                </div>
+              </div>
+            )}
+            <input
+              type="file"
+              id="child-selfie-upload-input"
+              accept="image/*"
+              onChange={handleSelfieUpload}
+              className="hidden"
+            />
+          </label>
+        </div>
+
+        {/* 2. Reference Document */}
         <ReferenceDocUploadSection
           refDocType={refDocType}
           onRefDocTypeChange={(val) => {
@@ -536,6 +779,7 @@ export function JuniorNoNidForm({ occupations = [] }: JuniorNoNidFormProps) {
             setFormData((prev) => ({ ...prev, reference_doc_type: val }));
           }}
           refDocFileName={refDocFileName}
+          refDocImagePreview={refDocImagePreview}
           onFileUpload={handleFileUpload}
         />
       </div>
@@ -604,18 +848,17 @@ export function JuniorNoNidForm({ occupations = [] }: JuniorNoNidFormProps) {
         type={alertModal.type}
       />
 
+      {/* SUBMISSION PROGRESS LOADING MODAL */}
+      <SubmissionProgressModal
+        isOpen={isSubmittingModal}
+        title={locale === "kh" ? "កំពុងដំណើរការបង្កើតគណនី Junior" : "Creating Junior Account..."}
+        message={locale === "kh" ? "សូមរង់ចាំបន្តិច ប្រព័ន្ធកំពុងដំណើរការបង្កើតគណនី និងភ្ជាប់សេវា Mobile Banking..." : "Please wait while we set up the Junior account and Mobile Banking service..."}
+      />
+
       {/* SUCCESS MODAL */}
       <SubmitSuccessModal
         isOpen={showSuccessModal}
-        onClose={() => {
-          setShowSuccessModal(false);
-          setParentVerified(false);
-          setJuniorVerified(false);
-          setParentOtpSent(false);
-          setJuniorOtpSent(false);
-          setParentCountdown(0);
-          setJuniorCountdown(0);
-        }}
+        onClose={resetForm}
         data={successData}
       />
     </form>

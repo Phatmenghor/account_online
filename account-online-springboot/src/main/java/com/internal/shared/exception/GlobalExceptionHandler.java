@@ -131,7 +131,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler({SQLException.class, org.springframework.dao.DataAccessException.class})
     public ResponseEntity<ApiResponse<Object>> handleSQLException(Exception ex) {
-        log.error("Database error: {}", ex.getMessage(), ex);
+        log.error("Database error: {}", ex.getMessage());
         return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, AppConstants.MSG_DB_CONNECTION_ERR);
     }
 

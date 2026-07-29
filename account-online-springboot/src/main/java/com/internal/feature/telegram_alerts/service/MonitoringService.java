@@ -104,16 +104,17 @@ public class MonitoringService {
     private static final long ACCOUNT_CREATED_PHOTO_DELAY_MS = 2000;
 
     @Async
-    public void sendAccountCreatedAlert(String fullName, String fullAddress, String legalId,
+    public void sendAccountCreatedAlert(String fullName, String fullAddress, String legalId, String phoneNumber,
             String cif, String usdAccount, String khrAccount, String branchName) {
         try {
             StringBuilder msg = new StringBuilder();
-            msg.append("*[ACCOUNT ONLINE OPENING]*\n")
+            msg.append("*Account Online - Customer CREATED*\n")
                     .append("--------------------\n");
 
             appendIfNotEmpty(msg, "Full Name", fullName);
             appendIfNotEmpty(msg, "Full Address", fullAddress);
             appendIfNotEmpty(msg, "Legal ID", legalId);
+            appendIfNotEmpty(msg, "Phone Number", phoneNumber);
             appendIfNotEmpty(msg, "CIF", cif);
             appendIfNotEmpty(msg, "Account USD", usdAccount);
             appendIfNotEmpty(msg, "Account KHR", khrAccount);
@@ -152,10 +153,10 @@ public class MonitoringService {
     }
 
     @Async
-    public void sendJuniorAccountCreatedAlert(String fullName, String fullAddress, String legalId,
+    public void sendJuniorAccountCreatedAlert(String fullName, String fullAddress, String legalId, String phoneNumber,
             String cif, String usdAccount, String khrAccount, String branchName,
             String guardianName, String guardianLegalId) {
-        sendJuniorAccountCreatedAlert(true, fullName, fullAddress, legalId, cif, usdAccount, khrAccount, branchName,
+        sendJuniorAccountCreatedAlert(true, fullName, fullAddress, legalId, phoneNumber, cif, usdAccount, khrAccount, branchName,
                 guardianName, guardianLegalId, null, null, null, null, null);
     }
 
@@ -165,6 +166,7 @@ public class MonitoringService {
             String fullName,
             String fullAddress,
             String legalId,
+            String phoneNumber,
             String cif,
             String usdAccount,
             String khrAccount,
@@ -179,12 +181,15 @@ public class MonitoringService {
     ) {
         try {
             StringBuilder msg = new StringBuilder();
-            msg.append("*[JUNIOR ACCOUNT OPENING]*\n");
+            msg.append("*Junior Account - Customer CREATED*\n");
             msg.append("--------------------\n");
 
             appendIfNotEmpty(msg, "Junior Full Name", fullName);
             appendIfNotEmpty(msg, "Legal Address", fullAddress);
-            appendIfNotEmpty(msg, "Junior Legal ID", legalId);
+            if (hasNid && legalId != null && !legalId.startsWith("JNR-")) {
+                appendIfNotEmpty(msg, "Junior Legal ID", legalId);
+            }
+            appendIfNotEmpty(msg, "Phone Number", phoneNumber);
             appendIfNotEmpty(msg, "CIF", cif);
             appendIfNotEmpty(msg, "Account USD", usdAccount);
             appendIfNotEmpty(msg, "Account KHR", khrAccount);
@@ -198,22 +203,27 @@ public class MonitoringService {
 
             if (!hasNid) {
                 appendIfNotEmpty(msg, "Document Type", referenceDocType);
-                appendIfNotEmpty(msg, "Document Name", referenceDocName);
             }
 
             telegramService.sendToJunior(msg.toString());
 
             if (legalId != null && !legalId.isBlank()) {
                 try {
-                    Resource nidImage = customerImageService.getNidImageResourceForEmail(legalId);
-                    if (nidImage != null && nidImage.exists()) {
-                        telegramService.sendPhotoToJunior("*Junior Document Photo*\nLegal ID: `" + escape(legalId) + "`", nidImage);
+                    Thread.sleep(ACCOUNT_CREATED_PHOTO_DELAY_MS);
+                } catch (InterruptedException ignored) {
+                    Thread.currentThread().interrupt();
+                }
+
+                try {
+                    Resource docImage = customerImageService.getNidImageResourceForEmail(legalId);
+                    if (docImage != null && docImage.exists()) {
+                        telegramService.sendPhotoToJunior("*ឯកសារយោងអត្តសញ្ញាណ (Reference Document)*", docImage);
                     }
                 } catch (Exception ignored) {}
                 try {
                     Resource selfieImage = customerImageService.getSelfieImageResourceForEmail(legalId);
                     if (selfieImage != null && selfieImage.exists()) {
-                        telegramService.sendPhotoToJunior("*Junior Face Photo*\nLegal ID: `" + escape(legalId) + "`", selfieImage);
+                        telegramService.sendPhotoToJunior("*រូបថតផ្ទាល់ខ្លួនកុមារ (Child Face Photo)*", selfieImage);
                     }
                 } catch (Exception ignored) {}
             }

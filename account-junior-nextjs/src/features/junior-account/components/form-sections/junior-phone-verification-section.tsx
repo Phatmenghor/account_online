@@ -16,6 +16,7 @@ interface JuniorPhoneVerificationSectionProps {
   juniorCountdown: number;
   loading: boolean;
   onSendOtp: () => void;
+  error?: string;
 }
 
 export function JuniorPhoneVerificationSection({
@@ -28,6 +29,7 @@ export function JuniorPhoneVerificationSection({
   juniorCountdown,
   loading,
   onSendOtp,
+  error,
 }: JuniorPhoneVerificationSectionProps) {
   const translate = useTranslations("NIDPage");
   const locale = useLocale();
@@ -92,6 +94,7 @@ export function JuniorPhoneVerificationSection({
               )}
             </Button>
           </div>
+          {error && <p className="text-xs text-red-500 font-medium mt-1">{error}</p>}
         </div>
 
         {/* Junior OTP Code Field */}
@@ -116,9 +119,6 @@ export function JuniorPhoneVerificationSection({
             />
             {loading && juniorOtpSent && !juniorVerified && (
               <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-primary pointer-events-none" />
-            )}
-            {juniorVerified && (
-              <CheckCircle className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-green-600 pointer-events-none" />
             )}
           </div>
         </div>

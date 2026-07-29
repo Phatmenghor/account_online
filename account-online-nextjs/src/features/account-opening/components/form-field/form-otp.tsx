@@ -287,7 +287,7 @@ export default function OTPInput({
   }, [otpCode, phoneNumber, isOtpVerified, isVerifyingOtp, lastVerifiedOtp, handleVerifyOtp]);
 
   useEffect(() => {
-    if (reset) {
+    if (reset || !phoneNumber) {
       setOtpCode("");
       setIsOtpSent(false);
       setIsOtpVerified(false);
@@ -297,7 +297,7 @@ export default function OTPInput({
       setIsSendingOtp(false);
       setIsVerifyingOtp(false);
     }
-  }, [reset]);
+  }, [reset, phoneNumber]);
 
   return (
     <>

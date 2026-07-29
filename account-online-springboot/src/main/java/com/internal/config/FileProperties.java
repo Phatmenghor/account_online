@@ -16,6 +16,7 @@ public class FileProperties {
         private String nid = "/nid";
         private String selfie = "/selfie";
         private String junior = "/junior";
-        private String referenceDoc = "/reference-doc";
+        private String referenceDoc = "/document";
+        private String document = "/document";
     }
 }

@@ -15,10 +15,10 @@ import com.internal.feature.open_account.dto.response.OpenAccountResponseDto;
 import com.internal.feature.open_account.service.BankingService;
 import com.internal.feature.open_account.service.ComplianceService;
 import com.internal.feature.open_account.service.ReportingService;
+import com.internal.feature.customer_image.service.CustomerImageService;
 import com.internal.feature.customer_image.service.JuniorCustomerImageService;
 import com.internal.feature.telegram_alerts.service.MonitoringService;
 import com.internal.shared.constant.AppConstants;
-import com.internal.shared.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -35,6 +35,8 @@ import java.util.UUID;
 import com.internal.feature.junior_account.event.JuniorAccountOpenedEvent;
 import com.internal.feature.junior_account.mapper.JuniorAccountMapper;
 import com.internal.feature.junior_account.service.JuniorBankingService;
+import com.internal.feature.sms_otp.service.PhoneCheckService;
+import com.internal.shared.exception.openaccount.AccountExistsException;
 import org.springframework.context.ApplicationEventPublisher;
 
 @Service
@@ -43,11 +45,13 @@ import org.springframework.context.ApplicationEventPublisher;
 public class JuniorAccountServiceImpl implements JuniorAccountService {
 
     private final JuniorBankingService juniorBankingService;
+    private final PhoneCheckService phoneCheckService;
     private final ComplianceService complianceService;
     private final ReportingService reportingService;
     private final JuniorAccountFinalRepository juniorAccountFinalRepository;
     private final JuniorAmlStatusRepository juniorAmlStatusRepository;
     private final JuniorCustomerImageService juniorCustomerImageService;
+    private final CustomerImageService customerImageService;
     private final JuniorAccountMapper juniorAccountMapper;
     private final MonitoringService monitoringService;
     private final ApplicationEventPublisher eventPublisher;
@@ -65,18 +69,12 @@ public class JuniorAccountServiceImpl implements JuniorAccountService {
             request.setLegalId(legalId);
         }
 
-        // Junior account uses DEFAULT_SECTOR (6011) for T24 Customer Creation and JUNIOR_PRODUCT (SAVE.JUNIOR.SAVING) for Account Creation
-        request.setSector(AppConstants.DEFAULT_SECTOR);
+        // Junior account uses JUNIOR_SECTOR (6012) for T24 Customer Creation and JUNIOR_PRODUCT (SAVE.JUNIOR.SAVING) for Account Creation
+        request.setSector(AppConstants.JUNIOR_SECTOR);
         request.setProductAccount(AppConstants.JUNIOR_PRODUCT);
 
         String currentStep = "START";
         String submittedBy = "Customer";
-        try {
-            String username = SecurityUtils.getCurrentUsername();
-            if (username != null) {
-                submittedBy = username;
-            }
-        } catch (Exception ignored) {}
 
         log.info("Processing Junior Account Opening | Has NID: {} | Legal ID: {} | Submitted by: {}",
                 hasNid, legalId, submittedBy);
@@ -100,23 +98,20 @@ public class JuniorAccountServiceImpl implements JuniorAccountService {
                 juniorBankingService.validateExistingAccounts(customerInfo);
             }
 
-            String amlStatus = AmlStatusEnum.APPROVE.name();
-            if (hasNid) {
-                log.info("Step 4: Processing Junior AML | Legal ID: {}", legalId);
-                currentStep = AppConstants.PROCESS_AML;
-                var amlResult = complianceService.processAml(request);
-                context.setAmlResult(amlResult);
-                if (amlResult != null) {
-                    amlStatus = amlResult.getStatus().name();
-                    // Only save Junior AML status record if HIGH RISK / PENDING review
-                    if (amlResult.getStatus() == AmlStatusEnum.PENDING) {
-                        saveJuniorAmlStatus(request, amlResult, hasNid);
-                    }
+            // Step 3.1: Validate that Junior phone number is NOT already registered in MB/CBS
+            if (request.getPhoneNumber() != null && !request.getPhoneNumber().isBlank()) {
+                log.info("Step 3.1: Checking if Junior phone number is registered | Phone: {}", request.getPhoneNumber());
+                currentStep = AppConstants.VALIDATE_EXISTING_ACCOUNT;
+                var phoneCheckResult = phoneCheckService.checkPhone(request.getPhoneNumber().trim());
+                if (phoneCheckResult != null && Boolean.TRUE.equals(phoneCheckResult.getHasAccount())) {
+                    log.warn("Junior Account creation REJECTED: Phone number {} is ALREADY registered with CIF {}",
+                            request.getPhoneNumber(), phoneCheckResult.getCif());
+                    throw new AccountExistsException(phoneCheckResult.getCif());
                 }
-                complianceService.sentMessageOnHighRisk(request, amlResult);
-            } else {
-                log.info("Step 4: Bypassing AML check for Junior NO-NID account | Ref Doc: {}", legalId);
             }
+
+            String amlStatus = AmlStatusEnum.APPROVE.name();
+            log.info("Step 4: Bypassing AML check for Junior account opening | Legal ID: {}", legalId);
 
             log.info("Step 5: Creating customer in Core Banking | Legal ID: {}", legalId);
             currentStep = AppConstants.CREATE_CUSTOMER;
@@ -166,7 +161,7 @@ public class JuniorAccountServiceImpl implements JuniorAccountService {
 
         } catch (Exception e) {
             log.error("Junior Account opening failed at step: {} | Legal ID: {} | Error: {}",
-                    currentStep, legalId, e.getMessage(), e);
+                    currentStep, legalId, e.getMessage());
 
             final String failureRemark = reportingService.buildFailureRemark(
                     currentStep, context.getCif(), context.getKhrAccount(),
@@ -212,11 +207,51 @@ public class JuniorAccountServiceImpl implements JuniorAccountService {
             juniorAccountFinalRepository.save(juniorFinal);
             log.info("Saved JuniorAccountFinal record successfully for Legal ID: {}", request.getLegalId());
 
-            juniorCustomerImageService.saveImage("NID", request.getNidImageName(), request.getLegalId(), request.getGuardianLegalId());
-            juniorCustomerImageService.saveImage("SELFIE", request.getSelfieImageName(), request.getLegalId(), request.getGuardianLegalId());
-            if (request.getReferenceDocName() != null || request.getReferenceDocImage() != null) {
-                String docName = request.getReferenceDocName() != null ? request.getReferenceDocName() : "reference_document.png";
-                juniorCustomerImageService.saveImage("REF_DOC", docName, request.getLegalId(), request.getGuardianLegalId());
+            if (request.getNidImageName() != null && request.getNidImageName().startsWith("data:image")) {
+                try {
+                    String nidName = "nid_" + request.getLegalId() + ".jpg";
+                    customerImageService.saveBase64File(request.getNidImageName(), nidName, "junior_nid");
+                    request.setNidImageName(nidName);
+                } catch (Exception e) {
+                    log.warn("Could not save Junior NID image file to disk: {}", e.getMessage());
+                }
+            }
+
+            String selfieData = (request.getSelfieImageBase64() != null && !request.getSelfieImageBase64().isBlank())
+                    ? request.getSelfieImageBase64()
+                    : (request.getSelfieImageName() != null && request.getSelfieImageName().startsWith("data:image") ? request.getSelfieImageName() : null);
+
+            if (selfieData != null && !selfieData.isBlank()) {
+                try {
+                    String selfieName = "selfie_" + request.getLegalId() + ".jpg";
+                    customerImageService.saveBase64File(selfieData, selfieName, "junior_selfie");
+                    request.setSelfieImageName(selfieName);
+                } catch (Exception e) {
+                    log.warn("Could not save Junior selfie image file to disk: {}", e.getMessage());
+                }
+            }
+
+            if (request.getReferenceDocImage() != null && !request.getReferenceDocImage().isBlank()) {
+                try {
+                    String docName = "ref_doc_" + request.getLegalId() + ".png";
+                    customerImageService.saveBase64File(request.getReferenceDocImage(), docName, "junior_document");
+                    request.setReferenceDocName(docName);
+                    if (request.getNidImageName() == null || request.getNidImageName().isBlank() || request.getNidImageName().startsWith("data:image")) {
+                        request.setNidImageName(docName);
+                    }
+                } catch (Exception e) {
+                    log.warn("Could not save Junior reference document image file to disk: {}", e.getMessage());
+                }
+            }
+
+            if (request.getNidImageName() != null && !request.getNidImageName().isBlank()) {
+                juniorCustomerImageService.saveImage("NID", request.getNidImageName(), request.getLegalId(), request.getGuardianLegalId());
+            }
+            if (request.getSelfieImageName() != null && !request.getSelfieImageName().isBlank()) {
+                juniorCustomerImageService.saveImage("SELFIE", request.getSelfieImageName(), request.getLegalId(), request.getGuardianLegalId());
+            }
+            if (request.getReferenceDocName() != null && !request.getReferenceDocName().isBlank()) {
+                juniorCustomerImageService.saveImage("REF_DOC", request.getReferenceDocName(), request.getLegalId(), request.getGuardianLegalId());
             }
         } catch (Exception e) {
             log.error("Failed to save JuniorAccountFinal record for Legal ID: {}. Error: {}", request.getLegalId(), e.getMessage(), e);

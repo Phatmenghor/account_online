@@ -27,7 +27,7 @@ public class JuniorAccountXmlBuilder {
         String username = cpbProperties.getT24().getUsername();
         String password = cpbProperties.getT24().getPassword();
 
-        String branchCode = xmlUtils.getOrDefault(request.getBranchCode(), defaultProperties.getBranchCode());
+        String branchCode = xmlUtils.formatCompanyCode(request.getBranchCode(), defaultProperties.getBranchCode());
         String maritalStatus = xmlUtils.mapMaritalStatus(request.getMaritalStatus());
 
         boolean isStaffRequest = xmlUtils.isAuthenticated();
@@ -53,12 +53,17 @@ public class JuniorAccountXmlBuilder {
         String englishFullName = xmlUtils.safe(request.getFamilyName()) + " " + xmlUtils.safe(request.getGivenName());
         String khmerFullName = xmlUtils.safe(request.getLastNameKh()) + " " + xmlUtils.safe(request.getFirstNameKh());
 
-        String legalDocType = request.getLegalDocType();
-        if (legalDocType == null || legalDocType.isBlank()) {
-            legalDocType = Boolean.TRUE.equals(request.getHasNid()) ? "NATIONAL.ID" : xmlUtils.getOrDefault(request.getReferenceDocType(), "BIRTH.CERTIFICATE");
-        }
+        String legalDocType = xmlUtils.mapLegalDocType(
+                request.getLegalDocType() != null ? request.getLegalDocType() : request.getReferenceDocType(),
+                request.getHasNid()
+        );
+        String legalExpDate = xmlUtils.formatLegalExpireDateWithDefault(request.getLegalExpireDate());
+        String gender = xmlUtils.mapGender(request.getGender());
 
         String referralBy = xmlUtils.getOrDefault(request.getReferralId(), xmlUtils.getOrDefault(request.getReferralBy(), ""));
+
+        String legalIdValue = xmlUtils.safe(request.getLegalId());
+        String legalHolderName = Boolean.FALSE.equals(request.getHasNid()) ? legalDocType : defaultProperties.getLegalHolderName();
 
         return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
                 + "<soapenv:Envelope xmlns:soapenv=\"" + AppConstants.SOAP_ENV_NS + "\" "
@@ -99,14 +104,14 @@ public class JuniorAccountXmlBuilder {
                 + "<cus:CustomerStatus>" + defaultProperties.getCustomerStatus() + "</cus:CustomerStatus>"
                 + "<cus:Residence>" + defaultProperties.getNationality() + "</cus:Residence>"
 
-                // Legal identification
+                // Legal identification (Empty LegalId for NO-NID mode)
                 + "<cus:gLEGALID g=\"1\"><cus:mLEGALID m=\"1\">"
-                + "<cus:LegalId>" + request.getLegalId() + "</cus:LegalId>"
+                + "<cus:LegalId>" + legalIdValue + "</cus:LegalId>"
                 + "<cus:LegalDocName>" + legalDocType + "</cus:LegalDocName>"
-                + "<cus:LegalHolderName>" + defaultProperties.getLegalHolderName() + "</cus:LegalHolderName>"
+                + "<cus:LegalHolderName>" + legalHolderName + "</cus:LegalHolderName>"
                 + "<cus:LegalIssAuth>" + xmlUtils.getOrDefault(request.getLegalIssAuth(), request.getGivenName()) + "</cus:LegalIssAuth>"
                 + "<cus:LegalIssDate>" + legalIssueDate + "</cus:LegalIssDate>"
-                + "<cus:LegalExpDate>" + request.getLegalExpireDate() + "</cus:LegalExpDate>"
+                + "<cus:LegalExpDate>" + legalExpDate + "</cus:LegalExpDate>"
                 + "</cus:mLEGALID></cus:gLEGALID>"
 
                 // Language
@@ -119,7 +124,7 @@ public class JuniorAccountXmlBuilder {
                 + "<cus:TITLE>" + title + "</cus:TITLE>"
                 + "<cus:GIVENNAMES>" + request.getGivenName() + "</cus:GIVENNAMES>"
                 + "<cus:FAMILYNAME>" + request.getFamilyName() + "</cus:FAMILYNAME>"
-                + "<cus:Gender>" + request.getGender() + "</cus:Gender>"
+                + "<cus:Gender>" + gender + "</cus:Gender>"
                 + "<cus:DateofBirth>" + dateOfBirth + "</cus:DateofBirth>"
                 + "<cus:MaritalStatus>" + maritalStatus + "</cus:MaritalStatus>"
 
@@ -160,7 +165,7 @@ public class JuniorAccountXmlBuilder {
 
         String username = cpbProperties.getT24().getUsername();
         String password = cpbProperties.getT24().getPassword();
-        String branchCode = xmlUtils.getOrDefault(request.getBranchCode(), defaultProperties.getBranchCode());
+        String branchCode = xmlUtils.formatCompanyCode(request.getBranchCode(), defaultProperties.getBranchCode());
 
         String englishFullName = xmlUtils.safe(request.getFamilyName()) + " " + xmlUtils.safe(request.getGivenName());
         String khmerFullName = xmlUtils.safe(request.getLastNameKh() + " " + request.getFirstNameKh());

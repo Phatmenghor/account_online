@@ -2,6 +2,7 @@ package com.internal.feature.junior_account.event;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.internal.enumation.AmlStatusEnum;
+import com.internal.feature.customer_image.service.CustomerImageService;
 import com.internal.feature.customer_image.service.JuniorCustomerImageService;
 import com.internal.feature.junior_account.dto.request.JuniorCustomerRequest;
 import com.internal.feature.junior_account.mapper.JuniorAccountMapper;
@@ -36,6 +37,7 @@ public class JuniorAccountOpenedEventListener {
 
     private final JuniorAccountFinalRepository juniorAccountFinalRepository;
     private final JuniorCustomerImageService juniorCustomerImageService;
+    private final CustomerImageService customerImageService;
     private final JuniorAccountMapper juniorAccountMapper;
     private final MonitoringService monitoringService;
     private final BranchRepository branchRepository;
@@ -63,7 +65,45 @@ public class JuniorAccountOpenedEventListener {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void saveJuniorAccountFinalAsync(JuniorCustomerRequest request, OpenAccountContext context, String amlStatusStr, boolean hasNid) {
         try {
+            // 1. Save base64 image files FIRST so we get clean short filenames
+            String selfieData = (request.getSelfieImageBase64() != null && !request.getSelfieImageBase64().isBlank())
+                    ? request.getSelfieImageBase64()
+                    : (request.getSelfieImageName() != null && request.getSelfieImageName().startsWith("data:image") ? request.getSelfieImageName() : null);
+
+            if (selfieData != null && !selfieData.isBlank()) {
+                try {
+                    String selfieName = "selfie_" + request.getLegalId() + ".jpg";
+                    customerImageService.saveBase64File(selfieData, selfieName, "junior_selfie");
+                    request.setSelfieImageName(selfieName);
+                } catch (Exception e) {
+                    log.warn("Could not save Junior selfie image file to disk in listener: {}", e.getMessage());
+                }
+            }
+
+            if (request.getReferenceDocImage() != null && !request.getReferenceDocImage().isBlank()) {
+                try {
+                    String docName = "ref_doc_" + request.getLegalId() + ".png";
+                    customerImageService.saveBase64File(request.getReferenceDocImage(), docName, "junior_document");
+                    request.setReferenceDocName(docName);
+                    if (request.getNidImageName() == null || request.getNidImageName().isBlank() || request.getNidImageName().startsWith("data:image")) {
+                        request.setNidImageName(docName);
+                    }
+                } catch (Exception e) {
+                    log.warn("Could not save Junior reference document image file to disk in listener: {}", e.getMessage());
+                }
+            }
+
+            // 2. Map request to JuniorAccountFinal AFTER filenames are clean
             JuniorAccountFinal juniorFinal = juniorAccountMapper.toJuniorAccountFinal(request, context, hasNid);
+
+            // Explicitly set clean filenames on entity
+            if (request.getSelfieImageName() != null && !request.getSelfieImageName().startsWith("data:image")) {
+                juniorFinal.setSelfieImageName(request.getSelfieImageName());
+            }
+            if (request.getReferenceDocName() != null && !request.getReferenceDocName().startsWith("data:image")) {
+                juniorFinal.setReferenceDocName(request.getReferenceDocName());
+                juniorFinal.setNidImageName(request.getReferenceDocName());
+            }
 
             // Reuse existing record ID if one already exists for this Legal ID
             juniorAccountFinalRepository.findTopByLegalIdOrderByCreatedAtDesc(request.getLegalId())
@@ -110,10 +150,18 @@ public class JuniorAccountOpenedEventListener {
             } catch (Exception ignored) {}
 
             juniorAccountFinalRepository.save(juniorFinal);
-            log.info("Saved JuniorAccountFinal record in background for Legal ID: {}", request.getLegalId());
+            log.info("Saved JuniorAccountFinal record in background for Legal ID: {}, Selfie: {}, RefDoc: {}",
+                    request.getLegalId(), juniorFinal.getSelfieImageName(), juniorFinal.getReferenceDocName());
 
-            juniorCustomerImageService.saveImage("NID", request.getNidImageName(), request.getLegalId(), request.getGuardianLegalId());
-            juniorCustomerImageService.saveImage("SELFIE", request.getSelfieImageName(), request.getLegalId(), request.getGuardianLegalId());
+            if (juniorFinal.getNidImageName() != null && !juniorFinal.getNidImageName().isBlank()) {
+                juniorCustomerImageService.saveImage("NID", juniorFinal.getNidImageName(), request.getLegalId(), request.getGuardianLegalId());
+            }
+            if (juniorFinal.getSelfieImageName() != null && !juniorFinal.getSelfieImageName().isBlank()) {
+                juniorCustomerImageService.saveImage("SELFIE", juniorFinal.getSelfieImageName(), request.getLegalId(), request.getGuardianLegalId());
+            }
+            if (juniorFinal.getReferenceDocName() != null && !juniorFinal.getReferenceDocName().isBlank()) {
+                juniorCustomerImageService.saveImage("REF_DOC", juniorFinal.getReferenceDocName(), request.getLegalId(), request.getGuardianLegalId());
+            }
         } catch (Exception e) {
             log.error("Failed to save JuniorAccountFinal record for Legal ID: {}. Error: {}", request.getLegalId(), e.getMessage(), e);
         }
@@ -155,6 +203,7 @@ public class JuniorAccountOpenedEventListener {
                     fullName,
                     fullAddress,
                     request.getLegalId(),
+                    request.getPhoneNumber(),
                     context.getCif(),
                     context.getUsdAccount(),
                     context.getKhrAccount(),

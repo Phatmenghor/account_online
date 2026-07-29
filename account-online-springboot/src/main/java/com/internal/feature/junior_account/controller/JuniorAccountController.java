@@ -44,7 +44,7 @@ public class JuniorAccountController {
 
     @PostMapping("/api/v1/public/junior-open-account/process")
     public Mono<ResponseEntity<ApiResponse<OpenAccountResponseDto>>> processJuniorAccountOpening(
-            @Valid @RequestBody JuniorCustomerRequest request) {
+            @RequestBody JuniorCustomerRequest request) {
         log.info("Received Public Junior Account Opening request | Has NID: {} | Legal ID: {}",
                 request.getHasNid(), request.getLegalId());
 

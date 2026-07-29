@@ -471,7 +471,11 @@ export function JuniorAccountContent({ isPublic = false }: OpenAccountContentPro
 
             {/* ── Form Content ── */}
             {!hasNid ? (
-              <JuniorNoNidForm branches={referenceBanks || []} occupations={occupations || []} />
+              <JuniorNoNidForm
+                branches={referenceBanks || []}
+                occupations={occupations || []}
+                maritalStatuses={maritalStatuses || []}
+              />
             ) : (
               <div className="bg-white rounded-2xl border border-slate-100 shadow-sm shadow-slate-100/60">
 

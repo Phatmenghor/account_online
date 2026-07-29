@@ -121,7 +121,7 @@ public class OpenAccountServiceImpl implements OpenAccountService {
 
         } catch (Exception e) {
             log.error("Account opening failed at step: {} | Legal ID: {} | Error: {}",
-                    currentStep, legalId, e.getMessage(), e);
+                    currentStep, legalId, e.getMessage());
             final String failureRemark = reportingService.buildFailureRemark(
                     currentStep, context.getCif(), context.getKhrAccount(),
                     context.getUsdAccount(), context.getAmlResult());

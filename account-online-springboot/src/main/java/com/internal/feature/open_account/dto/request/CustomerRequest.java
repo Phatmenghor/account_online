@@ -52,7 +52,6 @@ public class CustomerRequest {
     @JsonProperty("email")
     private String email;
 
-    @NotBlank(message = "Legal ID is required")
     @JsonProperty("legal_id")
     @JsonAlias({"legalId", "idNumber", "legal_id"})
     private String legalId;

@@ -135,6 +135,56 @@ public class JuniorAccountFinal extends BaseNoIdEntity {
     @Column(name = "phone_number")
     private String phoneNumber;
 
+    // === CURRENT ADDRESS CODES & NAMES ===
+    @Column(name = "customer_province_code")
+    private String customerProvinceCode;
+
+    @Column(name = "customer_province")
+    private String customerProvince;
+
+    @Column(name = "customer_district_code")
+    private String customerDistrictCode;
+
+    @Column(name = "customer_district")
+    private String customerDistrict;
+
+    @Column(name = "customer_commune_code")
+    private String customerCommuneCode;
+
+    @Column(name = "customer_commune")
+    private String customerCommune;
+
+    @Column(name = "customer_village_code")
+    private String customerVillageCode;
+
+    @Column(name = "customer_village")
+    private String customerVillage;
+
+    // === PLACE OF BIRTH CODES & NAMES ===
+    @Column(name = "customer_pob_province_code")
+    private String customerPobProvinceCode;
+
+    @Column(name = "customer_pob_province")
+    private String customerPobProvince;
+
+    @Column(name = "customer_pob_district_code")
+    private String customerPobDistrictCode;
+
+    @Column(name = "customer_pob_district")
+    private String customerPobDistrict;
+
+    @Column(name = "customer_pob_commune_code")
+    private String customerPobCommuneCode;
+
+    @Column(name = "customer_pob_commune")
+    private String customerPobCommune;
+
+    @Column(name = "customer_pob_village_code")
+    private String customerPobVillageCode;
+
+    @Column(name = "customer_pob_village")
+    private String customerPobVillage;
+
     @Column(name = "referral_id")
     private String referralId;
 

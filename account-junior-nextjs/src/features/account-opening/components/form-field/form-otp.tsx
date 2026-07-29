@@ -267,6 +267,17 @@ export default function OTPInput({
     }
   }, [otpCode, phoneNumber, isOtpVerified, isVerifyingOtp, isOtpSent, lastVerifiedOtp, handleVerifyOtp]);
 
+  // Auto-clear verified status on reset or empty phone number
+  useEffect(() => {
+    if (reset || !phoneNumber) {
+      setOtpCode("");
+      setIsOtpSent(false);
+      setIsOtpVerified(false);
+      setCountdown(0);
+      setLastVerifiedOtp("");
+    }
+  }, [reset, phoneNumber]);
+
   return (
     <>
       {/* Contact Number */}

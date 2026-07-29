@@ -166,7 +166,7 @@ public class JuniorBankingService {
             return accountNumber;
         } catch (Exception e) {
             log.error("Error creating Junior {} account: {}", currency, e.getMessage());
-            return null;
+            throw new RuntimeException("Junior " + currency + " account creation failed: " + e.getMessage(), e);
         }
     }
 

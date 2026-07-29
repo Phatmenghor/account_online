@@ -18,6 +18,7 @@ interface ParentVerificationSectionProps {
   loading: boolean;
   parentInfo: CustomerInfo | null;
   onSendOtp: () => void;
+  error?: string;
 }
 
 export function ParentVerificationSection({
@@ -31,6 +32,7 @@ export function ParentVerificationSection({
   loading,
   parentInfo,
   onSendOtp,
+  error,
 }: ParentVerificationSectionProps) {
   const translate = useTranslations("NIDPage");
   const locale = useLocale();
@@ -95,6 +97,7 @@ export function ParentVerificationSection({
               )}
             </Button>
           </div>
+          {error && <p className="text-xs text-red-500 font-medium mt-1">{error}</p>}
         </div>
 
         {/* Parent OTP Code Field */}
@@ -119,9 +122,6 @@ export function ParentVerificationSection({
             />
             {loading && parentOtpSent && !parentVerified && (
               <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-primary pointer-events-none" />
-            )}
-            {parentVerified && (
-              <CheckCircle className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-green-600 pointer-events-none" />
             )}
           </div>
         </div>

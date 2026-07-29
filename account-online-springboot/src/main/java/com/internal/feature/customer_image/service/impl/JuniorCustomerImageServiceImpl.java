@@ -31,8 +31,8 @@ public class JuniorCustomerImageServiceImpl implements JuniorCustomerImageServic
         }
 
         String subFolder;
-        if ("REF_DOC".equalsIgnoreCase(type)) {
-            subFolder = fileProperties.getUpload().getJunior() + fileProperties.getUpload().getReferenceDoc();
+        if ("REF_DOC".equalsIgnoreCase(type) || "DOCUMENT".equalsIgnoreCase(type) || "REFERENCE_DOC".equalsIgnoreCase(type)) {
+            subFolder = fileProperties.getUpload().getJunior() + fileProperties.getUpload().getDocument();
         } else if ("NID".equalsIgnoreCase(type)) {
             subFolder = fileProperties.getUpload().getJunior() + fileProperties.getUpload().getNid();
         } else if ("SELFIE".equalsIgnoreCase(type)) {
