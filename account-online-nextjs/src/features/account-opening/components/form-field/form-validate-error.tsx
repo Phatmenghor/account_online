@@ -28,7 +28,7 @@ export const NIDFormSchema = z.object({
   maritalStatus: z.string().min(1, "Marital status is required"),
   occupation: z.string().min(1, "Occupation is required"),
   branch: z.string().min(1, "Branch is required"),
-  legalType: z.string().min(1, "Legal type is required"),
+  legalType: z.string().optional(),
   accountProduct: z.string().optional(),
   referenceBank: z.string().optional(),
   staffCode: z.string().optional(),

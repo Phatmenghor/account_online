@@ -54,7 +54,6 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
     private final JWTGenerator jwtGenerator;
-    private final RefreshTokenService refreshTokenService;
     private final ClientIpComponent clientIpComponent;
 
     @Override
@@ -168,10 +167,8 @@ public class UserServiceImpl implements UserService {
         String token = jwtGenerator.generateTokenForUser(saved.getUsername(), roles);
 
         UserResponseDto dto = userMapper.mapToDto(saved);
-        String clientIp = clientIpComponent.getClientIp();
-        RefreshToken refreshTokenEntity = refreshTokenService.createRefreshToken(saved, clientIp, null);
 
-        return new AuthResponseDTO(token, refreshTokenEntity.getToken(), dto);
+        return new AuthResponseDTO(token, dto);
     }
 
     private Page<UserEntity> fetchUsers(String search, StatusData status, List<String> roles, Pageable pageable) {

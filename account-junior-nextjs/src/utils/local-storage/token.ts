@@ -37,7 +37,7 @@ export function storeTokenRemember(token: string | undefined): void {
   if (typeof window === "undefined" || !token) {
     return;
   }
-  const maxAge = getMaxAgeFromToken(token, 30 * 24 * 60 * 60);
+  const maxAge = getMaxAgeFromToken(token, 365 * 24 * 60 * 60);
   setCookie(ACCESS_TOKEN_KEY, token, { maxAge, path: "/" });
 }
 
@@ -50,7 +50,7 @@ export function storeToken(token: string | undefined, expiresIn?: number): void 
   if (typeof window === "undefined" || !token) {
     return;
   }
-  const maxAge = expiresIn || getMaxAgeFromToken(token, 7 * 24 * 60 * 60);
+  const maxAge = expiresIn || getMaxAgeFromToken(token, 365 * 24 * 60 * 60);
   setCookie(ACCESS_TOKEN_KEY, token, { maxAge, path: "/" });
 }
 

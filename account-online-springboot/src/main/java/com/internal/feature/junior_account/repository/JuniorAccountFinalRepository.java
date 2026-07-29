@@ -13,5 +13,7 @@ public interface JuniorAccountFinalRepository extends JpaRepository<JuniorAccoun
 
     Optional<JuniorAccountFinal> findByLegalId(String legalId);
 
+    Optional<JuniorAccountFinal> findTopByLegalIdOrderByCreatedAtDesc(String legalId);
+
     Optional<JuniorAccountFinal> findByCif(String cif);
 }

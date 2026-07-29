@@ -17,6 +17,11 @@ import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
@@ -55,13 +60,36 @@ public class JuniorAccountOpenedEventListener {
         log.info("Junior post-opening background tasks completed for Legal ID: {}", request.getLegalId());
     }
 
-    private void saveJuniorAccountFinalAsync(JuniorCustomerRequest request, OpenAccountContext context, String amlStatusStr, boolean hasNid) {
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void saveJuniorAccountFinalAsync(JuniorCustomerRequest request, OpenAccountContext context, String amlStatusStr, boolean hasNid) {
         try {
             JuniorAccountFinal juniorFinal = juniorAccountMapper.toJuniorAccountFinal(request, context, hasNid);
+
+            // Reuse existing record ID if one already exists for this Legal ID
+            juniorAccountFinalRepository.findTopByLegalIdOrderByCreatedAtDesc(request.getLegalId())
+                    .ifPresent(existing -> juniorFinal.setId(existing.getId()));
 
             juniorFinal.setLegalDateOfBirth(parseDate(request.getDateOfBirth()));
             juniorFinal.setLegalIssuedDate(parseDate(request.getLegalIssueDate()));
             juniorFinal.setLegalExpiredDate(parseDate(request.getLegalExpireDate()));
+
+            if (request.getBranchCode() != null) {
+                branchRepository.findByBranchCode(request.getBranchCode())
+                        .map(Branch::getBranchKh)
+                        .ifPresent(juniorFinal::setBranchNameKh);
+            }
+
+            if (juniorFinal.getLegalDocName() == null || juniorFinal.getLegalDocName().isBlank()) {
+                juniorFinal.setLegalDocName(hasNid ? "NATIONAL.ID" : (request.getReferenceDocType() != null ? request.getReferenceDocType() : "BIRTH.CERTIFICATE"));
+            }
+
+            if (juniorFinal.getSubmittedBy() == null || juniorFinal.getSubmittedBy().isBlank()) {
+                juniorFinal.setSubmittedBy("Customer");
+            }
+
+            if (juniorFinal.getLegalPlaceOfBirth() == null || juniorFinal.getLegalPlaceOfBirth().isBlank()) {
+                juniorFinal.setLegalPlaceOfBirth(request.getPlaceOfBirth());
+            }
 
             if (juniorFinal.getNationality() == null) {
                 juniorFinal.setNationality("KH");
@@ -102,16 +130,42 @@ public class JuniorAccountOpenedEventListener {
                     .map(Branch::getBranchKh)
                     .orElse(request.getBranchCode());
 
+            List<String> parts = new ArrayList<>();
+            String villagePart = formatTelegramAddressPart(request.getCustomerVillageEn(), request.getCustomerVillageKh());
+            if (!villagePart.isBlank()) parts.add(villagePart);
+
+            String communePart = formatTelegramAddressPart(request.getCustomerCommuneEn(), request.getCustomerCommuneKh());
+            if (!communePart.isBlank()) parts.add(communePart);
+
+            String districtPart = formatTelegramAddressPart(request.getCustomerDistrictEn(), request.getCustomerDistrictKh());
+            if (!districtPart.isBlank()) parts.add(districtPart);
+
+            String provincePart = formatTelegramAddressPart(request.getCustomerProvinceEn(), request.getCustomerProvinceKh());
+            if (!provincePart.isBlank()) parts.add(provincePart);
+
+            String fullAddress = String.join(", ", parts);
+            if (isBlank(fullAddress)) {
+                fullAddress = request.getLegalAddress() != null ? request.getLegalAddress() : "";
+            }
+
+            boolean hasNid = Boolean.TRUE.equals(request.getHasNid());
+
             monitoringService.sendJuniorAccountCreatedAlert(
+                    hasNid,
                     fullName,
-                    request.getLegalAddress(),
+                    fullAddress,
                     request.getLegalId(),
                     context.getCif(),
                     context.getUsdAccount(),
                     context.getKhrAccount(),
                     branchName,
                     request.getGuardianName(),
-                    request.getGuardianLegalId()
+                    request.getGuardianLegalId(),
+                    request.getGuardianPhone(),
+                    request.getGuardianRelationship(),
+                    request.getGuardianCif(),
+                    request.getReferenceDocType(),
+                    request.getReferenceDocName()
             );
         } catch (Exception e) {
             log.error("Failed to send Junior Telegram alert for Legal ID: {}", request.getLegalId(), e);
@@ -128,6 +182,19 @@ public class JuniorAccountOpenedEventListener {
         } catch (Exception e) {
             return null;
         }
+    }
+
+    private boolean isBlank(String value) {
+        return value == null || value.isBlank();
+    }
+
+    private String formatTelegramAddressPart(String en, String kh) {
+        if (!isBlank(en) && !isBlank(kh)) {
+            return en.trim() + " (" + kh.trim() + ")";
+        }
+        if (!isBlank(kh)) return kh.trim();
+        if (!isBlank(en)) return en.trim();
+        return "";
     }
 
     private String joinNonBlank(String a, String b) {

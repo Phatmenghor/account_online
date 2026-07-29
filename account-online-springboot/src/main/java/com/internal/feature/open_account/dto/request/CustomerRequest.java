@@ -121,27 +121,35 @@ public class CustomerRequest {
     private String customerType;
 
     @JsonProperty("cust_province")
+    @JsonAlias({"customerCurrentProvince", "cust_province"})
     private String customerCurrentProvince;
 
     @JsonProperty("cust_district")
+    @JsonAlias({"customerCurrentDistrict", "cust_district"})
     private String customerCurrentDistrict;
 
     @JsonProperty("cust_commune")
+    @JsonAlias({"customerCurrentCommune", "cust_commune"})
     private String customerCurrentCommune;
 
     @JsonProperty("cust_village")
+    @JsonAlias({"customerCurrentVillage", "cust_village"})
     private String customerCurrentVillage;
 
     @JsonProperty("cust_pob_province")
+    @JsonAlias({"customerPobProvince", "cust_pob_province"})
     private String customerPobProvince;
 
     @JsonProperty("cust_pob_district")
+    @JsonAlias({"customerPobDistrict", "cust_pob_district"})
     private String customerPobDistrict;
 
     @JsonProperty("cust_pob_commune")
+    @JsonAlias({"customerPobCommune", "cust_pob_commune"})
     private String customerPobCommune;
 
     @JsonProperty("cust_pob_village")
+    @JsonAlias({"customerPobVillage", "cust_pob_village"})
     private String customerPobVillage;
 
     @JsonProperty("ownership")
@@ -172,9 +180,11 @@ public class CustomerRequest {
     private String releasedBy;
 
     @JsonProperty("nid_image_name")
+    @JsonAlias({"nidImageName", "nid_image_name", "nidImage", "nid_image"})
     private String nidImageName; // Filename from upload
 
     @JsonProperty("selfie_image_name")
+    @JsonAlias({"selfieImageName", "selfie_image_name", "selfieImage", "selfie_image"})
     private String selfieImageName; // Filename from upload
 
     private String legalMrz1;
@@ -197,43 +207,89 @@ public class CustomerRequest {
     private String relationManager;
 
     @JsonProperty("place_of_birth")
+    @JsonAlias({"placeOfBirth", "place_of_birth", "pob"})
     private String placeOfBirth;
 
     @JsonProperty("firstNameKh")
+    @JsonAlias({"firstNameKh", "first_name_kh"})
     @NotBlank(message = "First name in Khmer is required")
     private String firstNameKh;
 
     @JsonProperty("lastNameKh")
+    @JsonAlias({"lastNameKh", "last_name_kh"})
     @NotBlank(message = "Last name in Khmer is required")
     private String lastNameKh;
 
+    // === CURRENT ADDRESS NAMES (ENGLISH) ===
+    @JsonProperty("customer_province_en")
+    @JsonAlias({"customerProvinceEn", "customer_province_en"})
+    private String customerProvinceEn;
+
+    @JsonProperty("customer_district_en")
+    @JsonAlias({"customerDistrictEn", "customer_district_en"})
+    private String customerDistrictEn;
+
+    @JsonProperty("customer_commune_en")
+    @JsonAlias({"customerCommuneEn", "customer_commune_en"})
+    private String customerCommuneEn;
+
+    @JsonProperty("customer_village_en")
+    @JsonAlias({"customerVillageEn", "customer_village_en"})
+    private String customerVillageEn;
+
     // === CURRENT ADDRESS NAMES (KHMER) ===
     @JsonProperty("customer_province_kh")
+    @JsonAlias({"customerProvinceKh", "customer_province_kh"})
     private String customerProvinceKh;
 
     @JsonProperty("customer_district_kh")
+    @JsonAlias({"customerDistrictKh", "customer_district_kh"})
     private String customerDistrictKh;
 
     @JsonProperty("customer_commune_kh")
+    @JsonAlias({"customerCommuneKh", "customer_commune_kh"})
     private String customerCommuneKh;
 
     @JsonProperty("customer_village_kh")
+    @JsonAlias({"customerVillageKh", "customer_village_kh"})
     private String customerVillageKh;
+
+    // === PLACE OF BIRTH NAMES (ENGLISH) ===
+    @JsonProperty("customer_pob_province_en")
+    @JsonAlias({"customerPobProvinceEn", "customer_pob_province_en"})
+    private String customerPobProvinceEn;
+
+    @JsonProperty("customer_pob_district_en")
+    @JsonAlias({"customerPobDistrictEn", "customer_pob_district_en"})
+    private String customerPobDistrictEn;
+
+    @JsonProperty("customer_pob_commune_en")
+    @JsonAlias({"customerPobCommuneEn", "customer_pob_commune_en"})
+    private String customerPobCommuneEn;
+
+    @JsonProperty("customer_pob_village_en")
+    @JsonAlias({"customerPobVillageEn", "customer_pob_village_en"})
+    private String customerPobVillageEn;
 
     // === PLACE OF BIRTH NAMES (KHMER) ===
     @JsonProperty("customer_pob_province_kh")
+    @JsonAlias({"customerPobProvinceKh", "customer_pob_province_kh"})
     private String customerPobProvinceKh;
 
     @JsonProperty("customer_pob_district_kh")
+    @JsonAlias({"customerPobDistrictKh", "customer_pob_district_kh"})
     private String customerPobDistrictKh;
 
     @JsonProperty("customer_pob_commune_kh")
+    @JsonAlias({"customerPobCommuneKh", "customer_pob_commune_kh"})
     private String customerPobCommuneKh;
 
     @JsonProperty("customer_pob_village_kh")
+    @JsonAlias({"customerPobVillageKh", "customer_pob_village_kh"})
     private String customerPobVillageKh;
 
     @JsonProperty("account_type")
+    @JsonAlias({"accountType", "account_type"})
     private String accountType;
 }
 

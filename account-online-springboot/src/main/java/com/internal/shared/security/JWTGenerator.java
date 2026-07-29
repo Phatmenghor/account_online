@@ -76,22 +76,6 @@ public class JWTGenerator {
                 .compact();
     }
 
-    public String generateRefreshTokenForUser(String username, List<String> roles) {
-        Date currentDate = new Date();
-        long expirationTimeInMs = jwtProperties.getRefreshTokenExpirationMin() * 60 * 1000;
-        Date expireDate = new Date(currentDate.getTime() + expirationTimeInMs);
-        return Jwts.builder()
-                .setIssuedAt(currentDate)
-                .setExpiration(expireDate)
-                .setSubject(username)
-                .setIssuer(jwtProperties.getIssuer())
-                .claim("roles", roles)
-                .claim("type", "refresh")
-                .claim("created", currentDate.getTime())
-                .signWith(getSigningKey(), SignatureAlgorithm.HS512)
-                .compact();
-    }
-
     /**
      * Extract username from JWT token.
      * @param token JWT token

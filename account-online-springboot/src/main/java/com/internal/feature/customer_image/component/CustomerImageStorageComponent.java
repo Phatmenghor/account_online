@@ -76,37 +76,42 @@ public class CustomerImageStorageComponent {
     }
 
     public Optional<Path> findFileByName(String subFolder, String filename) {
-        Path subDir;
-        if (subFolder != null && subFolder.startsWith("junior")) {
-            Path parent = Paths.get(uploadDir).getParent();
-            subDir = (parent != null) ? parent.resolve(subFolder) : Paths.get(uploadDir, subFolder);
-        } else {
-            subDir = Paths.get(uploadDir, subFolder);
+        if (filename == null || filename.isBlank()) {
+            return Optional.empty();
         }
 
-        if (Files.exists(subDir)) {
-            try (Stream<Path> walk = Files.walk(subDir, 4)) {
-                Optional<Path> found = walk
-                        .filter(Files::isRegularFile)
-                        .filter(p -> p.getFileName().toString().equalsIgnoreCase(filename))
-                        .findFirst();
-                if (found.isPresent()) {
-                    return found;
+        java.util.List<Path> searchDirs = new java.util.ArrayList<>();
+
+        Path primarySub = (subFolder != null && subFolder.startsWith("junior"))
+                ? (Paths.get(uploadDir).getParent() != null ? Paths.get(uploadDir).getParent().resolve(subFolder) : Paths.get(uploadDir, subFolder))
+                : Paths.get(uploadDir, subFolder != null ? subFolder : "");
+        searchDirs.add(primarySub);
+        searchDirs.add(Paths.get(uploadDir));
+        searchDirs.add(Paths.get("uploads/customer-image"));
+        searchDirs.add(Paths.get("account-online-springboot/uploads/customer-image"));
+
+        String basePrefix = filename.contains(".") ? filename.substring(0, filename.lastIndexOf('.')) : filename;
+
+        for (Path dir : searchDirs) {
+            if (dir != null && Files.exists(dir)) {
+                try (Stream<Path> walk = Files.walk(dir, 4)) {
+                    java.util.List<Path> matches = walk
+                            .filter(Files::isRegularFile)
+                            .filter(p -> {
+                                String fn = p.getFileName().toString();
+                                return fn.equalsIgnoreCase(filename) ||
+                                       fn.equalsIgnoreCase(basePrefix + ".jpg") ||
+                                       fn.startsWith(basePrefix + "_") ||
+                                       fn.startsWith(basePrefix + ".");
+                            })
+                            .sorted(Comparator.comparingLong(p -> p.toFile().lastModified()))
+                            .collect(java.util.stream.Collectors.toList());
+                    if (!matches.isEmpty()) {
+                        return Optional.of(matches.get(matches.size() - 1));
+                    }
+                } catch (IOException e) {
+                    log.warn("Could not search for file {} in {}: {}", filename, dir, e.getMessage());
                 }
-            } catch (IOException e) {
-                log.warn("Could not search for file {} in {}: {}", filename, subDir, e.getMessage());
-            }
-        }
-
-        Path mainDir = Paths.get(uploadDir);
-        if (Files.exists(mainDir)) {
-            try (Stream<Path> walk = Files.walk(mainDir, 4)) {
-                return walk
-                        .filter(Files::isRegularFile)
-                        .filter(p -> p.getFileName().toString().equalsIgnoreCase(filename))
-                        .findFirst();
-            } catch (IOException e) {
-                log.warn("Could not search for file {} in root {}: {}", filename, mainDir, e.getMessage());
             }
         }
 

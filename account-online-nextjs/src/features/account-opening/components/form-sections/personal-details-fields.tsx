@@ -12,6 +12,7 @@ import {
 import { CustomDateTimePicker } from "@/components/shared/common/custom-datetime-picker";
 import { ResponseNID } from "@/features/account-opening/types/nid.response.model";
 import { LegalTypeModel } from "@/features/master-data/types/legal-type/legal-type.response";
+import { MaritalModel } from "@/features/master-data/types/marital/marital.response";
 import { useFormState } from "@/providers/form-state-context";
 import { CheckCircle } from "lucide-react";
 
@@ -24,6 +25,11 @@ interface PersonalDetailsFieldsProps {
   setSelectedLegalType: (value: LegalTypeModel | null) => void;
   isLegalTypeLoading: boolean;
   getLegalTypeName: (item: LegalTypeModel) => string;
+  maritalStatuses?: MaritalModel[];
+  selectedMaritalStatus?: MaritalModel | null;
+  setSelectedMaritalStatus?: (value: MaritalModel | null) => void;
+  isLoadingMarital?: boolean;
+  getMaritalName?: (item: MaritalModel) => string;
   isVerified?: boolean;
   isNidExtracted?: boolean;
 }
@@ -37,6 +43,11 @@ export const PersonalDetailsFields: React.FC<PersonalDetailsFieldsProps> = ({
   setSelectedLegalType,
   isLegalTypeLoading,
   getLegalTypeName,
+  maritalStatuses = [],
+  selectedMaritalStatus = null,
+  setSelectedMaritalStatus,
+  isLoadingMarital = false,
+  getMaritalName = (m) => m.nameEn,
   isVerified = false,
   isNidExtracted = false,
 }) => {
@@ -171,34 +182,6 @@ export const PersonalDetailsFields: React.FC<PersonalDetailsFieldsProps> = ({
         )}
       </div>
 
-      {/* Legal Type */}
-      <div className="space-y-1">
-        {renderLabel("legalType")}
-        <Select
-          value={selectedLegalType?.id.toString() || ""}
-          onValueChange={(value) => {
-            const legalType = legalTypes.find((l) => l.id.toString() === value);
-            setSelectedLegalType(legalType || null);
-            validateField("legalType", value);
-          }}
-          disabled={isLoading || isValidating || isLegalTypeLoading}
-        >
-          <SelectTrigger className={`w-full h-9 text-sm rounded-xl ${validationErrors.legalType ? "border-red-400" : ""}`}>
-            <SelectValue placeholder={isLegalTypeLoading ? translate("loading") : translateSelect("selectLegalType")} />
-          </SelectTrigger>
-          <SelectContent>
-            {legalTypes.map((legalType) => (
-              <SelectItem key={legalType.id} value={legalType.id.toString()}>
-                {getLegalTypeName(legalType)}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        {validationErrors.legalType && (
-          <p className="text-xs text-red-500">{translate("err_legalType")}</p>
-        )}
-      </div>
-
       {/* Legal ID */}
       <div className="space-y-1">
         {renderLabel("legalId")}
@@ -207,12 +190,27 @@ export const PersonalDetailsFields: React.FC<PersonalDetailsFieldsProps> = ({
           placeholder={translate("legalId")}
           value={formData.idNumber}
           onChange={(e) => handleInputChange("idNumber", e.target.value)}
-          className={`w-full h-9 text-sm rounded-xl ${validationErrors.idNumber ? "border-red-400 focus-visible:ring-red-300" : ""} ${isNidExtracted ? "bg-gray-50 cursor-default" : ""}`}
-          readOnly={isNidExtracted}
+          className={`w-full h-9 text-sm rounded-xl ${validationErrors.idNumber ? "border-red-400 focus-visible:ring-red-300" : ""}`}
           disabled={isLoading || isValidating || isSubmitting}
         />
         {validationErrors.idNumber && (
           <p className="text-xs text-red-500">{translate("err_idNumber")}</p>
+        )}
+      </div>
+
+      {/* Place Of Birth */}
+      <div className="space-y-1">
+        {renderLabel("pob")}
+        <Input
+          id="pob"
+          placeholder={translate("pob")}
+          value={formData.pob}
+          onChange={(e) => handleInputChange("pob", e.target.value)}
+          className={`w-full h-9 text-sm rounded-xl ${validationErrors.pob ? "border-red-400 focus-visible:ring-red-300" : ""}`}
+          disabled={isLoading || isValidating || isSubmitting}
+        />
+        {validationErrors.pob && (
+          <p className="text-xs text-red-500">{translate("err_pob")}</p>
         )}
       </div>
 
@@ -232,19 +230,41 @@ export const PersonalDetailsFields: React.FC<PersonalDetailsFieldsProps> = ({
         )}
       </div>
 
-      {/* Place Of Birth */}
+      {/* Marital Status (ស្ថានភាពគ្រួសារ) */}
       <div className="space-y-1">
-        {renderLabel("pob")}
-        <Input
-          id="pob"
-          placeholder={translate("pob")}
-          value={formData.pob}
-          onChange={(e) => handleInputChange("pob", e.target.value)}
-          className={`w-full h-9 text-sm rounded-xl ${validationErrors.pob ? "border-red-400 focus-visible:ring-red-300" : ""}`}
-          disabled={isLoading || isValidating || isSubmitting}
-        />
-        {validationErrors.pob && (
-          <p className="text-xs text-red-500">{translate("err_pob")}</p>
+        {renderLabel("marital")}
+        <Select
+          value={selectedMaritalStatus?.id.toString() || ""}
+          onValueChange={(value) => {
+            const marital = maritalStatuses.find((m) => m.id.toString() === value);
+            if (setSelectedMaritalStatus) setSelectedMaritalStatus(marital || null);
+            validateField("maritalStatus", value);
+          }}
+          disabled={isLoading || isValidating || isLoadingMarital}
+        >
+          <SelectTrigger
+            className={`w-full h-9 text-sm rounded-xl ${validationErrors.maritalStatus ? "border-red-400" : ""}`}
+          >
+            <SelectValue
+              placeholder={
+                isLoadingMarital
+                  ? translate("loading")
+                  : translateSelect("selectMarital")
+              }
+            />
+          </SelectTrigger>
+          <SelectContent>
+            {maritalStatuses.map((marital) => (
+              <SelectItem key={marital.id} value={marital.id.toString()}>
+                {getMaritalName(marital)}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        {validationErrors.maritalStatus && (
+          <p className="text-xs text-red-500">
+            {translate("err_maritalStatus")}
+          </p>
         )}
       </div>
     </div>

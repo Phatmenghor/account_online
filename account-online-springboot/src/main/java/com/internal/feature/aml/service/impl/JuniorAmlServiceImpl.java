@@ -27,7 +27,8 @@ public class JuniorAmlServiceImpl implements JuniorAmlService {
     @Override
     public Page<JuniorAmlStatus> getAllJuniorAmlStatus(String status, String search, Pageable pageable) {
         log.info("Fetching all Junior AML statuses - Status: {}, Search: {}", status, search);
-        return juniorAmlStatusRepository.findByStatusAndSearch(status, search, pageable);
+        String targetStatus = (status == null || status.isBlank()) ? "PENDING" : status;
+        return juniorAmlStatusRepository.findByStatusAndSearch(targetStatus, search, pageable);
     }
 
     @Override

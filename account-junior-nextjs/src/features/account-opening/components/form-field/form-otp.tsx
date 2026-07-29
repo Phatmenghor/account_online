@@ -327,19 +327,17 @@ export default function OTPInput({
             <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0" />
           )}
         </div>
-        <div className="relative flex items-center">
+        <div className="relative">
           <Input
             placeholder={translate("otp6Digit")}
             value={otpCode}
             onChange={(e) => handleOtpChange(e.target.value)}
             maxLength={6}
-            className={`w-full h-10 text-sm rounded-xl font-mono tracking-wider pr-10 ${validationErrors.isPhoneVerified ? "border-red-400" : ""}`}
+            disabled={disabled || isOtpVerified}
+            className={`w-full h-10 text-sm rounded-xl font-mono tracking-wider ${validationErrors.isPhoneVerified ? "border-red-400" : ""}`}
           />
           {isVerifyingOtp && (
             <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-primary pointer-events-none" />
-          )}
-          {isOtpVerified && (
-            <CheckCircle className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-green-600 pointer-events-none" />
           )}
         </div>
         {validationErrors.isPhoneVerified && (

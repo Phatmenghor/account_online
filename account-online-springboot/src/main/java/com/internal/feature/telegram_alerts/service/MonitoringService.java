@@ -108,7 +108,7 @@ public class MonitoringService {
             String cif, String usdAccount, String khrAccount, String branchName) {
         try {
             StringBuilder msg = new StringBuilder();
-            msg.append("*Account Online - Customer CREATED*\n")
+            msg.append("*[ACCOUNT ONLINE OPENING]*\n")
                     .append("--------------------\n");
 
             appendIfNotEmpty(msg, "Full Name", fullName);
@@ -155,46 +155,67 @@ public class MonitoringService {
     public void sendJuniorAccountCreatedAlert(String fullName, String fullAddress, String legalId,
             String cif, String usdAccount, String khrAccount, String branchName,
             String guardianName, String guardianLegalId) {
+        sendJuniorAccountCreatedAlert(true, fullName, fullAddress, legalId, cif, usdAccount, khrAccount, branchName,
+                guardianName, guardianLegalId, null, null, null, null, null);
+    }
+
+    @Async
+    public void sendJuniorAccountCreatedAlert(
+            boolean hasNid,
+            String fullName,
+            String fullAddress,
+            String legalId,
+            String cif,
+            String usdAccount,
+            String khrAccount,
+            String branchName,
+            String guardianName,
+            String guardianLegalId,
+            String guardianPhone,
+            String guardianRelationship,
+            String guardianCif,
+            String referenceDocType,
+            String referenceDocName
+    ) {
         try {
             StringBuilder msg = new StringBuilder();
-            msg.append("*Junior Account - Customer CREATED*\n")
-                    .append("--------------------\n");
+            msg.append("*[JUNIOR ACCOUNT OPENING]*\n");
+            msg.append("--------------------\n");
 
             appendIfNotEmpty(msg, "Junior Full Name", fullName);
             appendIfNotEmpty(msg, "Legal Address", fullAddress);
             appendIfNotEmpty(msg, "Junior Legal ID", legalId);
-            appendIfNotEmpty(msg, "Guardian Name", guardianName);
-            appendIfNotEmpty(msg, "Guardian Legal ID", guardianLegalId);
             appendIfNotEmpty(msg, "CIF", cif);
             appendIfNotEmpty(msg, "Account USD", usdAccount);
             appendIfNotEmpty(msg, "Account KHR", khrAccount);
             appendIfNotEmpty(msg, "Branch", branchName);
 
+            appendIfNotEmpty(msg, "Guardian Name", guardianName);
+            appendIfNotEmpty(msg, "Guardian Legal ID", guardianLegalId);
+            appendIfNotEmpty(msg, "Guardian Phone", guardianPhone);
+            appendIfNotEmpty(msg, "Guardian Relationship", guardianRelationship);
+            appendIfNotEmpty(msg, "Guardian CIF", guardianCif);
+
+            if (!hasNid) {
+                appendIfNotEmpty(msg, "Document Type", referenceDocType);
+                appendIfNotEmpty(msg, "Document Name", referenceDocName);
+            }
+
             telegramService.sendToJunior(msg.toString());
 
             if (legalId != null && !legalId.isBlank()) {
                 try {
-                    Thread.sleep(ACCOUNT_CREATED_PHOTO_DELAY_MS);
-                } catch (InterruptedException ignored) {
-                    Thread.currentThread().interrupt();
-                }
-
-                try {
                     Resource nidImage = customerImageService.getNidImageResourceForEmail(legalId);
                     if (nidImage != null && nidImage.exists()) {
-                        telegramService.sendPhotoToJunior("*Junior NID Photo*\nLegal ID: `" + escape(legalId) + "`",
-                                nidImage);
+                        telegramService.sendPhotoToJunior("*Junior Document Photo*\nLegal ID: `" + escape(legalId) + "`", nidImage);
                     }
-                } catch (Exception ignored) {
-                }
+                } catch (Exception ignored) {}
                 try {
                     Resource selfieImage = customerImageService.getSelfieImageResourceForEmail(legalId);
                     if (selfieImage != null && selfieImage.exists()) {
-                        telegramService.sendPhotoToJunior("*Junior Face Photo*\nLegal ID: `" + escape(legalId) + "`",
-                                selfieImage);
+                        telegramService.sendPhotoToJunior("*Junior Face Photo*\nLegal ID: `" + escape(legalId) + "`", selfieImage);
                     }
-                } catch (Exception ignored) {
-                }
+                } catch (Exception ignored) {}
             }
         } catch (Exception e) {
             log.error("Failed to send Junior account created alert: {}", e.getMessage());

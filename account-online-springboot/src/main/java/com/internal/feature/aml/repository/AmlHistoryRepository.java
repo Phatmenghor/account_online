@@ -15,10 +15,10 @@ import java.util.List;
 public interface AmlHistoryRepository extends JpaRepository<AmlHistory, Long>, JpaSpecificationExecutor<AmlHistory> {
 
     @Query("SELECT a FROM AmlHistory a WHERE " +
-           "(:status IS NULL OR a.status = :status) AND " +
-           "(:fromDate IS NULL OR a.createdAt >= :fromDate) AND " +
-           "(:toDate IS NULL OR a.createdAt <= :toDate) AND " +
-           "(:search IS NULL OR LOWER(a.familyName) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+           "(cast(:status as string) IS NULL OR a.status = :status) AND " +
+           "(cast(:fromDate as java.time.LocalDateTime) IS NULL OR a.createdAt >= :fromDate) AND " +
+           "(cast(:toDate as java.time.LocalDateTime) IS NULL OR a.createdAt <= :toDate) AND " +
+           "(cast(:search as string) IS NULL OR LOWER(a.familyName) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
            "LOWER(a.givenName) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
            "LOWER(a.lastNameKh) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
            "LOWER(a.firstNameKh) LIKE LOWER(CONCAT('%', :search, '%')) OR " +

@@ -74,6 +74,27 @@ public class JuniorAmlStatus extends BaseEntity {
     @Column(name = "guardian_relationship", length = 50)
     private String guardianRelationship;
 
+    @Column(name = "guardian_cif", length = 50)
+    private String guardianCif;
+
+    @Column(name = "guardian_address", columnDefinition = "TEXT")
+    private String guardianAddress;
+
+    @Column(name = "legal_address", columnDefinition = "TEXT")
+    private String legalAddress;
+
+    @Column(name = "place_of_birth")
+    private String placeOfBirth;
+
+    @Column(name = "reference_doc_type", length = 50)
+    private String referenceDocType;
+
+    @Column(name = "reference_doc_name", length = 100)
+    private String referenceDocName;
+
+    @Column(name = "nationality", length = 50)
+    private String nationality;
+
     @Column(name = "has_nid")
     private Boolean hasNid;
 

@@ -18,6 +18,5 @@ public interface AuthService {
     UserResponseDto updateUserProfile(UpdateUserRequestDto registerDto, String name);
     List<Map<String, Object>> getAvailableRoles();
     boolean validateToken();
-    com.internal.feature.auth.dto.response.RefreshTokenResponseDto refreshToken(com.internal.feature.auth.dto.request.RefreshTokenRequestDto requestDto);
 }
 

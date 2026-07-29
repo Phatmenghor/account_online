@@ -38,11 +38,11 @@ public class DashboardService {
         return rows.stream()
                 .map(r -> new TopUserOpenAccountResponse(
                         r[0] != null ? ((Number) r[0]).longValue() : null,
-                        (String) r[1],
-                        (String) r[2],
-                        (String) r[3],
-                        (String) r[4],
-                        ((Number) r[5]).longValue()))
+                        r[1] != null ? String.valueOf(r[1]) : "Unknown",
+                        r[2] != null ? String.valueOf(r[2]) : "Staff",
+                        r[3] != null ? String.valueOf(r[3]) : null,
+                        r[4] != null ? String.valueOf(r[4]) : null,
+                        r[5] != null ? ((Number) r[5]).longValue() : 0L))
                 .collect(Collectors.toList());
     }
 

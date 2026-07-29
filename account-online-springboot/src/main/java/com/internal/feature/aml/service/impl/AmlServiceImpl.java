@@ -5,7 +5,6 @@ import com.internal.enumation.AmlStatusEnum;
 import com.internal.feature.aml.dto.request.AllAmlHistoryRequestDto;
 import com.internal.feature.aml.dto.request.AllAmlRequestDto;
 import com.internal.feature.aml.dto.request.CreateAmlRequestDto;
-import com.internal.feature.aml.dto.request.ExternalAmlStatusUpdateDto;
 import com.internal.feature.aml.dto.request.UpdateAmlStatusDto;
 import com.internal.feature.aml.dto.response.AllAmlHistoryResponseDto;
 import com.internal.feature.aml.dto.response.AllAmlResponseDto;
@@ -116,7 +115,18 @@ public class AmlServiceImpl implements AmlService {
         log.info("Fetching all AML statuses with status: {} and search: {}", request.getAmlStatus(), request.getSearch());
         Pageable pageable = PaginationUtil.createPageable(request);
 
-        Page<AmlStatus> page = amlStatusRepository.findByStatusAndSearch(request.getAmlStatus(), request.getSearch(), pageable);
+        AmlStatusEnum statusFilter = request.getAmlStatus();
+        String statusStr = request.getAmlStatusString();
+        if (statusFilter == null && statusStr != null) {
+            try {
+                statusFilter = AmlStatusEnum.valueOf(statusStr.toUpperCase());
+            } catch (Exception ignored) {}
+        }
+        if (statusFilter == null) {
+            statusFilter = AmlStatusEnum.PENDING;
+        }
+
+        Page<AmlStatus> page = amlStatusRepository.findByStatusAndSearch(statusFilter, request.getSearch(), pageable);
 
         List<AmlStatusDto> content = page.stream()
                 .map(amlStatusMapper::toStatusDto)
@@ -158,35 +168,6 @@ public class AmlServiceImpl implements AmlService {
 
         log.info("Found {} AML history records", page.getTotalElements());
         return amlHistoryMapper.mapToListDto(content, page);
-    }
-
-    @Override
-    @Transactional
-    public void updateExternalAmlStatus(String apiKey, String secretKey, ExternalAmlStatusUpdateDto request) {
-        log.info("Updating external AML status for customerId: {}", request.getCustomerId());
-        String legalId = request.getCustomerId();
-        if (legalId != null && legalId.toUpperCase().startsWith("OAO")) {
-            legalId = legalId.substring(3);
-        }
-        Optional<AmlStatus> amlStatusOpt = amlStatusRepository.findByLegalId(legalId);
-        if (amlStatusOpt.isPresent()) {
-            AmlStatus amlStatus = amlStatusOpt.get();
-            amlStatus.setAmlExternalRiskLevel(AppConstants.RISK_LOW);
-            amlStatus.setStatus(AmlStatusEnum.APPROVE);
-            if (request.getUpdateFrom() != null) {
-                amlStatus.setAmlExternalServiceName(request.getUpdateFrom());
-            }
-            amlStatus = amlStatusRepository.save(amlStatus);
-            AmlHistory history = amlHistoryMapper.createHistoryFromStatusChange(amlStatus, null);
-            amlHistoryRepository.save(history);
-
-            AmlStatusDto amlDto = amlStatusMapper.toStatusDto(amlStatus);
-            eventPublisher.publishEvent(new AmlStatusChangedEvent(this, amlDto));
-            log.info("Successfully updated AML Status Risk Level to Low for Legal ID: {}", legalId);
-        } else {
-            log.warn("Attempted to update AML Status for non-existent Legal ID: {}", legalId);
-            throw new NotFoundException("AML Status not found for Legal ID: " + legalId);
-        }
     }
 
     private void populateAddressFields(AmlStatus status, CreateAmlRequestDto requestDto) {

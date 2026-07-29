@@ -85,6 +85,11 @@ mssql:
       initialization-fail-timeout: -1
       pool-name: MSSQL-Staff-Pool
 
+# Simulator — AML High Risk testing toggle
+simulator:
+  aml:
+    high-risk: false
+
 cpb:
   environment: production
   camdx:
@@ -109,8 +114,7 @@ aml:
     url: http://localservice.cambodiapostbank/aml-management?pageNo=1
 
 jwt:
-  expiration-min: 10                    # Access Token: 10 minutes
-  refresh-token-expiration-min: 43200   # Refresh Token: 30 days (30 * 24 * 60)
+  expiration-min: 525600               # Access Token: 1 year (365 days)
   issuer: account-online-api
 
 telegram:

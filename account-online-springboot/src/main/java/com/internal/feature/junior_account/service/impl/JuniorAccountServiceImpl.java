@@ -32,8 +32,10 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+import com.internal.feature.junior_account.event.JuniorAccountOpenedEvent;
 import com.internal.feature.junior_account.mapper.JuniorAccountMapper;
 import com.internal.feature.junior_account.service.JuniorBankingService;
+import org.springframework.context.ApplicationEventPublisher;
 
 @Service
 @RequiredArgsConstructor
@@ -48,6 +50,7 @@ public class JuniorAccountServiceImpl implements JuniorAccountService {
     private final JuniorCustomerImageService juniorCustomerImageService;
     private final JuniorAccountMapper juniorAccountMapper;
     private final MonitoringService monitoringService;
+    private final ApplicationEventPublisher eventPublisher;
     private final ObjectMapper objectMapper;
 
     @Override
@@ -97,15 +100,23 @@ public class JuniorAccountServiceImpl implements JuniorAccountService {
                 juniorBankingService.validateExistingAccounts(customerInfo);
             }
 
-            log.info("Step 4: Processing Junior AML | Legal ID: {}", legalId);
-            currentStep = AppConstants.PROCESS_AML;
-            var amlResult = complianceService.processAml(request);
-            context.setAmlResult(amlResult);
-            String amlStatus = amlResult != null ? amlResult.getStatus().name() : "UNKNOWN";
-            complianceService.sentMessageOnHighRisk(request, amlResult);
-
-            // Also persist Junior AML record into acc_junior_aml_status table
-            saveJuniorAmlStatus(request, amlResult, hasNid);
+            String amlStatus = AmlStatusEnum.APPROVE.name();
+            if (hasNid) {
+                log.info("Step 4: Processing Junior AML | Legal ID: {}", legalId);
+                currentStep = AppConstants.PROCESS_AML;
+                var amlResult = complianceService.processAml(request);
+                context.setAmlResult(amlResult);
+                if (amlResult != null) {
+                    amlStatus = amlResult.getStatus().name();
+                    // Only save Junior AML status record if HIGH RISK / PENDING review
+                    if (amlResult.getStatus() == AmlStatusEnum.PENDING) {
+                        saveJuniorAmlStatus(request, amlResult, hasNid);
+                    }
+                }
+                complianceService.sentMessageOnHighRisk(request, amlResult);
+            } else {
+                log.info("Step 4: Bypassing AML check for Junior NO-NID account | Ref Doc: {}", legalId);
+            }
 
             log.info("Step 5: Creating customer in Core Banking | Legal ID: {}", legalId);
             currentStep = AppConstants.CREATE_CUSTOMER;
@@ -133,9 +144,9 @@ public class JuniorAccountServiceImpl implements JuniorAccountService {
             context.setMbActivationCode(juniorBankingService.activateMobileBanking(request, context.getCif(),
                     context.getKhrAccount(), context.getUsdAccount()));
 
-            log.info("Step 10: Saving Junior Account Final record into acc_junior_open_final | Legal ID: {}", legalId);
+            log.info("Step 10: Publishing JuniorAccountOpenedEvent & Telegram alert | Legal ID: {}", legalId);
             currentStep = "SAVE_FINAL_JUNIOR_LOG";
-            saveJuniorAccountFinal(request, context, amlStatus, hasNid);
+            eventPublisher.publishEvent(new JuniorAccountOpenedEvent(this, request, context, amlStatus, hasNid));
 
             log.info("Junior Account opened successfully | CIF: {} | KHR: {} | USD: {} | Has NID: {}",
                     context.getCif(), context.getKhrAccount(), context.getUsdAccount(), hasNid);
@@ -218,6 +229,18 @@ public class JuniorAccountServiceImpl implements JuniorAccountService {
             JuniorAmlStatus amlStatus = existingOpt.orElseGet(JuniorAmlStatus::new);
 
             juniorAccountMapper.updateJuniorAmlStatusFromRequest(request, hasNid, amlStatus);
+
+            if (amlStatus.getLegalId() == null) amlStatus.setLegalId(request.getLegalId());
+            if (amlStatus.getFamilyName() == null) amlStatus.setFamilyName(request.getFamilyName());
+            if (amlStatus.getGivenName() == null) amlStatus.setGivenName(request.getGivenName());
+            if (amlStatus.getFirstNameKh() == null) amlStatus.setFirstNameKh(request.getFirstNameKh());
+            if (amlStatus.getLastNameKh() == null) amlStatus.setLastNameKh(request.getLastNameKh());
+            if (amlStatus.getDateOfBirth() == null) amlStatus.setDateOfBirth(request.getDateOfBirth());
+            if (amlStatus.getGender() == null) amlStatus.setGender(request.getGender());
+            if (amlStatus.getPhoneNumber() == null) amlStatus.setPhoneNumber(request.getPhoneNumber());
+            if (amlStatus.getMaritalStatus() == null) amlStatus.setMaritalStatus(request.getMaritalStatus());
+            if (amlStatus.getNidImageName() == null) amlStatus.setNidImageName(request.getNidImageName());
+            if (amlStatus.getSelfieImageName() == null) amlStatus.setSelfieImageName(request.getSelfieImageName());
 
             try {
                 amlStatus.setRequestPayload(objectMapper.writeValueAsString(request));

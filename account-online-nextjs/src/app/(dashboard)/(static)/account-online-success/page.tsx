@@ -113,15 +113,15 @@ function SuccessAccountPageContent() {
                 emptyMessage="No success accounts found"
                 getRowKey={(account) => account.id}
               />
-              {/* Pagination positioned to the right and outside the scrollable area */}
-              <div className="border-t bg-background p-2 flex justify-end">
-                <CustomPagination
-                  currentPage={currentPage}
-                  totalPages={accounts?.totalPages || 1}
-                  onPageChange={handlePageChange}
-                  size="md"
-                />
-              </div>
+            </div>
+            {/* Pagination positioned to the right and outside the scrollable area */}
+            <div className="border-t bg-background p-2 flex justify-end">
+              <CustomPagination
+                currentPage={currentPage}
+                totalPages={accounts?.totalPages || 1}
+                onPageChange={handlePageChange}
+                size="md"
+              />
             </div>
           </div>
         </div>

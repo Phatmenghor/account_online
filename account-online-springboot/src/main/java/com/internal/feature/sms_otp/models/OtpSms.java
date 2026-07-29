@@ -39,7 +39,9 @@ public class OtpSms extends BaseEntity {
     private LocalDateTime expiresAt;
 
     @PrePersist
+    @Override
     protected void onCreate() {
+        super.onCreate();
         if (expiresAt == null) {
             expiresAt = LocalDateTime.now().plusMinutes(5);
         }

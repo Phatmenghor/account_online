@@ -15,24 +15,27 @@ export default function SubmitSuccessModal({ isOpen, onClose }: SuccessModalProp
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 bg-black/50 backdrop-blur-xs"
+            className="absolute inset-0 bg-black/60 backdrop-blur-xs"
             onClick={onClose}
           />
 
           <motion.div
-            initial={{ opacity: 0, scale: 0.96, y: 12 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.96, y: 12 }}
-            transition={{ duration: 0.2, ease: "easeOut" }}
-            className="relative bg-white w-full max-w-lg sm:max-w-[480px] rounded-2xl shadow-xl overflow-hidden z-10 border border-gray-100 flex flex-col"
+            initial={{ y: "100%", opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: "100%", opacity: 0 }}
+            transition={{ type: "spring", damping: 26, stiffness: 320 }}
+            className="relative bg-white w-full max-w-lg sm:max-w-[480px] rounded-t-3xl sm:rounded-2xl shadow-2xl overflow-hidden z-10 border border-gray-100 flex flex-col max-h-[90vh]"
           >
             {/* Primary Top Accent */}
             <div className="h-1.5 w-full bg-primary flex-shrink-0" />
+
+            {/* Native Mobile Drag Handle Pill */}
+            <div className="w-12 h-1.5 bg-gray-300 rounded-full mx-auto my-2 sm:hidden shrink-0" />
 
             {/* Body */}
             <div className="px-6 py-8 flex flex-col items-center text-center">

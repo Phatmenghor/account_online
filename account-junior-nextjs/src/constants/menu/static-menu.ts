@@ -1,13 +1,24 @@
 import {
-  LayoutDashboard, User2, IdCard, FolderClosed,
-  Calendar1, MapPin, Baby, LucideIcon,
+  LayoutDashboard,
+  User2,
+  IdCard,
+  FolderClosed,
+  Building,
+  Baby,
+  UserCheck,
+  MapPin,
 } from "lucide-react";
 
-export type RoleEnum = "STAFF" | "COMPLIANCE" | "BUSINESS" | "DEVELOPER" | "CALLCENTER";
+export type RoleEnum =
+  | "STAFF"
+  | "COMPLIANCE"
+  | "BUSINESS"
+  | "DEVELOPER"
+  | "CALLCENTER";
 
 export interface StaticMenuItem {
   title: string;
-  icon?: LucideIcon;
+  icon?: any;
   href?: string;
   roles: RoleEnum[];
   children?: StaticMenuItem[];
@@ -21,18 +32,24 @@ export const STATIC_MENU: StaticMenuItem[] = [
     roles: ["COMPLIANCE", "BUSINESS", "DEVELOPER", "CALLCENTER"],
   },
   {
+    title: "Staff Account Opening",
+    icon: UserCheck,
+    href: "/staff/opening",
+    roles: ["STAFF"],
+  },
+  {
     title: "Users",
     icon: User2,
     href: "/user",
     roles: ["COMPLIANCE", "BUSINESS", "DEVELOPER", "CALLCENTER"],
   },
   {
-    title: "Account",
+    title: "Account Online",
     icon: IdCard,
     roles: ["COMPLIANCE", "BUSINESS", "DEVELOPER", "CALLCENTER"],
     children: [
       {
-        title: "Success Accounts",
+        title: "Account Online Success",
         href: "/account-online-success",
         roles: ["COMPLIANCE", "BUSINESS", "DEVELOPER", "CALLCENTER"],
       },
@@ -54,8 +71,25 @@ export const STATIC_MENU: StaticMenuItem[] = [
         roles: ["COMPLIANCE", "BUSINESS", "DEVELOPER", "CALLCENTER"],
       },
       {
-        title: "Junior AML Status",
+        title: "Report Junior Account",
+        href: "/report-junior-account-success",
+        roles: ["COMPLIANCE", "BUSINESS", "DEVELOPER", "CALLCENTER"],
+      },
+    ],
+  },
+  {
+    title: "Junior AML",
+    icon: FolderClosed,
+    roles: ["COMPLIANCE", "BUSINESS", "DEVELOPER", "CALLCENTER"],
+    children: [
+      {
+        title: "Management",
         href: "/junior-aml-management",
+        roles: ["COMPLIANCE", "BUSINESS", "DEVELOPER", "CALLCENTER"],
+      },
+      {
+        title: "History",
+        href: "/junior-aml-history",
         roles: ["COMPLIANCE", "BUSINESS", "DEVELOPER", "CALLCENTER"],
       },
     ],
@@ -78,26 +112,57 @@ export const STATIC_MENU: StaticMenuItem[] = [
     ],
   },
   {
-    title: "Master Data",
-    icon: Calendar1,
-    roles: ["COMPLIANCE", "BUSINESS", "DEVELOPER", "CALLCENTER"],
-    children: [
-      { title: "Branch", href: "/branch", roles: ["COMPLIANCE", "BUSINESS", "DEVELOPER", "CALLCENTER"] },
-      { title: "Reference", href: "/reference", roles: ["COMPLIANCE", "BUSINESS", "DEVELOPER", "CALLCENTER"] },
-      { title: "Marital", href: "/marital", roles: ["COMPLIANCE", "BUSINESS", "DEVELOPER", "CALLCENTER"] },
-      { title: "Occupation", href: "/occupation", roles: ["COMPLIANCE", "BUSINESS", "DEVELOPER", "CALLCENTER"] },
-      { title: "Legal Type", href: "/legal-type", roles: ["COMPLIANCE", "BUSINESS", "DEVELOPER", "CALLCENTER"] },
-    ],
-  },
-  {
     title: "Location",
     icon: MapPin,
     roles: ["COMPLIANCE", "BUSINESS", "DEVELOPER", "CALLCENTER"],
     children: [
-      { title: "Province", href: "/province", roles: ["COMPLIANCE", "BUSINESS", "DEVELOPER", "CALLCENTER"] },
-      { title: "District", href: "/district", roles: ["COMPLIANCE", "BUSINESS", "DEVELOPER", "CALLCENTER"] },
-      { title: "Commune", href: "/commune", roles: ["COMPLIANCE", "BUSINESS", "DEVELOPER", "CALLCENTER"] },
-      { title: "Village", href: "/village", roles: ["COMPLIANCE", "BUSINESS", "DEVELOPER", "CALLCENTER"] },
+      {
+        title: "Province",
+        href: "/province",
+        roles: ["COMPLIANCE", "BUSINESS", "DEVELOPER", "CALLCENTER"],
+      },
+      {
+        title: "District",
+        href: "/district",
+        roles: ["COMPLIANCE", "BUSINESS", "DEVELOPER", "CALLCENTER"],
+      },
+      {
+        title: "Commune",
+        href: "/commune",
+        roles: ["COMPLIANCE", "BUSINESS", "DEVELOPER", "CALLCENTER"],
+      },
+      {
+        title: "Village",
+        href: "/village",
+        roles: ["COMPLIANCE", "BUSINESS", "DEVELOPER", "CALLCENTER"],
+      },
+    ],
+  },
+  {
+    title: "Master Data",
+    icon: Building,
+    roles: ["COMPLIANCE", "BUSINESS", "DEVELOPER", "CALLCENTER"],
+    children: [
+      {
+        title: "Branch",
+        href: "/branch",
+        roles: ["COMPLIANCE", "BUSINESS", "DEVELOPER", "CALLCENTER"],
+      },
+      {
+        title: "Marital",
+        href: "/marital",
+        roles: ["COMPLIANCE", "BUSINESS", "DEVELOPER", "CALLCENTER"],
+      },
+      {
+        title: "Occupation",
+        href: "/occupation",
+        roles: ["COMPLIANCE", "BUSINESS", "DEVELOPER", "CALLCENTER"],
+      },
+      {
+        title: "Reference",
+        href: "/reference",
+        roles: ["COMPLIANCE", "BUSINESS", "DEVELOPER", "CALLCENTER"],
+      },
     ],
   },
 ];

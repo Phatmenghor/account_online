@@ -51,9 +51,11 @@ const detectErrorType = (message?: string): ErrorType => {
   ) {
     return "pending-request";
   } else if (
-    lowerMsg.includes("សំណើរបស់អ្នក (AML High Risk)") ||
+    lowerMsg.includes("សំណើរបស់អ្នក (aml high risk)") ||
     lowerMsg.includes("aml") ||
-    lowerMsg.includes("high risk")
+    lowerMsg.includes("high risk") ||
+    lowerMsg.includes("ក្នុងការពិនិត្យ") ||
+    lowerMsg.includes("ត្រួតពិនិត្យ")
   ) {
     return "aml-high-risk";
   } else if (
@@ -209,24 +211,27 @@ export default function SubmitErrorModal({
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="absolute inset-0 bg-black/50 backdrop-blur-xs"
+            className="absolute inset-0 bg-black/60 backdrop-blur-xs"
           />
 
           <motion.div
-            initial={{ opacity: 0, scale: 0.96, y: 12 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.96, y: 12 }}
-            transition={{ duration: 0.2, ease: "easeOut" }}
-            className="relative bg-white w-full max-w-lg sm:max-w-[480px] rounded-2xl shadow-xl overflow-hidden z-10 border border-gray-100 flex flex-col"
+            initial={{ y: "100%", opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: "100%", opacity: 0 }}
+            transition={{ type: "spring", damping: 26, stiffness: 320 }}
+            className="relative bg-white w-full max-w-lg sm:max-w-[480px] rounded-t-3xl sm:rounded-2xl shadow-2xl overflow-hidden z-10 border border-gray-100 flex flex-col max-h-[90vh]"
           >
-            {/* Top Accent */}
-            <div className={`h-1.5 w-full bg-gradient-to-r ${config.accent}`} />
+            {/* Top Accent Line at absolute top */}
+            <div className={`h-1.5 w-full bg-gradient-to-r ${config.accent} shrink-0`} />
+
+            {/* Native Mobile Drag Handle Pill */}
+            <div className="w-12 h-1.5 bg-gray-300 rounded-full mx-auto my-2 sm:hidden shrink-0" />
 
             {/* Header */}
             <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between bg-white flex-shrink-0">
@@ -247,14 +252,14 @@ export default function SubmitErrorModal({
               </button>
             </div>
 
-            {/* Body */}
-            <div className="px-6 py-6">
-              <p className="text-sm text-gray-600 leading-relaxed text-center font-medium">
-                {message}
+            {/* Body - Left Aligned Message */}
+            <div className="px-6 py-6 overflow-y-auto">
+              <p className="text-sm text-gray-700 leading-relaxed text-left font-medium">
+                {message?.replace(/\(AML High Risk\)/gi, "").replace(/AML High Risk/gi, "").trim()}
               </p>
               {description && (
-                <p className="text-xs text-gray-400 mt-2 text-center">
-                  {description}
+                <p className="text-xs text-gray-500 mt-2 text-left">
+                  {description?.replace(/\(AML High Risk\)/gi, "").replace(/AML High Risk/gi, "").trim()}
                 </p>
               )}
             </div>

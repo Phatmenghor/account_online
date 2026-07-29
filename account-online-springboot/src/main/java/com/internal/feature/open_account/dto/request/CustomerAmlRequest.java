@@ -20,6 +20,9 @@ public class CustomerAmlRequest {
     @JsonProperty("CUST_NAME")
     private String custName;
 
+    @JsonProperty("SHORT_NAME")
+    private String shortName;
+
     @JsonProperty("GIVEN_NAME")
     private String givenName;
 

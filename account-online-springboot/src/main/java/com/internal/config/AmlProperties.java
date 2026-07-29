@@ -5,8 +5,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 @Data
-@Configuration
-@ConfigurationProperties(prefix = "aml")
 public class AmlProperties {
     private Api api = new Api();
     private Dashboard dashboard = new Dashboard();

@@ -51,6 +51,9 @@ public class MobileBankingRestAdapter implements MobileBankingPort {
             } else {
                 log.info("Mobile banking activation successful for CIF: {}", cif);
                 activationCode = mbResponse != null ? mbResponse.getContent() : null;
+                if (activationCode != null) {
+                    activationCode = activationCode.replaceAll("(?i)registCode:\\s*", "").trim();
+                }
             }
         } catch (Exception e) {
             log.error("Mobile banking activation failed (non-critical): {}", e.getMessage());

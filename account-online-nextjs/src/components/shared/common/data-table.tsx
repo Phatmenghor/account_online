@@ -1,7 +1,7 @@
 "use client";
 
 import { ReactNode, useState, useRef, useEffect } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Inbox } from "lucide-react";
 import { PageSizeSelectField } from "@/components/shared/form-field/page-size-select-field";
 import { cn } from "@/lib/utils";
 import { CustomButton } from "@/components/shared/button/custom-button";
@@ -301,9 +301,14 @@ export function DataTableWithPagination<T = any>({
               <tr>
                 <td
                   colSpan={columns.length}
-                  className="px-3 py-5 text-center text-muted-foreground border-b border-border/50"
+                  className="px-4 py-12 text-center border-b border-border/50"
                 >
-                  {emptyMessage}
+                  <div className="flex flex-col items-center justify-center space-y-2 text-muted-foreground">
+                    <div className="w-12 h-12 rounded-full bg-muted/60 flex items-center justify-center text-muted-foreground/60 mb-1">
+                      <Inbox className="w-6 h-6" />
+                    </div>
+                    <span className="text-sm font-medium text-gray-500">{emptyMessage}</span>
+                  </div>
                 </td>
               </tr>
             ) : (

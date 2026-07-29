@@ -14,12 +14,17 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.internal.feature.customer_image.component.CustomerImageStorageComponent;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 @Component
 @RequiredArgsConstructor
 @Slf4j
 public class ReportingService {
 
     private final AccountFinalService accountOnlineOpenSuccessService;
+    private final CustomerImageStorageComponent storageComponent;
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void saveFailureLogs(CustomerRequest request, Exception e, String currentStep, String failureRemark,
@@ -56,12 +61,30 @@ public class ReportingService {
     public CustomerImageUploadResponseDto safeSaveCustomerImages(CustomerRequest request) {
         log.info("Step 10: SAVE_CUSTOMER_IMAGES");
         try {
+            String nid = request.getNidImageName();
+            String selfie = request.getSelfieImageName();
+
+            if ((nid == null || nid.isBlank()) && request.getLegalId() != null) {
+                Path latestNid = storageComponent.findLatestFileRecursive(
+                        Paths.get(storageComponent.getUploadDir(), "nid"), "nid_" + request.getLegalId() + "_");
+                if (latestNid != null) {
+                    nid = latestNid.getFileName().toString();
+                }
+            }
+
+            if ((selfie == null || selfie.isBlank()) && request.getLegalId() != null) {
+                Path latestSelfie = storageComponent.findLatestFileRecursive(
+                        Paths.get(storageComponent.getUploadDir(), "selfie"), "selfie_" + request.getLegalId() + "_");
+                if (latestSelfie != null) {
+                    selfie = latestSelfie.getFileName().toString();
+                }
+            }
+
             CustomerImageUploadResponseDto imagePaths = CustomerImageUploadResponseDto.builder()
-                    .nidImagePath(request.getNidImageName())
-                    .selfieImagePath(request.getSelfieImageName())
+                    .nidImagePath(nid)
+                    .selfieImagePath(selfie)
                     .build();
-            log.info("Step 10 SUCCESS: Image filenames resolved - NID: {}, Selfie: {}",
-                    request.getNidImageName(), request.getSelfieImageName());
+            log.info("Step 10 SUCCESS: Image filenames resolved - NID: {}, Selfie: {}", nid, selfie);
             return imagePaths;
         } catch (Exception e) {
             log.warn("Step 10 WARNING: Failed to resolve image filenames (non-critical): {}", e.getMessage());
@@ -69,6 +92,7 @@ public class ReportingService {
         }
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void safeSaveSuccessLog(CustomerRequest request, CustomerResponse accountInfo,
                                    AmlStatusDto amlStatusResponseDto, CustomerImageUploadResponseDto imagePaths,
                                    String mbActivationCode) {

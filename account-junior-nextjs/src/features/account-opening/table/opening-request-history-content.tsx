@@ -1,5 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { TableColumn } from "@/components/shared/table/data-table";
+import { DateTimeFormat } from "@/utils/date/date-time-format";
 
 interface PendingAccountOpeningRequestHistoryDto {
   id: number;
@@ -101,13 +102,11 @@ export const createOpeningRequestHistoryTableColumns =
         key: "createdAt",
         label: "Date & Time",
         truncate: true,
-        maxWidth: "180px",
+        maxWidth: "600px",
         minWidth: "160px",
         render: (record) => (
-          <span className="text-sm">
-            {record.createdAt
-              ? new Date(record.createdAt).toLocaleString()
-              : "---"}
+          <span className="text-sm whitespace-nowrap">
+            {DateTimeFormat(record.createdAt) || "---"}
           </span>
         ),
       },

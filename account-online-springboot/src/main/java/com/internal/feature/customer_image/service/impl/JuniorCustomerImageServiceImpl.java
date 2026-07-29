@@ -30,8 +30,18 @@ public class JuniorCustomerImageServiceImpl implements JuniorCustomerImageServic
             return null;
         }
 
-        String juniorPath = fileProperties.getUpload().getJunior().replaceFirst("^/", "");
-        String fullRelativePath = juniorPath + "/" + imageName;
+        String subFolder;
+        if ("REF_DOC".equalsIgnoreCase(type)) {
+            subFolder = fileProperties.getUpload().getJunior() + fileProperties.getUpload().getReferenceDoc();
+        } else if ("NID".equalsIgnoreCase(type)) {
+            subFolder = fileProperties.getUpload().getJunior() + fileProperties.getUpload().getNid();
+        } else if ("SELFIE".equalsIgnoreCase(type)) {
+            subFolder = fileProperties.getUpload().getJunior() + fileProperties.getUpload().getSelfie();
+        } else {
+            subFolder = fileProperties.getUpload().getJunior();
+        }
+        subFolder = subFolder.replaceFirst("^/", "");
+        String fullRelativePath = subFolder + "/" + imageName;
 
         JuniorCustomerImage image = JuniorCustomerImage.builder()
                 .type(type)

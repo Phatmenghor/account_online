@@ -17,8 +17,8 @@ public interface JuniorAmlStatusRepository extends JpaRepository<JuniorAmlStatus
     Optional<JuniorAmlStatus> findByLegalId(String legalId);
 
     @Query("SELECT j FROM JuniorAmlStatus j WHERE " +
-           "(:status IS NULL OR j.status = :status) AND " +
-           "(:search IS NULL OR LOWER(j.legalId) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+           "(cast(:status as string) IS NULL OR j.status = :status) AND " +
+           "(cast(:search as string) IS NULL OR LOWER(j.legalId) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
            "LOWER(j.familyName) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
            "LOWER(j.givenName) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
            "LOWER(j.guardianLegalId) LIKE LOWER(CONCAT('%', :search, '%')) OR " +

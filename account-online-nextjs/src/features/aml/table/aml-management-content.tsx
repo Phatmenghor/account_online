@@ -16,7 +16,7 @@ import {
 import RiskBadge from "@/components/shared/badge/risk-level-badge";
 import { AmlStatusEnum } from "@/constants/AppResource/display-list/enum/status";
 import AmlStatusBadge from "@/components/shared/badge/aml-badge";
-import { Span } from "next/dist/trace";
+import { DateTimeFormat } from "@/utils/date/date-time-format";
 
 interface ManagementTableHandlers {
   handleViewManagementDetail: (management: AmlManagementModel) => void;
@@ -101,11 +101,11 @@ export const createManagementTableColumns = ({
       key: "createdAt",
       label: "Created At",
       truncate: true,
-      maxWidth: "160px",
-      minWidth: "150px",
+      maxWidth: "600px",
+      minWidth: "180px",
       render: (m) => (
-        <span className="font-medium">
-          {new Date(m.createdAt).toLocaleString() || "---"}
+        <span className="font-medium whitespace-nowrap">
+          {DateTimeFormat(m.createdAt) || "---"}
         </span>
       ),
     },

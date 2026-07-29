@@ -9,9 +9,8 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties(prefix = "jwt")
 public class JwtProperties {
     private Secret secret = new Secret();
-    private long expirationMin;
-    private long refreshTokenExpirationMin = 43200; // default 30 days
-    private String issuer = "cbc-sender-api";
+    private long expirationMin = 525600L; // default 1 year (365 days)
+    private String issuer = "account-online-api";
 
     @Data
     public static class Secret {

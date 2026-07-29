@@ -123,8 +123,20 @@ public class JuniorAccountFinal extends BaseNoIdEntity {
     @Column(name = "branch_code")
     private String branchCode;
 
+    @Column(name = "branch_name_kh")
+    private String branchNameKh;
+
+    @Column(name = "submitted_by")
+    private String submittedBy;
+
+    @Column(name = "legal_holder_name")
+    private String legalHolderName;
+
     @Column(name = "phone_number")
     private String phoneNumber;
+
+    @Column(name = "referral_id")
+    private String referralId;
 
     // === AML & STATUS ===
     @Enumerated(EnumType.STRING)

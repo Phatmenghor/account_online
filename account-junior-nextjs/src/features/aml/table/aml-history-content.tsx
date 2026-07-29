@@ -85,9 +85,10 @@ export const createHistoryTableColumns = ({
       key: "createdAt",
       label: "Created At",
       minWidth: "180px",
+      maxWidth: "600px",
       truncate: true,
       render: (h) =>
-        h.createdAt ? <span>{DateTimeFormat(h.createdAt) || "---"}</span> : "-",
+        h.createdAt ? <span className="whitespace-nowrap">{DateTimeFormat(h.createdAt) || "---"}</span> : "-",
     },
 
     /** Status */

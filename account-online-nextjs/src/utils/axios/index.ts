@@ -481,75 +481,11 @@ const createAxiosInstance = (requiresAuth = false): AxiosInstance => {
           return Promise.reject(error);
         }
 
-        (originalRequest as any)._retry = true;
-
-        if (isRefreshing) {
-          return new Promise((resolve, reject) => {
-            failedQueue.push({ resolve, reject });
-          })
-            .then((token) => {
-              if (originalRequest.headers) {
-                if (typeof (originalRequest.headers as any).set === "function") {
-                  (originalRequest.headers as any).set("Authorization", `Bearer ${token}`);
-                }
-                originalRequest.headers["Authorization"] = `Bearer ${token}`;
-              }
-              return axiosInstance(originalRequest);
-            })
-            .catch((refreshError) => {
-              return Promise.reject(refreshError);
-            });
+        logoutToken();
+        if (typeof window !== "undefined" && !window.location.pathname.startsWith("/login")) {
+          window.location.href = "/login";
         }
-
-        isRefreshing = true;
-
-        const refreshToken = getRefreshToken();
-        if (!refreshToken) {
-          isRefreshing = false;
-          logoutToken();
-          if (typeof window !== "undefined") {
-            window.location.href = "/login";
-          }
-          return Promise.reject(error);
-        }
-
-        try {
-          const response = await axios.post(
-            `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/auth/refresh`,
-            { refreshToken },
-            { headers: { "Content-Type": "application/json" } }
-          );
-
-          // Standard response wrapper from Spring Boot wraps in "data" property
-          const newTokens = response.data?.data || response.data;
-          const newAccessToken = newTokens?.accessToken || newTokens?.token;
-          const newRefreshToken = newTokens?.refreshToken || refreshToken;
-
-          if (!newAccessToken) {
-            throw new Error("No access token returned from refresh endpoint");
-          }
-
-          storeTokens(newAccessToken, newRefreshToken);
-
-          if (originalRequest.headers) {
-            if (typeof (originalRequest.headers as any).set === "function") {
-              (originalRequest.headers as any).set("Authorization", `Bearer ${newAccessToken}`);
-            }
-            originalRequest.headers["Authorization"] = `Bearer ${newAccessToken}`;
-          }
-
-          processQueue(null, newAccessToken);
-          isRefreshing = false;
-          return axiosInstance(originalRequest);
-        } catch (refreshError) {
-          processQueue(refreshError, null);
-          isRefreshing = false;
-          logoutToken();
-          if (typeof window !== "undefined") {
-            window.location.href = "/login";
-          }
-          return Promise.reject(refreshError);
-        }
+        return Promise.reject(error);
       }
 
       // Get request ID from metadata

@@ -313,6 +313,22 @@ export function OpenAccountContent({ isPublic = false }: OpenAccountContentProps
     [handleInputChange, setIsVerified],
   );
 
+  const handleImageUploadWrapper = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setIsVerified(false);
+      handleImageUpload(e);
+    },
+    [handleImageUpload, setIsVerified],
+  );
+
+  const handleSelfieUploadWrapper = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setIsVerified(false);
+      handleSelfieUpload(e);
+    },
+    [handleSelfieUpload, setIsVerified],
+  );
+
   const handleMasterDataChange = useCallback(
     (setter: any, value: any) => {
       setter(value);
@@ -424,8 +440,8 @@ export function OpenAccountContent({ isPublic = false }: OpenAccountContentProps
                 <AccountImages
                   uploadedImage={uploadedImage}
                   selfiePreview={selfiePreview}
-                  handleImageUpload={handleImageUpload}
-                  handleSelfieUpload={handleSelfieUpload}
+                  handleImageUpload={handleImageUploadWrapper}
+                  handleSelfieUpload={handleSelfieUploadWrapper}
                 />
               </div>
 
@@ -443,6 +459,11 @@ export function OpenAccountContent({ isPublic = false }: OpenAccountContentProps
                   setSelectedLegalType={handleSetSelectedLegalType}
                   isLegalTypeLoading={isLegalTypeLoading}
                   getLegalTypeName={getLegalTypeName}
+                  maritalStatuses={maritalStatuses}
+                  selectedMaritalStatus={selectedMaritalStatus}
+                  setSelectedMaritalStatus={handleSetSelectedMaritalStatus}
+                  isLoadingMarital={isLoadingMarital}
+                  getMaritalName={getMaritalName}
                   isVerified={isVerified}
                   isNidExtracted={!!uploadedImage}
                 />

@@ -85,7 +85,7 @@ export default function AmlViewDetailModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-3xl sm:max-w-3xl w-full max-h-[90vh] overflow-hidden p-0 gap-0 flex flex-col">
+      <DialogContent className="max-w-5xl sm:max-w-5xl w-full max-h-[90vh] overflow-hidden p-0 gap-0 flex flex-col">
 
         {/* ── Header ── */}
         <DialogHeader className="px-6 py-4 border-b bg-muted/30 flex-shrink-0">

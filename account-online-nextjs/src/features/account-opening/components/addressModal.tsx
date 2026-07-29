@@ -484,20 +484,22 @@ const LocationModal = ({
   return (
     <>
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 lg:p-8">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 sm:p-6 lg:p-8">
           {/* Backdrop — Instant click response */}
           <div
             onClick={onClose}
-            className="absolute inset-0 bg-black/50 backdrop-blur-xs"
+            className="absolute inset-0 bg-black/60 backdrop-blur-xs"
           />
 
-          {/* Modal — Instant open without scale/bounce animation */}
+          {/* Modal */}
           <div
-            className="relative bg-white w-full max-w-xl sm:max-w-[580px] lg:max-w-[640px] rounded-2xl shadow-xl z-10 flex flex-col overflow-hidden border border-gray-100"
-            style={{ maxHeight: "88vh" }}
+            className="relative bg-white w-full max-w-xl sm:max-w-[580px] lg:max-w-[640px] rounded-t-3xl sm:rounded-2xl shadow-2xl z-10 flex flex-col overflow-hidden border border-gray-100 max-h-[92vh]"
           >
             {/* Primary top accent bar */}
-            <div className="h-1.5 w-full bg-primary flex-shrink-0 rounded-t-2xl sm:rounded-t-2xl" />
+            <div className="h-1.5 w-full bg-primary flex-shrink-0" />
+
+            {/* Native Mobile Drag Handle Pill */}
+            <div className="w-12 h-1.5 bg-gray-300 rounded-full mx-auto my-2 sm:hidden shrink-0" />
 
             {/* Header */}
             <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-gray-100 flex-shrink-0">

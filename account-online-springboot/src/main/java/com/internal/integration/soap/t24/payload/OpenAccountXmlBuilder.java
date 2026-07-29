@@ -137,7 +137,6 @@ public class OpenAccountXmlBuilder {
                 + "<cus:RelationManager>" + relationManager + "</cus:RelationManager>"
                 + "<cus:LoanOfficer>" + loanOfficer + "</cus:LoanOfficer>"
                 + "<cus:Staff>" + staff + "</cus:Staff>"
-                + "<cus:ReferralBy>" + referralBy + "</cus:ReferralBy>"
 
                 // Place of birth address
                 + "<cus:CUSTPROVINCEP>" + pobProvince + "</cus:CUSTPROVINCEP>"

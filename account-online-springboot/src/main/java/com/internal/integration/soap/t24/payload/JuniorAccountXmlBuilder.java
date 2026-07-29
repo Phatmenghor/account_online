@@ -55,7 +55,7 @@ public class JuniorAccountXmlBuilder {
 
         String legalDocType = request.getLegalDocType();
         if (legalDocType == null || legalDocType.isBlank()) {
-            legalDocType = xmlUtils.getOrDefault(request.getReferenceDocType(), "BIRTH.CERTIFICATE");
+            legalDocType = Boolean.TRUE.equals(request.getHasNid()) ? "NATIONAL.ID" : xmlUtils.getOrDefault(request.getReferenceDocType(), "BIRTH.CERTIFICATE");
         }
 
         String referralBy = xmlUtils.getOrDefault(request.getReferralId(), xmlUtils.getOrDefault(request.getReferralBy(), ""));
@@ -90,8 +90,8 @@ public class JuniorAccountXmlBuilder {
                 // STREET
                 + "<cus:gSTREET g=\"1\"><cus:STREET>" + legalAddress + "</cus:STREET></cus:gSTREET>"
 
-                // Organizational fields — Always Sector 6012 for Junior Account
-                + "<cus:Sector>" + AppConstants.JUNIOR_SECTOR + "</cus:Sector>"
+                // Organizational fields — Default Sector (4501) for T24 Individual Customer
+                + "<cus:Sector>" + defaultProperties.getSector() + "</cus:Sector>"
                 + "<cus:CostCenter>" + defaultProperties.getCostCenter() + "</cus:CostCenter>"
                 + "<cus:Industry>" + defaultProperties.getIndustry() + "</cus:Industry>"
                 + "<cus:Target>" + defaultProperties.getTarget() + "</cus:Target>"
@@ -142,9 +142,6 @@ public class JuniorAccountXmlBuilder {
                 // Ownership and staff
                 + "<cus:Ownership>" + defaultProperties.getOwnership() + "</cus:Ownership>"
                 + "<cus:RelationManager>" + relationManager + "</cus:RelationManager>"
-                + "<cus:LoanOfficer></cus:LoanOfficer>"
-                + "<cus:Staff></cus:Staff>"
-                + "<cus:ReferralBy>" + referralBy + "</cus:ReferralBy>"
 
                 // Place of birth address
                 + "<cus:CUSTPROVINCEP>" + pobProvince + "</cus:CUSTPROVINCEP>"

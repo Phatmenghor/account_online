@@ -29,9 +29,13 @@ const SuccessModal = ({ isOpen, onClose, data }: SuccessModalProps) => {
     return fieldLabels[field] || field;
   };
 
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 sm:max-w-[520px] w-full mx-4">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-xs" onClick={onClose} />
+      <div className="relative bg-white rounded-t-3xl sm:rounded-2xl shadow-2xl p-6 sm:max-w-[520px] w-full z-10 border border-gray-100 max-h-[90vh] flex flex-col overflow-hidden">
+        {/* Primary Top Accent */}
+        <div className="h-1.5 w-full bg-green-500 flex-shrink-0 -mx-6 -mt-6 mb-4" />
+        {/* Native Mobile Drag Handle Pill */}
+        <div className="w-12 h-1.5 bg-gray-300 rounded-full mx-auto mb-3 sm:hidden shrink-0" />
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">

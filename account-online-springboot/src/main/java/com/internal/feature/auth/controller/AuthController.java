@@ -82,14 +82,6 @@ public class AuthController {
         UserResponseDto userResponse = authService.updateUserProfile(requestDto, authentication.getName());
         return ResponseEntity.ok(ApiResponse.success(ResponseMessage.PROFILE_UPDATED, userResponse));
     }
-
-    @PostMapping("/refresh")
-    public ResponseEntity<ApiResponse<com.internal.feature.auth.dto.response.RefreshTokenResponseDto>> refresh(
-            @Valid @RequestBody com.internal.feature.auth.dto.request.RefreshTokenRequestDto requestDto) {
-        log.info("Token refresh request received");
-        com.internal.feature.auth.dto.response.RefreshTokenResponseDto response = authService.refreshToken(requestDto);
-        return ResponseEntity.ok(ApiResponse.success("Token refreshed successfully.", response));
-    }
 }
 
 

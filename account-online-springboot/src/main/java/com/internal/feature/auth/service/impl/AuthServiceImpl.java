@@ -62,7 +62,6 @@ public class AuthServiceImpl implements AuthService {
     private final UserMapper userMapper;
     private final TelegramService telegramService;
     private final ClientIpComponent clientIpComponent;
-    private final com.internal.feature.auth.service.RefreshTokenService refreshTokenService;
 
     private static final DateTimeFormatter DT_FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
@@ -126,17 +125,12 @@ public class AuthServiceImpl implements AuthService {
         log.info("User {} logged in successfully (forceChange={}, passwordExpired={})",
                 loginDto.getUsername(), forceChange, passwordExpired);
 
-        com.internal.feature.auth.models.RefreshToken refreshTokenEntity = refreshTokenService.createRefreshToken(userEntity, clientIp, null);
-
-        return new AuthResponseDTO(token, refreshTokenEntity.getToken(), userDto);
+        return new AuthResponseDTO(token, userDto);
     }
 
     @Override
     public void logout(String username) {
         log.info("User logged out: {}", username);
-        userRepository.findByUsername(username).ifPresent(u -> {
-            refreshTokenService.revokeAllUserTokens(u.getId(), "User logged out");
-        });
     }
 
     @Override
@@ -180,10 +174,7 @@ public class AuthServiceImpl implements AuthService {
         userDto.setLastLogin(user.getLastLogin());
         log.info("Registration completed and user created for ID Card: {}", dto.getIdCard());
 
-        String clientIp = clientIpComponent.getClientIp();
-        com.internal.feature.auth.models.RefreshToken refreshTokenEntity = refreshTokenService.createRefreshToken(user, clientIp, null);
-
-        return new AuthResponseDTO(token, refreshTokenEntity.getToken(), userDto);
+        return new AuthResponseDTO(token, userDto);
     }
 
     @Override
@@ -259,36 +250,6 @@ public class AuthServiceImpl implements AuthService {
             return false;
         }
         return true;
-    }
-
-    @Override
-    @org.springframework.transaction.annotation.Transactional
-    public com.internal.feature.auth.dto.response.RefreshTokenResponseDto refreshToken(com.internal.feature.auth.dto.request.RefreshTokenRequestDto requestDto) {
-        log.info("Processing token refresh request");
-        com.internal.feature.auth.models.RefreshToken refreshToken = refreshTokenService.verifyRefreshToken(requestDto.getRefreshToken())
-                .orElseThrow(() -> new com.internal.shared.exception.custom.UnauthorizedException("Invalid or expired refresh token"));
-
-        UserEntity user = userRepository.findById(refreshToken.getUserId())
-                .orElseThrow(() -> new com.internal.shared.exception.custom.UnauthorizedException("User associated with refresh token not found"));
-
-        if (user.getStatus() != StatusData.ACTIVE) {
-            throw new com.internal.shared.exception.custom.UnauthorizedException("User account is inactive or deleted");
-        }
-
-        List<String> roles = user.getRoles().stream()
-                .map(r -> r.getName().name())
-                .collect(Collectors.toList());
-
-        String newAccessToken = jwtGenerator.generateTokenForUser(user.getUsername(), roles);
-        String clientIp = clientIpComponent.getClientIp();
-
-        refreshTokenService.revokeRefreshToken(requestDto.getRefreshToken(), "Rotated with new refresh token");
-        com.internal.feature.auth.models.RefreshToken newRefreshTokenEntity = refreshTokenService.createRefreshToken(user, clientIp, null);
-
-        return com.internal.feature.auth.dto.response.RefreshTokenResponseDto.builder()
-                .accessToken(newAccessToken)
-                .refreshToken(newRefreshTokenEntity.getToken())
-                .build();
     }
 
     private String formatDisplayName(String roleName) {

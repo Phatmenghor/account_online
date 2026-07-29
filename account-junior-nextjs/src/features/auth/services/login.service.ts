@@ -3,7 +3,7 @@ import { UpdateUserReq } from "@/features/user/types/user.request";
 import { axiosClient } from "@/utils/axios";
 import { storePermission } from "@/utils/local-storage/permission";
 import { storeRole } from "@/utils/local-storage/roles";
-import { getToken, storeTokens } from "@/utils/local-storage/token";
+import { getToken, storeToken } from "@/utils/local-storage/token";
 import { storeUserInfo } from "@/utils/local-storage/userInfo";
 
 export async function loginService(credentials: LoginCredentials) {
@@ -11,9 +11,9 @@ export async function loginService(credentials: LoginCredentials) {
     // Simulate async call and delay
     const response = await axiosClient.post("/api/v1/auth/login", credentials);
 
-    const { accessToken, refreshToken, userRole } = response.data.data;
+    const { accessToken, userRole } = response.data.data;
 
-    storeTokens(accessToken, refreshToken);
+    storeToken(accessToken);
     storeRole(userRole.userRole);
     storeUserInfo(userRole);
     storePermission(response?.data?.userRole?.userPermission);

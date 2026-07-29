@@ -110,9 +110,11 @@ public class MasterDataController {
     }
 
     @PostMapping("/marital-status/all")
-    public ResponseEntity<ApiResponse<List<MaritalStatusDto>>> getAllMaritalStatus(@RequestBody PublicReferenceRequest request) {
-        log.info("API: Public request - Fetch all marital statuses");
-        List<MaritalStatusDto> list = maritalStatusService.getAllPublic(request.getSearch());
+    public ResponseEntity<ApiResponse<List<MaritalStatusDto>>> getAllMaritalStatus(@RequestBody(required = false) PublicReferenceRequest request) {
+        String searchTerm = request != null ? request.getSearch() : null;
+        log.info("API: Public request - Fetch all marital statuses | Search: {}", searchTerm);
+        List<MaritalStatusDto> list = maritalStatusService.getAllPublic(searchTerm);
+        log.info("API: Public request - Fetch all marital statuses completed | Items count: {}", list != null ? list.size() : 0);
         return ResponseEntity.ok(ApiResponse.success(ResponseMessage.retrieved(ResponseMessage.ALL_MARITAL_STATUSES), list));
     }
 

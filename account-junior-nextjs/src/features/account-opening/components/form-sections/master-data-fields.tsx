@@ -148,46 +148,6 @@ export const MasterDataFields: React.FC<MasterDataFieldsProps> = ({
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-      {/* Marital Status */}
-      <div className="space-y-1">
-        {renderLabel("marital")}
-        <Select
-          value={selectedMaritalStatus?.id.toString() || ""}
-          onValueChange={(value) => {
-            const marital = maritalStatuses.find(
-              (m) => m.id.toString() === value
-            );
-            setSelectedMaritalStatus(marital || null);
-            validateField("maritalStatus", value);
-          }}
-          disabled={isLoading || isValidating || isLoadingMarital}
-        >
-          <SelectTrigger
-            className={`w-full h-9 text-sm rounded-xl ${validationErrors.maritalStatus ? "border-red-400" : ""}`}
-          >
-            <SelectValue
-              placeholder={
-                isLoadingMarital
-                  ? translate("loading")
-                  : translateSelect("selectMarital")
-              }
-            />
-          </SelectTrigger>
-          <SelectContent>
-            {maritalStatuses.map((marital) => (
-              <SelectItem key={marital.id} value={marital.id.toString()}>
-                {getMaritalName(marital)}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        {validationErrors.maritalStatus && (
-          <p className="text-xs text-red-500">
-            {translate("err_maritalStatus")}
-          </p>
-        )}
-      </div>
-
       {/* Occupation */}
       <div className="space-y-1">
         {renderLabel("occupation")}
@@ -252,7 +212,7 @@ export const MasterDataFields: React.FC<MasterDataFieldsProps> = ({
 
       {/* Account Type */}
       {!isPublic && (
-        <div className="space-y-1">
+        <div className="space-y-1 md:col-span-2">
           {renderLabel("accountType")}
           <Select
             value={selectedCategory?.id.toString() || ""}
@@ -284,8 +244,8 @@ export const MasterDataFields: React.FC<MasterDataFieldsProps> = ({
         </div>
       )}
 
-      {/* Relationship Manager / Staff ID */}
-      <div className={`${isPublic ? "" : "md:col-span-2"} space-y-1`}>
+      {/* Relationship Manager / Staff ID (Single full-width row) */}
+      <div className="md:col-span-2 space-y-1">
         {renderLabel(isPublic ? "referralId" : "relationshipManager", false)}
         <div className="relative">
           <Input

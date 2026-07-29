@@ -167,6 +167,9 @@ function Management() {
           description: `AML has been ${selectedStatus.toLowerCase()}.`,
         });
       });
+
+      // Reload fresh list from server (only PENDING items will be returned)
+      loadManagement();
     } catch (error) {
       console.error("Error updating AML status:", error);
     } finally {
@@ -210,7 +213,7 @@ function Management() {
                     },
                   })}
                   loading={isLoading}
-                  emptyMessage={t("common.loading")}
+                  emptyMessage={t("common.no_data_found") || "No pending AML cases found"}
                   getRowKey={(item) => item.id}
                 />
                 {/* Pagination */}

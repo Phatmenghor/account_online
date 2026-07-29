@@ -56,7 +56,6 @@ public final class ResponseMessage {
     public static final String AML_STATUS_RETRIEVED = "AML status retrieved successfully";
     public static final String AML_HISTORY_BY_ID_RETRIEVED = "AML history retrieved successfully";
     public static final String AML_STATUS_UPDATED = "AML status updated successfully";
-    public static final String AML_EXTERNAL_UPDATED = "AML Risk Level Updated to Low";
 
     // ===== CAMDX / NID =====
     public static final String NID_VALIDATED = "NID validated successfully";

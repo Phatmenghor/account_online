@@ -21,12 +21,68 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+import com.internal.feature.customer_image.component.CustomerImageStorageComponent;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 @Component
 @RequiredArgsConstructor
 public class OpenAccountAmlStatusMapper {
 
         private final MasterDataServiceHelper masterDataServiceHelper;
         private final ObjectMapper objectMapper;
+        private final CustomerImageStorageComponent storageComponent;
+
+        private String resolveNidImage(String imageFromRequest, String legalId) {
+                if (imageFromRequest != null && !imageFromRequest.isBlank()) {
+                        return imageFromRequest;
+                }
+                if (legalId != null && storageComponent != null) {
+                        try {
+                                Path match = storageComponent.findLatestFileRecursive(
+                                                Paths.get(storageComponent.getUploadDir(), "nid"), "nid_" + legalId + "_");
+                                if (match != null) {
+                                        return match.getFileName().toString();
+                                }
+                        } catch (Exception ignored) {}
+                }
+                return "";
+        }
+
+        private String resolveSelfieImage(String imageFromRequest, String legalId) {
+                if (imageFromRequest != null && !imageFromRequest.isBlank()) {
+                        return imageFromRequest;
+                }
+                if (legalId != null && storageComponent != null) {
+                        try {
+                                Path match = storageComponent.findLatestFileRecursive(
+                                                Paths.get(storageComponent.getUploadDir(), "selfie"), "selfie_" + legalId + "_");
+                                if (match != null) {
+                                        return match.getFileName().toString();
+                                }
+                        } catch (Exception ignored) {}
+                }
+                return "";
+        }
+
+        private String formatFastAddress(String en, String kh, String code) {
+                if (en != null && !en.isBlank() && kh != null && !kh.isBlank()) {
+                        return en + " / " + kh;
+                }
+                if (kh != null && !kh.isBlank()) return kh;
+                if (en != null && !en.isBlank()) return en;
+                return code != null ? code : "";
+        }
+
+        private String joinNonEmpty(String delimiter, String... parts) {
+                java.util.List<String> list = new java.util.ArrayList<>();
+                for (String p : parts) {
+                        if (p != null && !p.isBlank()) {
+                                list.add(p);
+                        }
+                }
+                return String.join(delimiter, list);
+        }
 
         // -------------------- ENTITY → DTO --------------------
         public AmlStatusDto toDto(AmlStatus entity) {
@@ -36,27 +92,27 @@ public class OpenAccountAmlStatusMapper {
                 return AmlStatusDto.builder()
                                 .id(entity.getId())
                                 .status(entity.getStatus())
-                                .screeningResult(entity.getScreeningResult())
-                                .riskLevel(entity.getAmlExternalRiskLevel())
-                                .actionTaken(entity.getAmlExternalActionTaken())
-                                .rulesTriggered(entity.getAmlExternalRulesTriggered())
-                                .serviceName(entity.getAmlExternalServiceName())
+                                .screeningResult(entity.getScreeningResult() != null ? entity.getScreeningResult() : "CLEAN")
+                                .riskLevel(entity.getAmlExternalRiskLevel() != null ? entity.getAmlExternalRiskLevel() : "LOW")
+                                .actionTaken(entity.getAmlExternalActionTaken() != null ? entity.getAmlExternalActionTaken() : "PASS")
+                                .rulesTriggered(entity.getAmlExternalRulesTriggered() != null ? entity.getAmlExternalRulesTriggered() : "")
+                                .serviceName(entity.getAmlExternalServiceName() != null ? entity.getAmlExternalServiceName() : "AML_CHECK")
                                 .totalRulesScore(entity.getAmlExternalTotalRulesScore() == null ? 0
                                                 : entity.getAmlExternalTotalRulesScore())
-                                .trxnID(entity.getAmlExternalTrxnID())
+                                .trxnID(entity.getAmlExternalTrxnID() != null ? entity.getAmlExternalTrxnID() : "")
                                 .customerInfo(toCustomerDto(entity))
                                 .approvedBy(mapUser(entity.getApprovedBy()))
                                 .rejectedBy(mapUser(entity.getRejectedBy()))
-                                .currentAddressName(entity.getCurrentAddressName())
-                                .currentAddressCode(entity.getCurrentAddressCode())
-                                .placeOfBirthName(entity.getPlaceOfBirthName())
-                                .placeOfBirthCode(entity.getPlaceOfBirthCode())
-                                .maritalStatus(entity.getMaritalStatus())
-                                .occupationCode(entity.getOccupationCode())
-                                .occupationStatus(entity.getOccupationStatus())
-                                .remarks(entity.getRemarks())
-                                .nidImageName(entity.getNidImageName())
-                                .selfieImageName(entity.getSelfieImageName())
+                                .currentAddressName(entity.getCurrentAddressName() != null ? entity.getCurrentAddressName() : "")
+                                .currentAddressCode(entity.getCurrentAddressCode() != null ? entity.getCurrentAddressCode() : "")
+                                .placeOfBirthName(entity.getPlaceOfBirthName() != null ? entity.getPlaceOfBirthName() : (entity.getCurrentAddressName() != null ? entity.getCurrentAddressName() : ""))
+                                .placeOfBirthCode(entity.getPlaceOfBirthCode() != null ? entity.getPlaceOfBirthCode() : "")
+                                .maritalStatus(entity.getMaritalStatus() != null ? entity.getMaritalStatus() : "SINGLE")
+                                .occupationCode(entity.getOccupationCode() != null ? entity.getOccupationCode() : "")
+                                .occupationStatus(entity.getOccupationStatus() != null ? entity.getOccupationStatus() : "")
+                                .remarks(entity.getRemarks() != null ? entity.getRemarks() : "Approved")
+                                .nidImageName(resolveNidImage(entity.getNidImageName(), entity.getLegalId()))
+                                .selfieImageName(resolveSelfieImage(entity.getSelfieImageName(), entity.getLegalId()))
                                 .createdAt(entity.getCreatedAt())
                                 .updatedAt(entity.getUpdatedAt())
                                 .build();
@@ -64,18 +120,18 @@ public class OpenAccountAmlStatusMapper {
 
         private CustomerAmlDto toCustomerDto(AmlStatus entity) {
                 return CustomerAmlDto.builder()
-                                .legalId(entity.getLegalId())
-                                .familyName(entity.getFamilyName())
-                                .givenName(entity.getGivenName())
-                                .firstNameKh(entity.getFirstNameKh())
-                                .lastNameKh(entity.getLastNameKh())
-                                .dateOfBirth(entity.getDateOfBirth())
-                                .gender(entity.getGender())
-                                .nationality(entity.getNationality())
-                                .legalAddress(entity.getCurrentAddressName())
-                                .issuedDate(entity.getIssuedDate())
-                                .expiredDate(entity.getExpiredDate())
-                                .phoneNumber(entity.getPhoneNumber())
+                                .legalId(entity.getLegalId() != null ? entity.getLegalId() : "")
+                                .familyName(entity.getFamilyName() != null ? entity.getFamilyName() : "")
+                                .givenName(entity.getGivenName() != null ? entity.getGivenName() : "")
+                                .firstNameKh(entity.getFirstNameKh() != null ? entity.getFirstNameKh() : "")
+                                .lastNameKh(entity.getLastNameKh() != null ? entity.getLastNameKh() : "")
+                                .dateOfBirth(entity.getDateOfBirth() != null ? entity.getDateOfBirth() : "")
+                                .gender(entity.getGender() != null ? entity.getGender() : "M")
+                                .nationality(entity.getNationality() != null ? entity.getNationality() : "KH")
+                                .legalAddress(entity.getCurrentAddressName() != null ? entity.getCurrentAddressName() : "")
+                                .issuedDate(entity.getIssuedDate() != null ? entity.getIssuedDate() : "")
+                                .expiredDate(entity.getExpiredDate() != null ? entity.getExpiredDate() : "")
+                                .phoneNumber(entity.getPhoneNumber() != null ? entity.getPhoneNumber() : "")
                                 .build();
         }
 
@@ -101,66 +157,74 @@ public class OpenAccountAmlStatusMapper {
                         AmlExternalResponseDto amlResponse,
                         AmlStatusEnum status) {
 
-                String fullNameEn = request.getFamilyName() + " " + request.getGivenName();
-                String fullNameKh = (request.getLastNameKh() != null ? request.getLastNameKh() : "") + " "
-                                + (request.getFirstNameKh() != null ? request.getFirstNameKh() : "");
-
                 CustomerAmlDto customerDto = CustomerAmlDto.builder()
                                 .legalId(request.getLegalId())
-                                .familyName(request.getFamilyName())
-                                .givenName(request.getGivenName())
-                                .firstNameKh(request.getFirstNameKh())
-                                .lastNameKh(request.getLastNameKh())
-                                .dateOfBirth(request.getDateOfBirth())
-                                .gender(request.getGender())
+                                .familyName(request.getFamilyName() != null ? request.getFamilyName() : "")
+                                .givenName(request.getGivenName() != null ? request.getGivenName() : "")
+                                .firstNameKh(request.getFirstNameKh() != null ? request.getFirstNameKh() : "")
+                                .lastNameKh(request.getLastNameKh() != null ? request.getLastNameKh() : "")
+                                .dateOfBirth(request.getDateOfBirth() != null ? request.getDateOfBirth() : "")
+                                .gender(request.getGender() != null ? request.getGender() : "M")
                                 .nationality("KH")
-                                .legalAddress(request.getLegalAddress())
-                                .issuedDate(request.getLegalIssueDate())
-                                .expiredDate(request.getLegalExpireDate())
-                                .phoneNumber(request.getPhoneNumber())
+                                .legalAddress(request.getLegalAddress() != null ? request.getLegalAddress() : "")
+                                .issuedDate(request.getLegalIssueDate() != null ? request.getLegalIssueDate() : "")
+                                .expiredDate(request.getLegalExpireDate() != null ? request.getLegalExpireDate() : "")
+                                .phoneNumber(request.getPhoneNumber() != null ? request.getPhoneNumber() : "")
                                 .build();
 
-                String currentAddressCode = null;
-                if (request.getCustomerCurrentProvince() != null) {
-                        try {
-                                LocationCodesDto loc = masterDataServiceHelper.resolveAddress(
-                                                request.getCustomerCurrentProvince(),
-                                                request.getCustomerCurrentDistrict(),
-                                                request.getCustomerCurrentCommune(),
-                                                request.getCustomerCurrentVillage());
-                                currentAddressCode = masterDataServiceHelper.buildFullAddressCode(loc);
-                        } catch (Exception ignored) {
-                        }
+                String currentAddressCode = joinNonEmpty(", ",
+                                request.getCustomerCurrentProvince(),
+                                request.getCustomerCurrentDistrict(),
+                                request.getCustomerCurrentCommune(),
+                                request.getCustomerCurrentVillage());
+
+                String placeOfBirthCode = joinNonEmpty(", ",
+                                request.getCustomerPobProvince(),
+                                request.getCustomerPobDistrict(),
+                                request.getCustomerPobCommune(),
+                                request.getCustomerPobVillage());
+
+                String resolvedCurrentAddress = joinNonEmpty(", ",
+                                formatFastAddress(request.getCustomerVillageEn(), request.getCustomerVillageKh(), request.getCustomerCurrentVillage()),
+                                formatFastAddress(request.getCustomerCommuneEn(), request.getCustomerCommuneKh(), request.getCustomerCurrentCommune()),
+                                formatFastAddress(request.getCustomerDistrictEn(), request.getCustomerDistrictKh(), request.getCustomerCurrentDistrict()),
+                                formatFastAddress(request.getCustomerProvinceEn(), request.getCustomerProvinceKh(), request.getCustomerCurrentProvince()));
+
+                if (resolvedCurrentAddress.isBlank()) {
+                        resolvedCurrentAddress = request.getLegalAddress() != null ? request.getLegalAddress() : "";
                 }
 
-                String placeOfBirthCode = null;
-                if (request.getCustomerPobProvince() != null) {
-                        try {
-                                LocationCodesDto loc = masterDataServiceHelper.resolveAddress(
-                                                request.getCustomerPobProvince(),
-                                                request.getCustomerPobDistrict(),
-                                                request.getCustomerPobCommune(),
-                                                request.getCustomerPobVillage());
-                                placeOfBirthCode = masterDataServiceHelper.buildFullAddressCode(loc);
-                        } catch (Exception ignored) {
-                        }
+                String resolvedPob = request.getPlaceOfBirth();
+                if (resolvedPob == null || resolvedPob.isBlank()) {
+                        resolvedPob = joinNonEmpty(", ",
+                                        formatFastAddress(request.getCustomerPobVillageEn(), request.getCustomerPobVillageKh(), request.getCustomerPobVillage()),
+                                        formatFastAddress(request.getCustomerPobCommuneEn(), request.getCustomerPobCommuneKh(), request.getCustomerPobCommune()),
+                                        formatFastAddress(request.getCustomerPobDistrictEn(), request.getCustomerPobDistrictKh(), request.getCustomerPobDistrict()),
+                                        formatFastAddress(request.getCustomerPobProvinceEn(), request.getCustomerPobProvinceKh(), request.getCustomerPobProvince()));
                 }
+                if (resolvedPob == null || resolvedPob.isBlank()) {
+                        resolvedPob = resolvedCurrentAddress;
+                }
+
+                String resolvedNid = resolveNidImage(request.getNidImageName(), request.getLegalId());
+                String resolvedSelfie = resolveSelfieImage(request.getSelfieImageName(), request.getLegalId());
 
                 return AmlStatusDto.builder()
                                 .status(status)
                                 .customerInfo(customerDto)
                                 .currentAddressCode(currentAddressCode)
                                 .placeOfBirthCode(placeOfBirthCode)
-                                .currentAddressName(request.getLegalAddress())
-                                .maritalStatus(request.getMaritalStatus())
-                                .occupationCode(request.getOccupation())
-                                .riskLevel(amlResponse != null ? amlResponse.getRiskLevel() : null)
-                                .actionTaken(amlResponse != null ? amlResponse.getActionTaken() : null)
-                                .serviceName(amlResponse != null ? amlResponse.getServiceName() : null)
+                                .currentAddressName(resolvedCurrentAddress != null ? resolvedCurrentAddress : "")
+                                .placeOfBirthName(resolvedPob != null ? resolvedPob : "")
+                                .maritalStatus(request.getMaritalStatus() != null ? request.getMaritalStatus() : "SINGLE")
+                                .occupationCode(request.getOccupation() != null ? request.getOccupation() : "")
+                                .riskLevel(amlResponse != null && amlResponse.getRiskLevel() != null ? amlResponse.getRiskLevel() : "LOW")
+                                .actionTaken(amlResponse != null && amlResponse.getActionTaken() != null ? amlResponse.getActionTaken() : "PASS")
+                                .serviceName(amlResponse != null && amlResponse.getServiceName() != null ? amlResponse.getServiceName() : "AML_CHECK")
                                 .totalRulesScore(amlResponse != null ? amlResponse.getTotalRulesScore() : 0)
-                                .trxnID(amlResponse != null ? amlResponse.getTrxnID() : null)
-                                .nidImageName(request.getNidImageName())
-                                .selfieImageName(request.getSelfieImageName())
+                                .trxnID(amlResponse != null && amlResponse.getTrxnID() != null ? amlResponse.getTrxnID() : "")
+                                .nidImageName(resolvedNid)
+                                .selfieImageName(resolvedSelfie)
                                 .build();
         }
 
@@ -270,12 +334,19 @@ public class OpenAccountAmlStatusMapper {
                         englishAddress = request.getLegalAddress() != null ? request.getLegalAddress() : "NA";
                 }
 
+                String khmerFullName = joinNonEmpty(" ", request.getLastNameKh(), request.getFirstNameKh());
+                if (khmerFullName.isBlank()) {
+                    khmerFullName = joinNonEmpty(" ", request.getFamilyName(), request.getGivenName());
+                }
+                String englishFullName = joinNonEmpty(" ", request.getFamilyName(), request.getGivenName());
+
                 return CustomerAmlRequest.builder()
                                 .customerId(request.getLegalId())
                                 .custCreateDate(LocalDateTime.now()
                                                 .format(DateTimeFormatter.ofPattern("ddMMyyHHmm")))
                                 .customerType(StatusData.ACTIVE.toString())
-                                .custName(request.getFamilyName() + " " + request.getGivenName())
+                                .custName(englishFullName)
+                                .shortName(khmerFullName)
                                 .givenName(request.getGivenName())
                                 .familyName(request.getFamilyName())
                                 .gender(request.getGender())

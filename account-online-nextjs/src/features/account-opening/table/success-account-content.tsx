@@ -1,12 +1,6 @@
-import { Button } from "@/components/ui/button";
+import { ActionButton } from "@/components/shared/button/custom-button";
 import { indexDisplay, toProperCase } from "@/utils/common/common";
 import { Eye } from "lucide-react";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { TableColumn } from "@/components/shared/table/data-table";
 import {
   AllSuccessAccountOnlineModel,
@@ -104,10 +98,10 @@ export const createSuccessAccountTableColumns = ({
       key: "createdAt",
       label: "Created At",
       truncate: true,
-      maxWidth: "250px",
+      maxWidth: "600px",
       minWidth: "160px",
       render: (account) => (
-        <span className="font-medium">
+        <span className="font-medium whitespace-nowrap">
           {DateTimeFormat(account.createdAt) || "---"}
         </span>
       ),
@@ -119,25 +113,13 @@ export const createSuccessAccountTableColumns = ({
       minWidth: "80px",
       render: (account) => (
         <div className="flex items-center gap-2">
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleViewAccountDetail(account)}
-                >
-                  <Eye className="h-4 w-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>{"View Details"}</TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          <ActionButton
+            icon={<Eye className="h-4 w-4" />}
+            tooltip="View Details"
+            onClick={() => handleViewAccountDetail(account)}
+          />
         </div>
       ),
     },
   ];
 };
-
-
-

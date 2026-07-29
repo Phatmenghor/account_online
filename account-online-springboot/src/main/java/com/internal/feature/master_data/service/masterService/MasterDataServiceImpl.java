@@ -16,6 +16,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -229,6 +230,7 @@ public class MasterDataServiceImpl implements MasterDataService {
 
     // ---------------------- Code-based lookups ----------------------
     @Override
+    @Transactional(readOnly = true)
     public ClsProvinceDto getProvinceByCode(String provinceCode) {
         return provinceRepository.findByProvinceCode(provinceCode)
                 .map(provinceMapper::toClsDto)
@@ -236,6 +238,7 @@ public class MasterDataServiceImpl implements MasterDataService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ClsDistrictDto getDistrictByCode(String districtCode) {
         return districtRepository.findByDistrictCode(districtCode)
                 .map(districtMapper::toClsDto)
@@ -243,6 +246,7 @@ public class MasterDataServiceImpl implements MasterDataService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ClsCommuneDto getCommuneByCode(String communeCode) {
         return communeRepository.findByCommuneCode(communeCode)
                 .map(communeMapper::toClsDto)
@@ -250,6 +254,7 @@ public class MasterDataServiceImpl implements MasterDataService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ClsVillageDto getVillageByCode(String villageCode) {
         return villageRepository.findByVillageCode(villageCode)
                 .map(villageMapper::toClsDto)

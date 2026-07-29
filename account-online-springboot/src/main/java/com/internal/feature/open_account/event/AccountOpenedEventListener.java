@@ -17,6 +17,8 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.transaction.annotation.Transactional;
+
 @Component
 @RequiredArgsConstructor
 @Slf4j
@@ -28,6 +30,7 @@ public class AccountOpenedEventListener {
     private final MasterDataServiceHelper masterDataServiceHelper;
 
     @EventListener
+    @Transactional
     public void handleAccountOpenedEvent(AccountOpenedEvent event) {
         OpenAccountContext context = event.getContext();
         log.info("Processing post-opening events for Legal ID: {}", context.getRequest().getLegalId());
@@ -66,47 +69,27 @@ public class AccountOpenedEventListener {
 
             String branchName = branchRepository.findByBranchCode(request.getBranchCode())
                     .map(Branch::getBranchKh)
-                    .orElse(request.getBranchCode());
+                    .orElse(request.getBranchCode() != null ? request.getBranchCode() : "Main Branch");
 
-            String fullAddress = "";
-            if (masterDataServiceHelper != null) {
-                var loc = masterDataServiceHelper.resolveAddress(
-                        request.getCustomerCurrentProvince(),
-                        request.getCustomerCurrentDistrict(),
-                        request.getCustomerCurrentCommune(),
-                        request.getCustomerCurrentVillage()
-                );
-                
-                List<String> parts = new ArrayList<>();
-                if (loc.getVillage() != null) {
-                    parts.add(loc.getVillage().getVillageEn() + " (" + loc.getVillage().getVillageKh() + ")");
-                } else if (!isBlank(request.getCustomerVillageKh())) {
-                    parts.add(request.getCustomerVillageKh());
-                }
-                
-                if (loc.getCommune() != null) {
-                    parts.add(loc.getCommune().getCommuneEn() + " (" + loc.getCommune().getCommuneKh() + ")");
-                } else if (!isBlank(request.getCustomerCommuneKh())) {
-                    parts.add(request.getCustomerCommuneKh());
-                }
-                
-                if (loc.getDistrict() != null) {
-                    parts.add(loc.getDistrict().getDistrictEn() + " (" + loc.getDistrict().getDistrictKh() + ")");
-                } else if (!isBlank(request.getCustomerDistrictKh())) {
-                    parts.add(request.getCustomerDistrictKh());
-                }
-                
-                if (loc.getProvince() != null) {
-                    parts.add(loc.getProvince().getProvinceEn() + " (" + loc.getProvince().getProvinceKh() + ")");
-                } else if (!isBlank(request.getCustomerProvinceKh())) {
-                    parts.add(request.getCustomerProvinceKh());
-                }
-                
-                fullAddress = String.join(", ", parts);
-            }
+            List<String> parts = new ArrayList<>();
+            String villagePart = formatTelegramAddressPart(request.getCustomerVillageEn(), request.getCustomerVillageKh());
+            if (!villagePart.isBlank()) parts.add(villagePart);
+
+            String communePart = formatTelegramAddressPart(request.getCustomerCommuneEn(), request.getCustomerCommuneKh());
+            if (!communePart.isBlank()) parts.add(communePart);
+
+            String districtPart = formatTelegramAddressPart(request.getCustomerDistrictEn(), request.getCustomerDistrictKh());
+            if (!districtPart.isBlank()) parts.add(districtPart);
+
+            String provincePart = formatTelegramAddressPart(request.getCustomerProvinceEn(), request.getCustomerProvinceKh());
+            if (!provincePart.isBlank()) parts.add(provincePart);
+
+            String fullAddress = String.join(", ", parts);
             if (isBlank(fullAddress)) {
-                fullAddress = request.getLegalAddress();
+                fullAddress = request.getLegalAddress() != null ? request.getLegalAddress() : "";
             }
+
+            log.info("Sending Telegram account created alert for Legal ID: {}", request.getLegalId());
 
             monitoringService.sendAccountCreatedAlert(
                     fullName,
@@ -124,6 +107,15 @@ public class AccountOpenedEventListener {
 
     private boolean isBlank(String value) {
         return value == null || value.isBlank();
+    }
+
+    private String formatTelegramAddressPart(String en, String kh) {
+        if (!isBlank(en) && !isBlank(kh)) {
+            return en.trim() + " (" + kh.trim() + ")";
+        }
+        if (!isBlank(kh)) return kh.trim();
+        if (!isBlank(en)) return en.trim();
+        return "";
     }
 
     private String joinNonBlank(String a, String b) {

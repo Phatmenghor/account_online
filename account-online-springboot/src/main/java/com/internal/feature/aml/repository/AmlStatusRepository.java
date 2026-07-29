@@ -17,8 +17,8 @@ public interface AmlStatusRepository extends JpaRepository<AmlStatus, Long> {
     Optional<AmlStatus> findByLegalId(String legalId);
 
     @Query("SELECT a FROM AmlStatus a WHERE " +
-           "(:status IS NULL OR a.status = :status) AND " +
-           "(:search IS NULL OR :search = '' OR " +
+           "(cast(:status as string) IS NULL OR a.status = :status) AND " +
+           "(cast(:search as string) IS NULL OR cast(:search as string) = '' OR " +
            "LOWER(a.familyName) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
            "LOWER(a.givenName) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
            "LOWER(a.lastNameKh) LIKE LOWER(CONCAT('%', :search, '%')) OR " +

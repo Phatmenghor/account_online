@@ -211,6 +211,10 @@ export const useAccountSubmission = ({
         customerCurrentDistrict: locationData.currentAddress.district?.districtCode || "",
         customerCurrentCommune: locationData.currentAddress.commune?.communeCode || "",
         customerCurrentVillage: locationData.currentAddress.village?.villageCode || "",
+        customerProvinceEn: locationData.currentAddress.province?.provinceEn || "",
+        customerDistrictEn: locationData.currentAddress.district?.districtEn || "",
+        customerCommuneEn: locationData.currentAddress.commune?.communeEn || "",
+        customerVillageEn: locationData.currentAddress.village?.villageEn || "",
         customerProvinceKh: locationData.currentAddress.province?.provinceKh || "",
         customerDistrictKh: locationData.currentAddress.district?.districtKh || "",
         customerCommuneKh: locationData.currentAddress.commune?.communeKh || "",
@@ -219,6 +223,10 @@ export const useAccountSubmission = ({
         customerPobDistrict: locationData.placeOfBirth.district?.districtCode || "",
         customerPobCommune: locationData.placeOfBirth.commune?.communeCode || "",
         customerPobVillage: locationData.placeOfBirth.village?.villageCode || "",
+        customerPobProvinceEn: locationData.placeOfBirth.province?.provinceEn || "",
+        customerPobDistrictEn: locationData.placeOfBirth.district?.districtEn || "",
+        customerPobCommuneEn: locationData.placeOfBirth.commune?.communeEn || "",
+        customerPobVillageEn: locationData.placeOfBirth.village?.villageEn || "",
         customerPobProvinceKh: locationData.placeOfBirth.province?.provinceKh || "",
         customerPobDistrictKh: locationData.placeOfBirth.district?.districtKh || "",
         customerPobCommuneKh: locationData.placeOfBirth.commune?.communeKh || "",
@@ -229,7 +237,6 @@ export const useAccountSubmission = ({
         accountType: isPublic ? "6011" : (selectedCategory?.lookupId || "6011"),
       };
 
-      setProgressPercent(85);
       const response = await createOpenAccountService(accountData);
 
       // Step 4: Finalizing & Success

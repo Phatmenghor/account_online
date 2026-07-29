@@ -25,9 +25,10 @@ export const ROUTES = {
       VILLAGE: "/village",
       ACCOUNT_ONLINE_SUCCESS: "/account-online-success",
       ACCOUNT_ONLINE_SUCCESS_REPORT: "/report-account-online-success",
-      LEGAL_TYPE: "/legal-type",
       JUNIOR_ACCOUNT_SUCCESS: "/junior-account-success",
+      JUNIOR_ACCOUNT_SUCCESS_REPORT: "/report-junior-account-success",
       JUNIOR_AML_MANAGEMENT: "/junior-aml-management",
+      JUNIOR_AML_HISTORY: "/junior-aml-history",
     },
     AML: {
       MANAGEMENT: "/aml-management",

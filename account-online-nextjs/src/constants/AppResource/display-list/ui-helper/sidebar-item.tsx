@@ -51,7 +51,6 @@ export function useNavItems() {
         },
         { title: "Marital", href: ROUTES.DASHBOARD.STATIC.MARITAL },
         { title: "Occupation", href: ROUTES.DASHBOARD.STATIC.OCCUPATION },
-        { title: "Legal Type", href: ROUTES.DASHBOARD.STATIC.LEGAL_TYPE },
       ],
     },
     {

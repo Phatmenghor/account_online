@@ -50,7 +50,7 @@ export default function SuccessAccountViewModal({
 }: SuccessAccountViewModalProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-3xl sm:max-w-3xl w-full max-h-[90vh] overflow-hidden p-0 gap-0 flex flex-col">
+      <DialogContent className="max-w-5xl sm:max-w-5xl w-full max-h-[90vh] overflow-hidden p-0 gap-0 flex flex-col">
         {/* Header */}
         <DialogHeader className="px-6 py-4 border-b bg-muted/30 flex-shrink-0">
           <div className="flex items-center gap-4 pr-8">
@@ -58,10 +58,15 @@ export default function SuccessAccountViewModal({
               <User className="w-6 h-6 text-foreground" />
             </div>
             <div className="flex-1">
-              <DialogTitle className="text-xl font-semibold">
-                Success Account Details
-              </DialogTitle>
-              <DialogDescription className="text-base text-muted-foreground">
+              <div className="flex items-center gap-2">
+                <DialogTitle className="text-xl font-semibold">
+                  Account Online Details
+                </DialogTitle>
+                <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-teal-100 text-teal-800 dark:bg-teal-900/40 dark:text-teal-300">
+                  Junior Account
+                </span>
+              </div>
+              <DialogDescription className="text-base text-muted-foreground mt-0.5">
                 {account?.legalHolderName
                   ? `Details for "${toProperCase(account.legalHolderName)}"`
                   : account?.cif

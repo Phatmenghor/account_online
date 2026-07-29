@@ -121,10 +121,10 @@ export const createSuccessAccountExcelTableColumns = ({
       key: "createdAt",
       label: "Created At",
       truncate: true,
-      maxWidth: "250px",
+      maxWidth: "600px",
       minWidth: "160px",
       render: (account) => (
-        <span className="font-medium">
+        <span className="font-medium whitespace-nowrap">
           {DateTimeFormat(account.createdAt) || "---"}
         </span>
       ),

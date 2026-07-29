@@ -104,8 +104,25 @@ public class TelegramService {
 
             String response = restTemplate.postForObject(url, requestEntity, String.class);
             saveLog(response, chatId);
+            log.info("Telegram alert sent successfully to chat_id: {}", chatId);
         } catch (Exception e) {
-            log.warn("Telegram send failed - chat_id: {}, error: {}", chatId, e.getMessage());
+            log.warn("Telegram markdown send failed - chat_id: {}, error: {}. Retrying as plain text...", chatId, e.getMessage());
+            try {
+                HttpHeaders headers = new HttpHeaders();
+                headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+
+                MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
+                body.add("chat_id", chatId);
+                body.add("text", message);
+
+                HttpEntity<MultiValueMap<String, String>> requestEntity = new HttpEntity<>(body, headers);
+                String url = String.format("https://api.telegram.org/bot%s/sendMessage", botToken);
+                String response = restTemplate.postForObject(url, requestEntity, String.class);
+                saveLog(response, chatId);
+                log.info("Telegram alert sent as plain text to chat_id: {}", chatId);
+            } catch (Exception retryEx) {
+                log.error("Telegram send failed completely - chat_id: {}, error: {}", chatId, retryEx.getMessage());
+            }
         }
     }
 

@@ -10,8 +10,9 @@ import {
   verifiedOtpService,
   type PhoneCheckResult,
 } from "@/features/account-opening/services/otp.service";
+import { Button } from "@/components/ui/button";
 import { SendOtpReq, VerifyOtpReq } from "@/features/account-opening/types/otp.request";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 
 interface OTPInputProps {
   phoneNumber: string;
@@ -32,6 +33,7 @@ export default function OTPInput({
   onValidationChange,
   reset,
 }: OTPInputProps) {
+  const locale = useLocale();
   const [otpCode, setOtpCode] = useState<string>("");
   const [isOtpSent, setIsOtpSent] = useState<boolean>(false);
   const [isOtpVerified, setIsOtpVerified] = useState<boolean>(false);
@@ -309,19 +311,39 @@ export default function OTPInput({
             <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0" />
           )}
         </div>
-        <div className="relative">
+        <div className="relative flex items-center">
           <Input
             placeholder={translate("contactNumber")}
             value={phoneNumber}
             onChange={(e) => handlePhoneChange(e.target.value)}
             onBlur={handlePhoneBlur}
-            className={`w-full h-9 text-sm rounded-xl ${validationErrors.phoneNumber ? "border-red-400" : ""}`}
-            disabled={disabled || isSendingOtp}
+            className={`w-full h-9 text-sm rounded-xl pr-28 ${validationErrors.phoneNumber ? "border-red-400" : ""}`}
+            disabled={disabled || isSendingOtp || isOtpVerified}
             maxLength={15}
           />
-          {isSendingOtp && (
-            <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-primary pointer-events-none" />
-          )}
+          <button
+            type="button"
+            onClick={handleSendOtp}
+            disabled={countdown > 0 || disabled || isSendingOtp || isOtpVerified}
+            className={`absolute right-1 text-xs px-3 h-7 rounded-lg font-semibold shadow-xs transition-all duration-200 ${
+              countdown > 0 || disabled || isSendingOtp || isOtpVerified
+                ? "bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200"
+                : "bg-primary hover:bg-primary/90 text-white cursor-pointer"
+            }`}
+          >
+            {isSendingOtp ? (
+              <span className="flex items-center gap-1">
+                <Loader2 className="h-3 w-3 animate-spin" />
+                {translate("loading")}
+              </span>
+            ) : countdown > 0 ? (
+              `ផ្ញើ OTP (${countdown}s)`
+            ) : isOtpSent ? (
+              translate("reSendOtp")
+            ) : (
+              "ផ្ញើ OTP"
+            )}
+          </button>
         </div>
         {validationErrors.phoneNumber && (
           <p className="text-xs text-red-500 mt-1">{translate("err_phoneNumber_regex")}</p>
@@ -334,29 +356,9 @@ export default function OTPInput({
           <label className="text-sm font-medium text-gray-700">
             {translate("otpCode")}
           </label>
-          <button
-            type="button"
-            onClick={handleSendOtp}
-            disabled={countdown > 0 || disabled || isSendingOtp || isOtpVerified}
-            className={`text-xs font-semibold bg-transparent border-none p-0 transition-colors duration-200 ${
-              countdown > 0 || disabled || isSendingOtp || isOtpVerified
-                ? "text-gray-400 cursor-not-allowed"
-                : "text-primary hover:text-primary/70 cursor-pointer"
-            }`}
-          >
-            {isSendingOtp ? (
-              <span className="flex items-center gap-1">
-                <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                {translate("loading")}
-              </span>
-            ) : countdown > 0 ? (
-              `${isOtpSent ? translate("reSendOtp") : translate("sendOtp")} (${countdown}s)`
-            ) : isOtpSent ? (
-              translate("reSendOtp")
-            ) : (
-              translate("sendOtp")
-            )}
-          </button>
+          {isOtpVerified && (
+            <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0" />
+          )}
         </div>
         <div className="relative">
           <Input
@@ -364,6 +366,7 @@ export default function OTPInput({
             value={otpCode}
             onChange={(e) => handleOtpChange(e.target.value)}
             maxLength={6}
+            disabled={disabled || isOtpVerified}
             className={`w-full h-9 text-sm rounded-xl ${validationErrors.isPhoneVerified ? "border-red-400" : ""}`}
           />
           {isVerifyingOtp && (
@@ -377,79 +380,28 @@ export default function OTPInput({
 
       {/* ── Phone Already Registered Warning Modal ── */}
       {showPhoneWarning && phoneWarning && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
-          <div
-            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-            onClick={() => setShowPhoneWarning(false)}
-          />
-          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 fade-in duration-200">
-            {/* Orange accent bar */}
-            <div className="h-1.5 w-full bg-amber-500" />
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs">
+          <div className="relative bg-white border border-slate-200 w-full max-w-md rounded-2xl p-6 shadow-2xl space-y-4 text-center">
+            <div className="w-12 h-12 rounded-full bg-amber-100 border border-amber-200 text-amber-600 flex items-center justify-center mx-auto">
+              <AlertTriangle className="w-6 h-6" />
+            </div>
 
-            <div className="p-6 space-y-4">
-              {/* Icon + Title */}
-              <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <AlertTriangle className="w-5 h-5 text-amber-600" />
-                </div>
-                <div>
-                  <h3 className="text-base font-bold text-gray-900">
-                    Phone Already Registered
-                  </h3>
-                  <p className="text-sm text-gray-500 mt-1 leading-relaxed">
-                    This phone number is already linked to an active MB account.
-                  </p>
-                </div>
-              </div>
+            <h3 className="text-base font-bold text-slate-900">
+              {translate("account_exists_title")}
+            </h3>
 
-              {/* CIF Info */}
-              <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 space-y-1">
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-500 font-medium">CIF</span>
-                  <span className="text-gray-900 font-semibold">{phoneWarning.cif}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-500 font-medium">Mobile</span>
-                  <span className="text-gray-900 font-semibold">{phoneWarning.mobile}</span>
-                </div>
-              </div>
+            <p className="text-xs text-slate-600 leading-relaxed text-left bg-slate-50 p-4 rounded-xl border border-slate-200">
+              {translate("account_exists_message")}
+            </p>
 
-              <p className="text-xs text-gray-400 leading-relaxed">
-                If you believe this is an error, you may still proceed. Otherwise, please use a different phone number.
-              </p>
-
-              {/* Action Buttons */}
-              <div className="flex gap-3 pt-1">
-                <button
-                  onClick={() => setShowPhoneWarning(false)}
-                  className="flex-1 h-10 rounded-xl border border-gray-200 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
-                >
-                  Use Different Number
-                </button>
-                <button
-                  onClick={async () => {
-                    setShowPhoneWarning(false);
-                    setIsSendingOtp(true);
-                    try {
-                      const requestData: SendOtpReq = { phone: phoneNumber.replace(/\s/g, "") };
-                      const response = await sendOtpService(requestData);
-                      setIsOtpSent(true);
-                      setOtpExpiresAt(response?.expiresAt ?? "");
-                      setCountdown(60);
-                      setOtpCode("");
-                      validateField("phoneNumber", phoneNumber);
-                      AppToast({ type: "success", message: translate("otp_sent_success"), description: translate("otp_sent_success_desc", { phone: phoneNumber }) });
-                    } catch (err: any) {
-                      AppToast({ type: "error", message: translate("otp_send_fail"), description: err?.response?.data?.message ?? translate("otp_send_fail_desc") });
-                    } finally {
-                      setIsSendingOtp(false);
-                    }
-                  }}
-                  className="flex-1 h-10 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-sm font-medium transition-colors"
-                >
-                  Proceed Anyway
-                </button>
-              </div>
+            <div className="pt-2">
+              <Button
+                type="button"
+                onClick={() => setShowPhoneWarning(false)}
+                className="w-full h-10 bg-primary hover:bg-primary/90 text-white font-bold text-xs rounded-xl cursor-pointer"
+              >
+                {locale === "kh" ? "យល់ព្រម" : "OK"}
+              </Button>
             </div>
           </div>
         </div>

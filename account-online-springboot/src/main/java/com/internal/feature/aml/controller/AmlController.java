@@ -3,7 +3,6 @@ package com.internal.feature.aml.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.internal.feature.aml.dto.request.AllAmlHistoryRequestDto;
 import com.internal.feature.aml.dto.request.AllAmlRequestDto;
-import com.internal.feature.aml.dto.request.ExternalAmlStatusUpdateDto;
 import com.internal.feature.aml.dto.request.UpdateAmlStatusDto;
 import com.internal.feature.aml.dto.response.AllAmlHistoryResponseDto;
 import com.internal.feature.aml.dto.response.AllAmlResponseDto;
@@ -76,17 +75,5 @@ public class AmlController {
         return ResponseEntity.ok(ApiResponse.success(
                 ResponseMessage.AML_STATUS_UPDATED, updatedStatus
         ));
-    }
-
-    @PostMapping("/external/update-status")
-    public ResponseEntity<ApiResponse<String>> updateExternalAmlStatus(
-            @RequestHeader("X-API-KEY") String apiKey,
-            @RequestHeader("X-SECRET-KEY") String secretKey,
-            @RequestBody @Valid ExternalAmlStatusUpdateDto req) {
-
-        log.info("Received external request to update AML status for Legal ID: {}", req.getCustomerId());
-        service.updateExternalAmlStatus(apiKey, secretKey, req);
-        
-        return ResponseEntity.ok(ApiResponse.success(ResponseMessage.AML_EXTERNAL_UPDATED, null));
     }
 }
