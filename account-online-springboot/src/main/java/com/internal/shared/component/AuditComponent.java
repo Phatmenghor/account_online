@@ -1,8 +1,8 @@
 package com.internal.shared.component;
 
-import com.internal.shared.exception.custom.NotFoundException;
 import com.internal.feature.auth.models.UserEntity;
 import com.internal.feature.auth.repository.UserRepository;
+import com.internal.shared.exception.custom.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
@@ -32,12 +32,7 @@ public class AuditComponent {
         return userRepository.findByUsername(username)
                 .orElseThrow(() -> {
                     log.error("User not found: {}", username);
-                    return new NotFoundException("User with id card " + username + " not found");
+                    return new NotFoundException("User with username " + username + " not found");
                 });
     }
 }
-
-
-
-
-

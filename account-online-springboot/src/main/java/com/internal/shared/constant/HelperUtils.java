@@ -1,16 +1,19 @@
 package com.internal.shared.constant;
 
-import org.springframework.stereotype.Component;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
-@Component
-public class HelperUtils {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class HelperUtils {
+
     public static String formatCodeWithLeadingZero(String code, int length) {
-        if (code == null || code.isEmpty()) return code;
+        if (code == null || code.isBlank()) {
+            return code;
+        }
         try {
-            int numeric = Integer.parseInt(code);
+            int numeric = Integer.parseInt(code.trim());
             return String.format("%0" + length + "d", numeric);
         } catch (NumberFormatException e) {
-            // If code is not numeric, just return it as-is
             return code;
         }
     }
