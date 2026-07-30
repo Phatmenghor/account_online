@@ -17,7 +17,7 @@ import { CustomDatePicker } from "@/components/shared/common/custom-date-picker"
 import { AppToast } from "@/components/shared/toast/app-toast";
 import { format, subMonths } from "date-fns";
 import { axiosClientWithAuth } from "@/utils/axios";
-import JuniorAccountViewModal from "@/features/account-opening/components/junior-account-detail-modal";
+import SuccessAccountDetailModal from "@/features/account-opening/components/success-account-detail-modal";
 import { createJuniorSuccessAccountTableColumns } from "@/features/account-opening/table/junior-success-account-content";
 
 const formatDate = (date: Date) => format(date, "yyyy-MM-dd");
@@ -168,7 +168,7 @@ function ReportJuniorSuccessAccountContent() {
             </div>
           </div>
 
-          <JuniorAccountViewModal
+          <SuccessAccountDetailModal
             isOpen={isDetailOpen}
             onClose={() => {
               setIsDetailOpen(false);

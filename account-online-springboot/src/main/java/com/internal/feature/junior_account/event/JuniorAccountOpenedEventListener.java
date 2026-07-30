@@ -149,6 +149,34 @@ public class JuniorAccountOpenedEventListener {
                 juniorFinal.setNationality("KH");
             }
 
+            // Resolve fast location strings (Khmer -> English -> Code fallback)
+            if (juniorFinal.getCustomerProvince() == null || juniorFinal.getCustomerProvince().isBlank()) {
+                juniorFinal.setCustomerProvince(formatFastAddress(request.getCustomerProvinceKh(), request.getCustomerProvinceEn(), request.getCustomerCurrentProvince()));
+            }
+            if (juniorFinal.getCustomerDistrict() == null || juniorFinal.getCustomerDistrict().isBlank()) {
+                juniorFinal.setCustomerDistrict(formatFastAddress(request.getCustomerDistrictKh(), request.getCustomerDistrictEn(), request.getCustomerCurrentDistrict()));
+            }
+            if (juniorFinal.getCustomerCommune() == null || juniorFinal.getCustomerCommune().isBlank()) {
+                juniorFinal.setCustomerCommune(formatFastAddress(request.getCustomerCommuneKh(), request.getCustomerCommuneEn(), request.getCustomerCurrentCommune()));
+            }
+            if (juniorFinal.getCustomerVillage() == null || juniorFinal.getCustomerVillage().isBlank()) {
+                juniorFinal.setCustomerVillage(formatFastAddress(request.getCustomerVillageKh(), request.getCustomerVillageEn(), request.getCustomerCurrentVillage()));
+            }
+
+            if (juniorFinal.getCustomerPobProvince() == null || juniorFinal.getCustomerPobProvince().isBlank()) {
+                juniorFinal.setCustomerPobProvince(formatFastAddress(request.getCustomerPobProvinceKh(), request.getCustomerPobProvinceEn(), request.getCustomerPobProvince()));
+            }
+            if (juniorFinal.getCustomerPobDistrict() == null || juniorFinal.getCustomerPobDistrict().isBlank()) {
+                juniorFinal.setCustomerPobDistrict(formatFastAddress(request.getCustomerPobDistrictKh(), request.getCustomerPobDistrictEn(), request.getCustomerPobDistrict()));
+            }
+            if (juniorFinal.getCustomerPobCommune() == null || juniorFinal.getCustomerPobCommune().isBlank()) {
+                juniorFinal.setCustomerPobCommune(formatFastAddress(request.getCustomerPobCommuneKh(), request.getCustomerPobCommuneEn(), request.getCustomerPobCommune()));
+            }
+            if (juniorFinal.getCustomerPobVillage() == null || juniorFinal.getCustomerPobVillage().isBlank()) {
+                juniorFinal.setCustomerPobVillage(formatFastAddress(request.getCustomerPobVillageKh(), request.getCustomerPobVillageEn(), request.getCustomerPobVillage()));
+            }
+
+
             if (!hasNid && request.getGuardianCif() != null && !request.getGuardianCif().isBlank()) {
                 try {
                     var parentInfo = customerInfoService.getCustomerByCif(request.getGuardianCif());
@@ -309,4 +337,12 @@ public class JuniorAccountOpenedEventListener {
         }
         return sb.toString();
     }
+
+    private String formatFastAddress(String kh, String en, String code) {
+        if (kh != null && !kh.isBlank()) return kh.trim();
+        if (en != null && !en.isBlank()) return en.trim();
+        if (code != null && !code.isBlank()) return code.trim();
+        return "";
+    }
 }
+

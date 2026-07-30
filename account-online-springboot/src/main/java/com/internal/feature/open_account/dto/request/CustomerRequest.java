@@ -120,36 +120,37 @@ public class CustomerRequest {
     private String customerType;
 
     @JsonProperty("cust_province")
-    @JsonAlias({"customerCurrentProvince", "cust_province"})
+    @JsonAlias({"customerCurrentProvince", "cust_province", "customerProvinceCode", "customer_province_code"})
     private String customerCurrentProvince;
 
     @JsonProperty("cust_district")
-    @JsonAlias({"customerCurrentDistrict", "cust_district"})
+    @JsonAlias({"customerCurrentDistrict", "cust_district", "customerDistrictCode", "customer_district_code"})
     private String customerCurrentDistrict;
 
     @JsonProperty("cust_commune")
-    @JsonAlias({"customerCurrentCommune", "cust_commune"})
+    @JsonAlias({"customerCurrentCommune", "cust_commune", "customerCommuneCode", "customer_commune_code"})
     private String customerCurrentCommune;
 
     @JsonProperty("cust_village")
-    @JsonAlias({"customerCurrentVillage", "cust_village"})
+    @JsonAlias({"customerCurrentVillage", "cust_village", "customerVillageCode", "customer_village_code"})
     private String customerCurrentVillage;
 
     @JsonProperty("cust_pob_province")
-    @JsonAlias({"customerPobProvince", "cust_pob_province"})
+    @JsonAlias({"customerPobProvince", "cust_pob_province", "customerPobProvinceCode", "customer_pob_province_code"})
     private String customerPobProvince;
 
     @JsonProperty("cust_pob_district")
-    @JsonAlias({"customerPobDistrict", "cust_pob_district"})
+    @JsonAlias({"customerPobDistrict", "cust_pob_district", "customerPobDistrictCode", "customer_pob_district_code"})
     private String customerPobDistrict;
 
     @JsonProperty("cust_pob_commune")
-    @JsonAlias({"customerPobCommune", "cust_pob_commune"})
+    @JsonAlias({"customerPobCommune", "cust_pob_commune", "customerPobCommuneCode", "customer_pob_commune_code"})
     private String customerPobCommune;
 
     @JsonProperty("cust_pob_village")
-    @JsonAlias({"customerPobVillage", "cust_pob_village"})
+    @JsonAlias({"customerPobVillage", "cust_pob_village", "customerPobVillageCode", "customer_pob_village_code"})
     private String customerPobVillage;
+
 
     @JsonProperty("ownership")
     private String ownership;

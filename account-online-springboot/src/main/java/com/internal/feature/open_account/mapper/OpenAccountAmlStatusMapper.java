@@ -218,6 +218,7 @@ public class OpenAccountAmlStatusMapper {
                                 .placeOfBirthName(resolvedPob != null ? resolvedPob : "")
                                 .maritalStatus(request.getMaritalStatus() != null ? request.getMaritalStatus() : "SINGLE")
                                 .occupationCode(request.getOccupation() != null ? request.getOccupation() : "")
+                                .branch(request.getBranchCode() != null ? request.getBranchCode() : "")
                                 .riskLevel(amlResponse != null && amlResponse.getRiskLevel() != null ? amlResponse.getRiskLevel() : "LOW")
                                 .actionTaken(amlResponse != null && amlResponse.getActionTaken() != null ? amlResponse.getActionTaken() : "PASS")
                                 .serviceName(amlResponse != null && amlResponse.getServiceName() != null ? amlResponse.getServiceName() : "AML_CHECK")

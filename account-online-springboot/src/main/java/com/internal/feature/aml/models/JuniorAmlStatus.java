@@ -100,6 +100,63 @@ public class JuniorAmlStatus extends BaseEntity {
     @Column(name = "has_nid")
     private Boolean hasNid;
 
+    // ============================================
+    // CURRENT ADDRESS (resolved EN+KH name & code)
+    // ============================================
+    @Column(name = "current_address_code")
+    private String currentAddressCode;
+
+    @Column(name = "current_address_name", columnDefinition = "TEXT")
+    private String currentAddressName;
+
+    // ============================================
+    // PLACE OF BIRTH (resolved EN+KH name & code)
+    // ============================================
+    @Column(name = "place_of_birth_code")
+    private String placeOfBirthCode;
+
+    @Column(name = "place_of_birth_name", columnDefinition = "TEXT")
+    private String placeOfBirthName;
+
+    // ============================================
+    // OCCUPATION STATUS
+    // ============================================
+    @Column(name = "occupation_status")
+    private String occupationStatus;
+
+    // ============================================
+    // AML SCREENING INFORMATION
+    // ============================================
+    @Column(name = "screening_result", columnDefinition = "TEXT")
+    private String screeningResult;
+
+    @Column(name = "aml_ext_risk_level")
+    private String amlExternalRiskLevel;
+
+    @Column(name = "aml_ext_action_taken")
+    private String amlExternalActionTaken;
+
+    @Column(name = "aml_ext_rules_triggered", columnDefinition = "TEXT")
+    private String amlExternalRulesTriggered;
+
+    @Column(name = "aml_ext_service_name")
+    private String amlExternalServiceName;
+
+    @Column(name = "aml_ext_total_rules_score")
+    private Integer amlExternalTotalRulesScore;
+
+    @Column(name = "aml_ext_trxn_id")
+    private String amlExternalTrxnID;
+
+    // ============================================
+    // SUBMITTED BY
+    // ============================================
+    @Column(name = "submitted_by", length = 100)
+    private String submittedBy;
+
+    // ============================================
+    // ADMIN REMARKS
+    // ============================================
     @Column(name = "remarks", columnDefinition = "TEXT")
     private String remarks;
 

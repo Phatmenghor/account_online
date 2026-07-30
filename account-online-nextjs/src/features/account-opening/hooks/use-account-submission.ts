@@ -99,14 +99,23 @@ export const useAccountSubmission = ({
     selfieFileName: null,
   });
 
+  const closeLoading = () => {
+    setLoadingState({ isLoading: false, title: "", message: "" });
+    setProgressPercent(0);
+  };
+
+  /** Close loading modal first, then open error modal after transition gap */
   const showError = (override?: Partial<{ title: string; message: string; variant?: "error" | "warning" }>) => {
-    setSubmitErrorData({
-      title: translate("err_generic_title") || GENERIC_ERROR.title,
-      message: translate("err_generic_message") || GENERIC_ERROR.message,
-      variant: "error" as const,
-      ...override,
-    });
-    setShowSubmitErrorModal(true);
+    closeLoading();
+    setTimeout(() => {
+      setSubmitErrorData({
+        title: translate("err_generic_title") || GENERIC_ERROR.title,
+        message: translate("err_generic_message") || GENERIC_ERROR.message,
+        variant: "error" as const,
+        ...override,
+      });
+      setShowSubmitErrorModal(true);
+    }, 350);
   };
 
   const resetUploadCache = () => {
@@ -243,8 +252,12 @@ export const useAccountSubmission = ({
       setProgressPercent(100);
       uploadCache.current = { nidFileName: null, selfieFileName: null };
 
-      setSuccessData(response?.data ?? response);
-      setShowSuccessModal(true);
+      // Close loading first, then show success modal smoothly
+      closeLoading();
+      setTimeout(() => {
+        setSuccessData(response?.data ?? response);
+        setShowSuccessModal(true);
+      }, 350);
     } catch (error: any) {
       // Clean up cache on failure so retry doesn't reuse partial/failed files
       resetUploadCache();
@@ -281,13 +294,17 @@ export const useAccountSubmission = ({
           errorMessage ||
           "លោកអ្នកមានគណនីជាមួយធនាគាររួចហើយ។ សូមប្រើប្រាស់ជាមួយគណនីរបស់លោកអ្នក។";
 
-        setAccountExistsData({
-          cif: errorResponse?.details?.cif || errorResponse?.data?.cif,
-          accountNumber: errorResponse?.details?.accountNumber || errorResponse?.data?.khrAccount,
-          accountName: errorResponse?.details?.accountName || errorResponse?.data?.legalHolderName,
-          message: friendlyMessage,
-        });
-        setShowAccountExistsModal(true);
+        // Close loading first, then show account-exists modal smoothly
+        closeLoading();
+        setTimeout(() => {
+          setAccountExistsData({
+            cif: errorResponse?.details?.cif || errorResponse?.data?.cif,
+            accountNumber: errorResponse?.details?.accountNumber || errorResponse?.data?.khrAccount,
+            accountName: errorResponse?.details?.accountName || errorResponse?.data?.legalHolderName,
+            message: friendlyMessage,
+          });
+          setShowAccountExistsModal(true);
+        }, 350);
       } else {
         const fullMsg =
           errorMessage ||
@@ -301,10 +318,11 @@ export const useAccountSubmission = ({
         });
       }
     } finally {
+      // Only close loading if not already handled inside catch block
       setTimeout(() => {
-        setLoadingState({ isLoading: false, title: "", message: "" });
+        setLoadingState((prev) => (prev.isLoading ? { isLoading: false, title: "", message: "" } : prev));
         setProgressPercent(0);
-      }, 300);
+      }, 50);
     }
   };
 

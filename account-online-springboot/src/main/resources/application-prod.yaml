@@ -122,7 +122,7 @@ telegram:
     token: "8227113200:AAGq1I7Hs0CjkSW99M9rgrIdlHpgM8r6NMY"
     dev-chat-id: "-1002740302492"
     monitor-chat-id: "-1003115792160"
-    junior-chat-id: "-1002740302492"
+    junior-chat-id: "-5590655829"
     compliance-mention: "@COMPLIANCE_TEAM"
     enabled: true
     message-retention-days: 30

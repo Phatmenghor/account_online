@@ -1,23 +1,38 @@
 "use client";
 
-import { Suspense, useCallback, useEffect, useState } from "react";
+import {
+  startTransition,
+  Suspense,
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
 import { PageHeader } from "@/components/shared/common/page-header";
 import { TableToolbar } from "@/components/shared/common/table-toolbar";
 import { CustomPagination } from "@/components/shared/pagination/custom-pagination";
 import { DataTable, TableColumn } from "@/components/shared/table/data-table";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { ROUTES } from "@/constants/AppRoutes/routes";
 import { usePagination } from "@/hooks/use-pagination";
 import { useDebounce } from "@/utils/debounce/debounce";
-import { ShieldAlert, Check, X, Eye } from "lucide-react";
+import { ShieldAlert, CheckCircle, XCircle, Eye } from "lucide-react";
 import Loading from "@/components/shared/common/loading";
 import { AppToast } from "@/components/shared/toast/app-toast";
+import RiskBadge from "@/components/shared/badge/risk-level-badge";
+import AmlStatusBadge from "@/components/shared/badge/aml-badge";
 import AmlStatusFilter from "@/features/aml/components/aml-status-filter";
 import { AmlStatusEnum } from "@/constants/AppResource/display-list/enum/status";
 import AmlConfirmDialog from "@/components/shared/dialog/dialog-aml";
 import JuniorAccountViewModal from "@/features/account-opening/components/junior-account-detail-modal";
-import { ActionButton } from "@/components/shared/button/custom-button";
+import { DateTimeFormat } from "@/utils/date/date-time-format";
 import {
   getAllJuniorAmlManagementService,
   updateJuniorAmlManagementService,
@@ -85,10 +100,19 @@ function JuniorAmlManagementContent() {
         status: confirmStatus,
         remark: remarks || "",
       });
-      AppToast({
-        type: "success",
-        message: `Junior AML Case successfully ${confirmStatus.toLowerCase()}d`,
+
+      // Optimistic update — remove the processed record
+      setData((prev) => prev.filter((item) => item.id !== selectedRecord.id));
+      setTotalElements((prev) => Math.max(0, prev - 1));
+
+      startTransition(() => {
+        AppToast({
+          type: "success",
+          message: `Junior AML ${confirmStatus} successfully`,
+          description: `Case has been ${confirmStatus.toLowerCase()}.`,
+        });
       });
+
       setIsConfirmDialogOpen(false);
       setSelectedRecord(null);
       loadAmlManagement();
@@ -101,94 +125,157 @@ function JuniorAmlManagementContent() {
   };
 
   const columns: TableColumn<any>[] = [
+    // Index
     {
-      key: "cif",
-      label: "CIF",
-      minWidth: "120px",
-      render: (item) => <span className="font-mono text-xs font-bold">{item.cif || "---"}</span>,
+      key: "index",
+      label: "#",
+      maxWidth: "60px",
+      minWidth: "60px",
+      render: (_, index) => <span className="font-medium">{index + 1}</span>,
     },
+
+    // Legal ID
     {
       key: "legalId",
-      label: "Legal ID",
-      minWidth: "130px",
-      render: (item) => <span className="text-xs font-medium">{item.legalId || "---"}</span>,
-    },
-    {
-      key: "legalHolderName",
-      label: "Holder Name",
-      minWidth: "160px",
-      render: (item) => <span className="text-xs font-semibold">{item.legalHolderName || "---"}</span>,
-    },
-    {
-      key: "guardianName",
-      label: "Guardian Name",
-      minWidth: "150px",
-      render: (item) => <span className="text-xs font-medium">{item.guardianName || "---"}</span>,
-    },
-    {
-      key: "amlRiskLevel",
-      label: "Risk Level",
-      minWidth: "110px",
+      label: "ID Number",
+      truncate: true,
+      maxWidth: "250px",
+      minWidth: "20px",
       render: (item) => (
-        <span
-          className={`px-2.5 py-0.5 rounded-full text-xs font-semibold whitespace-nowrap ${
-            item.amlRiskLevel === "HIGH"
-              ? "bg-red-100 text-red-800"
-              : item.amlRiskLevel === "MEDIUM"
-              ? "bg-amber-100 text-amber-800"
-              : "bg-green-100 text-green-800"
-          }`}
-        >
-          {item.amlRiskLevel || "MEDIUM"}
+        <span className="font-medium">{item.legalId || "---"}</span>
+      ),
+    },
+
+    // Junior / Child Name
+    {
+      key: "customerName",
+      label: "Child Name",
+      truncate: true,
+      maxWidth: "240px",
+      minWidth: "180px",
+      render: (item) => {
+        const name = `${item.familyName || ""} ${item.givenName || ""}`.trim()
+          || `${item.lastNameKh || ""} ${item.firstNameKh || ""}`.trim()
+          || "---";
+        return <span className="font-medium">{name}</span>;
+      },
+    },
+
+    // Guardian Name
+    // Branch
+    // (removed — Junior AML table matches Account Online AML columns exactly)
+
+    // Risk Level
+    {
+      key: "riskLevel",
+      label: "Risk Level",
+      truncate: true,
+      maxWidth: "130px",
+      minWidth: "100px",
+      render: (item) => (
+        <RiskBadge riskLevel={item.amlExternalRiskLevel || item.amlRiskLevel || "---"} />
+      ),
+    },
+
+    // Score
+    {
+      key: "totalRulesScore",
+      label: "Score",
+      maxWidth: "100px",
+      minWidth: "80px",
+      render: (item) => (
+        <span className="font-medium">{item.amlExternalTotalRulesScore ?? item.totalRulesScore ?? "---"}</span>
+      ),
+    },
+
+    // Created At
+    {
+      key: "createdAt",
+      label: "Created At",
+      truncate: true,
+      maxWidth: "200px",
+      minWidth: "180px",
+      render: (item) => (
+        <span className="font-medium whitespace-nowrap">
+          {DateTimeFormat(item.createdAt) || "---"}
         </span>
       ),
     },
+
+    // Status
     {
       key: "status",
       label: "Status",
-      minWidth: "110px",
-      render: (item) => (
-        <span
-          className={`px-2.5 py-0.5 rounded-full text-xs font-semibold whitespace-nowrap ${
-            item.status === "APPROVE"
-              ? "bg-emerald-100 text-emerald-800"
-              : item.status === "REJECT"
-              ? "bg-rose-100 text-rose-800"
-              : "bg-blue-100 text-blue-800"
-          }`}
-        >
-          {item.status || "PENDING"}
-        </span>
-      ),
+      truncate: true,
+      maxWidth: "120px",
+      minWidth: "120px",
+      render: (item) => <AmlStatusBadge status={item.status || "---"} />,
     },
+
+    // Actions
     {
       key: "actions",
       label: "Actions",
-      minWidth: "140px",
+      maxWidth: "180px",
+      minWidth: "160px",
       render: (item) => (
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-2">
+          {/* View */}
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setSelectedRecord(item);
+                    setIsDetailOpen(true);
+                  }}
+                >
+                  <Eye className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>View</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+
           {item.status === "PENDING" && (
             <>
-              <ActionButton
-                icon={<Check className="h-4 w-4 text-emerald-600" />}
-                tooltip="Approve Case"
-                onClick={() => handleOpenConfirm(item, AmlStatusEnum.APPROVE)}
-              />
-              <ActionButton
-                icon={<X className="h-4 w-4 text-rose-600" />}
-                tooltip="Reject Case"
-                onClick={() => handleOpenConfirm(item, AmlStatusEnum.REJECT)}
-              />
+              {/* Approve */}
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleOpenConfirm(item, AmlStatusEnum.APPROVE)}
+                      className="border-orange-500 text-orange-600 hover:bg-orange-50"
+                    >
+                      <CheckCircle className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Approve</TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+
+              {/* Reject */}
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleOpenConfirm(item, AmlStatusEnum.REJECT)}
+                      className="border-red-500 text-red-600 hover:bg-red-50"
+                    >
+                      <XCircle className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Reject</TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             </>
           )}
-          <ActionButton
-            icon={<Eye className="h-4 w-4" />}
-            tooltip="View Details"
-            onClick={() => {
-              setSelectedRecord({ ...item, isJunior: true });
-              setIsDetailOpen(true);
-            }}
-          />
         </div>
       ),
     },
@@ -207,7 +294,7 @@ function JuniorAmlManagementContent() {
           <TableToolbar
             searchQuery={searchQuery}
             onSearchChange={(e) => setSearchQuery(e.target.value)}
-            searchPlaceholder="Search by CIF, NID, or Name"
+            searchPlaceholder="Search by NID, Name..."
             searchAriaLabel="search-junior-aml"
             disabled={isLoading}
             leftFilters={
@@ -227,18 +314,28 @@ function JuniorAmlManagementContent() {
                   emptyMessage="No Junior AML cases found"
                   getRowKey={(item) => item.id}
                 />
-              </div>
-              <div className="border-t bg-background p-2 flex justify-end">
-                <CustomPagination
-                  currentPage={currentPage}
-                  totalPages={totalPages}
-                  onPageChange={handlePageChange}
-                  size="md"
-                />
+                <div className="border-t bg-background p-2 flex justify-end">
+                  <CustomPagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={handlePageChange}
+                    size="md"
+                  />
+                </div>
               </div>
             </div>
           </div>
 
+          {/* CONFIRM DIALOG */}
+          <AmlConfirmDialog
+            isLoading={isConfirmLoading}
+            isOpen={isConfirmDialogOpen}
+            onClose={() => setIsConfirmDialogOpen(false)}
+            status={confirmStatus}
+            onConfirm={handleConfirmAction}
+          />
+
+          {/* VIEW DETAIL MODAL */}
           <JuniorAccountViewModal
             isOpen={isDetailOpen}
             onClose={() => {
@@ -246,14 +343,6 @@ function JuniorAmlManagementContent() {
               setSelectedRecord(null);
             }}
             account={selectedRecord ?? undefined}
-          />
-
-          <AmlConfirmDialog
-            isOpen={isConfirmDialogOpen}
-            onClose={() => setIsConfirmDialogOpen(false)}
-            onConfirm={handleConfirmAction}
-            status={confirmStatus}
-            isLoading={isConfirmLoading}
           />
         </CardContent>
       </Card>

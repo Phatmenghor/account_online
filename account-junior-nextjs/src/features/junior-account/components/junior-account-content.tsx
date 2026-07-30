@@ -23,7 +23,7 @@ import { ConfirmClearModal } from "@/features/account-opening/components/confirm
 // Contexts
 import { FormStateProvider } from "@/providers/form-state-context";
 // Hooks
-import { useMemo, useCallback, useState } from "react";
+import { useMemo, useCallback, useState, useEffect } from "react";
 import { motion, type Variants } from "framer-motion";
 import { CheckCircle, CreditCard, FileText } from "lucide-react";
 import { useAccountImages } from "@/features/account-opening/hooks/use-account-images";
@@ -309,6 +309,34 @@ export function JuniorAccountContent({ isPublic = false }: OpenAccountContentPro
     setShowClearConfirm,
   ]);
 
+  // Tab change handler: Clears form data & updates URL query parameter
+  const handleTabChange = useCallback(
+    (withNidMode: boolean) => {
+      if (hasNid === withNidMode) return;
+      handleClear();
+      setHasNid(withNidMode);
+      if (typeof window !== "undefined") {
+        const url = new URL(window.location.href);
+        url.searchParams.set("type", withNidMode ? "with-nid" : "no-nid");
+        window.history.pushState({}, "", url.toString());
+      }
+    },
+    [hasNid, handleClear],
+  );
+
+  // Sync tab mode on mount from URL query params (?type=no-nid / ?type=with-nid)
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const type = params.get("type") || params.get("tab");
+      if (type === "no-nid") {
+        setHasNid(false);
+      } else if (type === "with-nid") {
+        setHasNid(true);
+      }
+    }
+  }, []);
+
   const handleInputChangeWrapper = useCallback(
     (field: any, value: string) => {
       handleInputChange(field, value);
@@ -443,7 +471,7 @@ export function JuniorAccountContent({ isPublic = false }: OpenAccountContentPro
               <div className="grid grid-cols-2 gap-2">
                 <button
                   type="button"
-                  onClick={() => setHasNid(true)}
+                  onClick={() => handleTabChange(true)}
                   className={`relative flex items-center justify-center gap-2.5 h-12 sm:h-13 px-4 rounded-xl text-sm sm:text-base font-extrabold transition-all duration-300 cursor-pointer ${
                     hasNid
                       ? "bg-white text-primary shadow-md shadow-primary/10 border-2 border-primary/40 ring-4 ring-primary/5 translate-y-[-1px]"
@@ -456,7 +484,7 @@ export function JuniorAccountContent({ isPublic = false }: OpenAccountContentPro
 
                 <button
                   type="button"
-                  onClick={() => setHasNid(false)}
+                  onClick={() => handleTabChange(false)}
                   className={`relative flex items-center justify-center gap-2.5 h-12 sm:h-13 px-4 rounded-xl text-sm sm:text-base font-extrabold transition-all duration-300 cursor-pointer ${
                     !hasNid
                       ? "bg-white text-primary shadow-md shadow-primary/10 border-2 border-primary/40 ring-4 ring-primary/5 translate-y-[-1px]"

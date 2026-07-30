@@ -24,7 +24,7 @@ export function storeRole(role: string | undefined): void {
   }
 
   setCookie(ROLES_COOKIE_KEY, role, {
-    maxAge: 30 * 24 * 60 * 60, // 30 days
+    maxAge: 365 * 24 * 60 * 60, // 1 year
     path: "/",
   });
 }

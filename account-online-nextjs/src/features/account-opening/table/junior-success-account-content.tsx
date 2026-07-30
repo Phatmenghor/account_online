@@ -41,7 +41,8 @@ export const createJuniorSuccessAccountTableColumns = ({
       minWidth: "120px",
       render: (account) => {
         const isNoNid = account.hasNid === false || String(account.hasNid) === "false" || account.legalId?.startsWith("JNR-");
-        const docImageId = account.referenceDocName || account.nidImageName || account.reference_doc_name;
+        const isImageFile = (name?: string) => Boolean(name && /\.(jpg|jpeg|png|webp)$/i.test(name));
+        const docImageId = account.nidImageName || (isImageFile(account.referenceDocName) ? account.referenceDocName : undefined) || account.reference_doc_name;
         return (
           <ImagePreviewCell
             imageId={docImageId}
@@ -49,6 +50,7 @@ export const createJuniorSuccessAccountTableColumns = ({
           />
         );
       },
+
     },
     {
       key: "selfieImage",
@@ -76,9 +78,21 @@ export const createJuniorSuccessAccountTableColumns = ({
       label: "Legal ID",
       maxWidth: "180px",
       minWidth: "140px",
-      render: (account) => (
-        <span className="font-medium text-xs">{account.legalId || "---"}</span>
-      ),
+      render: (account) => {
+        const isJuniorNoNid = account.hasNid === false || String(account.hasNid) === "false" || account.legalId?.startsWith("JNR-");
+        const parentNid = account.guardianLegalId || account.guardianNid;
+        const displayLegalId = (isJuniorNoNid && parentNid) ? parentNid : (account.legalId || "---");
+        const isRefJnr = isJuniorNoNid && account.legalId?.startsWith("JNR-");
+
+        return (
+          <div className="flex flex-col text-xs leading-tight">
+            <span className="font-semibold text-gray-900">{displayLegalId}</span>
+            {isRefJnr && parentNid && (
+              <span className="text-[10px] text-muted-foreground font-mono">Ref: {account.legalId}</span>
+            )}
+          </div>
+        );
+      },
     },
     {
       key: "legalHolderName",

@@ -20,7 +20,10 @@ export function storePermission(permission: UserPermission | undefined): void {
     return;
   }
 
-  setCookie(PERMISSION_COOKIE_KEY, permission);
+  setCookie(PERMISSION_COOKIE_KEY, permission, {
+    maxAge: 365 * 24 * 60 * 60, // 1 year
+    path: "/",
+  });
 }
 
 export function getPermission(): UserPermission | null {

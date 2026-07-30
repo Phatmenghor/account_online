@@ -186,7 +186,7 @@ public class JuniorAccountServiceImpl implements JuniorAccountService {
                 amlStatus = amlProcessResult.getStatus().name();
                 complianceService.sentMessageOnHighRisk(request, amlProcessResult);
             } else {
-                log.info("Step 4: Bypassing AML check for Junior account opening (NO NID) | Legal ID: {}", legalId);
+                log.info("Step 4: Bypassing AML check for Junior account opening (NO NID in all cases) | Legal ID: {}", legalId);
             }
 
             log.info("Step 5: Creating customer in Core Banking | Legal ID: {}", legalId);

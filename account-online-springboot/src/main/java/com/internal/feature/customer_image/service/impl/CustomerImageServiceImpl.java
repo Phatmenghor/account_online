@@ -172,6 +172,12 @@ public class CustomerImageServiceImpl implements CustomerImageService {
                 found = storageComponent.findFileByName("junior/nid", "nid_" + customerId);
             }
             if (found.isEmpty()) {
+                found = storageComponent.findFileByName("junior", "ref_doc_" + customerId);
+            }
+            if (found.isEmpty()) {
+                found = storageComponent.findFileByName("junior", "nid_" + customerId);
+            }
+            if (found.isEmpty()) {
                 found = storageComponent.findFileByName("nid", "nid_" + customerId);
             }
             if (found.isPresent() && Files.exists(found.get())) {
@@ -204,6 +210,9 @@ public class CustomerImageServiceImpl implements CustomerImageService {
     public Resource getSelfieImageResourceForEmail(String customerId) {
         try {
             Optional<Path> found = storageComponent.findFileByName("junior/selfie", "selfie_" + customerId);
+            if (found.isEmpty()) {
+                found = storageComponent.findFileByName("junior", "selfie_" + customerId);
+            }
             if (found.isEmpty()) {
                 found = storageComponent.findFileByName("selfie", "selfie_" + customerId);
             }

@@ -41,7 +41,8 @@ export const createJuniorSuccessAccountTableColumns = ({
       minWidth: "120px",
       render: (account) => {
         const isNoNid = account.hasNid === false || String(account.hasNid) === "false" || account.legalId?.startsWith("JNR-");
-        const docImageId = account.referenceDocName || account.nidImageName || account.reference_doc_name;
+        const isImageFile = (name?: string) => Boolean(name && /\.(jpg|jpeg|png|webp)$/i.test(name));
+        const docImageId = account.nidImageName || (isImageFile(account.referenceDocName) ? account.referenceDocName : undefined) || account.reference_doc_name;
         return (
           <ImagePreviewCell
             imageId={docImageId}
@@ -49,6 +50,7 @@ export const createJuniorSuccessAccountTableColumns = ({
           />
         );
       },
+
     },
     {
       key: "selfieImage",

@@ -1,33 +1,63 @@
 "use client";
 
 import type React from "react";
-import { User, ShieldCheck } from "lucide-react";
-import { Label } from "@/components/ui/label";
+import { Shield, ClipboardCheck } from "lucide-react";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
 } from "@/components/ui/dialog";
-import { DateTimeFormat } from "@/utils/date/date-time-format";
+import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { toProperCase } from "@/utils/common/common";
+import { DateTimeFormat } from "@/utils/date/date-time-format";
+import AmlStatusBadge from "@/components/shared/badge/aml-badge";
+import { getRoleDisplayName } from "@/utils/role-display";
 import { ImagePreviewCell } from "@/components/shared/image/image-preview-cell";
 
 interface JuniorAccountViewModalProps {
+  /** AML management record (pending list) */
   account?: any;
+  /** AML history record — alias for account */
+  history?: any;
   isOpen: boolean;
   onClose: () => void;
 }
 
 function InfoRow({ label, value }: { label: string; value?: React.ReactNode }) {
+  const isMissing = !value || value === "N/A" || value === "n/a" || value === "";
   return (
     <div className="flex justify-between border-b pb-2 gap-4">
       <Label className="text-sm font-medium text-muted-foreground shrink-0">
         {label}:
       </Label>
-      <span className="text-sm font-semibold text-right">{value || "N/A"}</span>
+      <span className="text-sm font-semibold text-right">
+        {isMissing ? (
+          <span className="text-muted-foreground/60 font-normal">---</span>
+        ) : (
+          value
+        )}
+      </span>
+    </div>
+  );
+}
+
+function InfoRowFull({ label, value }: { label: string; value?: React.ReactNode }) {
+  const isMissing = !value || value === "N/A" || value === "n/a" || value === "";
+  return (
+    <div className="flex justify-between border-b pb-2 gap-4 col-span-full">
+      <Label className="text-sm font-medium text-muted-foreground shrink-0">
+        {label}:
+      </Label>
+      <span className="text-sm font-semibold text-right">
+        {isMissing ? (
+          <span className="text-muted-foreground/60 font-normal">---</span>
+        ) : (
+          value
+        )}
+      </span>
     </div>
   );
 }
@@ -41,87 +71,125 @@ function SectionHeader({ color, title }: { color?: string; title: string }) {
   );
 }
 
+function formatMaritalStatus(val?: string) {
+  if (!val || val === "N/A" || val === "n/a") return "SINGLE";
+  return String(val).trim().toUpperCase();
+}
+
+
 export default function JuniorAccountViewModal({
   account,
+  history,
   isOpen,
   onClose,
 }: JuniorAccountViewModalProps) {
-  if (!account) return null;
+  const d = account ?? history;
+  if (!d) return null;
 
-  const hasNid = account.hasNid !== false && String(account.hasNid) !== "false";
-  const childNameKh = `${account.legalLastNameKh || ""} ${account.legalFirstNameKh || ""}`.trim();
-  const childNameEn = `${account.legalLastNameEn || ""} ${account.legalFirstNameEn || ""}`.trim();
-  const displayName = account.legalHolderName || childNameEn || childNameKh || "Junior Customer";
+  // Safely parse requestPayload fallback if present
+  let p: any = {};
+  if (d.requestPayload) {
+    try {
+      p = typeof d.requestPayload === "string" ? JSON.parse(d.requestPayload) : d.requestPayload;
+    } catch (_) {}
+  }
 
-  const docImage = account.referenceDocName || account.nidImageName || account.reference_doc_name;
-  const selfieImage = account.selfieImageName;
+  const hasNid = d.hasNid !== false && p.has_nid !== false && String(d.hasNid) !== "false";
 
-  // Format Address with slash separation
-  const formatAddress = (addr?: string) => {
-    if (!addr || addr === "N/A") return "N/A";
-    return addr.split(/,|\s{2,}/).map(s => s.trim()).filter(Boolean).join(" / ");
+  // Helper extractor from d -> p -> fallback
+  const get = (key: string, ...aliases: string[]) => {
+    if (d[key] && d[key] !== "N/A" && d[key] !== "") return d[key];
+    for (const a of aliases) {
+      if (d[a] && d[a] !== "N/A" && d[a] !== "") return d[a];
+      if (p[a] && p[a] !== "N/A" && p[a] !== "") return p[a];
+    }
+    if (p[key] && p[key] !== "N/A" && p[key] !== "") return p[key];
+    return undefined;
   };
 
-  const formattedLegalAddress = formatAddress(account.legalAddress);
-  const formattedPob = formatAddress(account.legalPlaceOfBirth);
+  const legalId      = get("legalId", "guardianLegalId", "legal_id");
+  const givenName    = get("givenName", "firstNameEn", "given_name");
+  const familyName   = get("familyName", "lastNameEn", "family_name", "legalHolderName");
+  const firstNameKh  = get("firstNameKh", "first_name_kh");
+  const lastNameKh   = get("lastNameKh", "last_name_kh");
+  const khmerName    = `${lastNameKh || ""} ${firstNameKh || ""}`.trim() || undefined;
 
-  const addressCodes = [
-    account.customerVillageCode,
-    account.customerCommuneCode,
-    account.customerDistrictCode,
-    account.customerProvinceCode
-  ].filter(Boolean).join(" / ");
+  const phoneNumber  = get("phoneNumber", "phone_number", "sms");
+  const gender       = get("gender");
+  const dateOfBirth  = get("dateOfBirth", "dob", "date_of_birth");
+  const nationality  = get("nationality") || "KH";
+  const issuedDate   = get("issuedDate", "legalIssueDate", "legal_iss_date");
+  const expiredDate  = get("expiredDate", "legalExpireDate", "legal_exp_date");
+  const branch       = get("branch", "branchCode", "branch_code");
+  const maritalStatus= formatMaritalStatus(get("maritalStatus", "marital_status"));
 
-  const pobCodes = [
-    account.customerPobVillageCode,
-    account.customerPobCommuneCode,
-    account.customerPobDistrictCode,
-    account.customerPobProvinceCode
-  ].filter(Boolean).join(" / ");
+  // Address resolution
+  const addressCode = get("currentAddressCode", "cust_province", "customerCurrentProvince", "customerProvinceCode", "customer_province_code") ||
+    ([p.customerCurrentProvince || p.customerProvinceCode || p.cust_province, p.customerCurrentDistrict || p.customerDistrictCode || p.cust_district, p.customerCurrentCommune || p.customerCommuneCode || p.cust_commune, p.customerCurrentVillage || p.customerVillageCode || p.cust_village].filter(Boolean).join(", ") || undefined);
+
+  const currentAddressName = get("currentAddressName", "legalAddress", "address");
+
+  const pobCode = get("placeOfBirthCode", "cust_pob_province", "customerPobProvince", "customerPobProvinceCode", "customer_pob_province_code") ||
+    ([p.customerPobProvince || p.customerPobProvinceCode || p.cust_pob_province, p.customerPobDistrict || p.customerPobDistrictCode || p.cust_pob_district, p.customerPobCommune || p.customerPobCommuneCode || p.cust_pob_commune, p.customerPobVillage || p.customerPobVillageCode || p.cust_pob_village].filter(Boolean).join(", ") || undefined);
+
+  const placeOfBirthName = get("placeOfBirthName", "placeOfBirth", "place_of_birth");
+
+  // Occupation
+  const rawOccupation = get("occupationCode", "occupation");
+  const occupationCode = rawOccupation || "320";
+  const rawStatus = get("occupationStatus");
+  const occupationStatus = (rawStatus && rawStatus !== "320" && rawStatus !== "STUDENT")
+    ? rawStatus
+    : "STUDENT / សិស្ស";
+
+
+  // Guardian fields
+  const guardianName         = get("guardianName", "guardian_name");
+  const guardianLegalId      = get("guardianLegalId", "guardian_legal_id");
+  const guardianPhone        = get("guardianPhone", "guardian_phone");
+  const guardianRelationship = get("guardianRelationship", "guardian_relationship");
+  const guardianCif          = get("guardianCif", "guardian_cif");
+  const guardianAddress      = get("guardianAddress", "guardian_address");
+
+  // Images
+  const docImage   = d.nidImageName || d.referenceDocName || p.nid_image_name || p.reference_doc_name;
+  const selfieImage = d.selfieImageName || p.selfie_image_name;
+
+  // Screening Results
+  const riskLevel: string = get("amlExternalRiskLevel", "riskLevel", "amlRiskLevel") || "";
+  const riskVariant: "destructive" | "default" = riskLevel === "HIGH" ? "destructive" : "default";
+  const actionTaken    = get("amlExternalActionTaken", "actionTaken");
+  const serviceName    = get("amlExternalServiceName", "serviceName");
+  const totalRulesScore= get("amlExternalTotalRulesScore", "totalRulesScore");
+  const trxnID         = get("amlExternalTrxnID", "trxnID");
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-5xl sm:max-w-5xl w-full max-h-[90vh] overflow-hidden p-0 gap-0 flex flex-col">
-        {/* Header */}
+
+        {/* ── Header ── */}
         <DialogHeader className="px-6 py-4 border-b bg-muted/30 flex-shrink-0">
           <div className="flex items-center gap-4 pr-8">
-            <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center shrink-0">
-              <User className="w-6 h-6 text-foreground" />
+            <div className="w-11 h-11 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+              <Shield className="w-5 h-5 text-primary" />
             </div>
-            <div className="flex-1">
-              <div className="flex items-center gap-2 flex-wrap">
-                <DialogTitle className="text-xl font-semibold">
-                  Account Online Details
-                </DialogTitle>
-                <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-teal-100 text-teal-800 dark:bg-teal-900/40 dark:text-teal-300">
-                  Junior Account
-                </span>
-                <span
-                  className={`px-2.5 py-0.5 rounded-full text-xs font-semibold flex items-center gap-1 ${
-                    hasNid
-                      ? "bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300"
-                      : "bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300"
-                  }`}
-                >
-                  <ShieldCheck className="w-3.5 h-3.5" />
-                  {hasNid ? "WITH NID MODE" : "NO NID MODE"}
-                </span>
-              </div>
-              <DialogDescription className="text-base text-muted-foreground mt-0.5">
-                {displayName
-                  ? `Details for "${toProperCase(displayName)}"`
-                  : account?.cif
-                  ? `CIF: ${account.cif}`
-                  : "Account information"}
+            <div className="flex-1 min-w-0">
+              <DialogTitle className="text-lg font-semibold">
+                Junior AML {d.status === "PENDING" ? "Alert" : "History"} Details
+              </DialogTitle>
+              <DialogDescription className="sr-only">
+                Junior AML {d.status === "PENDING" ? "Alert" : "History"} Details
               </DialogDescription>
+              {d && <div className="mt-1"><AmlStatusBadge status={d.status} /></div>}
             </div>
           </div>
         </DialogHeader>
 
-        {/* Content */}
+        {/* ── Body ── */}
         <div className="flex-1 min-h-0 overflow-y-auto">
           <div className="p-6 space-y-6">
-            {/* ── 1. Document Images ── */}
+
+            {/* ── Document Images ── */}
             {(docImage || selfieImage) && (
               <>
                 <div className="space-y-4">
@@ -135,7 +203,7 @@ export default function JuniorAccountViewModal({
                         <ImagePreviewCell
                           imageId={docImage}
                           label={hasNid ? "NID / ID Card" : "Birth Certificate"}
-                          className="w-full h-64"
+                          className="w-full h-64 rounded-lg object-cover"
                         />
                       </div>
                     )}
@@ -147,7 +215,7 @@ export default function JuniorAccountViewModal({
                         <ImagePreviewCell
                           imageId={selfieImage}
                           label="Selfie Photo"
-                          className="w-full h-64"
+                          className="w-full h-64 rounded-lg object-cover"
                         />
                       </div>
                     )}
@@ -157,98 +225,68 @@ export default function JuniorAccountViewModal({
               </>
             )}
 
-            {/* ── 2. Core Banking Account Information ── */}
+            {/* ── Child / Junior Profile ── */}
             <div className="space-y-4">
-              <SectionHeader color="bg-primary" title="Account Information" />
+              <SectionHeader color="bg-primary" title="Child / Junior Profile" />
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <InfoRow label="CIF" value={account.cif} />
-                <InfoRow label="KHR Account" value={account.khrAccount} />
-                <InfoRow label="USD Account" value={account.usdAccount} />
-                <InfoRow label="Mnemonic" value={account.mnemonic} />
-                <InfoRow label="Category Account" value={account.categoryAccount || "CPBank Junior Savings"} />
-                <InfoRow label="Branch Code" value={account.branchCode} />
-                <InfoRow label="Branch Name" value={account.branchNameKh || account.branchName} />
-                <InfoRow label="Staff Referral Code" value={account.staffCode || account.referralCode || account.referralId} />
+                {hasNid ? (
+                  <InfoRow label="Legal ID" value={legalId} />
+                ) : (
+                  <InfoRow label="Guardian NID (Parent NID)" value={guardianLegalId || legalId} />
+                )}
+                <InfoRow label="Given Name"    value={givenName} />
+                <InfoRow label="Family Name"   value={familyName} />
+                <InfoRow label="Khmer Name"    value={khmerName} />
+                <InfoRow label="Phone"         value={phoneNumber} />
+                <InfoRow label="Gender"        value={gender} />
+                <InfoRow label="Date of Birth" value={dateOfBirth} />
+                <InfoRow label="Nationality"   value={nationality} />
+                <InfoRow label="Issued Date"   value={issuedDate} />
+                <InfoRow label="Expired Date"  value={expiredDate} />
+                <InfoRowFull label="Legal Address" value={currentAddressName} />
               </div>
             </div>
 
             <Separator />
 
-            {/* ── 3. Child Personal Information ── */}
+            {/* ── Personal & KYC ── */}
             <div className="space-y-4">
-              <SectionHeader color="bg-primary" title="Child / Junior Information" />
+              <SectionHeader color="bg-primary" title="Personal & KYC" />
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <InfoRow label="Holder Name" value={toProperCase(childNameEn || account.legalHolderName)} />
-                {hasNid ? (
-                  <InfoRow label="National NID Number" value={account.legalId} />
-                ) : (
-                  <>
-                    <InfoRow label="Ref Doc Number" value={account.legalId || account.referenceDocName} />
-                    <InfoRow label="Ref Doc Type" value={account.referenceDocType || account.legalDocName || "Birth Certificate"} />
-                  </>
-                )}
-                <InfoRow label="First Name (EN)" value={toProperCase(account.legalFirstNameEn)} />
-                <InfoRow label="Last Name (EN)" value={toProperCase(account.legalLastNameEn)} />
-                <InfoRow label="First Name (KH)" value={account.legalFirstNameKh} />
-                <InfoRow label="Last Name (KH)" value={account.legalLastNameKh} />
-                <InfoRow label="Date of Birth" value={account.legalDateOfBirth || account.dob} />
-                <InfoRow label="Gender" value={account.legalGender || account.gender} />
-                <InfoRow label="Phone Number" value={account.phoneNumber || account.guardianPhone} />
-                <InfoRow label="Marital Status" value={account.maritalStatus || "SINGLE"} />
-                <InfoRow label="Nationality" value={account.nationality || "KH"} />
-                <InfoRow label="Occupation" value={account.occupation || "320"} />
-
-                <div className="flex justify-between border-b pb-2 gap-4 md:col-span-2">
-                  <Label className="text-sm font-medium text-muted-foreground shrink-0">Full Address:</Label>
-                  <span className="text-sm font-semibold text-right">{formattedLegalAddress}</span>
-                </div>
-                {addressCodes && (
-                  <div className="flex justify-between border-b pb-2 gap-4 md:col-span-2">
-                    <Label className="text-sm font-medium text-muted-foreground shrink-0">Full Address Code:</Label>
-                    <span className="text-sm font-mono font-semibold text-right text-teal-700 dark:text-teal-400">{addressCodes}</span>
-                  </div>
-                )}
-
-                <div className="flex justify-between border-b pb-2 gap-4 md:col-span-2">
-                  <Label className="text-sm font-medium text-muted-foreground shrink-0">Full Place of Birth:</Label>
-                  <span className="text-sm font-semibold text-right">{formattedPob}</span>
-                </div>
-                {pobCodes && (
-                  <div className="flex justify-between border-b pb-2 gap-4 md:col-span-2">
-                    <Label className="text-sm font-medium text-muted-foreground shrink-0">Full POB Code:</Label>
-                    <span className="text-sm font-mono font-semibold text-right text-teal-700 dark:text-teal-400">{pobCodes}</span>
-                  </div>
-                )}
+                <InfoRow label="Marital Status"    value={maritalStatus} />
+                <InfoRow label="Branch"            value={branch} />
+                <InfoRow label="Occupation Code"   value={occupationCode} />
+                <InfoRow label="Occupation Status" value={occupationStatus} />
+                <InfoRow label="Address Code"      value={addressCode} />
+                <InfoRow label="POB Code"          value={pobCode} />
+                <InfoRowFull label="Current Address"  value={currentAddressName} />
+                <InfoRowFull label="Place of Birth"   value={placeOfBirthName} />
+                <InfoRowFull label="Remarks"          value={d.remarks || p.remarks || "No remarks"} />
               </div>
             </div>
 
-            {/* ── 4. Parent / Guardian Information (ONLY FOR NO-NID MODE) ── */}
-            {!hasNid && (
+            {/* ── Parent / Guardian Information ── */}
+            {(guardianName || guardianLegalId || !hasNid) && (
               <>
                 <Separator />
                 <div className="space-y-4">
                   <SectionHeader color="bg-primary" title="Parent / Guardian Information" />
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <InfoRow label="Guardian Name" value={account.guardianName} />
-                    <InfoRow label="Guardian NID" value={account.guardianLegalId || account.guardianNid} />
-                    <InfoRow label="Guardian Phone" value={account.guardianPhone || account.phoneNumber} />
-                    <InfoRow label="Relationship" value={account.guardianRelationship || "Parent / Legal Guardian"} />
+                    <InfoRow label="Guardian Name"     value={guardianName} />
+                    <InfoRow label="Guardian NID"      value={guardianLegalId} />
+                    <InfoRow label="Guardian Phone"    value={guardianPhone || phoneNumber} />
+                    <InfoRow label="Relationship"      value={guardianRelationship} />
                     <InfoRow
-                      label="Guardian CIF Link"
+                      label="Guardian CIF"
                       value={
-                        account.guardianCif ? (
+                        guardianCif ? (
                           <span className="font-mono font-bold text-teal-700">
-                            {account.guardianCif} (Linked JOINT.OWNER)
+                            {guardianCif}
                           </span>
-                        ) : (
-                          <span className="text-amber-700 text-xs font-semibold">Will Link Parent CIF</span>
-                        )
+                        ) : undefined
                       }
                     />
-                    <div className="flex justify-between border-b pb-2 gap-4 md:col-span-2">
-                      <Label className="text-sm font-medium text-muted-foreground shrink-0">Guardian Address:</Label>
-                      <span className="text-sm font-semibold text-right">{formatAddress(account.guardianAddress)}</span>
-                    </div>
+                    <InfoRowFull label="Guardian Address" value={guardianAddress} />
                   </div>
                 </div>
               </>
@@ -256,24 +294,68 @@ export default function JuniorAccountViewModal({
 
             <Separator />
 
-            {/* ── 5. System Information ── */}
+            {/* ── Screening Results ── */}
             <div className="space-y-4">
-              <SectionHeader color="bg-primary" title="System Information" />
+              <SectionHeader color="bg-primary" title="Screening Results" />
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <InfoRow label="Submitted By" value={account.submittedBy || "Customer"} />
-                <InfoRow label="Created At" value={DateTimeFormat(account.createdAt)} />
-                {account.submittedByUser && (
-                  <>
-                    <InfoRow label="Staff Name" value={account.submittedByUser.fullName} />
-                    <InfoRow label="Staff Email" value={account.submittedByUser.email} />
-                    <InfoRow label="Staff Role" value={account.submittedByUser.userRole} />
-                    <InfoRow label="Staff Position" value={account.submittedByUser.position} />
-                  </>
-                )}
+                <InfoRow
+                  label="Risk Level"
+                  value={
+                    riskLevel ? (
+                      <Badge variant={riskVariant}>{riskLevel}</Badge>
+                    ) : undefined
+                  }
+                />
+                <InfoRow label="Action Taken"    value={actionTaken} />
+                <InfoRow label="Service Name"    value={serviceName} />
+                <InfoRow label="Total Rule Score" value={totalRulesScore} />
+                <InfoRow label="Transaction ID"  value={trxnID} />
               </div>
             </div>
+
+            <Separator />
+
+            {/* ── Audit Trail ── */}
+            <div className="space-y-4">
+              <SectionHeader color="bg-primary" title="Audit Trail" />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <InfoRow label="Submitted By" value={d.submittedBy || "Customer"} />
+                <InfoRow label="Created At"   value={DateTimeFormat(d.createdAt)} />
+                <InfoRow label="Updated At"   value={DateTimeFormat(d.updatedAt)} />
+              </div>
+
+              {d.approvedBy && (
+                <div className="pt-4 border-t space-y-3">
+                  <h4 className="text-sm font-semibold text-green-600 flex items-center gap-2">
+                    <ClipboardCheck className="h-4 w-4" /> Approved By
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <InfoRow label="Full Name" value={d.approvedBy.fullName} />
+                    <InfoRow label="Email"     value={d.approvedBy.email} />
+                    <InfoRow label="Role"      value={<Badge variant="outline">{getRoleDisplayName(d.approvedBy.userRole)}</Badge>} />
+                    <InfoRow label="Position"  value={d.approvedBy.position} />
+                  </div>
+                </div>
+              )}
+
+              {d.rejectedBy && (
+                <div className="pt-4 border-t space-y-3">
+                  <h4 className="text-sm font-semibold text-destructive flex items-center gap-2">
+                    <Shield className="h-4 w-4" /> Rejected By
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <InfoRow label="Full Name" value={d.rejectedBy.fullName} />
+                    <InfoRow label="Email"     value={d.rejectedBy.email} />
+                    <InfoRow label="Role"      value={<Badge variant="outline">{getRoleDisplayName(d.rejectedBy.userRole)}</Badge>} />
+                    <InfoRow label="Position"  value={d.rejectedBy.position} />
+                  </div>
+                </div>
+              )}
+            </div>
+
           </div>
         </div>
+
       </DialogContent>
     </Dialog>
   );

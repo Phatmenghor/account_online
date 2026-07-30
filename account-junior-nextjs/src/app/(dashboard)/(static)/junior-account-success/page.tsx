@@ -14,7 +14,7 @@ import { Baby } from "lucide-react";
 import Loading from "@/components/shared/common/loading";
 import { AppToast } from "@/components/shared/toast/app-toast";
 import { axiosClientWithAuth } from "@/utils/axios";
-import JuniorAccountViewModal from "@/features/account-opening/components/junior-account-detail-modal";
+import SuccessAccountDetailModal from "@/features/account-opening/components/success-account-detail-modal";
 import { createJuniorSuccessAccountTableColumns } from "@/features/account-opening/table/junior-success-account-content";
 
 function JuniorSuccessAccountContent() {
@@ -103,7 +103,7 @@ function JuniorSuccessAccountContent() {
             </div>
           </div>
 
-          <JuniorAccountViewModal
+          <SuccessAccountDetailModal
             isOpen={isDetailOpen}
             onClose={() => {
               setIsDetailOpen(false);

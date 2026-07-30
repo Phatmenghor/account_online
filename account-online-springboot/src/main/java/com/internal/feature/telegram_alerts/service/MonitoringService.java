@@ -14,10 +14,13 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
+import com.internal.feature.aml.models.JuniorAmlStatus;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class MonitoringService {
+
 
     private final TelegramService telegramService;
     private final CustomerImageService customerImageService;
@@ -54,6 +57,7 @@ public class MonitoringService {
             appendIfNotEmpty(msg, "Place of Birth", amlDto.getPlaceOfBirthName());
             appendIfNotEmpty(msg, "Marital Status", amlDto.getMaritalStatus());
             appendIfNotEmpty(msg, "Occupation", amlDto.getOccupationStatus());
+            appendIfNotEmpty(msg, "Branch", amlDto.getBranch());
             appendIfNotEmpty(msg, "Risk Level", amlDto.getRiskLevel());
             appendIfNotEmpty(msg, "Service Name", amlDto.getServiceName());
 
@@ -98,6 +102,84 @@ public class MonitoringService {
 
         } catch (Exception e) {
             log.error("Failed to send HIGH RISK AML alert: {}", e.getMessage());
+        }
+    }
+
+    public void sendJuniorHighRiskAmlAlert(AmlStatusDto amlDto) {
+        if (amlDto == null)
+            return;
+        try {
+            DateTimeFormatter formatter = DATE_FORMATTER;
+            String timeFormatted = amlDto.getCreatedAt() != null
+                    ? amlDto.getCreatedAt().format(formatter)
+                    : LocalDateTime.now(ZoneId.of("Asia/Phnom_Penh")).format(formatter);
+
+            String legalId = amlDto.getCustomerInfo() != null ? amlDto.getCustomerInfo().getLegalId() : null;
+
+            StringBuilder msg = new StringBuilder();
+            msg.append("*AML Junior Online - HIGH RISK*\n")
+                    .append("--------------------\n");
+
+            if (amlDto.getCustomerInfo() != null) {
+                appendIfNotEmpty(msg, "Junior Name", buildName(amlDto));
+                appendIfNotEmpty(msg, "Legal ID", legalId);
+                appendIfNotEmpty(msg, "Gender", amlDto.getCustomerInfo().getGender());
+                appendIfNotEmpty(msg, "DOB", amlDto.getCustomerInfo().getDateOfBirth());
+                appendIfNotEmpty(msg, "Nationality", amlDto.getCustomerInfo().getNationality());
+                appendIfNotEmpty(msg, "Phone Number", amlDto.getCustomerInfo().getPhoneNumber());
+                appendIfNotEmpty(msg, "ID Issued", amlDto.getCustomerInfo().getIssuedDate());
+                appendIfNotEmpty(msg, "ID Expired", amlDto.getCustomerInfo().getExpiredDate());
+            }
+
+            appendIfNotEmpty(msg, "Current Address", amlDto.getCurrentAddressName());
+            appendIfNotEmpty(msg, "Place of Birth", amlDto.getPlaceOfBirthName());
+            appendIfNotEmpty(msg, "Marital Status", amlDto.getMaritalStatus());
+            appendIfNotEmpty(msg, "Occupation", amlDto.getOccupationStatus());
+            appendIfNotEmpty(msg, "Branch", amlDto.getBranch());
+            appendIfNotEmpty(msg, "Risk Level", amlDto.getRiskLevel());
+            appendIfNotEmpty(msg, "Service Name", amlDto.getServiceName());
+
+            if (amlDto.getTotalRulesScore() > 0) {
+                msg.append("- Total Rules Score: `").append(amlDto.getTotalRulesScore()).append("`\n");
+            }
+
+            String rulesTriggered = amlDto.getRulesTriggered();
+            if (rulesTriggered != null && !rulesTriggered.isEmpty()) {
+                msg.append("- Rules Triggered: `").append(escape(rulesTriggered)).append("`\n");
+            }
+
+            appendIfNotEmpty(msg, "Transaction ID", amlDto.getTrxnID());
+            appendIfNotEmpty(msg, "Remarks", amlDto.getRemarks());
+            appendIfNotEmpty(msg, "Created By", amlDto.getSubmittedBy());
+
+            msg.append("--------------------\n")
+                    .append("Status: `PENDING`\n")
+                    .append("Time: `").append(timeFormatted).append("`");
+
+            telegramService.sendToJunior(msg.toString());
+
+            // Send NID and selfie photos if available to Junior channel
+            if (legalId != null) {
+                try {
+                    Resource docImage = customerImageService.getNidImageResourceForEmail(legalId);
+                    if (docImage != null && docImage.exists()) {
+                        telegramService.sendPhotoToJunior(
+                                "*AML Junior Online - HIGH RISK Document*\nLegal ID: `" + escape(legalId) + "`", docImage);
+                    }
+                } catch (Exception ignored) {
+                }
+                try {
+                    Resource selfieImage = customerImageService.getSelfieImageResourceForEmail(legalId);
+                    if (selfieImage != null && selfieImage.exists()) {
+                        telegramService.sendPhotoToJunior(
+                                "*AML Junior Online - HIGH RISK Photo*\nLegal ID: `" + escape(legalId) + "`", selfieImage);
+                    }
+                } catch (Exception ignored) {
+                }
+            }
+
+        } catch (Exception e) {
+            log.error("Failed to send Junior HIGH RISK AML alert: {}", e.getMessage());
         }
     }
 
@@ -316,12 +398,89 @@ public class MonitoringService {
         }
     }
 
+    public void sendJuniorAmlActionAlert(JuniorAmlStatus aml) {
+        if (aml == null || aml.getStatus() == null)
+            return;
+        try {
+            log.info("Sending Junior AML Action Telegram Alert for Legal ID: {}, Status: {}", aml.getLegalId(), aml.getStatus());
+
+            // Safely extract names from entity or requestPayload fallback
+            String name = (aml.getFamilyName() != null ? aml.getFamilyName() + " " : "") + (aml.getGivenName() != null ? aml.getGivenName() : "");
+            name = name.trim();
+            if (name.isEmpty()) {
+                name = (aml.getLastNameKh() != null ? aml.getLastNameKh() + " " : "") + (aml.getFirstNameKh() != null ? aml.getFirstNameKh() : "");
+            }
+
+            String phone = aml.getPhoneNumber();
+            String riskLevel = aml.getAmlExternalRiskLevel();
+
+            // Extract missing fields from requestPayload if present
+            if ((name.isEmpty() || phone == null || riskLevel == null) && aml.getRequestPayload() != null && !aml.getRequestPayload().isBlank()) {
+                try {
+                    com.fasterxml.jackson.databind.JsonNode payload = new com.fasterxml.jackson.databind.ObjectMapper().readTree(aml.getRequestPayload());
+                    if (name.isEmpty()) {
+                        String g = payload.path("given_name").asText(payload.path("givenName").asText(""));
+                        String f = payload.path("family_name").asText(payload.path("familyName").asText(payload.path("legalHolderName").asText("")));
+                        name = (f + " " + g).trim();
+                        if (name.isEmpty()) {
+                            name = payload.path("legalHolderName").asText("");
+                        }
+                    }
+                    if (phone == null || phone.isBlank()) {
+                        phone = payload.path("sms").asText(payload.path("phoneNumber").asText(""));
+                    }
+                    if (riskLevel == null || riskLevel.isBlank()) {
+                        riskLevel = payload.path("amlRiskLevel").asText(payload.path("riskLevel").asText("HIGH"));
+                    }
+                } catch (Exception ignored) {}
+            }
+
+            if (riskLevel == null || riskLevel.isBlank()) {
+                riskLevel = "HIGH";
+            }
+
+            String legalId = aml.getLegalId();
+            String status = aml.getStatus();
+            String actionBy = "Unknown";
+            if ("APPROVE".equalsIgnoreCase(status) && aml.getApprovedBy() != null) {
+                actionBy = aml.getApprovedBy().getFullName() != null ? aml.getApprovedBy().getFullName() : aml.getApprovedBy().getUsername();
+            } else if ("REJECT".equalsIgnoreCase(status) && aml.getRejectedBy() != null) {
+                actionBy = aml.getRejectedBy().getFullName() != null ? aml.getRejectedBy().getFullName() : aml.getRejectedBy().getUsername();
+            }
+
+            StringBuilder msg = new StringBuilder();
+            msg.append("APPROVE".equalsIgnoreCase(status)
+                    ? "*AML Account Online - APPROVED*\n"
+                    : "*AML Account Online - REJECTED*\n")
+                    .append("--------------------\n");
+
+            appendIfNotEmpty(msg, "Name", name);
+            appendIfNotEmpty(msg, "Legal ID", legalId);
+            appendIfNotEmpty(msg, "Phone Number", phone);
+            appendIfNotEmpty(msg, "Risk Level", riskLevel);
+            appendIfNotEmpty(msg, "Remarks", aml.getRemarks());
+
+            msg.append("--------------------\n")
+                    .append("Status: `").append(status).append("`\n")
+                    .append("By: `").append(escape(actionBy)).append("`\n")
+                    .append("Time: `").append(LocalDateTime.now(ZoneId.of("Asia/Phnom_Penh")).format(DATE_FORMATTER)).append("`");
+
+            telegramService.sendToMonitor(msg.toString());
+            log.info("Successfully sent Junior AML Action Telegram Alert for Legal ID: {}", legalId);
+        } catch (Exception e) {
+            log.error("Failed to send Junior AML action Telegram alert: {}", e.getMessage(), e);
+        }
+    }
+
+
     private String escape(String text) {
         if (text == null)
             return "";
         return text.replace("_", "\\_").replace("*", "\\*").replace("`", "\\`").replace("~", "\\~");
     }
 }
+
+
 
 
 
