@@ -48,6 +48,10 @@ export interface SubmittedByUser {
 export interface SuccessAccountOnlineModel {
   id: string;
   cif: string;
+  hasNid?: boolean;
+  guardianLegalId?: string;
+  guardianNid?: string;
+  referenceDocName?: string;
   khrAccount: string;
   usdAccount: string;
   mnemonic: string;

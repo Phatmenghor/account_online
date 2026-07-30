@@ -53,7 +53,7 @@ export default function JuniorAccountViewModal({
   const childNameEn = `${account.legalLastNameEn || ""} ${account.legalFirstNameEn || ""}`.trim();
   const displayName = account.legalHolderName || childNameEn || childNameKh || "Junior Customer";
 
-  const docImage = account.nidImageName || account.referenceDocName;
+  const docImage = account.referenceDocName || account.nidImageName || account.reference_doc_name;
   const selfieImage = account.selfieImageName;
 
   // Format Address with slash separation

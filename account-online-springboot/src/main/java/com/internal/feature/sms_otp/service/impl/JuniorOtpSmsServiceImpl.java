@@ -32,6 +32,8 @@ import com.internal.shared.exception.custom.BadRequestException;
 import com.internal.feature.junior_account.dto.response.CustomerInfoResponse;
 import com.internal.feature.junior_account.service.CustomerInfoService;
 
+import com.internal.feature.junior_account.repository.JuniorAccountFinalRepository;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -39,6 +41,7 @@ public class JuniorOtpSmsServiceImpl implements JuniorOtpSmsService {
 
     private final JuniorOtpSmsRepository juniorOtpSmsRepository;
     private final JuniorSmsLogRepository juniorSmsLogRepository;
+    private final JuniorAccountFinalRepository juniorAccountFinalRepository;
     private final OtpComponent otpComponent;
     private final CpbProperties cpbProperties;
     private final SmsPort smsPort;
@@ -48,14 +51,28 @@ public class JuniorOtpSmsServiceImpl implements JuniorOtpSmsService {
     @Override
     @Transactional
     public SendOtpResponse sendOtp(SendOtpRequest request) {
-        String phone = request.getPhone();
-        log.info("Processing Junior Guardian OTP request for phone: {}", phone);
+        String phone = request.getPhone() != null ? request.getPhone().trim() : "";
+        String roleType = request.getType() != null ? request.getType().trim().toUpperCase() : "GUARDIAN";
+        log.info("Processing Junior OTP send request for phone: {} | Role: {}", maskPhone(phone), roleType);
 
-        // Pre-check if Guardian phone is registered in MB Core (Guardian MUST have an active MB account)
-        PhoneCheckResponse phoneCheck = phoneCheckService.checkPhone(phone);
-        if (phoneCheck == null || !Boolean.TRUE.equals(phoneCheck.getHasAccount())) {
-            log.warn("Junior Guardian OTP send REJECTED: Phone number {} is NOT registered in MB Core", phone);
-            throw new BadRequestException("Guardian phone number must be registered with an active Mobile Banking account.");
+        if ("JUNIOR".equals(roleType) || "OWNER".equals(roleType) || "CHILD".equals(roleType)) {
+            // Junior / Owner Phone Validation: Must NOT be registered anywhere
+            if (juniorAccountFinalRepository.existsByPhoneNumber(phone)) {
+                log.warn("Junior OTP send REJECTED: Phone number {} is ALREADY registered in Junior Account database", maskPhone(phone));
+                throw new BadRequestException("Junior phone number is already registered with an existing Junior account.");
+            }
+            PhoneCheckResponse phoneCheck = phoneCheckService.checkPhone(phone);
+            if (phoneCheck != null && Boolean.TRUE.equals(phoneCheck.getHasAccount())) {
+                log.warn("Junior OTP send REJECTED: Phone number {} is ALREADY registered in MB Core (CIF: {})", maskPhone(phone), phoneCheck.getCif());
+                throw new BadRequestException("Junior phone number is already registered with an active Mobile Banking account.");
+            }
+        } else {
+            // Guardian / Parent Phone Validation: MUST be registered in MB Core
+            PhoneCheckResponse phoneCheck = phoneCheckService.checkPhone(phone);
+            if (phoneCheck == null || !Boolean.TRUE.equals(phoneCheck.getHasAccount())) {
+                log.warn("Guardian OTP send REJECTED: Phone number {} is NOT registered in MB Core", maskPhone(phone));
+                throw new BadRequestException("Guardian phone number must be registered with an active Mobile Banking account.");
+            }
         }
 
         checkCooldownPeriod(phone);
@@ -208,5 +225,10 @@ public class JuniorOtpSmsServiceImpl implements JuniorOtpSmsService {
                 }
             }
         }
+    }
+
+    private String maskPhone(String phone) {
+        if (phone == null || phone.length() < 4) return "***";
+        return "***" + phone.substring(phone.length() - 4);
     }
 }

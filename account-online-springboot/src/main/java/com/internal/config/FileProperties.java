@@ -13,6 +13,7 @@ public class FileProperties {
     @Data
     public static class Upload {
         private String directory = "/app/customer-image";
+        private String juniorDirectory = "/app/junior";
         private String nid = "/nid";
         private String selfie = "/selfie";
         private String junior = "/junior";

@@ -1,5 +1,6 @@
 package com.internal.feature.aml.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.internal.config.entity.BaseEntity;
 import com.internal.enumation.AmlStatusEnum;
 import com.internal.feature.auth.models.UserEntity;
@@ -146,6 +147,7 @@ public class AmlStatus extends BaseEntity {
     // ============================================
     // RAW SUBMISSION DATA FROM FRONTEND
     // ============================================
+    @JsonIgnore
     @Column(name = "request_payload", columnDefinition = "TEXT")
     private String requestPayload;
 

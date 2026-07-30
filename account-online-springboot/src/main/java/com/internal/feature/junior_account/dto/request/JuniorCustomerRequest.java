@@ -19,7 +19,7 @@ public class JuniorCustomerRequest extends CustomerRequest {
     private Boolean hasNid = true;
 
     @JsonProperty("guardian_legal_id")
-    @JsonAlias({"guardianLegalId", "guardian_legal_id"})
+    @JsonAlias({"guardianLegalId", "guardian_legal_id", "guardianNid", "guardian_nid"})
     private String guardianLegalId;
 
     @JsonProperty("guardian_name")

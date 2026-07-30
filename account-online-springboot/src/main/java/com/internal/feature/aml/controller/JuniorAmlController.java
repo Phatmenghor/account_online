@@ -7,6 +7,7 @@ import com.internal.feature.aml.dto.request.UpdateAmlStatusDto;
 import com.internal.feature.aml.models.JuniorAmlStatus;
 import com.internal.feature.aml.service.JuniorAmlService;
 import com.internal.shared.constant.ResponseMessage;
+import com.internal.shared.pagination.PaginationResponse;
 import com.internal.shared.pagination.PaginationUtil;
 import com.internal.shared.response.ApiResponse;
 import jakarta.validation.Valid;
@@ -26,21 +27,21 @@ public class JuniorAmlController {
     private final JuniorAmlService juniorAmlService;
 
     @PostMapping("/all-status")
-    public ResponseEntity<ApiResponse<Page<JuniorAmlStatus>>> getAllJuniorAmlStatus(
+    public ResponseEntity<ApiResponse<PaginationResponse<JuniorAmlStatus>>> getAllJuniorAmlStatus(
             @Valid @RequestBody AllAmlRequestDto request) {
         log.info("Fetching Junior AML status with search: {}", request.getSearch());
         Pageable pageable = PaginationUtil.createPageable(request);
         Page<JuniorAmlStatus> page = juniorAmlService.getAllJuniorAmlStatus(request.getAmlStatusString(), request.getSearch(), pageable);
-        return ResponseEntity.ok(ApiResponse.success(ResponseMessage.AML_STATUSES_RETRIEVED, page));
+        return ResponseEntity.ok(ApiResponse.success(ResponseMessage.AML_STATUSES_RETRIEVED, PaginationResponse.fromPage(page)));
     }
 
     @PostMapping("/all-history")
-    public ResponseEntity<ApiResponse<Page<JuniorAmlStatus>>> getAllJuniorAmlHistory(
+    public ResponseEntity<ApiResponse<PaginationResponse<JuniorAmlStatus>>> getAllJuniorAmlHistory(
             @Valid @RequestBody AllAmlHistoryRequestDto request) {
         log.info("Fetching Junior AML history with search: {}", request.getSearch());
         Pageable pageable = PaginationUtil.createPageable(request);
         Page<JuniorAmlStatus> page = juniorAmlService.getAllJuniorAmlHistory(request.getSearch(), pageable);
-        return ResponseEntity.ok(ApiResponse.success(ResponseMessage.AML_HISTORY_RETRIEVED, page));
+        return ResponseEntity.ok(ApiResponse.success(ResponseMessage.AML_HISTORY_RETRIEVED, PaginationResponse.fromPage(page)));
     }
 
     @PostMapping("/update/{id}")

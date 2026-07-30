@@ -53,7 +53,7 @@ export default function JuniorAccountViewModal({
   const childNameEn = `${account.legalLastNameEn || ""} ${account.legalFirstNameEn || ""}`.trim();
   const displayName = account.legalHolderName || childNameEn || childNameKh || "Junior Customer";
 
-  const docImage = account.nidImageName || account.referenceDocName;
+  const docImage = account.referenceDocName || account.nidImageName || account.reference_doc_name;
   const selfieImage = account.selfieImageName;
 
   // Format Address with slash separation
@@ -183,6 +183,7 @@ export default function JuniorAccountViewModal({
                   <InfoRow label="National NID Number" value={account.legalId} />
                 ) : (
                   <>
+                    <InfoRow label="Guardian NID (Parent NID)" value={account.guardianLegalId || account.guardianNid || "N/A"} />
                     <InfoRow label="Ref Doc Number" value={account.legalId || account.referenceDocName} />
                     <InfoRow label="Ref Doc Type" value={account.referenceDocType || account.legalDocName || "Birth Certificate"} />
                   </>
@@ -247,7 +248,13 @@ export default function JuniorAccountViewModal({
                     />
                     <div className="flex justify-between border-b pb-2 gap-4 md:col-span-2">
                       <Label className="text-sm font-medium text-muted-foreground shrink-0">Guardian Address:</Label>
-                      <span className="text-sm font-semibold text-right">{formatAddress(account.guardianAddress)}</span>
+                      <span className="text-sm font-semibold text-right font-mono">
+                        {(() => {
+                          const gAddr = formatAddress(account.guardianAddress);
+                          if (gAddr && gAddr !== "N/A" && gAddr !== "NA") return gAddr;
+                          return addressCodes || formattedLegalAddress || "N/A";
+                        })()}
+                      </span>
                     </div>
                   </div>
                 </div>

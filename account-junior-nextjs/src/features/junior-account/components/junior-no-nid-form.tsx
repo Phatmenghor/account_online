@@ -460,6 +460,7 @@ export function JuniorNoNidForm({ occupations = [], branches = [], maritalStatus
       reference_doc_name: "",
       reference_doc_image: "",
       selfie_image_name: "",
+      selfie_image_base64: "",
     });
     setParentVerified(false);
     setParentOtpSent(false);
@@ -471,8 +472,18 @@ export function JuniorNoNidForm({ occupations = [], branches = [], maritalStatus
     setParentCountdown(0);
     setJuniorCountdown(0);
     setRefDocFileName("");
+    setRefDocImagePreview(null);
+    setSelfieFileName("");
+    setSelfiePreview(null);
     lastTriedParentOtpRef.current = "";
     lastTriedJuniorOtpRef.current = "";
+
+    if (typeof document !== "undefined") {
+      const selfieInput = document.getElementById("child-selfie-upload-input") as HTMLInputElement;
+      if (selfieInput) selfieInput.value = "";
+      const refDocInput = document.getElementById("ref-doc-upload-input") as HTMLInputElement;
+      if (refDocInput) refDocInput.value = "";
+    }
   };
 
   // Zod Validation Schema
@@ -696,6 +707,19 @@ export function JuniorNoNidForm({ occupations = [], branches = [], maritalStatus
           selfiePreview={selfiePreview}
           selfieFileName={selfieFileName}
           onSelfieUpload={handleSelfieUpload}
+          onClearSelfie={() => {
+            setSelfiePreview(null);
+            setSelfieFileName("");
+            setFormData((prev) => ({
+              ...prev,
+              selfie_image_name: "",
+              selfie_image_base64: "",
+            }));
+            if (typeof document !== "undefined") {
+              const selfieInput = document.getElementById("child-selfie-upload-input") as HTMLInputElement;
+              if (selfieInput) selfieInput.value = "";
+            }
+          }}
         />
 
         {/* 2. Reference Document */}

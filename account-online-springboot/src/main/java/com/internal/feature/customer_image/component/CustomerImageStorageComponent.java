@@ -1,7 +1,8 @@
 package com.internal.feature.customer_image.component;
 
+import com.internal.config.FileProperties;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.imageio.IIOImage;
@@ -29,14 +30,34 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 @Component
+@RequiredArgsConstructor
 @Slf4j
 public class CustomerImageStorageComponent {
 
-    @Value("${file.upload.directory:/app/customer-image}")
-    private String uploadDir;
+    private final FileProperties fileProperties;
 
     public String getUploadDir() {
-        return uploadDir;
+        String dir = (fileProperties != null && fileProperties.getUpload() != null && fileProperties.getUpload().getDirectory() != null)
+                ? fileProperties.getUpload().getDirectory()
+                : "/app/customer-image";
+
+        boolean isWindows = System.getProperty("os.name", "").toLowerCase().contains("win");
+        if (isWindows || (!dir.startsWith("uploads") && !new java.io.File(dir).exists())) {
+            return "uploads/customer-image";
+        }
+        return dir;
+    }
+
+    public String getJuniorUploadDir() {
+        String dir = (fileProperties != null && fileProperties.getUpload() != null && fileProperties.getUpload().getJuniorDirectory() != null)
+                ? fileProperties.getUpload().getJuniorDirectory()
+                : "/app/junior";
+
+        boolean isWindows = System.getProperty("os.name", "").toLowerCase().contains("win");
+        if (isWindows || (!dir.startsWith("uploads") && !new java.io.File(dir).exists())) {
+            return "uploads/junior";
+        }
+        return dir;
     }
 
     public String getCurrentWeekFolder() {
@@ -49,10 +70,10 @@ public class CustomerImageStorageComponent {
     public Path resolveWeekFolder(String subFolder) {
         Path base;
         if (subFolder != null && subFolder.startsWith("junior")) {
-            Path parent = Paths.get(uploadDir).getParent();
-            base = (parent != null) ? parent.resolve(subFolder) : Paths.get(uploadDir, subFolder);
+            String relativeSub = subFolder.replaceFirst("^junior/?", "");
+            base = Paths.get(getJuniorUploadDir(), relativeSub);
         } else {
-            base = Paths.get(uploadDir, subFolder);
+            base = Paths.get(getUploadDir(), subFolder != null ? subFolder : "");
         }
         Path dir = base.resolve(getCurrentWeekFolder());
         dir.toFile().mkdirs();
@@ -80,37 +101,61 @@ public class CustomerImageStorageComponent {
             return Optional.empty();
         }
 
-        java.util.List<Path> searchDirs = new java.util.ArrayList<>();
+        String lowerName = filename.toLowerCase();
+        boolean isJunior = lowerName.contains("jnr") || (subFolder != null && subFolder.startsWith("junior"));
+        String typeSub = lowerName.startsWith("selfie") ? "selfie"
+                       : (lowerName.startsWith("ref_doc") || lowerName.contains("doc")) ? "document"
+                       : "nid";
 
-        Path primarySub = (subFolder != null && subFolder.startsWith("junior"))
-                ? (Paths.get(uploadDir).getParent() != null ? Paths.get(uploadDir).getParent().resolve(subFolder) : Paths.get(uploadDir, subFolder))
-                : Paths.get(uploadDir, subFolder != null ? subFolder : "");
-        searchDirs.add(primarySub);
-        searchDirs.add(Paths.get(uploadDir));
-        searchDirs.add(Paths.get("uploads/customer-image"));
-        searchDirs.add(Paths.get("account-online-springboot/uploads/customer-image"));
+        java.util.List<Path> candidateDirs = new java.util.ArrayList<>();
+        if (isJunior) {
+            Path juniorBase = Paths.get(getJuniorUploadDir());
+            candidateDirs.add(juniorBase.resolve(typeSub));
+            candidateDirs.add(juniorBase);
+            candidateDirs.add(Paths.get("uploads/junior", typeSub));
+            candidateDirs.add(Paths.get("uploads/junior"));
+        } else {
+            Path customerBase = Paths.get(getUploadDir());
+            candidateDirs.add(customerBase.resolve(typeSub));
+            candidateDirs.add(customerBase);
+            candidateDirs.add(Paths.get("uploads/customer-image", typeSub));
+            candidateDirs.add(Paths.get("uploads"));
+        }
 
-        String basePrefix = filename.contains(".") ? filename.substring(0, filename.lastIndexOf('.')) : filename;
+        // 1. Direct file lookup in mapped subfolders
+        for (Path dir : candidateDirs) {
+            if (Files.exists(dir)) {
+                Path file = dir.resolve(filename);
+                if (Files.exists(file) && Files.isRegularFile(file)) {
+                    return Optional.of(file);
+                }
+            }
+        }
 
-        for (Path dir : searchDirs) {
-            if (dir != null && Files.exists(dir)) {
-                try (Stream<Path> walk = Files.walk(dir, 4)) {
-                    java.util.List<Path> matches = walk
-                            .filter(Files::isRegularFile)
-                            .filter(p -> {
-                                String fn = p.getFileName().toString();
-                                return fn.equalsIgnoreCase(filename) ||
-                                       fn.equalsIgnoreCase(basePrefix + ".jpg") ||
-                                       fn.startsWith(basePrefix + "_") ||
-                                       fn.startsWith(basePrefix + ".");
-                            })
-                            .sorted(Comparator.comparingLong(p -> p.toFile().lastModified()))
-                            .collect(java.util.stream.Collectors.toList());
-                    if (!matches.isEmpty()) {
-                        return Optional.of(matches.get(matches.size() - 1));
+        // 2. Direct file lookup in weekly subfolders (e.g. 2026-07-W31)
+        String weekFolder = getCurrentWeekFolder();
+        for (Path dir : candidateDirs) {
+            if (Files.exists(dir)) {
+                Path weekFile = dir.resolve(weekFolder).resolve(filename);
+                if (Files.exists(weekFile) && Files.isRegularFile(weekFile)) {
+                    return Optional.of(weekFile);
+                }
+            }
+        }
+
+        // 3. Extension fallback (.jpg / .png / .pdf)
+        String baseName = filename.contains(".") ? filename.substring(0, filename.lastIndexOf('.')) : filename;
+        for (Path dir : candidateDirs) {
+            if (Files.exists(dir)) {
+                for (String ext : new String[]{".jpg", ".png", ".pdf", ".jpeg", ".webp"}) {
+                    Path extFile = dir.resolve(baseName + ext);
+                    if (Files.exists(extFile) && Files.isRegularFile(extFile)) {
+                        return Optional.of(extFile);
                     }
-                } catch (IOException e) {
-                    log.warn("Could not search for file {} in {}: {}", filename, dir, e.getMessage());
+                    Path weekExtFile = dir.resolve(weekFolder).resolve(baseName + ext);
+                    if (Files.exists(weekExtFile) && Files.isRegularFile(weekExtFile)) {
+                        return Optional.of(weekExtFile);
+                    }
                 }
             }
         }

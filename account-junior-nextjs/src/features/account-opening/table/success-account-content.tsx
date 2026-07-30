@@ -70,9 +70,19 @@ export const createSuccessAccountTableColumns = ({
       truncate: true,
       maxWidth: "180px",
       minWidth: "140px",
-      render: (account) => (
-        <span className="font-medium">{account.legalId || "---"}</span>
-      ),
+      render: (account) => {
+        const isJuniorNoNid = account.hasNid === false || String(account.hasNid) === "false" || account.legalId?.startsWith("JNR-");
+        const parentNid = account.guardianLegalId || account.guardianNid;
+        if (isJuniorNoNid && parentNid) {
+          return (
+            <div className="flex flex-col text-xs leading-tight">
+              <span className="font-semibold text-gray-900">{parentNid}</span>
+              <span className="text-[10px] text-muted-foreground font-mono">Ref: {account.legalId}</span>
+            </div>
+          );
+        }
+        return <span className="font-medium text-xs">{account.legalId || "---"}</span>;
+      },
     },
     {
       key: "legalHolderName",

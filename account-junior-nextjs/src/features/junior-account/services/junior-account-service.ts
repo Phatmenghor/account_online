@@ -41,6 +41,7 @@ export interface JuniorCustomerPayload {
   reference_doc_type?: string;
   reference_doc_name?: string;
   reference_doc_image?: string;
+  selfie_image_base64?: string;
 }
 
 export interface JuniorAccountResponse {

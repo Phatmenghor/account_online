@@ -24,16 +24,14 @@ public class DefaultUserInitializer implements CommandLineRunner {
 
     private final RoleRepository roleRepository;
     private final UserRepository userRepository;
-    private final com.internal.feature.master_data.repository.MaritalStatusRepository maritalStatusRepository;
     private final PasswordEncoder passwordEncoder;
     private final AppProperties appProperties;
 
     @Override
     public void run(String... args) {
-        log.info("Initializing default roles, users, and master data...");
+        log.info("Initializing default roles and users...");
         
         initializeRoles();
-        initializeMaritalStatuses();
         
         if (appProperties.getDefaultUsers().isCreate()) {
             createDefaultSuperAdminUser();
@@ -42,28 +40,6 @@ public class DefaultUserInitializer implements CommandLineRunner {
         }
         
         log.info("Role and user initialization completed");
-    }
-
-    private void initializeMaritalStatuses() {
-        if (maritalStatusRepository.count() == 0) {
-            log.info("Seeding default marital statuses...");
-            List<com.internal.feature.master_data.models.MaritalStatus> defaultStatuses = List.of(
-                createMarital("Single", "នៅលីវ"),
-                createMarital("Married", "រៀបការ"),
-                createMarital("Divorced", "លែងលះ"),
-                createMarital("Widowed", "មេម៉ាយ/ពោះម៉ាយ")
-            );
-            maritalStatusRepository.saveAll(defaultStatuses);
-            log.info("Successfully seeded {} default marital statuses", defaultStatuses.size());
-        }
-    }
-
-    private com.internal.feature.master_data.models.MaritalStatus createMarital(String en, String kh) {
-        com.internal.feature.master_data.models.MaritalStatus ms = new com.internal.feature.master_data.models.MaritalStatus();
-        ms.setNameEn(en);
-        ms.setNameKh(kh);
-        ms.setStatus(StatusData.ACTIVE);
-        return ms;
     }
 
     private void initializeRoles() {

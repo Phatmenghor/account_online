@@ -46,8 +46,8 @@ export function DataTable<T = any>({
                     column.className || ""
                   }`}
                   style={{
-                    ...(column.maxWidth && { maxWidth: column.maxWidth }),
-                    ...(column.minWidth && { minWidth: column.minWidth }),
+                    minWidth: column.minWidth || "20px",
+                    maxWidth: column.maxWidth || "200px",
                   }}
                 >
                   {column.label}

@@ -42,6 +42,7 @@ public class JuniorAccountOpenedEventListener {
     private final MonitoringService monitoringService;
     private final BranchRepository branchRepository;
     private final ObjectMapper objectMapper;
+    private final com.internal.feature.junior_account.service.CustomerInfoService customerInfoService;
 
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     private static final DateTimeFormatter T24_DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd");
@@ -96,7 +97,7 @@ public class JuniorAccountOpenedEventListener {
                     }
 
                     String docName = "ref_doc_" + request.getLegalId() + docExt;
-                    customerImageService.saveBase64File(request.getReferenceDocImage(), docName, "junior_document");
+                    customerImageService.saveBase64File(request.getReferenceDocImage(), docName, "junior/document");
                     request.setReferenceDocName(docName);
                     if (request.getNidImageName() == null || request.getNidImageName().isBlank() || request.getNidImageName().startsWith("data:image")) {
                         request.setNidImageName(docName);
@@ -146,6 +147,46 @@ public class JuniorAccountOpenedEventListener {
 
             if (juniorFinal.getNationality() == null) {
                 juniorFinal.setNationality("KH");
+            }
+
+            if (!hasNid && request.getGuardianCif() != null && !request.getGuardianCif().isBlank()) {
+                try {
+                    var parentInfo = customerInfoService.getCustomerByCif(request.getGuardianCif());
+                    if (parentInfo != null) {
+                        if (juniorFinal.getGuardianLegalId() == null || juniorFinal.getGuardianLegalId().isBlank()) {
+                            juniorFinal.setGuardianLegalId(parentInfo.getLegalId());
+                            request.setGuardianLegalId(parentInfo.getLegalId());
+                        }
+                        if (juniorFinal.getCustomerProvinceCode() == null || juniorFinal.getCustomerProvinceCode().isBlank()) {
+                            juniorFinal.setCustomerProvinceCode(parentInfo.getProvince());
+                            juniorFinal.setCustomerDistrictCode(parentInfo.getDistrict());
+                            juniorFinal.setCustomerCommuneCode(parentInfo.getCommune());
+                            juniorFinal.setCustomerVillageCode(parentInfo.getVillage());
+                        }
+                        if (juniorFinal.getCustomerPobProvinceCode() == null || juniorFinal.getCustomerPobProvinceCode().isBlank()) {
+                            juniorFinal.setCustomerPobProvinceCode(parentInfo.getPobProvince());
+                            juniorFinal.setCustomerPobDistrictCode(parentInfo.getPobDistrict());
+                            juniorFinal.setCustomerPobCommuneCode(parentInfo.getPobCommune());
+                            juniorFinal.setCustomerPobVillageCode(parentInfo.getPobVillage());
+                        }
+
+                        if (juniorFinal.getGuardianAddress() == null || juniorFinal.getGuardianAddress().isBlank() || "N/A".equalsIgnoreCase(juniorFinal.getGuardianAddress()) || "NA".equalsIgnoreCase(juniorFinal.getGuardianAddress())) {
+                            List<String> gAddrParts = new ArrayList<>();
+                            if (parentInfo.getVillage() != null && !parentInfo.getVillage().isBlank()) gAddrParts.add(parentInfo.getVillage());
+                            if (parentInfo.getCommune() != null && !parentInfo.getCommune().isBlank()) gAddrParts.add(parentInfo.getCommune());
+                            if (parentInfo.getDistrict() != null && !parentInfo.getDistrict().isBlank()) gAddrParts.add(parentInfo.getDistrict());
+                            if (parentInfo.getProvince() != null && !parentInfo.getProvince().isBlank()) gAddrParts.add(parentInfo.getProvince());
+
+                            if (!gAddrParts.isEmpty()) {
+                                String formattedGAddr = String.join(" / ", gAddrParts);
+                                juniorFinal.setGuardianAddress(formattedGAddr);
+                                request.setGuardianAddress(formattedGAddr);
+                            }
+                        }
+                    }
+                } catch (Exception e) {
+                    log.warn("Could not enrich parent details for CIF {}: {}", request.getGuardianCif(), e.getMessage());
+                }
             }
 
             try {

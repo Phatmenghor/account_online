@@ -11,6 +11,7 @@ import com.internal.feature.junior_account.service.CustomerInfoService;
 import com.internal.feature.junior_account.service.JuniorAccountService;
 import com.internal.feature.open_account.dto.request.AllAccountOnlineSuccessRequestDto;
 import com.internal.feature.open_account.dto.response.OpenAccountResponseDto;
+import com.internal.shared.pagination.PaginationResponse;
 import com.internal.shared.pagination.PaginationUtil;
 import com.internal.shared.response.ApiResponse;
 import jakarta.validation.Valid;
@@ -61,21 +62,21 @@ public class JuniorAccountController {
     }
 
     @PostMapping("/api/v1/junior-account/all-final")
-    public ResponseEntity<ApiResponse<Page<JuniorAccountFinal>>> getAllJuniorAccountFinals(
+    public ResponseEntity<ApiResponse<PaginationResponse<JuniorAccountFinal>>> getAllJuniorAccountFinals(
             @Valid @RequestBody AllAccountOnlineSuccessRequestDto request) {
         log.info("Fetching Junior Account Final records with search: {}", request.getSearch());
         Pageable pageable = PaginationUtil.createPageable(request);
         Page<JuniorAccountFinal> page = juniorAccountService.getAllJuniorAccountFinals(pageable);
-        return ResponseEntity.ok(ApiResponse.success("Junior account records retrieved", page));
+        return ResponseEntity.ok(ApiResponse.success("Junior account records retrieved", PaginationResponse.fromPage(page)));
     }
 
     @PostMapping("/api/v1/junior-account/all-aml")
-    public ResponseEntity<ApiResponse<Page<JuniorAmlStatus>>> getAllJuniorAmlStatuses(
+    public ResponseEntity<ApiResponse<PaginationResponse<JuniorAmlStatus>>> getAllJuniorAmlStatuses(
             @Valid @RequestBody AllAmlRequestDto request) {
         log.info("Fetching Junior AML status records with search: {}", request.getSearch());
         Pageable pageable = PaginationUtil.createPageable(request);
         Page<JuniorAmlStatus> page = juniorAmlService.getAllJuniorAmlStatus(
                 request.getAmlStatusString(), request.getSearch(), pageable);
-        return ResponseEntity.ok(ApiResponse.success("Junior AML status records retrieved", page));
+        return ResponseEntity.ok(ApiResponse.success("Junior AML status records retrieved", PaginationResponse.fromPage(page)));
     }
 }

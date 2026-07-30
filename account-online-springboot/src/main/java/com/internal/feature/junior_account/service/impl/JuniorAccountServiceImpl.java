@@ -38,6 +38,8 @@ import java.util.UUID;
 import com.internal.feature.junior_account.event.JuniorAccountOpenedEvent;
 import com.internal.feature.junior_account.mapper.JuniorAccountMapper;
 import com.internal.feature.junior_account.service.JuniorBankingService;
+import com.internal.feature.junior_account.service.CustomerInfoService;
+import com.internal.feature.master_data.repository.BranchRepository;
 import com.internal.feature.sms_otp.service.PhoneCheckService;
 import com.internal.shared.exception.openaccount.AccountExistsException;
 import org.springframework.context.ApplicationEventPublisher;
@@ -51,14 +53,16 @@ public class JuniorAccountServiceImpl implements JuniorAccountService {
     private final PhoneCheckService phoneCheckService;
     private final ComplianceService complianceService;
     private final ReportingService reportingService;
+    private final MonitoringService monitoringService;
+    private final ApplicationEventPublisher eventPublisher;
     private final JuniorAccountFinalRepository juniorAccountFinalRepository;
-    private final JuniorAmlStatusRepository juniorAmlStatusRepository;
     private final JuniorCustomerImageService juniorCustomerImageService;
     private final CustomerImageService customerImageService;
     private final JuniorAccountMapper juniorAccountMapper;
-    private final MonitoringService monitoringService;
-    private final ApplicationEventPublisher eventPublisher;
+    private final BranchRepository branchRepository;
+    private final JuniorAmlStatusRepository juniorAmlStatusRepository;
     private final ObjectMapper objectMapper;
+    private final CustomerInfoService customerInfoService;
 
     @Override
     @Transactional
@@ -66,10 +70,16 @@ public class JuniorAccountServiceImpl implements JuniorAccountService {
         boolean hasNid = Boolean.TRUE.equals(request.getHasNid());
         String legalId = request.getLegalId();
 
-        // If NO NID mode and legalId is missing, generate a unique Junior ID
-        if (!hasNid && (legalId == null || legalId.isBlank())) {
-            legalId = "JNR-" + System.currentTimeMillis();
-            request.setLegalId(legalId);
+        // If NO NID mode, use Parent Legal NID (guardianLegalId) as the legalId (do NOT use synthetic JNR- timestamp)
+        if (!hasNid) {
+            String parentNid = (request.getGuardianLegalId() != null && !request.getGuardianLegalId().isBlank())
+                    ? request.getGuardianLegalId().trim()
+                    : null;
+
+            if (parentNid != null && !parentNid.isBlank()) {
+                legalId = parentNid;
+                request.setLegalId(legalId);
+            }
         }
 
         // Junior account uses JUNIOR_SECTOR (6012) for T24 Customer Creation and JUNIOR_PRODUCT (SAVE.JUNIOR.SAVING) for Account Creation
@@ -103,14 +113,26 @@ public class JuniorAccountServiceImpl implements JuniorAccountService {
                 juniorBankingService.validateExistingAccounts(customerInfo);
             }
 
-            // Step 3.1: Validate Junior phone (must NOT be registered) and Guardian phone (MUST be registered)
+            // Step 3.1: Validate Junior phone (must NOT be registered in MB Core OR existing Junior Accounts)
             if (request.getPhoneNumber() != null && !request.getPhoneNumber().isBlank()) {
-                log.info("Step 3.1: Checking if Junior phone number is registered | Phone: {}", request.getPhoneNumber());
+                String cleanJuniorPhone = request.getPhoneNumber().trim();
+                log.info("Step 3.1: Checking if Junior phone number is registered | Phone: {}", cleanJuniorPhone);
                 currentStep = AppConstants.VALIDATE_EXISTING_ACCOUNT;
-                var phoneCheckResult = phoneCheckService.checkPhone(request.getPhoneNumber().trim());
+
+                // Check 1: Check existing Junior Account database
+                var existingJuniorOpt = juniorAccountFinalRepository.findByPhoneNumber(cleanJuniorPhone);
+                if (existingJuniorOpt.isPresent()) {
+                    String existingCif = existingJuniorOpt.get().getCif();
+                    log.warn("Junior Account creation REJECTED: Junior phone number {} is ALREADY registered in Junior Account database (CIF: {})",
+                            cleanJuniorPhone, existingCif);
+                    throw new AccountExistsException(existingCif);
+                }
+
+                // Check 2: Check MB Core database
+                var phoneCheckResult = phoneCheckService.checkPhone(cleanJuniorPhone);
                 if (phoneCheckResult != null && Boolean.TRUE.equals(phoneCheckResult.getHasAccount())) {
-                    log.warn("Junior Account creation REJECTED: Junior phone number {} is ALREADY registered with CIF {}",
-                            request.getPhoneNumber(), phoneCheckResult.getCif());
+                    log.warn("Junior Account creation REJECTED: Junior phone number {} is ALREADY registered in MB Core (CIF: {})",
+                            cleanJuniorPhone, phoneCheckResult.getCif());
                     throw new AccountExistsException(phoneCheckResult.getCif());
                 }
             }
@@ -121,6 +143,37 @@ public class JuniorAccountServiceImpl implements JuniorAccountService {
                 if (guardianPhoneCheck == null || !Boolean.TRUE.equals(guardianPhoneCheck.getHasAccount())) {
                     log.warn("Junior Account creation REJECTED: Guardian phone number {} is NOT registered in MB Core", request.getGuardianPhone());
                     throw new com.internal.shared.exception.custom.BadRequestException("Guardian phone number must be registered with an active Mobile Banking account.");
+                }
+                if (request.getGuardianCif() == null || request.getGuardianCif().isBlank()) {
+                    request.setGuardianCif(guardianPhoneCheck.getCif());
+                }
+            }
+
+            // Enrich Guardian Legal ID (Parent NID) and Guardian Address if not provided by request
+            if (request.getGuardianCif() != null && !request.getGuardianCif().isBlank()) {
+                try {
+                    var parentInfo = customerInfoService.getCustomerByCif(request.getGuardianCif());
+                    if (parentInfo != null) {
+                        if (parentInfo.getLegalId() != null && !parentInfo.getLegalId().isBlank() && (request.getGuardianLegalId() == null || request.getGuardianLegalId().isBlank())) {
+                            request.setGuardianLegalId(parentInfo.getLegalId());
+                            log.info("Enriched request guardianLegalId with parent NID: {} for CIF: {}", parentInfo.getLegalId(), request.getGuardianCif());
+                        }
+                        if (request.getGuardianAddress() == null || request.getGuardianAddress().isBlank() || "N/A".equalsIgnoreCase(request.getGuardianAddress()) || "NA".equalsIgnoreCase(request.getGuardianAddress())) {
+                            java.util.List<String> gAddrParts = new java.util.ArrayList<>();
+                            if (parentInfo.getVillage() != null && !parentInfo.getVillage().isBlank()) gAddrParts.add(parentInfo.getVillage());
+                            if (parentInfo.getCommune() != null && !parentInfo.getCommune().isBlank()) gAddrParts.add(parentInfo.getCommune());
+                            if (parentInfo.getDistrict() != null && !parentInfo.getDistrict().isBlank()) gAddrParts.add(parentInfo.getDistrict());
+                            if (parentInfo.getProvince() != null && !parentInfo.getProvince().isBlank()) gAddrParts.add(parentInfo.getProvince());
+
+                            if (!gAddrParts.isEmpty()) {
+                                String formattedGAddr = String.join(" / ", gAddrParts);
+                                request.setGuardianAddress(formattedGAddr);
+                                log.info("Enriched request guardianAddress with parent address codes: {} for CIF: {}", formattedGAddr, request.getGuardianCif());
+                            }
+                        }
+                    }
+                } catch (Exception e) {
+                    log.warn("Failed to enrich guardian details from CIF {}: {}", request.getGuardianCif(), e.getMessage());
                 }
             }
 
@@ -283,7 +336,7 @@ public class JuniorAccountServiceImpl implements JuniorAccountService {
                     }
 
                     String docName = "ref_doc_" + request.getLegalId() + docExt;
-                    customerImageService.saveBase64File(request.getReferenceDocImage(), docName, "junior_document");
+                    customerImageService.saveBase64File(request.getReferenceDocImage(), docName, "junior/document");
                     request.setReferenceDocName(docName);
                     if (request.getNidImageName() == null || request.getNidImageName().isBlank() || request.getNidImageName().startsWith("data:image")) {
                         request.setNidImageName(docName);

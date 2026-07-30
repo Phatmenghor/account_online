@@ -1,5 +1,6 @@
 package com.internal.feature.junior_account.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.internal.config.entity.BaseNoIdEntity;
 import com.internal.enumation.AmlStatusEnum;
 import lombok.*;
@@ -107,6 +108,7 @@ public class JuniorAccountFinal extends BaseNoIdEntity {
     @Column(name = "guardian_address", columnDefinition = "TEXT")
     private String guardianAddress;
 
+    @JsonIgnore
     @Column(name = "guardian_info_json", columnDefinition = "TEXT")
     private String guardianInfoJson;
 
@@ -205,6 +207,7 @@ public class JuniorAccountFinal extends BaseNoIdEntity {
     @Column(name = "selfie_image_name")
     private String selfieImageName;
 
+    @JsonIgnore
     @Column(name = "request_payload", columnDefinition = "TEXT")
     private String requestPayload;
 }

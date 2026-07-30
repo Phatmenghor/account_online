@@ -3,12 +3,13 @@
 import React from "react";
 import { useTranslations } from "next-intl";
 import { Label } from "@/components/ui/label";
-import { Camera } from "lucide-react";
+import { Camera, X } from "lucide-react";
 
 interface ChildPhotoUploadSectionProps {
   selfiePreview?: string | null;
   selfieFileName?: string;
   onSelfieUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onClearSelfie?: () => void;
   error?: string;
 }
 
@@ -16,15 +17,31 @@ export function ChildPhotoUploadSection({
   selfiePreview,
   selfieFileName,
   onSelfieUpload,
+  onClearSelfie,
   error,
 }: ChildPhotoUploadSectionProps) {
   const tJunior = useTranslations("junior");
 
   return (
     <div className="space-y-1.5">
-      <Label className="text-xs font-medium text-slate-700 block">
-        {tJunior("childFacePhoto")} <span className="text-red-500 ml-0.5">*</span>
-      </Label>
+      <div className="flex items-center justify-between">
+        <Label className="text-xs font-medium text-slate-700 block">
+          {tJunior("childFacePhoto")} <span className="text-red-500 ml-0.5">*</span>
+        </Label>
+        {selfiePreview && onClearSelfie && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onClearSelfie();
+            }}
+            className="text-[11px] text-red-500 hover:text-red-600 font-semibold flex items-center gap-1 transition-colors"
+          >
+            <X className="w-3 h-3" />
+            <span>Clear Photo</span>
+          </button>
+        )}
+      </div>
       <label
         htmlFor="child-selfie-upload-input"
         className={`group relative flex flex-col items-center justify-center h-36 sm:h-40 rounded-2xl border-2 border-dashed cursor-pointer overflow-hidden transition-all duration-200 ${

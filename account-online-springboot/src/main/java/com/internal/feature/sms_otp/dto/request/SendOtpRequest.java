@@ -18,4 +18,7 @@ public class SendOtpRequest {
     @Pattern(regexp = "^\\+?[0-9]{8,15}$", message = "Invalid phone number format")
     @Schema(description = "Phone number", example = "85512345678")
     private String phone;
+
+    @Schema(description = "Target phone role/type: GUARDIAN (must have MB account) or JUNIOR (must NOT have account)", example = "GUARDIAN")
+    private String type;
 }

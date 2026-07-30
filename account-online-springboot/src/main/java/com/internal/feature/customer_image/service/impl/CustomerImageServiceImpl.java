@@ -161,33 +161,25 @@ public class CustomerImageServiceImpl implements CustomerImageService {
     }
 
     private Path getJuniorParentPath() {
-        String uploadDir = storageComponent.getUploadDir();
-        Path parent = Paths.get(uploadDir).getParent();
-        return (parent != null) ? parent : Paths.get(uploadDir);
+        return Paths.get(storageComponent.getUploadDir());
     }
 
     @Override
     public Resource getNidImageResourceForEmail(String customerId) {
         try {
-            String uploadDir = storageComponent.getUploadDir();
-            Path imagePath = storageComponent.findLatestFileRecursive(
-                    Paths.get(uploadDir, "nid"), "nid_" + customerId + "_");
-            if (imagePath == null) {
-                imagePath = storageComponent.findLatestFileRecursive(
-                        getJuniorParentPath().resolve("junior/nid"), "nid_" + customerId + "_");
+            Optional<Path> found = storageComponent.findFileByName("junior/document", "ref_doc_" + customerId);
+            if (found.isEmpty()) {
+                found = storageComponent.findFileByName("junior/nid", "nid_" + customerId);
             }
-            if (imagePath == null) {
-                imagePath = storageComponent.findLatestFileRecursive(
-                        getJuniorParentPath().resolve("junior/document"), "ref_doc_" + customerId);
+            if (found.isEmpty()) {
+                found = storageComponent.findFileByName("nid", "nid_" + customerId);
             }
-            if (imagePath == null) {
-                imagePath = storageComponent.findLatestFileRecursive(
-                        getJuniorParentPath().resolve("junior"), "nid_" + customerId + "_");
+            if (found.isPresent() && Files.exists(found.get())) {
+                log.info("Found document/NID resource for Telegram/email: {}", found.get());
+                return new FileSystemResource(found.get().toFile());
             }
-            if (imagePath == null) {
-                return null;
-            }
-            return new FileSystemResource(imagePath.toFile());
+            log.warn("Document/NID resource not found for customerId: {}", customerId);
+            return null;
         } catch (Exception e) {
             log.error("Failed to get NID image resource: {}", e.getMessage(), e);
             return null;
@@ -197,17 +189,11 @@ public class CustomerImageServiceImpl implements CustomerImageService {
     @Override
     public byte[] getNidImageBytes(String customerId) {
         try {
-            String uploadDir = storageComponent.getUploadDir();
-            Path imagePath = storageComponent.findLatestFileRecursive(
-                    Paths.get(uploadDir, "nid"), "nid_" + customerId + "_");
-            if (imagePath == null) {
-                imagePath = storageComponent.findLatestFileRecursive(
-                        getJuniorParentPath().resolve("junior/nid"), "nid_" + customerId + "_");
+            Resource res = getNidImageResourceForEmail(customerId);
+            if (res != null && res.exists()) {
+                return Files.readAllBytes(res.getFile().toPath());
             }
-            if (imagePath == null) {
-                return null;
-            }
-            return Files.readAllBytes(imagePath);
+            return null;
         } catch (IOException e) {
             log.error("Failed to read NID image bytes: {}", e.getMessage(), e);
             return null;
@@ -217,21 +203,16 @@ public class CustomerImageServiceImpl implements CustomerImageService {
     @Override
     public Resource getSelfieImageResourceForEmail(String customerId) {
         try {
-            String uploadDir = storageComponent.getUploadDir();
-            Path imagePath = storageComponent.findLatestFileRecursive(
-                    Paths.get(uploadDir, "selfie"), "selfie_" + customerId);
-            if (imagePath == null) {
-                imagePath = storageComponent.findLatestFileRecursive(
-                        getJuniorParentPath().resolve("junior/selfie"), "selfie_" + customerId);
+            Optional<Path> found = storageComponent.findFileByName("junior/selfie", "selfie_" + customerId);
+            if (found.isEmpty()) {
+                found = storageComponent.findFileByName("selfie", "selfie_" + customerId);
             }
-            if (imagePath == null) {
-                imagePath = storageComponent.findLatestFileRecursive(
-                        getJuniorParentPath().resolve("junior"), "selfie_" + customerId);
+            if (found.isPresent() && Files.exists(found.get())) {
+                log.info("Found Selfie resource for Telegram/email: {}", found.get());
+                return new FileSystemResource(found.get().toFile());
             }
-            if (imagePath == null) {
-                return null;
-            }
-            return new FileSystemResource(imagePath.toFile());
+            log.warn("Selfie resource not found for customerId: {}", customerId);
+            return null;
         } catch (Exception e) {
             log.error("Failed to get Selfie image resource: {}", e.getMessage(), e);
             return null;
@@ -282,11 +263,37 @@ public class CustomerImageServiceImpl implements CustomerImageService {
             return Optional.empty();
         }
 
-        String subFolder = filename.toLowerCase().startsWith("selfie") ? "selfie" : "nid";
+        String lowerName = filename.toLowerCase();
+        String subFolder;
+        if (lowerName.startsWith("selfie")) {
+            subFolder = "selfie";
+        } else if (lowerName.startsWith("ref_doc") || lowerName.contains("doc")) {
+            subFolder = "document";
+        } else {
+            subFolder = "nid";
+        }
 
         Optional<Path> found = storageComponent.findFileByName(subFolder, filename);
         if (found.isEmpty()) {
+            found = storageComponent.findFileByName("junior_document", filename);
+        }
+        if (found.isEmpty()) {
             found = storageComponent.findFileByName("junior/" + subFolder, filename);
+        }
+        if (found.isEmpty()) {
+            found = storageComponent.findFileByName("junior/document", filename);
+        }
+        if (found.isEmpty()) {
+            found = storageComponent.findFileByName("document", filename);
+        }
+        if (found.isEmpty()) {
+            found = storageComponent.findFileByName("junior_nid", filename);
+        }
+        if (found.isEmpty()) {
+            found = storageComponent.findFileByName("junior/nid", filename);
+        }
+        if (found.isEmpty()) {
+            found = storageComponent.findFileByName("nid", filename);
         }
 
         if (found.isEmpty() && filename.contains(".")) {
@@ -316,12 +323,24 @@ public class CustomerImageServiceImpl implements CustomerImageService {
     }
 
     private MediaType resolveMediaType(Path filePath) {
-        try {
-            String contentType = Files.probeContentType(filePath);
-            if (contentType != null) {
-                return org.springframework.http.MediaType.parseMediaType(contentType);
+        if (filePath != null) {
+            String lower = filePath.getFileName().toString().toLowerCase();
+            if (lower.endsWith(".pdf")) {
+                return MediaType.APPLICATION_PDF;
+            } else if (lower.endsWith(".png")) {
+                return MediaType.IMAGE_PNG;
+            } else if (lower.endsWith(".webp")) {
+                return MediaType.parseMediaType("image/webp");
+            } else if (lower.endsWith(".jpg") || lower.endsWith(".jpeg")) {
+                return MediaType.IMAGE_JPEG;
             }
-        } catch (Exception ignored) {}
+            try {
+                String contentType = Files.probeContentType(filePath);
+                if (contentType != null) {
+                    return org.springframework.http.MediaType.parseMediaType(contentType);
+                }
+            } catch (Exception ignored) {}
+        }
         return org.springframework.http.MediaType.IMAGE_JPEG;
     }
 }

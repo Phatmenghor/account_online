@@ -16,8 +16,13 @@ export async function uploadImageService(data: UploadImageReq) {
 }
 
 export function getImageService(imageId: string): string {
-  const base = process.env.NEXT_PUBLIC_API_BASE_URL_IMAGE ?? "";
-  return `${base}/api/customer-images/${imageId}`;
+  if (!imageId) return "";
+  if (imageId.startsWith("data:") || imageId.startsWith("http://") || imageId.startsWith("https://")) {
+    return imageId;
+  }
+  const base = process.env.NEXT_PUBLIC_API_BASE_URL_IMAGE || process.env.NEXT_PUBLIC_API_BASE_URL || "";
+  const cleanBase = base.endsWith("/") ? base.slice(0, -1) : base;
+  return `${cleanBase}/api/customer-images/${imageId}`;
 }
 
 

@@ -375,6 +375,9 @@
     "valGender": "សូមជ្រើសរើសភេទ",
     "valJuniorPhone": "សូមបញ្ចូលលេខទូរស័ព្ទកុមារឲ្យបានត្រឹមត្រូវ",
     "invalidFileTypeTitle": "ទម្រង់ឯកសារមិនត្រឹមត្រូវ!",
-    "invalidFileTypeDesc": "សូមជ្រើសរើសតែឯកសារប្រភេទ PDF ឬ រូបភាព ប៉ុណ្ណោះ (.pdf, .jpg, .png, .webp)។"
+    "invalidFileTypeDesc": "សូមជ្រើសរើសតែឯកសារប្រភេទ PDF ឬ រូបភាព ប៉ុណ្ណោះ (.pdf, .jpg, .png, .webp)។",
+    "welcomeTitle": "សូមស្វាគមន៍មកកាន់ Cambodia Post Bank!",
+    "accountCreatedSuccessMessage": "គណនីធនាគាររបស់លោក/លោកស្រី ត្រូវបានបង្កើតដោយជោគជ័យ រួចរាល់ហើយ។",
+    "accountDetailsSmsNotice": "ព័ត៌មានលម្អិតគណនីត្រូវបានផ្ញើទៅកាន់ លេខទូរស័ព្ទរបស់លោក/លោកស្រីតាមរយៈ សារ SMS។"
   }
 }

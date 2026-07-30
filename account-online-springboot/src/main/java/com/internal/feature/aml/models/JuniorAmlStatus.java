@@ -1,6 +1,8 @@
 package com.internal.feature.aml.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.internal.config.entity.BaseEntity;
+import com.internal.feature.auth.models.UserEntity;
 import lombok.*;
 
 import jakarta.persistence.*;
@@ -103,15 +105,17 @@ public class JuniorAmlStatus extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "approved_by")
-    private com.internal.feature.auth.models.UserEntity approvedBy;
+    private UserEntity approvedBy;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "rejected_by")
-    private com.internal.feature.auth.models.UserEntity rejectedBy;
+    private UserEntity rejectedBy;
 
+    @JsonIgnore
     @Column(name = "customer_info_json", columnDefinition = "TEXT")
     private String customerInfoJson;
 
+    @JsonIgnore
     @Column(name = "request_payload", columnDefinition = "TEXT")
     private String requestPayload;
 }

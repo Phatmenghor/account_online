@@ -375,6 +375,9 @@
     "valGender": "Please select Gender",
     "valJuniorPhone": "Please enter valid Junior phone number",
     "invalidFileTypeTitle": "Invalid File Format!",
-    "invalidFileTypeDesc": "Please upload only PDF or Image files (.pdf, .jpg, .png, .webp)."
+    "invalidFileTypeDesc": "Please upload only PDF or Image files (.pdf, .jpg, .png, .webp).",
+    "welcomeTitle": "Welcome to Cambodia Post Bank!",
+    "accountCreatedSuccessMessage": "Your bank account has been created successfully.",
+    "accountDetailsSmsNotice": "Account details have been sent to your phone number via SMS."
   }
 }
