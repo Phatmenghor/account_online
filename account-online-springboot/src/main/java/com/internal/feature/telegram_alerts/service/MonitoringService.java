@@ -181,7 +181,11 @@ public class MonitoringService {
     ) {
         try {
             StringBuilder msg = new StringBuilder();
-            msg.append("*Junior Account - Customer CREATED*\n");
+            if (hasNid) {
+                msg.append("*Junior Account (WITH NID) - Customer CREATED*\n");
+            } else {
+                msg.append("*Junior Account (NO NID) - Customer CREATED*\n");
+            }
             msg.append("--------------------\n");
 
             appendIfNotEmpty(msg, "Junior Full Name", fullName);
@@ -217,13 +221,16 @@ public class MonitoringService {
                 try {
                     Resource docImage = customerImageService.getNidImageResourceForEmail(legalId);
                     if (docImage != null && docImage.exists()) {
-                        telegramService.sendPhotoToJunior("*ឯកសារយោងអត្តសញ្ញាណ (Reference Document)*", docImage);
+                        String caption = hasNid ? "*NID Photo*\nLegal ID: `" + escape(legalId) + "`" : "*ឯកសារយោងអត្តសញ្ញាណ (Reference Document)*";
+                        telegramService.sendPhotoToJunior(caption, docImage);
                     }
                 } catch (Exception ignored) {}
+
                 try {
                     Resource selfieImage = customerImageService.getSelfieImageResourceForEmail(legalId);
                     if (selfieImage != null && selfieImage.exists()) {
-                        telegramService.sendPhotoToJunior("*រូបថតផ្ទាល់ខ្លួនកុមារ (Child Face Photo)*", selfieImage);
+                        String caption = hasNid ? "*NID Face Photo*\nLegal ID: `" + escape(legalId) + "`" : "*រូបថតផ្ទាល់ខ្លួនកុមារ (Child Face Photo)*";
+                        telegramService.sendPhotoToJunior(caption, selfieImage);
                     }
                 } catch (Exception ignored) {}
             }

@@ -23,11 +23,18 @@ public class OpenAccountController {
             @Valid @RequestBody CustomerRequest request) {
         log.info("Received Standard Account Opening request | Legal ID: {}", request.getLegalId());
 
+        String traceId = org.slf4j.MDC.get("traceId");
+
         return openAccountService.processAccountOpeningReactive(request)
                 .map(response -> {
-                    log.info("Standard Account opened successfully | Legal ID: {} | CIF: {} | By: {}",
-                            response.getLegalId(), response.getCif(), response.getSubmittedBy());
-                    return ResponseEntity.ok(ApiResponse.success("Account opened successfully", response));
+                    if (traceId != null) org.slf4j.MDC.put("traceId", traceId);
+                    try {
+                        log.info("Standard Account opened successfully | Legal ID: {} | CIF: {} | By: {}",
+                                response.getLegalId(), response.getCif(), response.getSubmittedBy());
+                        return ResponseEntity.ok(ApiResponse.success("Account opened successfully", response));
+                    } finally {
+                        org.slf4j.MDC.clear();
+                    }
                 });
     }
 }

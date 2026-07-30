@@ -40,6 +40,7 @@ export default function OTPInput({
 
   const [phoneRegisteredModal, setPhoneRegisteredModal] = useState<boolean>(false);
   const translate = useTranslations("NIDPage");
+  const tJunior = useTranslations("junior");
   const locale = useLocale();
 
   useEffect(() => {
@@ -378,7 +379,7 @@ export default function OTPInput({
                 onClick={() => setPhoneRegisteredModal(false)}
                 className="w-full h-10 bg-primary hover:bg-primary/90 text-white font-bold text-xs rounded-xl"
               >
-                {locale === "kh" ? "យល់ព្រម" : "OK"}
+                {tJunior("ok")}
               </Button>
             </div>
           </div>

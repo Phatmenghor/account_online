@@ -16,6 +16,9 @@ import com.internal.feature.sms_otp.service.OtpService;
 import com.internal.shared.component.OtpComponent;
 import com.internal.integration.ports.SmsPort;
 import com.internal.shared.constant.AppConstants;
+import com.internal.feature.sms_otp.dto.response.PhoneCheckResponse;
+import com.internal.feature.sms_otp.service.PhoneCheckService;
+import com.internal.shared.exception.custom.BadRequestException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -29,6 +32,7 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@Transactional(readOnly = true)
 public class OtpServiceImpl implements OtpService {
 
     private final OtpRepository otpRepository;
@@ -36,6 +40,7 @@ public class OtpServiceImpl implements OtpService {
     private final SmsOtpMapper otpMapper;
     private final CpbProperties cpbProperties;
     private final SmsPort smsPort;
+    private final PhoneCheckService phoneCheckService;
     private final EntityManager entityManager;
 
     @Override
@@ -43,6 +48,13 @@ public class OtpServiceImpl implements OtpService {
     public SendOtpResponse sendOtp(SendOtpRequest request) {
         String phone = request.getPhone();
         log.info("Processing OTP request for phone: {}", phone);
+
+        // Pre-check if phone number is already registered in MB Core before sending OTP
+        PhoneCheckResponse phoneCheck = phoneCheckService.checkPhone(phone);
+        if (phoneCheck != null && Boolean.TRUE.equals(phoneCheck.getHasAccount())) {
+            log.warn("Send OTP rejected: Phone number {} is already registered with CIF {}", phone, phoneCheck.getCif());
+            throw new BadRequestException("Phone number is already registered with an active Mobile Banking account.");
+        }
 
         checkCooldownPeriod(phone);
         checkAttemptLockout(phone);
@@ -163,10 +175,3 @@ public class OtpServiceImpl implements OtpService {
         entityManager.clear();
     }
 }
-
-
-
-
-
-
-

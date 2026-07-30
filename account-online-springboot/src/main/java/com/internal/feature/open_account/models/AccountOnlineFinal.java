@@ -10,7 +10,11 @@ import java.util.UUID;
 
 @EqualsAndHashCode(callSuper = true)
 @Entity
-@Table(name = "acc_online_open_final")
+@Table(name = "acc_online_open_final", indexes = {
+        @Index(name = "idx_final_cif", columnList = "cif"),
+        @Index(name = "idx_final_legal_id", columnList = "legal_id"),
+        @Index(name = "idx_final_created_at", columnList = "created_at")
+})
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

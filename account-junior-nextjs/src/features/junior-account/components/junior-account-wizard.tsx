@@ -1,19 +1,23 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import {
   processJuniorAccountOpening,
   fetchBranches,
   fetchOccupations,
   checkPhone,
-  sendOtp,
-  verifyOtp,
+  sendGuardianOtp,
+  verifyGuardianOtp,
+  sendJuniorOtp,
+  verifyJuniorOtp,
   getCustomerInfoByCif,
   JuniorCustomerPayload,
   JuniorAccountResponse,
   CustomerInfo,
 } from '../services/junior-account-service';
 import { showToast } from '@/components/shared/common/show-toast';
+import { WarningAlertModal } from './form-sections/warning-alert-modal';
 import {
   ShieldCheck,
   UserCheck,
@@ -38,6 +42,7 @@ import {
 } from 'lucide-react';
 
 export function JuniorAccountWizard() {
+  const tJunior = useTranslations('junior');
   // Main Steps:
   // 1 = Option Selection (With NID vs No NID)
   // 2 = Parent Phone Pre-Check & OTP Verification
@@ -162,32 +167,12 @@ export function JuniorAccountWizard() {
         return;
       }
 
-      // Phone exists in MB Core → Get Parent Customer Info by CIF if available
       if (res.cif) {
         setFormData((prev) => ({ ...prev, guardian_cif: res.cif }));
-        try {
-          const info = await getCustomerInfoByCif(res.cif);
-          setParentInfo(info);
-          const parentBranch = info.coCode || info.companyBook || "KH0012011";
-          setFormData((prev) => ({
-            ...prev,
-            guardian_cif: res.cif,
-            guardian_name: (info.names && info.names.length > 0) ? info.names[0] : (info.shortNames && info.shortNames.length > 0 ? info.shortNames[0] : prev.guardian_name),
-            guardian_legal_id: info.legalId || prev.guardian_legal_id,
-            guardian_doc_type: info.legalDocName || "NATIONAL.ID",
-            guardian_dob: info.birthDate || "",
-            guardian_address: (info.streets && info.streets.length > 0) ? info.streets[0] : (prev.legal_address || ""),
-            guardian_info_json: JSON.stringify(info),
-            branch_code: parentBranch,
-            legal_address: (info.streets && info.streets.length > 0) ? info.streets[0] : (prev.legal_address || ""),
-          }));
-        } catch (e) {
-          console.warn('Parent info lookup non-critical error', e);
-        }
       }
 
       // Send OTP to parent
-      await sendOtp(formData.guardian_phone);
+      await sendGuardianOtp(formData.guardian_phone);
       setParentOtpSent(true);
       showToast.success('OTP sent to parent phone successfully!');
     } catch (err: any) {
@@ -210,8 +195,45 @@ export function JuniorAccountWizard() {
     setLoading(true);
     setErrorMsg('');
     try {
-      await verifyOtp(formData.guardian_phone || '', parentOtpCode);
+      const verifyRes: any = await verifyGuardianOtp(formData.guardian_phone || '', parentOtpCode);
       setParentVerified(true);
+
+      // Render parent info on UI INSTANTLY from OTP verify response
+      const parentCif = verifyRes?.cif || verifyRes?.guardian_cif || formData.guardian_cif;
+      const guardianName = verifyRes?.customerName || verifyRes?.guardian_name || formData.guardian_name;
+
+      if (parentCif) {
+        setParentInfo({
+          cif: parentCif,
+          names: [guardianName || "N/A"],
+          shortNames: [guardianName || "N/A"],
+        } as CustomerInfo);
+
+        setFormData((prev) => ({
+          ...prev,
+          guardian_cif: parentCif,
+          guardian_name: guardianName || prev.guardian_name,
+        }));
+
+        // Fetch remaining detailed customer fields in background without blocking UI
+        getCustomerInfoByCif(parentCif).then((info) => {
+          setParentInfo(info);
+          const parentBranch = info.coCode || info.companyBook || "KH0012011";
+          setFormData((prev) => ({
+            ...prev,
+            guardian_cif: parentCif,
+            guardian_name: (info.names && info.names.length > 0) ? info.names[0] : (info.shortNames && info.shortNames.length > 0 ? info.shortNames[0] : prev.guardian_name),
+            guardian_legal_id: info.legalId || prev.guardian_legal_id,
+            guardian_doc_type: info.legalDocName || "NATIONAL.ID",
+            guardian_dob: info.birthDate || "",
+            guardian_address: (info.streets && info.streets.length > 0) ? info.streets[0] : (prev.legal_address || ""),
+            guardian_info_json: JSON.stringify(info),
+            branch_code: parentBranch,
+            legal_address: (info.streets && info.streets.length > 0) ? info.streets[0] : (prev.legal_address || ""),
+          }));
+        }).catch((e) => console.warn('Parent info background fetch non-critical warning', e));
+      }
+
       showToast.success('Parent OTP verified successfully!');
       setStep(3); // Proceed to Junior Personal Details
     } catch (err: any) {
@@ -237,7 +259,7 @@ export function JuniorAccountWizard() {
     setLoading(true);
     setErrorMsg('');
     try {
-      await sendOtp(formData.phone_number);
+      await sendJuniorOtp(formData.phone_number);
       setJuniorOtpSent(true);
       showToast.success('OTP sent to junior phone successfully!');
     } catch (err: any) {
@@ -260,7 +282,7 @@ export function JuniorAccountWizard() {
     setLoading(true);
     setErrorMsg('');
     try {
-      await verifyOtp(formData.phone_number || '', juniorOtpCode);
+      await verifyJuniorOtp(formData.phone_number || '', juniorOtpCode);
       setJuniorVerified(true);
       showToast.success('Junior OTP verified successfully!');
       setStep(6); // Proceed to Branch & Location Selection
@@ -274,10 +296,22 @@ export function JuniorAccountWizard() {
     }
   };
 
-  // File upload change handler
+  // File upload change handler (PDF & Images only)
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
+
+      // Validate file type: Only PDF and Images allowed
+      const isPdf = file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
+      const isImage = file.type.startsWith("image/") || /\.(jpg|jpeg|png|webp|gif)$/i.test(file.name);
+
+      if (!isPdf && !isImage) {
+        const msg = tJunior("invalidFileTypeDesc");
+        setErrorMsg(msg);
+        showToast.error(msg);
+        return;
+      }
+
       setRefDocFileName(file.name);
       setFormData((prev) => ({
         ...prev,
@@ -1051,35 +1085,13 @@ export function JuniorAccountWizard() {
       </div>
 
       {/* UNREGISTERED PARENT PHONE WARNING MODAL */}
-      {parentPhoneWarningModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
-          <div className="relative bg-slate-900 border border-slate-800 w-full max-w-md rounded-2xl p-6 shadow-2xl space-y-4 text-center">
-            <div className="w-14 h-14 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center mx-auto">
-              <AlertTriangle className="w-8 h-8" />
-            </div>
-
-            <h3 className="text-lg font-bold text-slate-100">
-              លេខទូរស័ព្ទអាណាព្យាបាលមិនទាន់ចុះឈ្មោះ!
-            </h3>
-
-            <p className="text-xs text-slate-300 leading-relaxed text-left bg-slate-950 p-4 rounded-xl border border-slate-800">
-              លេខទូរស័ព្ទ <span className="font-bold text-amber-400">{unregisteredPhone}</span> មិនទាន់មានគណនី Mobile Banking នៅក្នុងប្រព័ន្ធ CPBank ទេ។
-              <br /><br />
-              សូមបញ្ចូលលេខទូរស័ព្ទអាណាព្យាបាលដែលមានចុះឈ្មោះ Mobile Banking រួចរាល់ ឬបង្កើតគណនីធនាគារធម្មតាជាមុនសិន។
-            </p>
-
-            <div className="pt-2">
-              <button
-                type="button"
-                onClick={() => setParentPhoneWarningModal(false)}
-                className="w-full py-2.5 rounded-xl bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold text-sm transition-colors"
-              >
-                យល់ព្រម (Understand)
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <WarningAlertModal
+        isOpen={parentPhoneWarningModal}
+        onClose={() => setParentPhoneWarningModal(false)}
+        title={tJunior("verificationFailed")}
+        message={tJunior("parentPhoneNotRegisteredDesc", { phone: unregisteredPhone })}
+        type="warning"
+      />
     </div>
   );
 }

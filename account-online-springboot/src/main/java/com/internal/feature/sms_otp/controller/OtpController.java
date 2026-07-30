@@ -1,6 +1,7 @@
 package com.internal.feature.sms_otp.controller;
 
 import com.internal.shared.response.ApiResponse;
+import com.internal.feature.sms_otp.dto.request.PhoneCheckRequest;
 import com.internal.feature.sms_otp.dto.request.SendOtpRequest;
 import com.internal.feature.sms_otp.dto.request.VerifyOtpRequest;
 import com.internal.feature.sms_otp.dto.response.PhoneCheckResponse;
@@ -12,15 +13,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
 
 @RestController
 @RequestMapping("/api/v1/public/otp")
@@ -34,16 +32,10 @@ public class OtpController {
 
     /**
      * Check if a phone number is already registered in MB Core.
-     *
-     * GET /api/v1/public/otp/check-phone?phone=070411260
-     *
-     * Response:
-     *   hasAccount = true  → phone already registered, show warning to user
-     *   hasAccount = false → phone not registered, safe to proceed
      */
     @PostMapping("/check-phone")
     public ResponseEntity<ApiResponse<PhoneCheckResponse>> checkPhone(
-            @Valid @RequestBody com.internal.feature.sms_otp.dto.request.PhoneCheckRequest request) {
+            @Valid @RequestBody PhoneCheckRequest request) {
 
         log.info("API: Phone pre-check request for phone: {}", request.getPhone());
         PhoneCheckResponse response = phoneCheckService.checkPhone(request.getPhone());
@@ -58,10 +50,10 @@ public class OtpController {
     @PostMapping("/send")
     public ResponseEntity<ApiResponse<SendOtpResponse>> sendOtp(
             @Valid @RequestBody SendOtpRequest request) {
-        
+
         log.info("API: Send OTP request - Phone: {}", request.getPhone());
         SendOtpResponse response = otpService.sendOtp(request);
-        
+
         return ResponseEntity.ok(
                 ApiResponse.success("OTP sent successfully!", response)
         );
@@ -70,17 +62,12 @@ public class OtpController {
     @PostMapping("/verify")
     public ResponseEntity<ApiResponse<VerifyOtpResponse>> verifyOtp(
             @Valid @RequestBody VerifyOtpRequest request) {
-        
+
         log.info("API: Verify OTP request - Phone: {}", request.getPhone());
         VerifyOtpResponse response = otpService.verifyOtp(request);
-        
+
         return ResponseEntity.ok(
                 ApiResponse.success("OTP verified successfully!", response)
         );
     }
 }
-
-
-
-
-

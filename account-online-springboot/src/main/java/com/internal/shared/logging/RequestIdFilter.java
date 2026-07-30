@@ -50,8 +50,8 @@ public class RequestIdFilter extends OncePerRequestFilter {
 
         String path = request.getRequestURI();
 
-        // Pass through silently for image and probe paths
-        if (shouldSkipLogging(path)) {
+        // Pass through silently for image, probe paths, and CORS OPTIONS preflight requests
+        if ("OPTIONS".equalsIgnoreCase(request.getMethod()) || shouldSkipLogging(path)) {
             chain.doFilter(request, response);
             return;
         }
@@ -60,6 +60,7 @@ public class RequestIdFilter extends OncePerRequestFilter {
         long start = System.currentTimeMillis();
 
         MDC.put("traceId", traceId);
+        MDC.put("requestId", traceId);
         MDC.put("method",  request.getMethod());
         MDC.put("path",    path);
 
@@ -79,15 +80,15 @@ public class RequestIdFilter extends OncePerRequestFilter {
 
             if (status >= 400 && responseMessage != null && !responseMessage.isBlank()) {
                 if (status >= 500) {
-                    log.error("{} {} → {} in {}ms [{}] — {}",
-                            request.getMethod(), path, status, duration, traceId, responseMessage);
+                    log.error("{} {} → {} in {}ms — {}",
+                            request.getMethod(), path, status, duration, responseMessage);
                 } else {
-                    log.warn("{} {} → {} in {}ms [{}] — {}",
-                            request.getMethod(), path, status, duration, traceId, responseMessage);
+                    log.warn("{} {} → {} in {}ms — {}",
+                            request.getMethod(), path, status, duration, responseMessage);
                 }
             } else {
-                log.info("{} {} → {} in {}ms [{}]",
-                        request.getMethod(), path, status, duration, traceId);
+                log.info("{} {} → {} in {}ms",
+                        request.getMethod(), path, status, duration);
             }
 
             MDC.clear();

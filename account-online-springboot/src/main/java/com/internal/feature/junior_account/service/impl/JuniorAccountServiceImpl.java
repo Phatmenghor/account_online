@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.internal.enumation.AccountOpeningRequestStatusEnum;
 import com.internal.enumation.AmlStatusEnum;
 import com.internal.feature.junior_account.dto.request.JuniorCustomerRequest;
+import com.internal.feature.aml.dto.response.AmlStatusDto;
 import com.internal.feature.aml.models.JuniorAmlStatus;
 import com.internal.feature.aml.repository.JuniorAmlStatusRepository;
 import com.internal.feature.junior_account.models.JuniorAccountFinal;
@@ -21,6 +22,8 @@ import com.internal.feature.telegram_alerts.service.MonitoringService;
 import com.internal.shared.constant.AppConstants;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Mono;
@@ -79,7 +82,9 @@ public class JuniorAccountServiceImpl implements JuniorAccountService {
         log.info("Processing Junior Account Opening | Has NID: {} | Legal ID: {} | Submitted by: {}",
                 hasNid, legalId, submittedBy);
 
-        OpenAccountContext context = OpenAccountContext.builder().request(request).submittedBy(submittedBy).build();
+        OpenAccountContext context = new OpenAccountContext();
+        context.setRequest(request);
+        context.setSubmittedBy(submittedBy);
 
         try {
             log.info("Step 1: Testing connection | Legal ID: {}", legalId);
@@ -98,20 +103,38 @@ public class JuniorAccountServiceImpl implements JuniorAccountService {
                 juniorBankingService.validateExistingAccounts(customerInfo);
             }
 
-            // Step 3.1: Validate that Junior phone number is NOT already registered in MB/CBS
+            // Step 3.1: Validate Junior phone (must NOT be registered) and Guardian phone (MUST be registered)
             if (request.getPhoneNumber() != null && !request.getPhoneNumber().isBlank()) {
                 log.info("Step 3.1: Checking if Junior phone number is registered | Phone: {}", request.getPhoneNumber());
                 currentStep = AppConstants.VALIDATE_EXISTING_ACCOUNT;
                 var phoneCheckResult = phoneCheckService.checkPhone(request.getPhoneNumber().trim());
                 if (phoneCheckResult != null && Boolean.TRUE.equals(phoneCheckResult.getHasAccount())) {
-                    log.warn("Junior Account creation REJECTED: Phone number {} is ALREADY registered with CIF {}",
+                    log.warn("Junior Account creation REJECTED: Junior phone number {} is ALREADY registered with CIF {}",
                             request.getPhoneNumber(), phoneCheckResult.getCif());
                     throw new AccountExistsException(phoneCheckResult.getCif());
                 }
             }
 
+            if (request.getGuardianPhone() != null && !request.getGuardianPhone().isBlank()) {
+                log.info("Step 3.2: Checking if Guardian phone number is registered in MB Core | Phone: {}", request.getGuardianPhone());
+                var guardianPhoneCheck = phoneCheckService.checkPhone(request.getGuardianPhone().trim());
+                if (guardianPhoneCheck == null || !Boolean.TRUE.equals(guardianPhoneCheck.getHasAccount())) {
+                    log.warn("Junior Account creation REJECTED: Guardian phone number {} is NOT registered in MB Core", request.getGuardianPhone());
+                    throw new com.internal.shared.exception.custom.BadRequestException("Guardian phone number must be registered with an active Mobile Banking account.");
+                }
+            }
+
             String amlStatus = AmlStatusEnum.APPROVE.name();
-            log.info("Step 4: Bypassing AML check for Junior account opening | Legal ID: {}", legalId);
+            if (hasNid) {
+                log.info("Step 4: Performing AML check for Junior account opening (WITH NID) | Legal ID: {}", legalId);
+                currentStep = AppConstants.PROCESS_AML;
+                AmlStatusDto amlProcessResult = complianceService.processAml(request);
+                context.setAmlResult(amlProcessResult);
+                amlStatus = amlProcessResult.getStatus().name();
+                complianceService.sentMessageOnHighRisk(request, amlProcessResult);
+            } else {
+                log.info("Step 4: Bypassing AML check for Junior account opening (NO NID) | Legal ID: {}", legalId);
+            }
 
             log.info("Step 5: Creating customer in Core Banking | Legal ID: {}", legalId);
             currentStep = AppConstants.CREATE_CUSTOMER;
@@ -173,9 +196,22 @@ public class JuniorAccountServiceImpl implements JuniorAccountService {
 
     @Override
     public Mono<OpenAccountResponseDto> processJuniorAccountOpeningReactive(JuniorCustomerRequest request) {
-        String legalId = request.getLegalId();
-        return Mono.fromCallable(() -> processJuniorAccountOpening(request))
-                .subscribeOn(Schedulers.boundedElastic());
+        Map<String, String> contextMap = org.slf4j.MDC.getCopyOfContextMap();
+        return Mono.fromCallable(() -> {
+            if (contextMap != null) {
+                org.slf4j.MDC.setContextMap(contextMap);
+            }
+            try {
+                return processJuniorAccountOpening(request);
+            } finally {
+                org.slf4j.MDC.clear();
+            }
+        }).subscribeOn(Schedulers.boundedElastic());
+    }
+
+    @Override
+    public Page<JuniorAccountFinal> getAllJuniorAccountFinals(Pageable pageable) {
+        return juniorAccountFinalRepository.findAll(pageable);
     }
 
     private void saveJuniorAccountFinal(JuniorCustomerRequest request, OpenAccountContext context, String amlStatusStr, boolean hasNid) {
@@ -233,14 +269,27 @@ public class JuniorAccountServiceImpl implements JuniorAccountService {
 
             if (request.getReferenceDocImage() != null && !request.getReferenceDocImage().isBlank()) {
                 try {
-                    String docName = "ref_doc_" + request.getLegalId() + ".png";
+                    String docExt = ".pdf";
+                    if (request.getReferenceDocName() != null && request.getReferenceDocName().contains(".")) {
+                        docExt = request.getReferenceDocName().substring(request.getReferenceDocName().lastIndexOf('.')).toLowerCase();
+                    } else if (request.getReferenceDocImage().startsWith("data:application/pdf")) {
+                        docExt = ".pdf";
+                    } else if (request.getReferenceDocImage().startsWith("data:image/png")) {
+                        docExt = ".png";
+                    } else if (request.getReferenceDocImage().startsWith("data:image/jpeg") || request.getReferenceDocImage().startsWith("data:image/jpg")) {
+                        docExt = ".jpg";
+                    } else if (request.getReferenceDocImage().startsWith("data:image/webp")) {
+                        docExt = ".webp";
+                    }
+
+                    String docName = "ref_doc_" + request.getLegalId() + docExt;
                     customerImageService.saveBase64File(request.getReferenceDocImage(), docName, "junior_document");
                     request.setReferenceDocName(docName);
                     if (request.getNidImageName() == null || request.getNidImageName().isBlank() || request.getNidImageName().startsWith("data:image")) {
                         request.setNidImageName(docName);
                     }
                 } catch (Exception e) {
-                    log.warn("Could not save Junior reference document image file to disk: {}", e.getMessage());
+                    log.warn("Could not save Junior reference document file to disk: {}", e.getMessage());
                 }
             }
 

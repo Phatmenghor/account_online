@@ -1,6 +1,5 @@
 package com.internal.feature.open_account.service.impl;
 
-import com.internal.enumation.AccountOpeningRequestStatusEnum;
 import com.internal.feature.open_account.dto.request.OpenAccountContext;
 import com.internal.feature.open_account.dto.request.CustomerCreationResult;
 import com.internal.feature.open_account.dto.request.CustomerRequest;
@@ -36,7 +35,6 @@ public class OpenAccountServiceImpl implements OpenAccountService {
         String legalId = request.getLegalId();
         String currentStep = "START";
 
-        // Always enforce Standard account sector (6011) and product (SAVE.ACCT.ONLINE) on backend
         request.setSector(AppConstants.DEFAULT_SECTOR);
         request.setProductAccount(AppConstants.PRODUCT_CODE);
 
@@ -50,7 +48,9 @@ public class OpenAccountServiceImpl implements OpenAccountService {
 
         log.info("Processing account opening | Legal ID: {} | Submitted by: {}", legalId, submittedBy);
 
-        OpenAccountContext context = OpenAccountContext.builder().request(request).submittedBy(submittedBy).build();
+        OpenAccountContext context = new OpenAccountContext();
+        context.setRequest(request);
+        context.setSubmittedBy(submittedBy);
 
         try {
             log.info("Step 1: Testing connection | Legal ID: {}", legalId);
@@ -133,23 +133,33 @@ public class OpenAccountServiceImpl implements OpenAccountService {
     @Override
     public Mono<OpenAccountResponseDto> processAccountOpeningReactive(CustomerRequest request) {
         String legalId = request.getLegalId();
-        return Mono.fromCallable(() -> processAccountOpening(request))
-                .subscribeOn(Schedulers.boundedElastic())
-                .doOnCancel(() -> {
-                    log.warn("Account opening process CANCELLED by client/user connection drop | Legal ID: {}", legalId);
-                    try {
-                        reportingService.saveFailureLogs(request,
-                                new RuntimeException("CLIENT_CANCELLED: Account opening cancelled due to client connection drop"),
-                                "CANCELLED_BY_CLIENT",
-                                "User disconnected or closed connection before account opening completed",
-                                false);
-                    } catch (Exception ex) {
-                        log.error("Failed to save cancellation log for Legal ID: {}", legalId, ex);
-                    }
-                })
-                .doOnDiscard(OpenAccountResponseDto.class, response -> {
-                    log.info("Discarding account opening response because connection was terminated prematurely for Legal ID: {}", legalId);
-                });
+        java.util.Map<String, String> contextMap = org.slf4j.MDC.getCopyOfContextMap();
+        return Mono.fromCallable(() -> {
+            if (contextMap != null) {
+                org.slf4j.MDC.setContextMap(contextMap);
+            }
+            try {
+                return processAccountOpening(request);
+            } finally {
+                org.slf4j.MDC.clear();
+            }
+        })
+        .subscribeOn(Schedulers.boundedElastic())
+        .doOnCancel(() -> {
+            log.warn("Account opening process CANCELLED by client/user connection drop | Legal ID: {}", legalId);
+            try {
+                reportingService.saveFailureLogs(request,
+                        new RuntimeException("CLIENT_CANCELLED: Account opening cancelled due to client connection drop"),
+                        "CANCELLED_BY_CLIENT",
+                        "User disconnected or closed connection before account opening completed",
+                        false);
+            } catch (Exception ex) {
+                log.error("Failed to save cancellation log for Legal ID: {}", legalId, ex);
+            }
+        })
+        .doOnDiscard(OpenAccountResponseDto.class, response -> {
+            log.info("Discarding account opening response because connection was terminated prematurely for Legal ID: {}", legalId);
+        });
     }
 }
 

@@ -1,6 +1,7 @@
 package com.internal.feature.sms_otp.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -16,15 +17,17 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@JsonInclude(JsonInclude.Include.NON_NULL)
 public class PhoneCheckResponse {
 
     /** Whether this phone already has an active MB account */
     private Boolean hasAccount;
 
-    /** CIF number (only present when hasAccount = true) */
+    @Schema(description = "Customer CIF if found", example = "4000086308")
     private String cif;
 
-    /** Mobile number as stored in MB Core (only present when hasAccount = true) */
+    @Schema(description = "Customer Full Name if found", example = "SEANG CHIVA")
+    private String customerName;
+
+    @Schema(description = "Mobile number registered in MB", example = "85512345678")
     private String mobile;
 }

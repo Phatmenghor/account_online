@@ -10,6 +10,7 @@ import com.internal.feature.open_account.dto.response.AllAccountOnlineFinalRespo
 import com.internal.feature.open_account.service.AccountFinalService;
 import com.internal.shared.constant.ResponseMessage;
 import com.internal.shared.response.ApiResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -24,14 +25,14 @@ public class AccountFinalController {
     private final AccountFinalService accountFinalService;
 
     @PostMapping()
-    public ResponseEntity<ApiResponse<AccountOnlineFinalResponseDto>> getAccountByCifOrLegalId(@RequestBody AccountOnlineFinalLogRequestDto request) {
+    public ResponseEntity<ApiResponse<AccountOnlineFinalResponseDto>> getAccountByCifOrLegalId(@Valid @RequestBody AccountOnlineFinalLogRequestDto request) {
         log.info("Fetching Account By CIF: {} , Legal Id: {}", request.getCif(), request.getLegalId());
         AccountOnlineFinalResponseDto dto = accountFinalService.findAccountByCifOrLegalId(request);
         return ResponseEntity.ok(ApiResponse.success(ResponseMessage.ACCOUNT_RETRIEVED, dto));
     }
 
     @PostMapping("/success-list")
-    public ResponseEntity<ApiResponse<AllAccountOnlineFinalResponseDto>> getSuccessOpenAccounts(@RequestBody AllAccountOnlineSuccessRequestDto request) {
+    public ResponseEntity<ApiResponse<AllAccountOnlineFinalResponseDto>> getSuccessOpenAccounts(@Valid @RequestBody AllAccountOnlineSuccessRequestDto request) {
         log.info("Fetching success open accounts - Page: {}, Size: {}, Search: {}",
                 request.getPageNo(), request.getPageSize(), request.getSearch());
         AllAccountOnlineFinalResponseDto response = accountFinalService.getSuccessOpenAccount(request);
@@ -39,7 +40,7 @@ public class AccountFinalController {
     }
 
     @PostMapping("/success-list/excel")
-    public ResponseEntity<ApiResponse<AllAccountOnlineFinalExcelResponseDto>> getSuccessOpenAccountExcels(@RequestBody AllAccountOnlineSuccessExcelRequestDto request) {
+    public ResponseEntity<ApiResponse<AllAccountOnlineFinalExcelResponseDto>> getSuccessOpenAccountExcels(@Valid @RequestBody AllAccountOnlineSuccessExcelRequestDto request) {
         log.info("Fetching success open accounts report excel - from: {}, to: {}, Search: {}",
                 request.getFromDate(), request.getToDate(), request.getSearch());
         AllAccountOnlineFinalExcelResponseDto response = accountFinalService.getSuccessOpenAccountExcel(request);

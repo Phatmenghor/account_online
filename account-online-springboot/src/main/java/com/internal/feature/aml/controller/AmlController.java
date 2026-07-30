@@ -15,14 +15,12 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/aml")
 @RequiredArgsConstructor
 @Slf4j
-@PreAuthorize("hasAnyRole('COMPLIANCE', 'BUSINESS', 'DEVELOPER')")
 public class AmlController {
 
     private final AmlService service;

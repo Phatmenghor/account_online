@@ -10,7 +10,10 @@ import jakarta.persistence.*;
 
 @EqualsAndHashCode(callSuper = true)
 @Entity
-@Table(name = "acc_online_aml_status")
+@Table(name = "acc_online_aml_status", indexes = {
+        @Index(name = "idx_aml_legal_id", columnList = "legal_id"),
+        @Index(name = "idx_aml_status", columnList = "status")
+})
 @Data
 public class AmlStatus extends BaseEntity {
 

@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { useLocale } from "next-intl";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle, XCircle } from "lucide-react";
 
@@ -20,7 +20,7 @@ export function WarningAlertModal({
   message,
   type = "warning",
 }: WarningAlertModalProps) {
-  const locale = useLocale();
+  const tJunior = useTranslations("junior");
 
   if (!isOpen) return null;
 
@@ -53,7 +53,7 @@ export function WarningAlertModal({
             onClick={onClose}
             className="w-full h-10 bg-primary hover:bg-primary/90 text-white font-bold text-xs rounded-xl"
           >
-            {locale === "kh" ? "យល់ព្រម" : "OK"}
+            {tJunior("ok")}
           </Button>
         </div>
       </div>

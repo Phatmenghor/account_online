@@ -1,10 +1,13 @@
 package com.internal.feature.auth.repository;
 
+import com.internal.enumation.RoleEnum;
 import com.internal.enumation.StatusData;
 import com.internal.feature.auth.models.UserEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -12,10 +15,10 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 
-import com.internal.enumation.RoleEnum;
-
 @Repository
-public interface UserRepository extends JpaRepository<UserEntity, Long> {
+public interface UserRepository extends JpaRepository<UserEntity, Long>, JpaSpecificationExecutor<UserEntity> {
+
+    @EntityGraph(attributePaths = {"roles"})
     Optional<UserEntity> findByUsername(String username);
 
     Boolean existsByUsername(String username);
@@ -26,7 +29,6 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
 
     Page<UserEntity> findByStatusIn(List<StatusData> statuses, Pageable pageable);
 
-    // search with statuses
     @Query("SELECT u FROM UserEntity u " +
             "WHERE u.status IN :statuses " +
             "AND (" +
@@ -38,8 +40,6 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
             @Param("statuses")   List<StatusData> statuses,
             Pageable pageable);
 
-
-    // search with status
     @Query("SELECT u FROM UserEntity u " +
             "WHERE u.status = :status " +
             "AND (" +
@@ -63,7 +63,6 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
             @Param("statuses") List<StatusData> statuses,
             @Param("roleNames") List<RoleEnum> roleNames,
             Pageable pageable);
-
 }
 
 

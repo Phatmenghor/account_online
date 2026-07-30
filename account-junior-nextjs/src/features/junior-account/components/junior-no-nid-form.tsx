@@ -7,8 +7,10 @@ import { CheckCircle, Camera } from "lucide-react";
 import { z } from "zod";
 import {
   checkPhone,
-  sendOtp,
-  verifyOtp,
+  sendGuardianOtp,
+  verifyGuardianOtp,
+  sendJuniorOtp,
+  verifyJuniorOtp,
   getCustomerInfoByCif,
   processJuniorAccountOpening,
   fetchOccupations,
@@ -24,16 +26,10 @@ import { SubmissionProgressModal } from "@/features/account-opening/components/s
 import { ParentVerificationSection } from "./form-sections/parent-verification-section";
 import { ReferenceDocUploadSection } from "./form-sections/reference-doc-upload-section";
 import { JuniorPhoneVerificationSection } from "./form-sections/junior-phone-verification-section";
+import { ChildPhotoUploadSection } from "./form-sections/child-photo-upload-section";
 import { WarningAlertModal } from "./form-sections/warning-alert-modal";
-import { Input } from "@/components/ui/input";
+import { FormInputField, FormSelectField } from "@/features/account-opening/components/form-field/form-field";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { CustomDateTimePicker } from "@/components/shared/common/custom-datetime-picker";
 
 const SectionLabel = ({ label }: { label: string }) => (
@@ -56,6 +52,7 @@ interface JuniorNoNidFormProps {
 export function JuniorNoNidForm({ occupations = [], branches = [], maritalStatuses = [] }: JuniorNoNidFormProps) {
   const translate = useTranslations("NIDPage");
   const translateCommon = useTranslations("common");
+  const tJunior = useTranslations("junior");
   const locale = useLocale();
 
   const [loading, setLoading] = useState(false);
@@ -224,8 +221,8 @@ export function JuniorNoNidForm({ occupations = [], branches = [], maritalStatus
   const handleCheckParentPhone = async () => {
     if (!formData.guardian_phone) {
       showAlertModal(
-        locale === "kh" ? "សូមបញ្ចូលលេខទូរស័ព្ទអាណាព្យាបាល!" : "Please Enter Parent Phone Number!",
-        locale === "kh" ? "សូមបញ្ចូលលេខទូរស័ព្ទអាណាព្យាបាលដើម្បីផ្ទៀងផ្ទាត់គណនី CPBank Mobile Banking។" : "Please enter parent phone number to verify CPBank Mobile Banking account."
+        tJunior("enterParentPhoneTitle"),
+        tJunior("enterParentPhoneDesc")
       );
       return;
     }
@@ -240,34 +237,15 @@ export function JuniorNoNidForm({ occupations = [], branches = [], maritalStatus
 
       if (res.cif) {
         setFormData((prev) => ({ ...prev, guardian_cif: res.cif }));
-        try {
-          const info = await getCustomerInfoByCif(res.cif);
-          setParentInfo(info);
-          const parentBranch = info.coCode || info.companyBook || "KH0012011";
-          setFormData((prev) => ({
-            ...prev,
-            guardian_cif: res.cif,
-            guardian_name: (info.names && info.names.length > 0) ? info.names[0] : (info.shortNames && info.shortNames.length > 0 ? info.shortNames[0] : prev.guardian_name),
-            guardian_legal_id: info.legalId || prev.guardian_legal_id,
-            guardian_doc_type: info.legalDocName || "NATIONAL.ID",
-            guardian_dob: info.birthDate || "",
-            guardian_address: (info.streets && info.streets.length > 0) ? info.streets[0] : (prev.legal_address || ""),
-            guardian_info_json: JSON.stringify(info),
-            branch_code: parentBranch,
-            legal_address: (info.streets && info.streets.length > 0) ? info.streets[0] : (prev.legal_address || ""),
-          }));
-        } catch (e) {
-          console.warn("Parent background info lookup error", e);
-        }
       }
 
-      await sendOtp(formData.guardian_phone);
+      await sendGuardianOtp(formData.guardian_phone);
       setParentOtpSent(true);
       setParentCountdown(60);
-      showToast.success(locale === "kh" ? "បានផ្ញើលេខកូដ OTP ទៅទូរស័ព្ទអាណាព្យាបាលដោយជោគជ័យ!" : "OTP sent to parent phone successfully!");
+      showToast.success(tJunior("otpSentParentSuccess"));
     } catch (err: any) {
-      const msg = err.response?.data?.message || err.message || "Failed to verify parent phone.";
-      showAlertModal(locale === "kh" ? "ការផ្ទៀងផ្ទាត់បរាជ័យ!" : "Verification Failed!", msg);
+      const msg = err.response?.data?.message || err.message || tJunior("verificationFailed");
+      showAlertModal(tJunior("verificationFailed"), msg);
     } finally {
       setLoading(false);
     }
@@ -280,21 +258,58 @@ export function JuniorNoNidForm({ occupations = [], branches = [], maritalStatus
   const handleVerifyParentOtp = async () => {
     if (!parentOtpCode || parentOtpCode.length !== 6) {
       showAlertModal(
-        locale === "kh" ? "លេខកូដ OTP មិនត្រឹមត្រូវ!" : "Invalid OTP Code!",
-        locale === "kh" ? "សូមបញ្ចូលលេខកូដ OTP ៦ខ្ទង់ឲ្យបានត្រឹមត្រូវ។" : "Please enter a valid 6-digit OTP code."
+        tJunior("invalidOtpTitle"),
+        tJunior("invalidOtpDesc")
       );
       return;
     }
     setLoading(true);
     try {
-      await verifyOtp(formData.guardian_phone || "", parentOtpCode);
+      const verifyRes: any = await verifyGuardianOtp(formData.guardian_phone || "", parentOtpCode);
       setParentVerified(true);
       setParentCountdown(0);
-      showToast.success(locale === "kh" ? "បានផ្ទៀងផ្ទាត់ OTP អាណាព្យាបាលដោយជោគជ័យ!" : "Parent OTP verified successfully!");
+
+      // Render parent info on UI INSTANTLY from OTP verify response
+      const parentCif = verifyRes?.cif || verifyRes?.guardian_cif || formData.guardian_cif;
+      const guardianName = verifyRes?.customerName || verifyRes?.guardian_name || formData.guardian_name;
+
+      if (parentCif) {
+        setParentInfo({
+          cif: parentCif,
+          names: [guardianName || "N/A"],
+          shortNames: [guardianName || "N/A"],
+        } as CustomerInfo);
+
+        setFormData((prev) => ({
+          ...prev,
+          guardian_cif: parentCif,
+          guardian_name: guardianName || prev.guardian_name,
+        }));
+
+        // Fetch remaining detailed customer fields in background without blocking UI
+        getCustomerInfoByCif(parentCif).then((info) => {
+          setParentInfo(info);
+          const parentBranch = info.coCode || info.companyBook || "KH0012011";
+          setFormData((prev) => ({
+            ...prev,
+            guardian_cif: parentCif,
+            guardian_name: (info.names && info.names.length > 0) ? info.names[0] : (info.shortNames && info.shortNames.length > 0 ? info.shortNames[0] : prev.guardian_name),
+            guardian_legal_id: info.legalId || prev.guardian_legal_id,
+            guardian_doc_type: info.legalDocName || "NATIONAL.ID",
+            guardian_dob: info.birthDate || "",
+            guardian_address: (info.streets && info.streets.length > 0) ? info.streets[0] : (prev.legal_address || ""),
+            guardian_info_json: JSON.stringify(info),
+            branch_code: parentBranch,
+            legal_address: (info.streets && info.streets.length > 0) ? info.streets[0] : (prev.legal_address || ""),
+          }));
+        }).catch((e) => console.warn("Background parent info fetch non-critical error", e));
+      }
+
+      showToast.success(tJunior("parentOtpVerifySuccess"));
     } catch (err: any) {
       lastTriedParentOtpRef.current = "";
-      const msg = err.response?.data?.message || err.message || "Invalid OTP code.";
-      showAlertModal(locale === "kh" ? "ការផ្ទៀងផ្ទាត់ OTP បរាជ័យ!" : "OTP Verification Failed!", msg);
+      const msg = err.response?.data?.message || err.message || tJunior("invalidOtpDesc");
+      showAlertModal(tJunior("otpVerifyFailed"), msg);
     } finally {
       setLoading(false);
     }
@@ -304,8 +319,8 @@ export function JuniorNoNidForm({ occupations = [], branches = [], maritalStatus
   const handleSendJuniorOtp = async () => {
     if (!formData.phone_number) {
       showAlertModal(
-        locale === "kh" ? "សូមបញ្ចូលលេខទូរស័ព្ទកុមារ!" : "Please Enter Junior Phone Number!",
-        locale === "kh" ? "សូមបញ្ចូលលេខទូរស័ព្ទទំនាក់ទំនងកុមារដើម្បីទទួលលេខកូដ OTP ផ្ទៀងផ្ទាត់។" : "Please enter junior contact phone number to receive OTP code."
+        tJunior("enterJuniorPhoneTitle"),
+        tJunior("enterJuniorPhoneDesc")
       );
       return;
     }
@@ -320,13 +335,13 @@ export function JuniorNoNidForm({ occupations = [], branches = [], maritalStatus
         return;
       }
 
-      await sendOtp(formData.phone_number);
+      await sendJuniorOtp(formData.phone_number);
       setJuniorOtpSent(true);
       setJuniorCountdown(60);
-      showToast.success(locale === "kh" ? "បានផ្ញើលេខកូដ OTP ទៅទូរស័ព្ទកុមារដោយជោគជ័យ!" : "OTP sent to junior phone successfully!");
+      showToast.success(tJunior("otpSentJuniorSuccess"));
     } catch (err: any) {
-      const msg = err.response?.data?.message || err.message || "Failed to send junior OTP.";
-      showAlertModal(locale === "kh" ? "ការផ្ញើ OTP បរាជ័យ!" : "Failed to Send OTP!", msg);
+      const msg = err.response?.data?.message || err.message || tJunior("sendOtpFailed");
+      showAlertModal(tJunior("sendOtpFailed"), msg);
     } finally {
       setLoading(false);
     }
@@ -335,21 +350,21 @@ export function JuniorNoNidForm({ occupations = [], branches = [], maritalStatus
   const handleVerifyJuniorOtp = async () => {
     if (!juniorOtpCode || juniorOtpCode.length !== 6) {
       showAlertModal(
-        locale === "kh" ? "លេខកូដ OTP មិនត្រឹមត្រូវ!" : "Invalid OTP Code!",
-        locale === "kh" ? "សូមបញ្ចូលលេខកូដ OTP ៦ខ្ទង់ឲ្យបានត្រឹមត្រូវ។" : "Please enter a valid 6-digit OTP code."
+        tJunior("invalidOtpTitle"),
+        tJunior("invalidOtpDesc")
       );
       return;
     }
     setLoading(true);
     try {
-      await verifyOtp(formData.phone_number || "", juniorOtpCode);
+      await verifyJuniorOtp(formData.phone_number || "", juniorOtpCode);
       setJuniorVerified(true);
       setJuniorCountdown(0);
-      showToast.success(locale === "kh" ? "បានផ្ទៀងផ្ទាត់ OTP កុមារដោយជោគជ័យ!" : "Junior OTP verified successfully!");
+      showToast.success(tJunior("juniorOtpVerifySuccess"));
     } catch (err: any) {
       lastTriedJuniorOtpRef.current = "";
-      const msg = err.response?.data?.message || err.message || "Invalid OTP code.";
-      showAlertModal(locale === "kh" ? "ការផ្ទៀងផ្ទាត់ OTP បរាជ័យ!" : "OTP Verification Failed!", msg);
+      const msg = err.response?.data?.message || err.message || tJunior("invalidOtpDesc");
+      showAlertModal(tJunior("otpVerifyFailed"), msg);
     } finally {
       setLoading(false);
     }
@@ -385,10 +400,23 @@ export function JuniorNoNidForm({ occupations = [], branches = [], maritalStatus
     }
   }, [juniorOtpCode, formData.phone_number, juniorVerified, loading]);
 
-  // File Upload with Base64 conversion
+  // File Upload with Base64 conversion (PDF & Images only)
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
+
+      // Validate file type: Only PDF and Images allowed
+      const isPdf = file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
+      const isImage = file.type.startsWith("image/") || /\.(jpg|jpeg|png|webp|gif)$/i.test(file.name);
+
+      if (!isPdf && !isImage) {
+        showAlertModal(
+          tJunior("invalidFileTypeTitle"),
+          tJunior("invalidFileTypeDesc")
+        );
+        return;
+      }
+
       setRefDocFileName(file.name);
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -451,53 +479,53 @@ export function JuniorNoNidForm({ occupations = [], branches = [], maritalStatus
   const validateFormWithZod = (): boolean => {
     // 1. Parent Verification Check
     if (!parentVerified) {
-      const msg = locale === "kh" ? "សូមផ្ទៀងផ្ទាត់លេខទូរស័ព្ទ និង OTP អាណាព្យាបាលជាមុនសិន" : "Please verify parent phone and OTP first";
+      const msg = tJunior("verifyParentPhoneFirst");
       showToast.error(msg);
-      showAlertModal(locale === "kh" ? "មិនទាន់ផ្ទៀងផ្ទាត់អាណាព្យាបាល!" : "Parent Not Verified!", msg);
+      showAlertModal(tJunior("verificationFailed"), msg);
       return false;
     }
 
     // 2. Child Face Photo Check
     if (!selfieFileName && !formData.selfie_image_name && !selfiePreview) {
-      const msg = locale === "kh" ? "សូមថត ឬផ្ទុកឡើងរូបថតផ្ទាល់ខ្លួនកុមារ" : "Please upload child face photo";
+      const msg = translate("err_selfie");
       showToast.error(msg);
-      showAlertModal(locale === "kh" ? "សូមថត ឬផ្ទុកឡើងរូបថតកុមារ!" : "Please Upload Child Face Photo!", msg);
+      showAlertModal(translate("err_selfie"), msg);
       return false;
     }
 
     // 3. Reference Document Check
     if (!formData.reference_doc_name && !formData.reference_doc_image) {
-      const msg = locale === "kh" ? "សូមផ្ទុកឡើងរូបភាពឯកសារយោង (សំបុត្រកំណើត ឬអត្តសញ្ញាណប័ណ្ណ)" : "Please upload reference document image";
+      const msg = tJunior("selectImage");
       showToast.error(msg);
-      showAlertModal(locale === "kh" ? "សូមផ្ទុកឡើងរូបភាពឯកសារយោង!" : "Please Upload Reference Document!", msg);
+      showAlertModal(tJunior("selectImage"), msg);
       return false;
     }
 
     // 4. Junior Phone Verification Check
     if (!juniorVerified) {
-      const msg = locale === "kh" ? "សូមផ្ទៀងផ្ទាត់លេខទូរស័ព្ទ និង OTP របស់កុមារជាមុនសិន" : "Please verify junior phone and OTP first";
+      const msg = tJunior("verifyJuniorPhoneFirst");
       showToast.error(msg);
-      showAlertModal(locale === "kh" ? "មិនទាន់ផ្ទៀងផ្ទាត់ទូរស័ព្ទកុមារ!" : "Junior Phone Not Verified!", msg);
+      showAlertModal(tJunior("juniorPhoneNotVerified"), msg);
       return false;
     }
 
     // 5. Zod Schema Validation
     const schema = z.object({
-      guardian_phone: z.string().min(8, locale === "kh" ? "សូមបញ្ចូលលេខទូរស័ព្ទអាណាព្យាបាលឲ្យបានត្រឹមត្រូវ" : "Please enter valid parent phone number"),
-      first_name_kh: z.string().min(1, locale === "kh" ? "សូមបញ្ចូលនាមខ្លួនជាភាសាខ្មែរ" : "Please enter First Name in Khmer"),
-      last_name_kh: z.string().min(1, locale === "kh" ? "សូមបញ្ចូលគោត្តនាមជាភាសាខ្មែរ" : "Please enter Last Name in Khmer"),
-      given_name: z.string().min(1, locale === "kh" ? "សូមបញ្ចូលនាមខ្លួនជាអក្សរឡាតាំង (Given Name)" : "Please enter Given Name in English"),
-      family_name: z.string().min(1, locale === "kh" ? "សូមបញ្ចូលគោត្តនាមជាអក្សរឡាតាំង (Family Name)" : "Please enter Family Name in English"),
-      date_of_birth: z.string().min(1, locale === "kh" ? "សូមជ្រើសរើសថ្ងៃខែឆ្នាំកំណើតកុមារ" : "Please select Date of Birth"),
-      gender: z.string().min(1, locale === "kh" ? "សូមជ្រើសរើសភេទ" : "Please select Gender"),
-      phone_number: z.string().min(8, locale === "kh" ? "សូមបញ្ចូលលេខទូរស័ព្ទកុមារឲ្យបានត្រឹមត្រូវ" : "Please enter valid Junior phone number"),
+      guardian_phone: z.string().min(8, tJunior("valParentPhone")),
+      first_name_kh: z.string().min(1, tJunior("valFirstNameKh")),
+      last_name_kh: z.string().min(1, tJunior("valLastNameKh")),
+      given_name: z.string().min(1, tJunior("valGivenName")),
+      family_name: z.string().min(1, tJunior("valFamilyName")),
+      date_of_birth: z.string().min(1, tJunior("valDob")),
+      gender: z.string().min(1, tJunior("valGender")),
+      phone_number: z.string().min(8, tJunior("valJuniorPhone")),
     });
 
     const result = schema.safeParse(formData);
     if (!result.success) {
       const firstError = result.error.issues[0]?.message || "Please complete all required fields correctly.";
       showToast.error(firstError);
-      showAlertModal(locale === "kh" ? "ព័ត៌មានមិនទាន់គ្រប់គ្រាន់!" : "Incomplete Information!", firstError);
+      showAlertModal(tJunior("incompleteInfo"), firstError);
       return false;
     }
 
@@ -522,7 +550,7 @@ export function JuniorNoNidForm({ occupations = [], branches = [], maritalStatus
       setIsSubmittingModal(false);
       const msg = err.response?.data?.message || err.message || "Account opening failed.";
       showToast.error(msg);
-      showAlertModal(locale === "kh" ? "ការបង្កើតគណនីបរាជ័យ!" : "Account Creation Failed!", msg);
+      showAlertModal(tJunior("accountCreationFailed"), msg);
     } finally {
       setLoading(false);
     }
@@ -550,64 +578,44 @@ export function JuniorNoNidForm({ occupations = [], branches = [], maritalStatus
 
       {/* ── SECTION 2: Junior Personal Details ── */}
       <div className="p-5 sm:p-6">
-        <SectionLabel label={locale === "kh" ? "2. ព័ត៌មានផ្ទាល់ខ្លួនកុមារ" : "2. Personal Details"} />
+        <SectionLabel label={tJunior("personalDetailsTitle")} />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-1">
-            <Label className="text-sm font-medium text-gray-700">
-              {translate("firstNameKh")} <span className="text-red-500 ml-0.5">*</span>
-            </Label>
-            <Input
-              placeholder={translate("firstNameKh")}
-              value={formData.last_name_kh || ""}
-              onChange={(e) => handleInputChange("last_name_kh", e.target.value)}
-              className="w-full h-9 text-sm rounded-xl"
-              required
-            />
-          </div>
+          <FormInputField
+            label={translate("firstNameKh")}
+            placeholder={translate("firstNameKh")}
+            value={formData.last_name_kh || ""}
+            onChange={(val) => handleInputChange("last_name_kh", val)}
+            required
+          />
+
+          <FormInputField
+            label={translate("lastNameKH")}
+            placeholder={translate("lastNameKH")}
+            value={formData.first_name_kh || ""}
+            onChange={(val) => handleInputChange("first_name_kh", val)}
+            required
+          />
+
+          <FormInputField
+            label={translate("familyNameEn")}
+            placeholder={translate("familyNameEn")}
+            value={formData.family_name || ""}
+            onChange={(val) => handleInputChange("family_name", val)}
+            required
+          />
+
+          <FormInputField
+            label={translate("givenNameEn")}
+            placeholder={translate("givenNameEn")}
+            value={formData.given_name || ""}
+            onChange={(val) => handleInputChange("given_name", val)}
+            required
+          />
 
           <div className="space-y-1">
-            <Label className="text-sm font-medium text-gray-700">
-              {translate("lastNameKH")} <span className="text-red-500 ml-0.5">*</span>
-            </Label>
-            <Input
-              placeholder={translate("lastNameKH")}
-              value={formData.first_name_kh || ""}
-              onChange={(e) => handleInputChange("first_name_kh", e.target.value)}
-              className="w-full h-9 text-sm rounded-xl"
-              required
-            />
-          </div>
-
-          <div className="space-y-1">
-            <Label className="text-sm font-medium text-gray-700">
-              {translate("familyNameEn")} <span className="text-red-500 ml-0.5">*</span>
-            </Label>
-            <Input
-              placeholder={translate("familyNameEn")}
-              value={formData.family_name || ""}
-              onChange={(e) => handleInputChange("family_name", e.target.value)}
-              className="w-full h-9 text-sm rounded-xl"
-              required
-            />
-          </div>
-
-          <div className="space-y-1">
-            <Label className="text-sm font-medium text-gray-700">
-              {translate("givenNameEn")} <span className="text-red-500 ml-0.5">*</span>
-            </Label>
-            <Input
-              placeholder={translate("givenNameEn")}
-              value={formData.given_name || ""}
-              onChange={(e) => handleInputChange("given_name", e.target.value)}
-              className="w-full h-9 text-sm rounded-xl"
-              required
-            />
-          </div>
-
-          <div className="space-y-1">
-            <Label className="text-sm font-medium text-gray-700">
+            <label className="text-sm font-medium text-gray-700 block">
               {translate("dateOfBirth")} <span className="text-red-500 ml-0.5">*</span>
-            </Label>
+            </label>
             <CustomDateTimePicker
               value={formData.date_of_birth || ""}
               onChange={(value) => handleInputChange("date_of_birth", value)}
@@ -615,109 +623,65 @@ export function JuniorNoNidForm({ occupations = [], branches = [], maritalStatus
             />
           </div>
 
-          <div className="space-y-1">
-            <Label className="text-sm font-medium text-gray-700">
-              {translate("gender")} <span className="text-red-500 ml-0.5">*</span>
-            </Label>
-            <Select
-              value={formData.gender || "Male"}
-              onValueChange={(val) => handleInputChange("gender", val)}
-            >
-              <SelectTrigger className="w-full h-9 text-sm rounded-xl">
-                <SelectValue placeholder={translateCommon("selectGender")} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Male">{locale === "kh" ? "ប្រុស (Male)" : "Male"}</SelectItem>
-                <SelectItem value="Female">{locale === "kh" ? "ស្រី (Female)" : "Female"}</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+          <FormSelectField
+            label={translate("gender")}
+            placeholder={translateCommon("selectGender")}
+            value={formData.gender || "Male"}
+            onChange={(val) => handleInputChange("gender", val)}
+            options={[
+              { id: "Male", label: tJunior("male"), value: "Male" },
+              { id: "Female", label: tJunior("female"), value: "Female" },
+            ]}
+            required
+          />
 
-          <div className="space-y-1">
-            <Label className="text-sm font-medium text-gray-700">
-              {translate("marital")} <span className="text-red-500 ml-0.5">*</span>
-            </Label>
-            <Select
-              value={formData.marital_status || ""}
-              onValueChange={(val) => handleInputChange("marital_status", val)}
-            >
-              <SelectTrigger className="w-full h-9 text-sm rounded-xl">
-                <SelectValue placeholder={translateCommon("selectMarital")} />
-              </SelectTrigger>
-              <SelectContent>
-                {apiMaritalStatuses.length > 0 ? (
-                  apiMaritalStatuses.map((ms, idx) => {
-                    const label = getMaritalStatusName(ms);
-                    const val = String(
-                      ms.maritalCode ||
-                      ms.code ||
-                      (ms.id !== undefined && ms.id !== null ? ms.id : "") ||
-                      ms.lookupId ||
-                      `ms-${idx}`
-                    );
-                    return (
-                      <SelectItem key={val} value={val}>
-                        {label}
-                      </SelectItem>
-                    );
-                  })
-                ) : (
-                  <>
-                    <SelectItem value="Single">{locale === "kh" ? "នៅលីវ (Single)" : "Single"}</SelectItem>
-                    <SelectItem value="Married">{locale === "kh" ? "រៀបការរួច (Married)" : "Married"}</SelectItem>
-                  </>
-                )}
-              </SelectContent>
-            </Select>
-          </div>
+          <FormSelectField
+            label={translate("marital")}
+            placeholder={translateCommon("selectMarital")}
+            value={formData.marital_status || ""}
+            onChange={(val) => handleInputChange("marital_status", val)}
+            options={
+              apiMaritalStatuses.length > 0
+                ? apiMaritalStatuses.map((ms, idx) => ({
+                    id: ms.id ?? ms.maritalCode ?? ms.code ?? idx,
+                    label: getMaritalStatusName(ms),
+                    value: String(ms.maritalCode || ms.code || (ms.id !== undefined && ms.id !== null ? ms.id : "") || `ms-${idx}`),
+                  }))
+                : [
+                    { id: "Single", label: tJunior("single"), value: "Single" },
+                    { id: "Married", label: tJunior("married"), value: "Married" },
+                  ]
+            }
+            required
+          />
 
-          <div className="space-y-1">
-            <Label className="text-sm font-medium text-gray-700">
-              {translate("occupation")} <span className="text-red-500 ml-0.5">*</span>
-            </Label>
-            <Select
-              value={formData.occupation || ""}
-              onValueChange={(val) => handleInputChange("occupation", val)}
-            >
-              <SelectTrigger className="w-full h-9 text-sm rounded-xl">
-                <SelectValue placeholder={translateCommon("selectOccupation")} />
-              </SelectTrigger>
-              <SelectContent>
-                {apiOccupations.length > 0 ? (
-                  apiOccupations.map((occ, idx) => {
-                    const label = getOccupationName(occ);
-                    const val = String(
-                      occ.occupationCode ||
-                      (occ.id !== undefined && occ.id !== null ? occ.id : "") ||
-                      occ.code ||
-                      occ.lookupId ||
-                      `occ-${idx}`
-                    );
-                    return (
-                      <SelectItem key={val} value={val}>
-                        {label}
-                      </SelectItem>
-                    );
-                  })
-                ) : (
-                  <>
-                    <SelectItem value="STUDENT">{locale === "kh" ? "សិស្ស / និស្សិត" : "Student"}</SelectItem>
-                    <SelectItem value="UNDERAGE">{locale === "kh" ? "កុមារតូច" : "Minor / Underage"}</SelectItem>
-                  </>
-                )}
-              </SelectContent>
-            </Select>
-          </div>
+          <FormSelectField
+            label={translate("occupation")}
+            placeholder={translateCommon("selectOccupation")}
+            value={formData.occupation || ""}
+            onChange={(val) => handleInputChange("occupation", val)}
+            options={
+              apiOccupations.length > 0
+                ? apiOccupations.map((occ, idx) => ({
+                    id: occ.id ?? occ.occupationCode ?? occ.code ?? idx,
+                    label: getOccupationName(occ),
+                    value: String(occ.occupationCode || (occ.id !== undefined && occ.id !== null ? occ.id : "") || occ.code || `occ-${idx}`),
+                  }))
+                : [
+                    { id: "STUDENT", label: tJunior("student"), value: "STUDENT" },
+                    { id: "UNDERAGE", label: tJunior("underage"), value: "UNDERAGE" },
+                  ]
+            }
+            required
+          />
 
-          <div className="space-y-1 md:col-span-2">
-            <Label className="text-sm font-medium text-gray-700">{translate("referralId")}</Label>
-            <Input
-              placeholder={translate("referralIdPlaceholder")}
-              value={formData.referral_id || ""}
-              onChange={(e) => handleInputChange("referral_id", e.target.value)}
-              className="w-full h-9 text-sm rounded-xl"
-            />
-          </div>
+          <FormInputField
+            label={translate("referralId")}
+            placeholder={translate("referralIdPlaceholder")}
+            value={formData.referral_id || ""}
+            onChange={(val) => handleInputChange("referral_id", val)}
+            className="md:col-span-2"
+          />
         </div>
       </div>
 
@@ -725,51 +689,14 @@ export function JuniorNoNidForm({ occupations = [], branches = [], maritalStatus
 
       {/* ── SECTION 3: Documents & Child Face Photo ── */}
       <div className="p-5 sm:p-6 space-y-5">
-        <SectionLabel label={locale === "kh" ? "3. រូបថត និងឯកសារយោងកុមារ" : "3. Child Face Photo & Reference Document"} />
+        <SectionLabel label={tJunior("childPhotoAndRefTitle")} />
 
         {/* 1. Child Face Photo (Selfie) */}
-        <div className="space-y-1.5">
-          <Label className="text-xs font-medium text-slate-700 block">
-            {locale === "kh" ? "រូបថតផ្ទាល់ខ្លួនកុមារ (Child Face Photo)" : "Child Face Photo"} <span className="text-red-500 ml-0.5">*</span>
-          </Label>
-          <label
-            htmlFor="child-selfie-upload-input"
-            className={`group relative flex flex-col items-center justify-center h-36 sm:h-40 rounded-2xl border-2 border-dashed cursor-pointer overflow-hidden transition-all duration-200 ${
-              selfiePreview
-                ? "border-emerald-500/50 bg-emerald-50/20 hover:border-emerald-500"
-                : "border-slate-200 bg-slate-50/50 hover:border-primary hover:bg-primary/5"
-            }`}
-          >
-            {selfiePreview ? (
-              <>
-                <img src={selfiePreview} alt="Child Face Photo" className="w-full h-full object-cover" />
-                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center text-white text-xs font-semibold gap-2">
-                  <Camera className="w-4 h-4" />
-                  <span>{locale === "kh" ? "ផ្លាស់ប្តូររូបថត" : "Change Photo"}</span>
-                </div>
-              </>
-            ) : (
-              <div className="flex flex-col items-center gap-2 text-center p-3">
-                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary group-hover:scale-105 transition-transform">
-                  <Camera className="w-5 h-5" />
-                </div>
-                <div>
-                  <p className="text-xs font-bold text-slate-700">
-                    {selfieFileName || (locale === "kh" ? "ចុចទីនេះដើម្បីថត ឬជ្រើសរើសរូបថតកុមារ" : "Click to Take or Upload Child Face Photo")}
-                  </p>
-                  <p className="text-[11px] text-slate-400 mt-0.5">JPG, PNG (Max 10MB)</p>
-                </div>
-              </div>
-            )}
-            <input
-              type="file"
-              id="child-selfie-upload-input"
-              accept="image/*"
-              onChange={handleSelfieUpload}
-              className="hidden"
-            />
-          </label>
-        </div>
+        <ChildPhotoUploadSection
+          selfiePreview={selfiePreview}
+          selfieFileName={selfieFileName}
+          onSelfieUpload={handleSelfieUpload}
+        />
 
         {/* 2. Reference Document */}
         <ReferenceDocUploadSection
@@ -830,12 +757,8 @@ export function JuniorNoNidForm({ occupations = [], branches = [], maritalStatus
       <WarningAlertModal
         isOpen={parentWarningModal}
         onClose={() => setParentWarningModal(false)}
-        title={locale === "kh" ? "លេខទូរស័ព្ទអាណាព្យាបាលមិនទាន់ចុះឈ្មោះ!" : "Parent Phone Not Registered!"}
-        message={
-          locale === "kh"
-            ? `លេខទូរស័ព្ទ ${unregisteredPhone} មិនទាន់មានគណនី Mobile Banking នៅក្នុងប្រព័ន្ធ CPBank ទេ។ សូមបញ្ចូលលេខទូរស័ព្ទអាណាព្យាបាលដែលមានចុះឈ្មោះ Mobile Banking រួចរាល់ ឬបង្កើតគណនីធនាគារធម្មតាជាមុនសិន។`
-            : `Phone number ${unregisteredPhone} does not have a CPBank Mobile Banking account. Please enter a registered parent phone number or create a standard bank account first.`
-        }
+        title={tJunior("verificationFailed")}
+        message={tJunior("parentPhoneNotRegisteredDesc", { phone: unregisteredPhone })}
         type="warning"
       />
 
@@ -851,8 +774,8 @@ export function JuniorNoNidForm({ occupations = [], branches = [], maritalStatus
       {/* SUBMISSION PROGRESS LOADING MODAL */}
       <SubmissionProgressModal
         isOpen={isSubmittingModal}
-        title={locale === "kh" ? "កំពុងដំណើរការបង្កើតគណនី Junior" : "Creating Junior Account..."}
-        message={locale === "kh" ? "សូមរង់ចាំបន្តិច ប្រព័ន្ធកំពុងដំណើរការបង្កើតគណនី និងភ្ជាប់សេវា Mobile Banking..." : "Please wait while we set up the Junior account and Mobile Banking service..."}
+        title={tJunior("creatingAccountTitle")}
+        message={tJunior("creatingAccountMessage")}
       />
 
       {/* SUCCESS MODAL */}

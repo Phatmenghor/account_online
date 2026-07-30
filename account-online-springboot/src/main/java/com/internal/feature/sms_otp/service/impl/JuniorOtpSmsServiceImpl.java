@@ -25,6 +25,13 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+import com.internal.feature.sms_otp.dto.response.PhoneCheckResponse;
+import com.internal.feature.sms_otp.service.PhoneCheckService;
+import com.internal.shared.exception.custom.BadRequestException;
+
+import com.internal.feature.junior_account.dto.response.CustomerInfoResponse;
+import com.internal.feature.junior_account.service.CustomerInfoService;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -35,12 +42,21 @@ public class JuniorOtpSmsServiceImpl implements JuniorOtpSmsService {
     private final OtpComponent otpComponent;
     private final CpbProperties cpbProperties;
     private final SmsPort smsPort;
+    private final PhoneCheckService phoneCheckService;
+    private final CustomerInfoService customerInfoService;
 
     @Override
     @Transactional
     public SendOtpResponse sendOtp(SendOtpRequest request) {
         String phone = request.getPhone();
-        log.info("Processing Junior OTP request for phone: {}", phone);
+        log.info("Processing Junior Guardian OTP request for phone: {}", phone);
+
+        // Pre-check if Guardian phone is registered in MB Core (Guardian MUST have an active MB account)
+        PhoneCheckResponse phoneCheck = phoneCheckService.checkPhone(phone);
+        if (phoneCheck == null || !Boolean.TRUE.equals(phoneCheck.getHasAccount())) {
+            log.warn("Junior Guardian OTP send REJECTED: Phone number {} is NOT registered in MB Core", phone);
+            throw new BadRequestException("Guardian phone number must be registered with an active Mobile Banking account.");
+        }
 
         checkCooldownPeriod(phone);
         checkAttemptLockout(phone);
@@ -124,10 +140,42 @@ public class JuniorOtpSmsServiceImpl implements JuniorOtpSmsService {
         juniorOtpSmsRepository.save(juniorOtpSms);
 
         log.info("Junior OTP successfully verified for phone: {}", phone);
+
+        // Fetch Guardian details from MB Core & T24 to return on UI upon OTP verification success
+        String cif = null;
+        String customerName = null;
+        try {
+            PhoneCheckResponse phoneCheck = phoneCheckService.checkPhone(phone);
+            if (phoneCheck != null && phoneCheck.getCif() != null) {
+                cif = phoneCheck.getCif();
+                if (phoneCheck.getCustomerName() != null && !phoneCheck.getCustomerName().isBlank()) {
+                    customerName = phoneCheck.getCustomerName();
+                }
+                try {
+                    CustomerInfoResponse info = customerInfoService.getCustomerByCif(cif);
+                    if (info != null) {
+                        if (info.getShortNames() != null && !info.getShortNames().isEmpty()) {
+                            customerName = String.join(" ", info.getShortNames());
+                        } else if (info.getNames() != null && !info.getNames().isEmpty()) {
+                            customerName = String.join(" ", info.getNames());
+                        } else if (info.getKhShortName() != null) {
+                            customerName = info.getKhShortName();
+                        }
+                    }
+                } catch (Exception e) {
+                    log.warn("Could not fetch T24 customer details for Guardian CIF {}: {}", cif, e.getMessage());
+                }
+            }
+        } catch (Exception e) {
+            log.warn("Could not fetch MB Core phone check for Guardian phone {}: {}", phone, e.getMessage());
+        }
+
         return VerifyOtpResponse.builder()
                 .phone(phone)
                 .verified(true)
                 .message("Junior OTP verified successfully")
+                .cif(cif)
+                .customerName(customerName)
                 .build();
     }
 

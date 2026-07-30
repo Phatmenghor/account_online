@@ -43,30 +43,48 @@ public class TelegramService {
     }
 
     public void sendToDev(String message) {
+        java.util.Map<String, String> contextMap = org.slf4j.MDC.getCopyOfContextMap();
         taskExecutor.execute(() -> {
-            if (devChatId == null || devChatId.trim().isEmpty()) {
-                return;
+            if (contextMap != null) org.slf4j.MDC.setContextMap(contextMap);
+            try {
+                if (devChatId == null || devChatId.trim().isEmpty()) {
+                    return;
+                }
+                sendMarkdownToChat(devChatId, message);
+            } finally {
+                org.slf4j.MDC.clear();
             }
-            sendMarkdownToChat(devChatId, message);
         });
     }
 
     public void sendToMonitor(String message) {
+        java.util.Map<String, String> contextMap = org.slf4j.MDC.getCopyOfContextMap();
         taskExecutor.execute(() -> {
-            if (monitorChatId == null || monitorChatId.trim().isEmpty()) {
-                return;
+            if (contextMap != null) org.slf4j.MDC.setContextMap(contextMap);
+            try {
+                if (monitorChatId == null || monitorChatId.trim().isEmpty()) {
+                    return;
+                }
+                sendMarkdownToChat(monitorChatId, message);
+            } finally {
+                org.slf4j.MDC.clear();
             }
-            sendMarkdownToChat(monitorChatId, message);
         });
     }
 
     public void sendToJunior(String message) {
+        java.util.Map<String, String> contextMap = org.slf4j.MDC.getCopyOfContextMap();
         taskExecutor.execute(() -> {
-            String targetId = (juniorChatId != null && !juniorChatId.trim().isEmpty()) ? juniorChatId : monitorChatId;
-            if (targetId == null || targetId.trim().isEmpty()) {
-                return;
+            if (contextMap != null) org.slf4j.MDC.setContextMap(contextMap);
+            try {
+                String targetId = (juniorChatId != null && !juniorChatId.trim().isEmpty()) ? juniorChatId : monitorChatId;
+                if (targetId == null || targetId.trim().isEmpty()) {
+                    return;
+                }
+                sendMarkdownToChat(targetId, message);
+            } finally {
+                org.slf4j.MDC.clear();
             }
-            sendMarkdownToChat(targetId, message);
         });
     }
 
@@ -79,9 +97,15 @@ public class TelegramService {
     }
 
     public void sendCriticalAlert(String title, String details) {
+        java.util.Map<String, String> contextMap = org.slf4j.MDC.getCopyOfContextMap();
         taskExecutor.execute(() -> {
-            String message = String.format("*🚨 %s*\n%s", title, details);
-            sendMarkdownToChat(monitorChatId, message);
+            if (contextMap != null) org.slf4j.MDC.setContextMap(contextMap);
+            try {
+                String message = String.format("*🚨 %s*\n%s", title, details);
+                sendMarkdownToChat(monitorChatId, message);
+            } finally {
+                org.slf4j.MDC.clear();
+            }
         });
     }
 
@@ -137,7 +161,9 @@ public class TelegramService {
         if (chatId == null || chatId.trim().isEmpty()) {
             return;
         }
+        java.util.Map<String, String> contextMap = org.slf4j.MDC.getCopyOfContextMap();
         taskExecutor.execute(() -> {
+            if (contextMap != null) org.slf4j.MDC.setContextMap(contextMap);
             try {
                 String url = String.format("https://api.telegram.org/bot%s/sendPhoto", botToken);
 
@@ -156,6 +182,8 @@ public class TelegramService {
                 saveLog(response, chatId);
             } catch (Exception e) {
                 log.warn("Failed to send Telegram photo: {}", e.getMessage());
+            } finally {
+                org.slf4j.MDC.clear();
             }
         });
     }

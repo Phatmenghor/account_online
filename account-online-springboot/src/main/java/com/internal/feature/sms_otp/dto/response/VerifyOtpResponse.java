@@ -11,7 +11,6 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@JsonInclude(JsonInclude.Include.NON_NULL)
 public class VerifyOtpResponse {
 
     @Schema(description = "Verification successful")
@@ -22,5 +21,11 @@ public class VerifyOtpResponse {
 
     @Schema(description = "Message")
     private String message;
+
+    @Schema(description = "Guardian CIF")
+    private String cif;
+
+    @Schema(description = "Guardian Customer Name")
+    private String customerName;
 }
 

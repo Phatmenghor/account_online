@@ -2,6 +2,7 @@ package com.internal.feature.open_account.controller;
 
 import com.internal.feature.customer_image.service.CustomerImageService;
 import com.internal.feature.open_account.dto.request.Base64UploadRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -25,15 +26,11 @@ public class DocumentUploadController {
     private final CustomerImageService customerImageService;
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Map<String, String>> uploadBase64(@RequestBody Base64UploadRequest request) {
+    public ResponseEntity<Map<String, String>> uploadBase64(@Valid @RequestBody Base64UploadRequest request) {
         log.info("Received base64 upload. Type: {}, LegalId: {}", request.getType(), request.getLegalId());
 
         if (request.getFileBase64() == null || request.getFileBase64().isBlank()) {
             return ResponseEntity.badRequest().body(Collections.singletonMap("error", "File data is empty"));
-        }
-
-        if (request.getLegalId() == null || request.getLegalId().isBlank()) {
-            log.warn("legalId is missing — falling back to UUID-based filename");
         }
 
         try {

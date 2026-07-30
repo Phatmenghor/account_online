@@ -99,15 +99,31 @@ export async function checkPhone(phone: string): Promise<PhoneCheckResult> {
   return response.data?.data || response.data;
 }
 
-export async function sendOtp(phone: string) {
+// Guardian / Parent Phone OTP (Requires phone to BE registered in MB Core)
+export async function sendGuardianOtp(phone: string) {
+  const response = await axios.post(`${BASE_URL}/api/v1/public/junior-otp/send`, { phone });
+  return response.data?.data || response.data;
+}
+
+export async function verifyGuardianOtp(phone: string, otpCode: string) {
+  const response = await axios.post(`${BASE_URL}/api/v1/public/junior-otp/verify`, { phone, otpCode });
+  return response.data?.data || response.data;
+}
+
+// Junior / Child Phone OTP (Requires phone to NOT be registered in MB Core)
+export async function sendJuniorOtp(phone: string) {
   const response = await axios.post(`${BASE_URL}/api/v1/public/otp/send`, { phone });
   return response.data?.data || response.data;
 }
 
-export async function verifyOtp(phone: string, otpCode: string) {
+export async function verifyJuniorOtp(phone: string, otpCode: string) {
   const response = await axios.post(`${BASE_URL}/api/v1/public/otp/verify`, { phone, otpCode });
   return response.data?.data || response.data;
 }
+
+// Backwards compatibility aliases
+export const sendOtp = sendGuardianOtp;
+export const verifyOtp = verifyGuardianOtp;
 
 export async function getCustomerInfoByCif(cif: string): Promise<CustomerInfo> {
   const response = await axios.post(`${BASE_URL}/api/v1/public/junior-open-account/customer-info`, { cif });

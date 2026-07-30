@@ -149,6 +149,17 @@ public class CustomerImageStorageComponent {
     }
 
     public void saveCompressedImage(byte[] imageBytes, String filePath) throws Exception {
+        if (filePath == null) return;
+        String lowerPath = filePath.toLowerCase();
+
+        // Write raw uncompressed bytes directly for documents and PNG/WEBP files
+        if (lowerPath.endsWith(".pdf") || lowerPath.endsWith(".docx") || lowerPath.endsWith(".doc") || lowerPath.endsWith(".png") || lowerPath.endsWith(".webp")) {
+            try (FileOutputStream fos = new FileOutputStream(filePath)) {
+                fos.write(imageBytes);
+            }
+            return;
+        }
+
         ByteArrayInputStream bais = new ByteArrayInputStream(imageBytes);
         BufferedImage originalImage = ImageIO.read(bais);
         if (originalImage == null) {

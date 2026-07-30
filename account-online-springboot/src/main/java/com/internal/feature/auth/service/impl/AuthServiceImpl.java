@@ -32,6 +32,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
@@ -52,6 +53,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@Transactional(readOnly = true)
 public class AuthServiceImpl implements AuthService {
 
     private final UserRepository userRepository;
@@ -66,6 +68,7 @@ public class AuthServiceImpl implements AuthService {
     private static final DateTimeFormatter DT_FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     @Override
+    @Transactional
     public AuthResponseDTO login(LoginRequestDto loginDto) {
         log.info("Processing login request for user: {}", loginDto.getUsername());
         String clientIp = clientIpComponent.getClientIp();
@@ -105,8 +108,6 @@ public class AuthServiceImpl implements AuthService {
         userEntity.setLastLogin(LocalDateTime.now(ZoneId.of("Asia/Phnom_Penh")));
         userRepository.save(userEntity);
 
-        // Case 1: admin explicitly reset password → forcePasswordChange flag
-        // Case 2: password never set (null) OR older than 3 months → passwordExpired flag
         boolean forceChange = userEntity.isForcePasswordChange();
         boolean passwordExpired = !forceChange && (
                 userEntity.getPasswordChangedAt() == null ||
@@ -134,6 +135,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    @Transactional
     public AuthResponseDTO register(RegisterInitiateDto dto) {
         log.info("Processing registration for ID Card: {}", dto.getIdCard());
 
@@ -178,6 +180,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    @Transactional
     public UserResponseDto createUserByAdmin(RegisterRequestDto registerDto) {
         log.info("Processing admin user creation for: {}", registerDto.getUsername());
 
@@ -209,6 +212,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    @Transactional
     public UserResponseDto updateUserProfile(UpdateUserRequestDto requestDto, String name) {
         log.info("Processing update user profile: {}", name);
 
@@ -272,7 +276,6 @@ public class AuthServiceImpl implements AuthService {
         } catch (Exception ignored) {
         }
     }
-
 
     private String escapeMarkdown(String text) {
         if (text == null) return "";

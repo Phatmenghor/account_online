@@ -41,14 +41,11 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/junior-otp/**").permitAll()
                         .requestMatchers("/api/public/**").permitAll()
                         .requestMatchers("/api/v1/enum/**").permitAll()
-                        .requestMatchers("/api/images/**").permitAll()
-                        .requestMatchers("/api/customer-images/**").permitAll()
-                        .requestMatchers("/api/v1/customer-images/**").permitAll()
-                        .requestMatchers("/customer-images/**").permitAll()
-                        .requestMatchers("/images/**").permitAll()
+                        .requestMatchers("/api/images/**", "/images/**").permitAll()
+                        .requestMatchers("/api/customer-images/**", "/api/v1/customer-images/**", "/customer-images/**").permitAll()
                         .requestMatchers("/api/v1/staff/**").permitAll()
                         .requestMatchers("/api/v1/open-account/process").permitAll()
-                        .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()
+                        .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**", "/actuator/health").permitAll()
                         .anyRequest().authenticated()
                 );
 

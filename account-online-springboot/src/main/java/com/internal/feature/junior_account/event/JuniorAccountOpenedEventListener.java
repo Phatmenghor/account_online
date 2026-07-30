@@ -82,14 +82,27 @@ public class JuniorAccountOpenedEventListener {
 
             if (request.getReferenceDocImage() != null && !request.getReferenceDocImage().isBlank()) {
                 try {
-                    String docName = "ref_doc_" + request.getLegalId() + ".png";
+                    String docExt = ".pdf";
+                    if (request.getReferenceDocName() != null && request.getReferenceDocName().contains(".")) {
+                        docExt = request.getReferenceDocName().substring(request.getReferenceDocName().lastIndexOf('.')).toLowerCase();
+                    } else if (request.getReferenceDocImage().startsWith("data:application/pdf")) {
+                        docExt = ".pdf";
+                    } else if (request.getReferenceDocImage().startsWith("data:image/png")) {
+                        docExt = ".png";
+                    } else if (request.getReferenceDocImage().startsWith("data:image/jpeg") || request.getReferenceDocImage().startsWith("data:image/jpg")) {
+                        docExt = ".jpg";
+                    } else if (request.getReferenceDocImage().startsWith("data:image/webp")) {
+                        docExt = ".webp";
+                    }
+
+                    String docName = "ref_doc_" + request.getLegalId() + docExt;
                     customerImageService.saveBase64File(request.getReferenceDocImage(), docName, "junior_document");
                     request.setReferenceDocName(docName);
                     if (request.getNidImageName() == null || request.getNidImageName().isBlank() || request.getNidImageName().startsWith("data:image")) {
                         request.setNidImageName(docName);
                     }
                 } catch (Exception e) {
-                    log.warn("Could not save Junior reference document image file to disk in listener: {}", e.getMessage());
+                    log.warn("Could not save Junior reference document file to disk in listener: {}", e.getMessage());
                 }
             }
 

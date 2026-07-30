@@ -27,7 +27,7 @@ public class JuniorAmlController {
 
     @PostMapping("/all-status")
     public ResponseEntity<ApiResponse<Page<JuniorAmlStatus>>> getAllJuniorAmlStatus(
-            @RequestBody AllAmlRequestDto request) {
+            @Valid @RequestBody AllAmlRequestDto request) {
         log.info("Fetching Junior AML status with search: {}", request.getSearch());
         Pageable pageable = PaginationUtil.createPageable(request);
         Page<JuniorAmlStatus> page = juniorAmlService.getAllJuniorAmlStatus(request.getAmlStatusString(), request.getSearch(), pageable);
@@ -36,7 +36,7 @@ public class JuniorAmlController {
 
     @PostMapping("/all-history")
     public ResponseEntity<ApiResponse<Page<JuniorAmlStatus>>> getAllJuniorAmlHistory(
-            @RequestBody AllAmlHistoryRequestDto request) {
+            @Valid @RequestBody AllAmlHistoryRequestDto request) {
         log.info("Fetching Junior AML history with search: {}", request.getSearch());
         Pageable pageable = PaginationUtil.createPageable(request);
         Page<JuniorAmlStatus> page = juniorAmlService.getAllJuniorAmlHistory(request.getSearch(), pageable);

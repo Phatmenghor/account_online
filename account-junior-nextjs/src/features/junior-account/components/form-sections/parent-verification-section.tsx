@@ -35,6 +35,7 @@ export function ParentVerificationSection({
   error,
 }: ParentVerificationSectionProps) {
   const translate = useTranslations("NIDPage");
+  const tJunior = useTranslations("junior");
   const locale = useLocale();
 
   return (
@@ -42,7 +43,7 @@ export function ParentVerificationSection({
       <div className="flex items-center gap-2 mb-4 pb-2 border-b border-slate-100">
         <div className="w-1 h-4 rounded-full bg-slate-300 flex-shrink-0" />
         <p className="text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-700">
-          {locale === "kh" ? "1. ផ្ទៀងផ្ទាត់លេខទូរស័ព្ទអាណាព្យាបាល" : "1. Parent Verification"}
+          {tJunior("parentVerificationTitle")}
         </p>
       </div>
 
@@ -86,7 +87,7 @@ export function ParentVerificationSection({
               ) : parentVerified ? (
                 <span className="flex items-center gap-1">
                   <CheckCircle className="h-3.5 w-3.5 text-teal-600" />
-                  {locale === "kh" ? "បានផ្ទៀងផ្ទាត់" : "Verified"}
+                  {tJunior("verified")}
                 </span>
               ) : parentCountdown > 0 ? (
                 `${parentOtpSent ? translate("reSendOtp") : translate("sendOtp")} (${parentCountdown}s)`
@@ -132,7 +133,7 @@ export function ParentVerificationSection({
             <div className="font-bold text-teal-800 flex items-center gap-1.5">
               <UserCheck className="w-4 h-4 text-teal-600" />
               <span>
-                {locale === "kh" ? "បានរកឃើញព័ត៌មានអាណាព្យាបាល" : "Parent Found"}:{" "}
+                {tJunior("parentFound")}:{" "}
                 {parentInfo.names ? parentInfo.names[0] : "N/A"}
               </span>
             </div>

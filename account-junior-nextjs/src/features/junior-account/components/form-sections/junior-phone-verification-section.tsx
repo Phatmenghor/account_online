@@ -32,6 +32,7 @@ export function JuniorPhoneVerificationSection({
   error,
 }: JuniorPhoneVerificationSectionProps) {
   const translate = useTranslations("NIDPage");
+  const tJunior = useTranslations("junior");
   const locale = useLocale();
 
   return (
@@ -39,7 +40,7 @@ export function JuniorPhoneVerificationSection({
       <div className="flex items-center gap-2 mb-4 pb-2 border-b border-slate-100">
         <div className="w-1 h-4 rounded-full bg-slate-300 flex-shrink-0" />
         <p className="text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-700">
-          {locale === "kh" ? "4. លេខទូរស័ព្ទទំនាក់ទំនងកុមារ" : "4. Junior Phone Verification"}
+          {tJunior("juniorPhoneVerificationTitle")}
         </p>
       </div>
 
@@ -83,7 +84,7 @@ export function JuniorPhoneVerificationSection({
               ) : juniorVerified ? (
                 <span className="flex items-center gap-1">
                   <CheckCircle className="h-3.5 w-3.5 text-teal-600" />
-                  {locale === "kh" ? "បានផ្ទៀងផ្ទាត់" : "Verified"}
+                  {tJunior("verified")}
                 </span>
               ) : juniorCountdown > 0 ? (
                 `${juniorOtpSent ? translate("reSendOtp") : translate("sendOtp")} (${juniorCountdown}s)`

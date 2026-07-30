@@ -37,6 +37,7 @@ public class PhoneCheckServiceImpl implements PhoneCheckService {
         return PhoneCheckResponse.builder()
                 .hasAccount(true)
                 .cif(result.get("cif"))
+                .customerName(result.get("cus_name"))
                 .mobile(result.get("mobile"))
                 .build();
     }

@@ -20,6 +20,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
+import java.util.concurrent.ConcurrentHashMap;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -28,16 +30,34 @@ public class CustomerInfoServiceImpl implements CustomerInfoService {
     private final CpbProperties cpbProperties;
     private final RestTemplate restTemplate;
 
+    private final ConcurrentHashMap<String, CustomerInfoResponse> customerCache = new ConcurrentHashMap<>();
+
     private static final MediaType TEXT_XML_UTF8 =
             new MediaType("text", "xml", StandardCharsets.UTF_8);
 
     @Override
     public CustomerInfoResponse getCustomerByCif(String cif) {
-        log.info("Fetching customer info for CIF: {}", cif);
+        if (cif == null || cif.isBlank()) {
+            return CustomerInfoResponse.builder().build();
+        }
+
+        // Return instantly from cache if fetched within session
+        if (customerCache.containsKey(cif)) {
+            log.info("Customer info retrieved from memory cache for CIF: {}", cif);
+            return customerCache.get(cif);
+        }
+
+        log.info("Fetching customer info from SOAP service for CIF: {}", cif);
 
         String soapXml = buildSoapRequest(cif);
         String responseXml = callCustomerService(soapXml);
-        return parseResponse(responseXml, cif);
+        CustomerInfoResponse info = parseResponse(responseXml, cif);
+
+        if (info != null && info.getCif() != null) {
+            customerCache.put(cif, info);
+        }
+
+        return info;
     }
 
     // ── Build SOAP Request ─────────────────────────────────────────────────

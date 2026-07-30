@@ -46,6 +46,7 @@ import com.internal.shared.pagination.PaginationUtil;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@Transactional(readOnly = true)
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
@@ -73,7 +74,6 @@ public class UserServiceImpl implements UserService {
     public UserResponseDto getUserById(Long id) {
         UserEntity user = userRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("User id " + id + " could not be found"));
-        
         return userMapper.mapToDto(user);
     }
 
@@ -92,32 +92,31 @@ public class UserServiceImpl implements UserService {
         return dto;
     }
 
-    @Transactional
     @Override
+    @Transactional
     public UserResponseDto deleteUserId(Long id) {
         log.info("Deleting user with id: {}", id);
-        
         UserEntity user = userRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("User id " + id + " could not be found"));
 
         user.getRoles().clear();
         userRepository.deleteById(id);
-        
         return userMapper.mapToDto(user);
     }
 
     @Override
+    @Transactional
     public UserResponseDto updateUserId(Long id, UpdateUserRequestDto request) {
         UserEntity user = userRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("User id " + id + " not found"));
 
         updateUserFields(user, request);
         UserEntity updated = userRepository.save(user);
-        
         return userMapper.mapToDto(updated);
     }
 
     @Override
+    @Transactional
     public UserResponseDto changePassword(ChangePasswordRequestDto requestDto) {
         UserEntity user = auditComponent.getCurrentUser();
         log.info("Changing password for current user: {}", user.getUsername());
@@ -127,13 +126,14 @@ public class UserServiceImpl implements UserService {
 
         user.setPassword(passwordEncoder.encode(requestDto.getNewPassword()));
         user.setForcePasswordChange(false);
-        user.setPasswordChangedAt(java.time.LocalDateTime.now(java.time.ZoneId.of("Asia/Phnom_Penh")));
+        user.setPasswordChangedAt(LocalDateTime.now(ZoneId.of("Asia/Phnom_Penh")));
         UserEntity userEntity = userRepository.save(user);
 
         return userMapper.mapToDto(userEntity);
     }
 
     @Override
+    @Transactional
     public UserResponseDto changePasswordByAdmin(ChangePasswordByAdminRequestDto requestDto) {
         log.info("Admin changing password for user with id: {}", requestDto.getId());
 
@@ -150,6 +150,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public AuthResponseDTO forceChangePassword(String newPassword, String confirmNewPassword) {
         UserEntity user = auditComponent.getCurrentUser();
         log.info("Force password change for user: {}", user.getUsername());
@@ -167,7 +168,6 @@ public class UserServiceImpl implements UserService {
         String token = jwtGenerator.generateTokenForUser(saved.getUsername(), roles);
 
         UserResponseDto dto = userMapper.mapToDto(saved);
-
         return new AuthResponseDTO(token, dto);
     }
 
@@ -214,7 +214,7 @@ public class UserServiceImpl implements UserService {
         if (request.getDepartment() != null) user.setDepartment(request.getDepartment());
         if (request.getUserRole() != null) {
             Role role = roleRepository.findByName(request.getUserRole())
-                    .orElseThrow(() -> new com.internal.shared.exception.custom.BadRequestException("Invalid role: " + request.getUserRole()));
+                    .orElseThrow(() -> new BadRequestException("Invalid role: " + request.getUserRole()));
             user.getRoles().clear();
             user.getRoles().add(role);
         }

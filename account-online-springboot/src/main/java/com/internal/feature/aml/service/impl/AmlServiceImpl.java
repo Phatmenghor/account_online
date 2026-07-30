@@ -42,6 +42,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@Transactional(readOnly = true)
 public class AmlServiceImpl implements AmlService {
 
     private final AmlStatusRepository amlStatusRepository;

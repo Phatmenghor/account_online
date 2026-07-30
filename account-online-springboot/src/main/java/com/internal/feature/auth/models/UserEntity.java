@@ -13,7 +13,10 @@ import java.util.List;
 
 @EqualsAndHashCode(callSuper = true)
 @Entity
-@Table(name = "acc_online_users")
+@Table(name = "acc_online_users", indexes = {
+        @Index(name = "idx_user_username", columnList = "username"),
+        @Index(name = "idx_user_status", columnList = "status")
+})
 @Data
 @NoArgsConstructor
 public class UserEntity extends BaseEntity {

@@ -1,6 +1,5 @@
 package com.internal.feature.auth.controller;
 
-import com.internal.config.RequiresRole;
 import com.internal.shared.response.ApiResponse;
 import com.internal.feature.auth.dto.request.ChangePasswordByAdminRequestDto;
 import com.internal.feature.auth.dto.request.ChangePasswordRequestDto;
@@ -35,11 +34,11 @@ public class UserController {
     private final AuthService authService;
 
     @PostMapping
-    public ResponseEntity<ApiResponse<AllUserResponseDto>> getAllUsers(@RequestBody GetAllUserRequestDto request) {
+    public ResponseEntity<ApiResponse<AllUserResponseDto>> getAllUsers(@Valid @RequestBody GetAllUserRequestDto request) {
         log.info("Fetching users - page: {}, size: {}, search: '{}', status: {}",
                 request.getPageNo(), request.getPageSize(), request.getSearch(), request.getStatus());
         AllUserResponseDto result = userService.getAllUser(request);
-        log.info("Successfully retrieved {} users (page {}/{})", result.getContent().size(), result.getPageNo(), result.getTotalPages());
+        log.info("Successfully retrieved {} users (page {}/{})", result.getContent() != null ? result.getContent().size() : 0, result.getPageNo(), result.getTotalPages());
         return ResponseEntity.ok(ApiResponse.success(ResponseMessage.USERS_RETRIEVED, result));
     }
 
@@ -75,7 +74,7 @@ public class UserController {
 
     @PostMapping("/updateById/{id}")
     public ResponseEntity<ApiResponse<UserResponseDto>> updateUser(@PathVariable("id") Long userId,
-                                                                   @RequestBody UpdateUserRequestDto request) {
+                                                                   @Valid @RequestBody UpdateUserRequestDto request) {
         log.info("Updating user ID: {} with data: {}", userId, request);
         UserResponseDto updatedUser = userService.updateUserId(userId, request);
         log.info("Successfully updated user: {} (ID: {})", updatedUser.getIdCard(), userId);
@@ -106,8 +105,6 @@ public class UserController {
         return ResponseEntity.ok(ApiResponse.success("Password updated successfully.", authResponse));
     }
 }
-
-
 
 
 

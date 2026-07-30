@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/v1/junior-otp")
+@RequestMapping({"/api/v1/junior-otp", "/api/v1/public/junior-otp"})
 @RequiredArgsConstructor
 @Slf4j
 public class JuniorOtpSmsController {
