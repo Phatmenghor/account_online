@@ -4,7 +4,7 @@ import { PageHeader } from "@/components/shared/common/page-header";
 import { TableToolbar } from "@/components/shared/common/table-toolbar";
 import { useBranchState } from "@/features/master-data/store/state/branch-state";
 import { setSearchFilter } from "@/features/master-data/store/slices/branch-slice";
-import { createBranchThunk, updateBranchThunk, deleteBranchThunk } from "@/features/master-data/store/thunks/branch-thunks";
+import { fetchAllBranchService, createBranchThunk, updateBranchThunk, deleteBranchThunk } from "@/features/master-data/store/thunks/branch-thunks";
 import { useAppDispatch } from "@/store/store";
 
 import { Suspense, startTransition, useCallback, useEffect, useState } from "react";
@@ -14,28 +14,24 @@ import { DataTable } from "@/components/shared/table/data-table";
 import { AppToast } from "@/components/shared/toast/app-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { ROUTES } from "@/constants/AppRoutes/routes";
 import { usePagination } from "@/hooks/use-pagination";
 import { useDebounce } from "@/utils/debounce/debounce";
-import { Search, GitBranch } from "lucide-react";
+import { GitBranch } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import Loading from "@/components/shared/common/loading";
 import { ModalMode } from "@/constants/AppResource/display-list/enum/mode";
 import { createBranchTableColumns } from "@/features/master-data/table/branch-content";
 import {
-  AllBranchModel,
   BranchModel,
 } from "@/features/master-data/types/branch/branch.response";
 import {
   CreateBranchReq,
   UpdateBranchReq,
 } from "@/features/master-data/types/branch/branch.request";
-import {
-  getAllBranchService,
-} from "@/features/master-data/services/branch/branch.service";
 import BranchViewModal from "@/features/master-data/components/branch-detail-modal";
+
 import ModalBranch from "@/features/master-data/components/branch-modal";
 
 function BranchPageContent() {
@@ -43,7 +39,6 @@ function BranchPageContent() {
   const { branchData: branchs, isLoading, filters } = useBranchState();
   const searchQuery = filters.search;
   const statusFilter = filters.status;
-  const [branch, setBranch] = useState<AllBranchModel | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedBranch, setSelectedBranch] = useState<BranchModel | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -65,19 +60,18 @@ function BranchPageContent() {
     }
   }, [searchParams, updateUrlWithPage]);
 
-  const loadBranch = useCallback(async () => {
-    try {
-      const response = await getAllBranchService({
+  const loadBranch = useCallback(() => {
+    dispatch(
+      fetchAllBranchService({
         search: debouncedSearchQuery,
         pageNo: currentPage,
         pageSize: 15,
         status: statusFilter !== "all" ? statusFilter : undefined,
-      });
-      setBranch(response);
-    } catch (error: any) {
-      console.error("Failed to fetch branch: ", error);
-    }
-  }, [debouncedSearchQuery, statusFilter, currentPage]);
+      })
+    );
+  }, [dispatch, debouncedSearchQuery, statusFilter, currentPage]);
+
+
 
   useEffect(() => {
     loadBranch();
@@ -226,6 +220,8 @@ function BranchPageContent() {
               </div>
             </div>
           </div>
+
+
 
           <DeleteConfirmationDialog
             isOpen={isDeleteDialogOpen}

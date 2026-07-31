@@ -23,6 +23,8 @@ import { LegalTypeModel } from "@/features/master-data/types/legal-type/legal-ty
 import { AccOnlineCategoryModel } from "@/features/master-data/types/acc-online-category/acc-online-category.response";
 import { LocationSubmitData } from "@/features/account-opening/types/address/open-acc-address.request.model";
 import { applicationName } from "@/constants/AppResource/display-list/enum/status";
+import { calculateAge } from "@/utils/date/calculate-age";
+
 
 interface UseVerificationFlowProps {
   formData: ResponseNID;
@@ -61,6 +63,8 @@ export const useVerificationFlow = ({
 }: UseVerificationFlowProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isValidating, setIsValidating] = useState(false);
+
+
   const [selectedBranch, setSelectedBranch] = useState<BranchModel | null>(
     null
   );
@@ -150,6 +154,9 @@ export const useVerificationFlow = ({
     return true;
   };
 
+  const [showAgeModal, setShowAgeModal] = useState(false);
+  const [ageModalAge, setAgeModalAge] = useState<number | null>(null);
+
   const handleValidateNID = async (
     setShowLocationModal: (show: boolean) => void,
     setShowErrorModal: (show: boolean) => void,
@@ -158,7 +165,18 @@ export const useVerificationFlow = ({
     setValidationErrorData: (data: any) => void
   ) => {
     setIsValidating(true);
+
+    // Age Check for Adult Account Opening (Must be >= 18)
+    const age = calculateAge(formData.dob);
+    if (age !== null && age < 18) {
+      setAgeModalAge(age);
+      setShowAgeModal(true);
+      setIsValidating(false);
+      return;
+    }
+
     try {
+
       const validationData: RequestValidModel = {
         applicationName: applicationName.ACCOUNT_ONLINE,
         idNumber: formData.idNumber,
@@ -317,13 +335,19 @@ export const useVerificationFlow = ({
 
   return {
     isLoading,
+    setIsLoading,
     isValidating,
+
+
     selectedBranch,
     setSelectedBranch,
     staffCode,
     setStaffCode,
     isVerified,
     setIsVerified,
+    showAgeModal,
+    setShowAgeModal,
+    ageModalAge,
     convertGenderToAPI,
     handleValidateNID,
     handleOpenConfirmModal,
@@ -331,5 +355,6 @@ export const useVerificationFlow = ({
     onBranchChange,
   };
 };
+
 
 

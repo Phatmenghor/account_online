@@ -60,7 +60,8 @@ public class AmlServiceImpl implements AmlService {
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public AmlStatus createAmlStatus(CreateAmlRequestDto requestDto) throws JsonProcessingException {
+    public AmlStatus createAmlStatus(CreateAmlRequestDto requestDto) {
+
         Optional<AmlStatus> existingOpt = amlStatusRepository.findByLegalId(requestDto.getLegalId());
 
         AmlStatus status;

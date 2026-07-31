@@ -80,7 +80,8 @@ export default function SuccessAccountViewModal({
   if (a.requestPayload) {
     try {
       p = typeof a.requestPayload === "string" ? JSON.parse(a.requestPayload) : a.requestPayload;
-    } catch (_) {}
+    } catch {}
+
   }
 
   const getVal = (key: string, ...aliases: string[]) => {

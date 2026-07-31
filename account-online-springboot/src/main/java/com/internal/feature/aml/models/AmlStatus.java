@@ -1,6 +1,7 @@
 package com.internal.feature.aml.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.internal.config.entity.BaseEntity;
 import com.internal.enumation.AmlStatusEnum;
 import com.internal.feature.auth.models.UserEntity;
@@ -16,7 +17,9 @@ import jakarta.persistence.*;
         @Index(name = "idx_aml_status", columnList = "status")
 })
 @Data
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class AmlStatus extends BaseEntity {
+
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

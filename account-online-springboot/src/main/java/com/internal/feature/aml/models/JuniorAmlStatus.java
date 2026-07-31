@@ -1,6 +1,7 @@
 package com.internal.feature.aml.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.internal.config.entity.BaseEntity;
 import com.internal.feature.auth.models.UserEntity;
 import lombok.*;
@@ -14,6 +15,7 @@ import jakarta.persistence.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "junior_aml_status")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class JuniorAmlStatus extends BaseEntity {
 
     @Column(name = "legal_id", length = 50)

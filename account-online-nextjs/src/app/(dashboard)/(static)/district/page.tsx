@@ -4,7 +4,7 @@ import { PageHeader } from "@/components/shared/common/page-header";
 import { TableToolbar } from "@/components/shared/common/table-toolbar";
 import { useDistrictState } from "@/features/master-data/store/state/district-state";
 import { setSearchFilter } from "@/features/master-data/store/slices/district-slice";
-import { createDistrictThunk, updateDistrictThunk, deleteDistrictThunk } from "@/features/master-data/store/thunks/district-thunks";
+import { fetchAllDistrictService, createDistrictThunk, updateDistrictThunk, deleteDistrictThunk } from "@/features/master-data/store/thunks/district-thunks";
 import { useAppDispatch } from "@/store/store";
 
 import { Suspense, startTransition, useCallback, useEffect, useState } from "react";
@@ -14,36 +14,31 @@ import { DataTable } from "@/components/shared/table/data-table";
 import { AppToast } from "@/components/shared/toast/app-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { ROUTES } from "@/constants/AppRoutes/routes";
 import { usePagination } from "@/hooks/use-pagination";
 import { useDebounce } from "@/utils/debounce/debounce";
-import { Search, MapPin } from "lucide-react";
+import { MapPin } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import Loading from "@/components/shared/common/loading";
 import { ModalMode } from "@/constants/AppResource/display-list/enum/mode";
 import { createDistrictTableColumns } from "@/features/master-data/table/district-content";
 import {
-  AllDistrictModel,
   DistrictModel,
 } from "@/features/master-data/types/district/district.response";
 import {
   CreateDistrictReq,
   UpdateDistrictReq,
 } from "@/features/master-data/types/district/district.request";
-import {
-  getAllDistrictService,
-} from "@/features/master-data/services/district/district.service";
 import DistrictViewModal from "@/features/master-data/components/district-detail-modal";
 import ModalDistrict from "@/features/master-data/components/district-modal";
+
 
 function DistrictPageContent() {
   const dispatch = useAppDispatch();
   const { districtData: districts, isLoading, filters } = useDistrictState();
   const searchQuery = filters.search;
   const statusFilter = filters.status;
-  const [district, setDistrict] = useState<AllDistrictModel | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedDistrict, setSelectedDistrict] = useState<DistrictModel | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -65,18 +60,17 @@ function DistrictPageContent() {
     }
   }, [searchParams, updateUrlWithPage]);
 
-  const loadDistrict = useCallback(async () => {
-    try {
-      const response = await getAllDistrictService({
+  const loadDistrict = useCallback(() => {
+    dispatch(
+      fetchAllDistrictService({
         search: debouncedSearchQuery,
         pageNo: currentPage,
         pageSize: 15,
-      });
-      setDistrict(response);
-    } catch (error: any) {
-      console.error("Failed to fetch district: ", error);
-    }
-  }, [debouncedSearchQuery, statusFilter, currentPage]);
+      })
+    );
+  }, [dispatch, debouncedSearchQuery, currentPage]);
+
+
 
   useEffect(() => {
     loadDistrict();
@@ -178,7 +172,7 @@ function DistrictPageContent() {
     <div className="space-y-4">
       <PageHeader
         title="Districts"
-        subtitle="Manage district database records"
+        subtitle="Manage CPBank districts"
         icon={MapPin}
         count={districts?.totalElements || 0}
       />
@@ -187,7 +181,7 @@ function DistrictPageContent() {
           <TableToolbar
             searchQuery={searchQuery}
             onSearchChange={handleSearchChange}
-            searchPlaceholder="Search districts..."
+            searchPlaceholder="Search district..."
             searchAriaLabel="search-district"
             disabled={isSubmitting}
             actions={<Button size="sm" onClick={handleAddDistrict}>New</Button>}
@@ -212,7 +206,7 @@ function DistrictPageContent() {
                   })}
                   loading={isLoading}
                   emptyMessage="No districts found"
-                  getRowKey={(districtItem) => districtItem.id}
+                  getRowKey={(reference) => reference.id}
                 />
                 <div className="border-t bg-background p-2 flex justify-end">
                   <CustomPagination
@@ -225,6 +219,7 @@ function DistrictPageContent() {
               </div>
             </div>
           </div>
+
 
           <DeleteConfirmationDialog
             isOpen={isDeleteDialogOpen}

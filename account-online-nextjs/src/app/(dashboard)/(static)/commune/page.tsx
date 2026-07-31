@@ -4,7 +4,7 @@ import { PageHeader } from "@/components/shared/common/page-header";
 import { TableToolbar } from "@/components/shared/common/table-toolbar";
 import { useCommuneState } from "@/features/master-data/store/state/commune-state";
 import { setSearchFilter } from "@/features/master-data/store/slices/commune-slice";
-import { createCommuneThunk, updateCommuneThunk, deleteCommuneThunk } from "@/features/master-data/store/thunks/commune-thunks";
+import { fetchAllCommuneService, createCommuneThunk, updateCommuneThunk, deleteCommuneThunk } from "@/features/master-data/store/thunks/commune-thunks";
 import { useAppDispatch } from "@/store/store";
 
 import { Suspense, startTransition, useCallback, useEffect, useState } from "react";
@@ -14,36 +14,31 @@ import { DataTable } from "@/components/shared/table/data-table";
 import { AppToast } from "@/components/shared/toast/app-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { ROUTES } from "@/constants/AppRoutes/routes";
 import { usePagination } from "@/hooks/use-pagination";
 import { useDebounce } from "@/utils/debounce/debounce";
-import { Search, MapPin } from "lucide-react";
+import { MapPin } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import Loading from "@/components/shared/common/loading";
 import { ModalMode } from "@/constants/AppResource/display-list/enum/mode";
 import { createCommuneTableColumns } from "@/features/master-data/table/commune-content";
 import {
-  AllCommuneModel,
   CommuneModel,
 } from "@/features/master-data/types/commune/commune.response";
 import {
   CreateCommuneReq,
   UpdateCommuneReq,
 } from "@/features/master-data/types/commune/commune.request";
-import {
-  getAllCommuneService,
-} from "@/features/master-data/services/commune/commune.service";
 import CommuneViewModal from "@/features/master-data/components/commune-detail-modal";
 import ModalCommune from "@/features/master-data/components/commune-modal";
+
 
 function CommunePageContent() {
   const dispatch = useAppDispatch();
   const { communeData: communes, isLoading, filters } = useCommuneState();
   const searchQuery = filters.search;
   const statusFilter = filters.status;
-  const [commune, setCommune] = useState<AllCommuneModel | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedCommune, setSelectedCommune] = useState<CommuneModel | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -65,18 +60,17 @@ function CommunePageContent() {
     }
   }, [searchParams, updateUrlWithPage]);
 
-  const loadCommune = useCallback(async () => {
-    try {
-      const response = await getAllCommuneService({
+  const loadCommune = useCallback(() => {
+    dispatch(
+      fetchAllCommuneService({
         search: debouncedSearchQuery,
         pageNo: currentPage,
         pageSize: 15,
-      });
-      setCommune(response);
-    } catch (error: any) {
-      console.error("Failed to fetch commune: ", error);
-    }
-  }, [debouncedSearchQuery, statusFilter, currentPage]);
+      })
+    );
+  }, [dispatch, debouncedSearchQuery, currentPage]);
+
+
 
   useEffect(() => {
     loadCommune();
@@ -178,7 +172,7 @@ function CommunePageContent() {
     <div className="space-y-4">
       <PageHeader
         title="Communes"
-        subtitle="Manage commune database records"
+        subtitle="Manage CPBank communes"
         icon={MapPin}
         count={communes?.totalElements || 0}
       />
@@ -187,7 +181,7 @@ function CommunePageContent() {
           <TableToolbar
             searchQuery={searchQuery}
             onSearchChange={handleSearchChange}
-            searchPlaceholder="Search communes..."
+            searchPlaceholder="Search commune..."
             searchAriaLabel="search-commune"
             disabled={isSubmitting}
             actions={<Button size="sm" onClick={handleAddCommune}>New</Button>}
@@ -212,7 +206,7 @@ function CommunePageContent() {
                   })}
                   loading={isLoading}
                   emptyMessage="No communes found"
-                  getRowKey={(communeItem) => communeItem.id}
+                  getRowKey={(reference) => reference.id}
                 />
                 <div className="border-t bg-background p-2 flex justify-end">
                   <CustomPagination
@@ -225,6 +219,7 @@ function CommunePageContent() {
               </div>
             </div>
           </div>
+
 
           <DeleteConfirmationDialog
             isOpen={isDeleteDialogOpen}

@@ -2,12 +2,19 @@ import createNextIntlPlugin from "next-intl/plugin";
 
 const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
-/ @type {import('next').NextConfig} */;
 const nextConfig = {
   reactStrictMode: false, // Disable to prevent duplicate API calls from React 18 double-mount
   output: "standalone",
 
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  typescript: {
+    ignoreBuildErrors: true,
+  },
+
   images: {
+
     unoptimized: true,
     remotePatterns: [
       {

@@ -4,7 +4,7 @@ import { PageHeader } from "@/components/shared/common/page-header";
 import { TableToolbar } from "@/components/shared/common/table-toolbar";
 import { useMaritalState } from "@/features/master-data/store/state/marital-state";
 import { setSearchFilter } from "@/features/master-data/store/slices/marital-slice";
-import { createMaritalThunk, updateMaritalThunk, deleteMaritalThunk } from "@/features/master-data/store/thunks/marital-thunks";
+import { fetchAllMaritalService, createMaritalThunk, updateMaritalThunk, deleteMaritalThunk } from "@/features/master-data/store/thunks/marital-thunks";
 import { useAppDispatch } from "@/store/store";
 
 import { Suspense, startTransition, useCallback, useEffect, useState } from "react";
@@ -14,36 +14,31 @@ import { DataTable } from "@/components/shared/table/data-table";
 import { AppToast } from "@/components/shared/toast/app-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { ROUTES } from "@/constants/AppRoutes/routes";
 import { usePagination } from "@/hooks/use-pagination";
 import { useDebounce } from "@/utils/debounce/debounce";
-import { Search, Heart } from "lucide-react";
+import { Heart } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import Loading from "@/components/shared/common/loading";
 import { ModalMode } from "@/constants/AppResource/display-list/enum/mode";
 import { createMaritalTableColumns } from "@/features/master-data/table/marital-content";
 import {
-  AllMaritalModel,
   MaritalModel,
 } from "@/features/master-data/types/marital/marital.response";
 import {
   CreateMaritalReq,
   UpdateMaritalReq,
 } from "@/features/master-data/types/marital/marital.request";
-import {
-  getAllMaritalService,
-} from "@/features/master-data/services/marital/marital.service";
 import MaritalViewModal from "@/features/master-data/components/marital-detail-modal";
 import ModalMarital from "@/features/master-data/components/marital-modal";
+
 
 function MaritalPageContent() {
   const dispatch = useAppDispatch();
   const { maritalData: maritals, isLoading, filters } = useMaritalState();
   const searchQuery = filters.search;
   const statusFilter = filters.status;
-  const [marital, setMarital] = useState<AllMaritalModel | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedMarital, setSelectedMarital] = useState<MaritalModel | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -65,19 +60,18 @@ function MaritalPageContent() {
     }
   }, [searchParams, updateUrlWithPage]);
 
-  const loadMarital = useCallback(async () => {
-    try {
-      const response = await getAllMaritalService({
+  const loadMarital = useCallback(() => {
+    dispatch(
+      fetchAllMaritalService({
         search: debouncedSearchQuery,
         pageNo: currentPage,
         pageSize: 15,
         status: statusFilter !== "all" ? statusFilter : undefined,
-      });
-      setMarital(response);
-    } catch (error: any) {
-      console.error("Failed to fetch marital: ", error);
-    }
-  }, [debouncedSearchQuery, statusFilter, currentPage]);
+      })
+    );
+  }, [dispatch, debouncedSearchQuery, statusFilter, currentPage]);
+
+
 
   useEffect(() => {
     loadMarital();
@@ -178,8 +172,8 @@ function MaritalPageContent() {
   return (
     <div className="space-y-4">
       <PageHeader
-        title="Marital Statuses"
-        subtitle="Manage marital status classifications"
+        title="Marital Status"
+        subtitle="Manage CPBank marital statuses"
         icon={Heart}
         count={maritals?.totalElements || 0}
       />
@@ -188,7 +182,7 @@ function MaritalPageContent() {
           <TableToolbar
             searchQuery={searchQuery}
             onSearchChange={handleSearchChange}
-            searchPlaceholder="Search marital status..."
+            searchPlaceholder="Search marital..."
             searchAriaLabel="search-marital"
             disabled={isSubmitting}
             actions={<Button size="sm" onClick={handleAddMarital}>New</Button>}
@@ -213,7 +207,7 @@ function MaritalPageContent() {
                   })}
                   loading={isLoading}
                   emptyMessage="No marital statuses found"
-                  getRowKey={(maritalItem) => maritalItem.id}
+                  getRowKey={(reference) => reference.id}
                 />
                 <div className="border-t bg-background p-2 flex justify-end">
                   <CustomPagination
@@ -226,6 +220,7 @@ function MaritalPageContent() {
               </div>
             </div>
           </div>
+
 
           <DeleteConfirmationDialog
             isOpen={isDeleteDialogOpen}

@@ -1,6 +1,5 @@
 package com.internal.feature.aml.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.internal.feature.aml.dto.request.AllAmlHistoryRequestDto;
 import com.internal.feature.aml.dto.request.AllAmlRequestDto;
 import com.internal.feature.aml.dto.request.CreateAmlRequestDto;
@@ -10,20 +9,15 @@ import com.internal.feature.aml.dto.response.AllAmlResponseDto;
 import com.internal.feature.aml.dto.response.AmlHistoryDto;
 import com.internal.feature.aml.dto.response.AmlStatusDto;
 import com.internal.feature.aml.models.AmlStatus;
-import com.internal.feature.aml.models.JuniorAmlStatus;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 
 import java.util.Optional;
 
 public interface AmlService {
     Optional<AmlStatus> findByLegalId(String legalId);
-    AmlStatus createAmlStatus(CreateAmlRequestDto requestDto) throws JsonProcessingException;
-    AmlStatusDto updateAmlStatus(Long id, UpdateAmlStatusDto status) throws JsonProcessingException;
+    AmlStatus createAmlStatus(CreateAmlRequestDto requestDto);
+    AmlStatusDto updateAmlStatus(Long id, UpdateAmlStatusDto status);
     AllAmlResponseDto getAllAml(AllAmlRequestDto requestDto);
     AmlStatusDto getAmlById(Long id);
-
     AmlHistoryDto getAmlHistoryById(Long id);
-
     AllAmlHistoryResponseDto getAllAmlHistory(AllAmlHistoryRequestDto requestDto);
 }

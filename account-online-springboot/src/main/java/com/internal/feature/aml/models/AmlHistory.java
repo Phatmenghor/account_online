@@ -1,5 +1,6 @@
 package com.internal.feature.aml.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.internal.config.entity.BaseEntity;
 import com.internal.enumation.AmlStatusEnum;
 import com.internal.feature.auth.models.UserEntity;
@@ -12,7 +13,9 @@ import jakarta.persistence.*;
 @Entity
 @Table(name = "acc_online_aml_history")
 @Data
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class AmlHistory extends BaseEntity {
+
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

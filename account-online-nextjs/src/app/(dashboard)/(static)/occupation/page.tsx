@@ -8,32 +8,25 @@ import { setPageNo, setSearchFilter, setStatusFilter } from '@/features/master-d
 import { fetchAllOccupationService, createOccupationThunk, updateOccupationThunk, deleteOccupationThunk } from '@/features/master-data/store/thunks/occupation-thunks';
 import { useAppDispatch } from '@/store/store';
 
-
-import { Suspense } from "react";
+import { Suspense, startTransition, useCallback, useEffect, useState } from "react";
 import { DeleteConfirmationDialog } from "@/components/shared/dialog/dialog-delete";
 import { CustomPagination } from "@/components/shared/pagination/custom-pagination";
 import { DataTable } from "@/components/shared/table/data-table";
 import { AppToast } from "@/components/shared/toast/app-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { ROUTES } from "@/constants/AppRoutes/routes";
 import { usePagination } from "@/hooks/use-pagination";
 import { useDebounce } from "@/utils/debounce/debounce";
-import { Search, Briefcase } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { Briefcase } from "lucide-react";
 import { useSearchParams } from "next/navigation";
-import { startTransition, useCallback, useEffect, useState } from "react";
-import {
-  AllOccupationModel,
-  OccupationModel,
-} from "@/features/master-data/types/occupation/occupation.response";
 import Loading from "@/components/shared/common/loading";
 import { createOccupationTableColumns } from "@/features/master-data/table/occupation-content";
 import OccupationViewModal from "@/features/master-data/components/occupation-detail-modal";
 import ModalOccupation from "@/features/master-data/components/occupation-modal";
 import { ModalMode } from "@/constants/AppResource/display-list/enum/mode";
+import { OccupationModel } from "@/features/master-data/types/occupation/occupation.response";
 import {
   CreateOccupationReq,
   UpdateOccupationReq,
@@ -44,14 +37,6 @@ import {
   getAllOccupationService,
   updateOccupationService,
 } from "@/features/master-data/services/occupation/occupation.service";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { STATUS_USER_OPTIONS } from "@/constants/AppResource/filter/status";
 
 function OccupationPageContent() {
   const dispatch = useAppDispatch();
@@ -59,18 +44,13 @@ function OccupationPageContent() {
   const searchQuery = filters.search;
   const statusFilter = filters.status;
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [selectedOccupation, setSelectedOccupation] =
-    useState<OccupationModel | null>(null);
+  const [selectedOccupation, setSelectedOccupation] = useState<OccupationModel | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [mode, setMode] = useState<ModalMode>(ModalMode.CREATE_MODE);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isOccupationDetailOpen, setIsOccupationDetailOpen] = useState(false);
 
-  const t = useTranslations();
-
   const searchParams = useSearchParams();
-
-  // Debounced search query - Optimized api performance when search
   const debouncedSearchQuery = useDebounce(searchQuery, 400);
 
   const { currentPage, updateUrlWithPage, handlePageChange } = usePagination({
@@ -96,7 +76,7 @@ function OccupationPageContent() {
       console.error("Failed to fetch occupations: ", error);
     } finally {
     }
-  }, [debouncedSearchQuery, statusFilter, currentPage]);
+  }, [debouncedSearchQuery, statusFilter, currentPage, dispatch]);
 
   useEffect(() => {
     loadOccupations();

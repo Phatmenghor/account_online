@@ -28,6 +28,9 @@ import { ReferenceDocUploadSection } from "./form-sections/reference-doc-upload-
 import { JuniorPhoneVerificationSection } from "./form-sections/junior-phone-verification-section";
 import { ChildPhotoUploadSection } from "./form-sections/child-photo-upload-section";
 import { WarningAlertModal } from "./form-sections/warning-alert-modal";
+import { AgeRestrictionModal } from "@/features/account-opening/components/age-restriction-modal";
+import { calculateAge } from "@/utils/date/calculate-age";
+
 import { FormInputField, FormSelectField } from "@/features/account-opening/components/form-field/form-field";
 import { Label } from "@/components/ui/label";
 import { CustomDateTimePicker } from "@/components/shared/common/custom-datetime-picker";
@@ -139,6 +142,11 @@ export function JuniorNoNidForm({ occupations = [], branches = [], maritalStatus
   const [refDocImagePreview, setRefDocImagePreview] = useState<string | null>(null);
   const [selfieFileName, setSelfieFileName] = useState("");
   const [selfiePreview, setSelfiePreview] = useState<string | null>(null);
+
+  // Age restriction modal state
+  const [showAgeModal, setShowAgeModal] = useState(false);
+  const [ageModalAge, setAgeModalAge] = useState<number | null>(null);
+
 
   const handleSelfieUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -549,8 +557,18 @@ export function JuniorNoNidForm({ occupations = [], branches = [], maritalStatus
     if (!validateFormWithZod()) {
       return;
     }
+
+    // Age Check for Junior Account Opening (Must be < 18)
+    const childAge = calculateAge(formData.date_of_birth);
+    if (childAge !== null && childAge >= 18) {
+      setAgeModalAge(childAge);
+      setShowAgeModal(true);
+      return;
+    }
+
     setLoading(true);
     setIsSubmittingModal(true);
+
 
     try {
       const res = await processJuniorAccountOpening(formData);
@@ -808,6 +826,15 @@ export function JuniorNoNidForm({ occupations = [], branches = [], maritalStatus
         onClose={resetForm}
         data={successData}
       />
+
+      {/* AGE RESTRICTION MODAL */}
+      <AgeRestrictionModal
+        isOpen={showAgeModal}
+        onClose={() => setShowAgeModal(false)}
+        mode="junior"
+        calculatedAge={ageModalAge}
+      />
     </form>
   );
+
 }

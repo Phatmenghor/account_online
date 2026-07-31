@@ -1,7 +1,0 @@
-src/main/resources/application-local.yaml
-src/main/resources/application-prod.yaml
-src/main/resources/application-uat.yaml
-src/main/resources/application.yaml
-src/main/resources/logback-spring.xml
-src/main/resources/xml/SendOtp
-src/main/resources/xml/createCustomerAccount

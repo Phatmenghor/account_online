@@ -1,6 +1,5 @@
 package com.internal.feature.aml.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.internal.feature.aml.dto.request.AllAmlHistoryRequestDto;
 import com.internal.feature.aml.dto.request.AllAmlRequestDto;
 import com.internal.feature.aml.dto.request.UpdateAmlStatusDto;
@@ -15,7 +14,11 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/v1/aml")
@@ -61,7 +64,7 @@ public class AmlController {
     public ResponseEntity<ApiResponse<AmlStatusDto>> updateAmlStatus(
             @PathVariable Long id,
             @Valid @RequestBody UpdateAmlStatusDto req
-    ) throws JsonProcessingException {
+    ) {
         log.info("Updating AML status for ID: {} to {}", id, req.getStatus());
         AmlStatusDto updatedStatus = service.updateAmlStatus(id, req);
         log.info("AML status updated successfully: {}", updatedStatus.getId());

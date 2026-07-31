@@ -91,7 +91,8 @@ export default function JuniorAccountViewModal({
   if (d.requestPayload) {
     try {
       p = typeof d.requestPayload === "string" ? JSON.parse(d.requestPayload) : d.requestPayload;
-    } catch (_) {}
+    } catch {}
+
   }
 
   const hasNid = d.hasNid !== false && p.has_nid !== false && String(d.hasNid) !== "false";

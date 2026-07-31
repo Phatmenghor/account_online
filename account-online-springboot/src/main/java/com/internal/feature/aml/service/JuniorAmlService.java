@@ -1,6 +1,5 @@
 package com.internal.feature.aml.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.internal.feature.aml.dto.request.AllAmlHistoryRequestDto;
 import com.internal.feature.aml.dto.request.UpdateAmlStatusDto;
 import com.internal.feature.aml.models.JuniorAmlHistory;
@@ -14,7 +13,7 @@ public interface JuniorAmlService {
 
     Page<JuniorAmlStatus> getAllJuniorAmlHistory(String search, Pageable pageable);
 
-    JuniorAmlStatus updateJuniorAmlStatus(Long id, UpdateAmlStatusDto request) throws JsonProcessingException;
+    JuniorAmlStatus updateJuniorAmlStatus(Long id, UpdateAmlStatusDto request);
 
     Page<JuniorAmlHistory> getJuniorAmlHistoryByStatusId(Long juniorAmlStatusId, AllAmlHistoryRequestDto request);
 

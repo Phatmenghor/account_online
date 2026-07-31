@@ -17,6 +17,8 @@ import LoadingModal from "@/features/master-data/components/extract-modal";
 import { SubmissionProgressModal } from "@/features/account-opening/components/submission-progress-modal";
 import SubmitSuccessModal from "@/features/account-opening/components/submit-success-modal";
 import SubmitErrorModal from "@/features/account-opening/components/submit-error-modal";
+import { AgeRestrictionModal } from "@/features/account-opening/components/age-restriction-modal";
+
 
 import { ConfirmClearModal } from "@/features/account-opening/components/confirm-clear-modal";
 // Contexts
@@ -161,8 +163,12 @@ export function OpenAccountContent({ isPublic = false }: OpenAccountContentProps
     setStaffCode,
     isVerified,
     setIsVerified,
+    showAgeModal,
+    setShowAgeModal,
+    ageModalAge,
     convertGenderToAPI,
     handleValidateNID,
+
     handleOpenConfirmModal,
     handleLocationSubmit,
     onBranchChange,
@@ -636,9 +642,16 @@ export function OpenAccountContent({ isPublic = false }: OpenAccountContentProps
           onClose={() => setShowAccountExistsModal(false)}
           data={accountExistsData}
         />
+        <AgeRestrictionModal
+          isOpen={showAgeModal}
+          onClose={() => setShowAgeModal(false)}
+          mode="adult"
+          calculatedAge={ageModalAge}
+        />
       </div>
     </FormStateProvider>
   );
 }
+
 
 

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { useTranslations } from "next-intl";
 import { useClientLocale } from "@/providers/local-provider";
+
 import { MaritalModel } from "@/features/master-data/types/marital/marital.response";
 import { OccupationModel } from "@/features/master-data/types/occupation/occupation.response";
 import { ReferenceModel } from "@/features/master-data/types/reference/reference.response";

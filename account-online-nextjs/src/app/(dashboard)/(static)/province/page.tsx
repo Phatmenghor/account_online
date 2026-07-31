@@ -4,53 +4,40 @@ import { PageHeader } from '@/components/shared/common/page-header';
 import { TableToolbar } from "@/components/shared/common/table-toolbar";
 
 import { useProvinceState } from '@/features/master-data/store/state/province-state';
-import { setPageNo, setSearchFilter, setStatusFilter } from '@/features/master-data/store/slices/province-slice';
+import { setSearchFilter } from '@/features/master-data/store/slices/province-slice';
 import { fetchAllProvinceService, createProvinceThunk, updateProvinceThunk, deleteProvinceThunk } from '@/features/master-data/store/thunks/province-thunks';
 import { useAppDispatch } from '@/store/store';
 
-
-import { Suspense } from "react";
+import { Suspense, startTransition, useCallback, useEffect, useState } from "react";
 import { DeleteConfirmationDialog } from "@/components/shared/dialog/dialog-delete";
 import { CustomPagination } from "@/components/shared/pagination/custom-pagination";
 import { DataTable } from "@/components/shared/table/data-table";
 import { AppToast } from "@/components/shared/toast/app-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { ROUTES } from "@/constants/AppRoutes/routes";
 import { usePagination } from "@/hooks/use-pagination";
 import { useDebounce } from "@/utils/debounce/debounce";
-import { Search, Map } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { MapPin } from "lucide-react";
 import { useSearchParams } from "next/navigation";
-import { startTransition, useCallback, useEffect, useState } from "react";
 import Loading from "@/components/shared/common/loading";
 import { ModalMode } from "@/constants/AppResource/display-list/enum/mode";
-import {
-  AllProvinceModel,
-  ProvinceModel,
-} from "@/features/master-data/types/province/province.response";
+import { ProvinceModel } from "@/features/master-data/types/province/province.response";
 import ProvinceViewModal from "@/features/master-data/components/province-detail-modal";
 import ModalProvince from "@/features/master-data/components/province-modal";
 import { createProvinceTableColumns } from "@/features/master-data/table/province-content";
 import {
-  createProvinceService,
-  deleteProvinceService,
-  getAllProviceService,
-  updateProvinceService,
-} from "@/features/master-data/services/province/province.service";
-import {
   CreateProvinceReq,
   UpdateProvinceReq,
 } from "@/features/master-data/types/province/province.request";
+
 
 function ProvincePageContent() {
   const dispatch = useAppDispatch();
   const { provinceData: provinces, isLoading, filters } = useProvinceState();
   const searchQuery = filters.search;
   const statusFilter = filters.status;
-  const [province, setProvince] = useState<AllProvinceModel | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedProvince, setSelectedProvince] =
     useState<ProvinceModel | null>(null);
@@ -59,9 +46,8 @@ function ProvincePageContent() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isReferenceDetailOpen, setIsReferenceDetailOpen] = useState(false);
 
-  const t = useTranslations();
-
   const searchParams = useSearchParams();
+
 
   // Debounced search query - Optimized api performance when search
   const debouncedSearchQuery = useDebounce(searchQuery, 400);
@@ -77,20 +63,18 @@ function ProvincePageContent() {
     }
   }, [searchParams, updateUrlWithPage]);
 
-  const loadReferences = useCallback(async () => {
-    try {
-      const response = await getAllProviceService({
+  const loadReferences = useCallback(() => {
+    dispatch(
+      fetchAllProvinceService({
         search: debouncedSearchQuery,
         pageNo: currentPage,
         pageSize: 15,
         status: statusFilter !== "all" ? statusFilter : undefined,
-      });
-      setProvince(response);
-    } catch (error: any) {
-      console.error("Failed to fetch references: ", error);
-    } finally {
-    }
-  }, [debouncedSearchQuery, statusFilter, currentPage]);
+      })
+    );
+  }, [dispatch, debouncedSearchQuery, statusFilter, currentPage]);
+
+
 
   useEffect(() => {
     loadReferences();
@@ -193,55 +177,54 @@ function ProvincePageContent() {
     <div className="space-y-4">
       <PageHeader
         title="Provinces"
-        subtitle="Manage province database records"
-        icon={Map}
+        subtitle="Manage CPBank provinces"
+        icon={MapPin}
         count={provinces?.totalElements || 0}
       />
       <Card className="h-full flex flex-col">
-      <CardContent className="space-y-6 p-6 flex flex-col h-full">
-        <TableToolbar
-          searchQuery={searchQuery}
-          onSearchChange={handleSearchChange}
-          searchPlaceholder="Search Province Code..."
-          searchAriaLabel="search-province"
-          disabled={isSubmitting}
-          actions={<Button size="sm" onClick={handleAddProvince}>New</Button>}
-        />
+        <CardContent className="space-y-6 p-6 flex flex-col h-full">
+          <TableToolbar
+            searchQuery={searchQuery}
+            onSearchChange={handleSearchChange}
+            searchPlaceholder="Search province..."
+            searchAriaLabel="search-province"
+            disabled={isSubmitting}
+            actions={<Button size="sm" onClick={handleAddProvince}>New</Button>}
+          />
 
-        <div className="w-full">
-          <Separator className="bg-gray-300" />
-        </div>
+          <div className="w-full">
+            <Separator className="bg-gray-300" />
+          </div>
 
-        <div className="flex-1 flex flex-col min-h-0">
-          {/* Table container with proper overflow handling */}
-          <div className="flex-1 rounded-md border overflow-hidden flex flex-col">
-            <div className="flex-1 overflow-x-auto">
-              <DataTable
-                data={province?.content || []}
-                columns={createProvinceTableColumns({
-                  data: province,
-                  handlers: {
-                    handleEditProvince,
-                    handleViewProvinceDetail,
-                    handleDeleteProvince,
-                  },
-                })}
-                loading={isLoading}
-                emptyMessage="No Province found"
-                getRowKey={(province) => province.id}
-              />
-              {/* Pagination positioned to the right and outside the scrollable area */}
-              <div className="border-t bg-background p-2 flex justify-end">
-                <CustomPagination
-                  currentPage={currentPage}
-                  totalPages={province?.totalPages || 1}
-                  onPageChange={handlePageChange}
-                  size="md"
+          <div className="flex-1 flex flex-col min-h-0">
+            <div className="flex-1 rounded-md border overflow-hidden flex flex-col">
+              <div className="flex-1 overflow-x-auto">
+                <DataTable
+                  data={provinces?.content || []}
+                  columns={createProvinceTableColumns({
+                    data: provinces,
+                    handlers: {
+                      handleEditProvince,
+                      handleViewProvinceDetail,
+                      handleDeleteProvince,
+                    },
+                  })}
+                  loading={isLoading}
+                  emptyMessage="No Province found"
+                  getRowKey={(reference) => reference.id}
                 />
+                <div className="border-t bg-background p-2 flex justify-end">
+                  <CustomPagination
+                    currentPage={currentPage}
+                    totalPages={provinces?.totalPages || 1}
+                    onPageChange={handlePageChange}
+                    size="md"
+                  />
+                </div>
               </div>
             </div>
           </div>
-        </div>
+
 
         <DeleteConfirmationDialog
           isOpen={isDeleteDialogOpen}

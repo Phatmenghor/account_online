@@ -8,32 +8,25 @@ import { setPageNo, setSearchFilter, setStatusFilter } from '@/features/master-d
 import { fetchAllReferenceService, createReferenceThunk, updateReferenceThunk, deleteReferenceThunk } from '@/features/master-data/store/thunks/reference-thunks';
 import { useAppDispatch } from '@/store/store';
 
-
-import { Suspense } from "react";
+import { Suspense, startTransition, useCallback, useEffect, useState } from "react";
 import { DeleteConfirmationDialog } from "@/components/shared/dialog/dialog-delete";
 import { CustomPagination } from "@/components/shared/pagination/custom-pagination";
 import { DataTable } from "@/components/shared/table/data-table";
 import { AppToast } from "@/components/shared/toast/app-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { ROUTES } from "@/constants/AppRoutes/routes";
 import { usePagination } from "@/hooks/use-pagination";
 import { useDebounce } from "@/utils/debounce/debounce";
-import { Search, UserCheck } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { UserCheck } from "lucide-react";
 import { useSearchParams } from "next/navigation";
-import { startTransition, useCallback, useEffect, useState } from "react";
-import {
-  AllReferenceModel,
-  ReferenceModel,
-} from "@/features/master-data/types/reference/reference.response";
 import Loading from "@/components/shared/common/loading";
 import { createReferenceTableColumns } from "@/features/master-data/table/reference-content";
 import ReferenceViewModal from "@/features/master-data/components/reference-detail-modal";
 import ModalReference from "@/features/master-data/components/reference-modal";
 import { ModalMode } from "@/constants/AppResource/display-list/enum/mode";
+import { ReferenceModel } from "@/features/master-data/types/reference/reference.response";
 import {
   CreateReferenceReq,
   UpdateReferenceReq,
@@ -44,14 +37,6 @@ import {
   getAllReferenceService,
   updateReferenceService,
 } from "@/features/master-data/services/reference/reference.service";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { STATUS_USER_OPTIONS } from "@/constants/AppResource/filter/status";
 
 function ReferencePageContent() {
   const dispatch = useAppDispatch();
@@ -59,18 +44,13 @@ function ReferencePageContent() {
   const searchQuery = filters.search;
   const statusFilter = filters.status;
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [selectedReference, setSelectedReference] =
-    useState<ReferenceModel | null>(null);
+  const [selectedReference, setSelectedReference] = useState<ReferenceModel | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [mode, setMode] = useState<ModalMode>(ModalMode.CREATE_MODE);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isReferenceDetailOpen, setIsReferenceDetailOpen] = useState(false);
 
-  const t = useTranslations();
-
   const searchParams = useSearchParams();
-
-  // Debounced search query - Optimized api performance when search
   const debouncedSearchQuery = useDebounce(searchQuery, 400);
 
   const { currentPage, updateUrlWithPage, handlePageChange } = usePagination({
@@ -96,7 +76,7 @@ function ReferencePageContent() {
       console.error("Failed to fetch references: ", error);
     } finally {
     }
-  }, [debouncedSearchQuery, statusFilter, currentPage]);
+  }, [debouncedSearchQuery, statusFilter, currentPage, dispatch]);
 
   useEffect(() => {
     loadReferences();

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { useTranslations } from "next-intl";
 import { useClientLocale } from "@/providers/local-provider";
+
 import { MaritalModel } from "@/features/master-data/types/marital/marital.response";
 import { OccupationModel } from "@/features/master-data/types/occupation/occupation.response";
 import { ReferenceModel } from "@/features/master-data/types/reference/reference.response";
@@ -46,13 +46,10 @@ export const useMasterData = () => {
     }
   }, [maritalStatuses, selectedMaritalStatus]);
 
-  // Default to item with lookupId === "6012" (Junior) or first available category
+  // Default to first item with lookupId === "6011" once list loads
   useEffect(() => {
     if (accOnlineCategories.length > 0 && !selectedCategory) {
-      const defaultItem =
-        accOnlineCategories.find((c) => c.lookupId === "6012") ||
-        accOnlineCategories.find((c) => c.lookupId === "6011") ||
-        accOnlineCategories[0];
+      const defaultItem = accOnlineCategories.find((c) => c.lookupId === "6011");
       if (defaultItem) setSelectedCategory(defaultItem);
     }
   }, [accOnlineCategories]);

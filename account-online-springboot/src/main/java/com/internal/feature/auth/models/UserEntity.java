@@ -1,5 +1,6 @@
 package com.internal.feature.auth.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.internal.config.entity.BaseEntity;
 import com.internal.enumation.StatusData;
 import lombok.Data;
@@ -19,7 +20,9 @@ import java.util.List;
 })
 @Data
 @NoArgsConstructor
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "password"})
 public class UserEntity extends BaseEntity {
+
 
     @Column(nullable = false, unique = true)
     private String username;

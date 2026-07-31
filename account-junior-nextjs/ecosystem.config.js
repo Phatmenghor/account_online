@@ -1,13 +1,17 @@
 module.exports = {
   apps: [
     {
-      name: "account_online_frontend",
-      script: ".next/standalone/server.js",
+      name: "account-junior-frontend",
+      script: "node_modules/next/dist/bin/next",
+      args: "start -p 7068",
       cwd: "./",
+      instances: 1,
+      autorestart: true,
       watch: false,
+      max_memory_restart: "1G",
       env: {
         NODE_ENV: "production",
-        PORT: "7069",
+        PORT: 7068,
         HOSTNAME: "0.0.0.0"
       }
     }

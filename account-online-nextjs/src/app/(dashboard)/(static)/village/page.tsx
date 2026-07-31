@@ -22,8 +22,8 @@ import { ROUTES } from "@/constants/AppRoutes/routes";
 import { usePagination } from "@/hooks/use-pagination";
 import { useDebounce } from "@/utils/debounce/debounce";
 import { Search, MapPin } from "lucide-react";
-import { useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
+
 import { startTransition, useCallback, useEffect, useState } from "react";
 import {
   AllVillageModel,
@@ -58,10 +58,8 @@ function VillagePageContent() {
   const [mode, setMode] = useState<ModalMode>(ModalMode.CREATE_MODE);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isVillageDetailOpen, setIsVillageDetailOpen] = useState(false);
-
-  const t = useTranslations();
-
   const searchParams = useSearchParams();
+
 
   // Debounced search query - Optimized api performance when search
   const debouncedSearchQuery = useDebounce(searchQuery, 400);
