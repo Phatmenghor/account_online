@@ -24,6 +24,7 @@ import { AccOnlineCategoryModel } from "@/features/master-data/types/acc-online-
 import { LocationSubmitData } from "@/features/account-opening/types/address/open-acc-address.request.model";
 import { applicationName } from "@/constants/AppResource/display-list/enum/status";
 import { calculateAge } from "@/utils/date/calculate-age";
+import { isAgeCheckDisabled } from "@/utils/date/disable-age-check";
 
 
 interface UseVerificationFlowProps {
@@ -166,13 +167,16 @@ export const useVerificationFlow = ({
   ) => {
     setIsValidating(true);
 
-    // Age Check for Adult Account Opening (Must be >= 18)
-    const age = calculateAge(formData.dob);
-    if (age !== null && age < 18) {
-      setAgeModalAge(age);
-      setShowAgeModal(true);
-      setIsValidating(false);
-      return;
+    // Age Check for Account Opening (Must be >= 18 for Adult)
+    // Disabled in Development mode for testing, active in Production
+    if (!isAgeCheckDisabled()) {
+      const age = calculateAge(formData.dob);
+      if (age !== null && age < 18) {
+        setAgeModalAge(age);
+        setShowAgeModal(true);
+        setIsValidating(false);
+        return;
+      }
     }
 
     try {
