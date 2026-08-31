@@ -20,9 +20,10 @@ import java.util.Base64;
 import java.util.Map;
 
 @Service
-@Slf4j
 @RequiredArgsConstructor
 public class AmlRestAdapter implements AmlPort {
+
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AmlRestAdapter.class);
 
     private final CpbProperties properties;
     private final RestTemplate restTemplate;
@@ -46,21 +47,20 @@ public class AmlRestAdapter implements AmlPort {
 
             if (isHighRiskTest) {
                 log.warn("AML High Risk Simulation Enabled / Triggered for Customer: {} - returning simulated high-risk response", requestBody != null ? requestBody.getCustomerId() : "N/A");
-                AmlExternalResponseDto simulated = AmlExternalResponseDto.builder()
-                        .riskLevel("HIGH")
-                        .actionTaken("Review Required")
-                        .rulesTriggered("[{\"RuleName\":\"Sanction List Hit\"}]")
-                        .serviceName("Simulation")
-                        .totalRulesScore(100)
-                        .trxnID("SIM-" + System.currentTimeMillis())
-                        .build();
+                AmlExternalResponseDto simulated = new AmlExternalResponseDto();
+                simulated.setRiskLevel("HIGH");
+                simulated.setActionTaken("Review Required");
+                simulated.setRulesTriggered("[{\"RuleName\":\"Sanction List Hit\"}]");
+                simulated.setServiceName("Simulation");
+                simulated.setTotalRulesScore(100);
+                simulated.setTrxnID("SIM-" + System.currentTimeMillis());
                 log.warn("Simulated AML Response: RiskLevel={}, TrxnID={}", simulated.getRiskLevel(), simulated.getTrxnID());
                 return simulated;
             }
 
             String url = properties.getAml().getUrl();
             String jsonRequest = objectMapper.writeValueAsString(requestBody);
-            log.info("AML Request to URL: {} | Customer: {} | Payload: {}", url, requestBody.getCustomerId(), jsonRequest);
+            log.info("[AmlRestAdapter] Initiating AML check. url={}, customerId={}", url, requestBody != null ? requestBody.getCustomerId() : "N/A");
 
             String credentials = properties.getAml().getUsername() + ":" + properties.getAml().getPassword();
             String encodedCredentials = Base64.getEncoder()
@@ -70,6 +70,12 @@ public class AmlRestAdapter implements AmlPort {
             headers.setContentType(new MediaType(MediaType.APPLICATION_JSON.getType(),
                     MediaType.APPLICATION_JSON.getSubtype(), StandardCharsets.UTF_8));
             headers.set("Authorization", "Basic " + encodedCredentials);
+
+            String traceId = org.slf4j.MDC.get("traceId");
+            if (traceId != null && !traceId.isBlank()) {
+                headers.set("X-Request-ID", traceId);
+                headers.set("X-Trace-ID", traceId);
+            }
 
             HttpEntity<String> entity = new HttpEntity<>(jsonRequest, headers);
 
@@ -88,8 +94,15 @@ public class AmlRestAdapter implements AmlPort {
             Map<String, Object> map = objectMapper.readValue(rawBody, new TypeReference<Map<String, Object>>() {
             });
             Object rulesArray = map.get("RulesTriggered");
+            if (rulesArray == null) {
+                rulesArray = map.get("rules_triggered");
+            }
+            if (rulesArray == null) {
+                rulesArray = map.get("rulesTriggered");
+            }
             String rulesAsString = rulesArray == null ? "" : objectMapper.writeValueAsString(rulesArray);
             map.put("RulesTriggered", rulesAsString);
+            map.put("rules_triggered", rulesAsString);
 
             AmlExternalResponseDto result = objectMapper.convertValue(map, AmlExternalResponseDto.class);
             log.info("AML Check Completed ({}ms) | RiskLevel: {} | TrxnID: {} | RulesScore: {}",

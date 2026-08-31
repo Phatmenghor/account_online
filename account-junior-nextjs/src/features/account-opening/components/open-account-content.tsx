@@ -193,7 +193,6 @@ export function OpenAccountContent({ isPublic = false }: OpenAccountContentProps
     setShowAccountExistsModal,
     accountExistsData,
     loadingState,
-    progressPercent,
   } = useAccountSubmission({
     formData,
     uploadedImage,
@@ -561,10 +560,9 @@ export function OpenAccountContent({ isPublic = false }: OpenAccountContentProps
           message={translate("clearConfirmMessage")}
         />
 
-        {/* Submission Real-time Progress Modal */}
-        <SubmissionProgressModal
+        {/* Submission Loading Modal */}
+        <LoadingModal
           isOpen={loadingState.isLoading}
-          progress={progressPercent}
           title={loadingState.title}
           message={loadingState.message}
         />

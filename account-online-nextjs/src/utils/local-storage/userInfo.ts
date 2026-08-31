@@ -1,27 +1,30 @@
 import { UserModel } from "@/features/user/types/user.response";
-import { setCookie, getCookie, deleteCookie } from "cookies-next";
+import { deleteCookie } from "cookies-next";
 
-const USER_INFO_COOKIE_KEY = "auth-user-info";
+const USER_INFO_STORAGE_KEY = "auth-user-info";
 
 export function storeUserInfo(user: UserModel | undefined): void {
   if (typeof window === "undefined" || !user) return;
-
-  setCookie(USER_INFO_COOKIE_KEY, JSON.stringify(user), {
-    maxAge: 365 * 24 * 60 * 60, // 1 year
-  });
+  try {
+    localStorage.setItem(USER_INFO_STORAGE_KEY, JSON.stringify(user));
+    deleteCookie(USER_INFO_STORAGE_KEY);
+  } catch (e) {
+    console.error("Failed to store user info in localStorage", e);
+  }
 }
 
 export function getUserInfo(): UserModel | null {
-  const cookieValue = getCookie(USER_INFO_COOKIE_KEY);
+  if (typeof window === "undefined") return null;
   try {
-    return cookieValue ? JSON.parse(cookieValue as string) : null;
+    const val = localStorage.getItem(USER_INFO_STORAGE_KEY);
+    return val ? JSON.parse(val) : null;
   } catch {
     return null;
   }
 }
 
 export function clearUserInfo(): void {
-  deleteCookie(USER_INFO_COOKIE_KEY);
+  if (typeof window === "undefined") return;
+  localStorage.removeItem(USER_INFO_STORAGE_KEY);
+  deleteCookie(USER_INFO_STORAGE_KEY);
 }
-
-

@@ -60,6 +60,12 @@ public class JuniorT24SoapAdapter implements JuniorCoreBankingPort {
             headers.set("Accept", "text/xml; charset=UTF-8");
             headers.set("SOAPAction", operation);
 
+            String traceId = org.slf4j.MDC.get("traceId");
+            if (traceId != null && !traceId.isBlank()) {
+                headers.set("X-Request-ID", traceId);
+                headers.set("X-Trace-ID", traceId);
+            }
+
             byte[] requestBytes = xmlRequest.getBytes(StandardCharsets.UTF_8);
             HttpEntity<byte[]> entity = new HttpEntity<>(requestBytes, headers);
 
@@ -70,7 +76,7 @@ public class JuniorT24SoapAdapter implements JuniorCoreBankingPort {
             byte[] responseBytes = response.getBody();
             String responseBody = responseBytes != null ? new String(responseBytes, StandardCharsets.UTF_8) : null;
 
-            log.info("T24 Junior Response Received | op={} | status={} | duration={} ms",
+            log.info("[JuniorT24SoapAdapter] T24 Junior operation completed. operation={}, status={}, durationMs={}",
                     operation, response.getStatusCode(), duration);
 
             if (responseBody == null || responseBody.isEmpty()) {

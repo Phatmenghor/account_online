@@ -36,7 +36,9 @@ public class OpenAccountServiceImpl implements OpenAccountService {
         String currentStep = "START";
 
         request.setSector(AppConstants.DEFAULT_SECTOR);
-        request.setProductAccount(AppConstants.PRODUCT_CODE);
+        if (request.getProductAccount() == null || request.getProductAccount().isBlank()) {
+            request.setProductAccount(AppConstants.PRODUCT_CODE);
+        }
 
         String submittedBy = "Customer";
         try {
@@ -46,65 +48,67 @@ public class OpenAccountServiceImpl implements OpenAccountService {
             }
         } catch (Exception ignored) {}
 
-        log.info("Processing account opening | Legal ID: {} | Submitted by: {}", legalId, submittedBy);
+        long start = System.currentTimeMillis();
+        log.info("[OpenAccountService] Processing account opening started. legalId={}, submittedBy={}", legalId, submittedBy);
 
         OpenAccountContext context = new OpenAccountContext();
         context.setRequest(request);
         context.setSubmittedBy(submittedBy);
 
         try {
-            log.info("Step 1: Testing connection | Legal ID: {}", legalId);
+            log.info("[OpenAccountService] Step 1/10: Testing connection. legalId={}", legalId);
             currentStep = AppConstants.TEST_CONNECTION;
             bankingService.testConnection();
 
-            log.info("Step 2: Retrieving customer info | Legal ID: {}", legalId);
+            log.info("[OpenAccountService] Step 2/10: Retrieving customer info. legalId={}", legalId);
             currentStep = AppConstants.GET_CUSTOMER_INFO;
             var customerInfo = bankingService.getCustomerInfo(legalId);
             context.setCustomerInfo(customerInfo);
 
-            log.info("Step 3: Validating existing accounts | Legal ID: {}", legalId);
+            log.info("[OpenAccountService] Step 3/10: Validating existing accounts. legalId={}", legalId);
             currentStep = AppConstants.VALIDATE_EXISTING_ACCOUNT;
             bankingService.validateExistingAccounts(customerInfo);
 
-            log.info("Step 4: Processing AML | Legal ID: {}", legalId);
+            log.info("[OpenAccountService] Step 4/10: Processing AML. legalId={}", legalId);
             currentStep = AppConstants.PROCESS_AML;
             var amlResult = complianceService.processAml(request);
             context.setAmlResult(amlResult);
             String amlStatus = amlResult != null ? amlResult.getStatus().name() : "UNKNOWN";
             complianceService.sentMessageOnHighRisk(request, amlResult);
 
-            log.info("Step 5: Creating customer | Legal ID: {}", legalId);
+            log.info("[OpenAccountService] Step 5/10: Creating customer. legalId={}", legalId);
             currentStep = AppConstants.CREATE_CUSTOMER;
             CustomerCreationResult customerResult = bankingService.createCustomerIfNeeded(request, customerInfo);
             context.setCif(customerResult.getCif());
             context.setMnemonic(customerResult.getMnemonic());
 
-            log.info("Step 6: Creating KHR account | CIF: {}", context.getCif());
-            currentStep = AppConstants.CREATE_KHR_ACCOUNT;
-            context.setKhrAccount(bankingService.createAccountIfNeeded(request, customerInfo,
-                    context.getCif(), AppConstants.CURRENCY_KHR));
-
-            log.info("Step 7: Creating USD account | CIF: {}", context.getCif());
+            log.info("[OpenAccountService] Step 6/10: Creating USD account ($). legalId={}, cif={}", legalId, context.getCif());
             currentStep = AppConstants.CREATE_USD_ACCOUNT;
             context.setUsdAccount(bankingService.createAccountIfNeeded(request, customerInfo,
                     context.getCif(), AppConstants.CURRENCY_USD));
 
-            log.info("Step 8: Validating accounts created | CIF: {}", context.getCif());
+            log.info("[OpenAccountService] Step 7/10: Creating KHR account. legalId={}, cif={}", legalId, context.getCif());
+            currentStep = AppConstants.CREATE_KHR_ACCOUNT;
+            context.setKhrAccount(bankingService.createAccountIfNeeded(request, customerInfo,
+                    context.getCif(), AppConstants.CURRENCY_KHR));
+
+            log.info("[OpenAccountService] Step 8/10: Validating accounts created. legalId={}, cif={}", legalId, context.getCif());
             currentStep = AppConstants.VALIDATE_ACCOUNT_CREATION;
             bankingService.validateAllRequiredAccountsCreated(context.getCif(),
                     context.getKhrAccount(), context.getUsdAccount(), context.getCustomerInfo());
 
-            log.info("Step 9: Activating mobile banking | CIF: {}", context.getCif());
+            log.info("[OpenAccountService] Step 9/10: Activating mobile banking. legalId={}, cif={}", legalId, context.getCif());
             currentStep = AppConstants.ACTIVATE_MOBILE_BANKING;
             context.setMbActivationCode(bankingService.activateMobileBanking(request, context.getCif(),
                     context.getKhrAccount(), context.getUsdAccount()));
 
-            log.info("Step 10: Saving success log | Legal ID: {}", legalId);
+            log.info("[OpenAccountService] Step 10/10: Saving success log. legalId={}, cif={}", legalId, context.getCif());
             eventPublisher.publishEvent(new AccountOpenedEvent(this, context));
 
-            log.info("Account opened successfully | CIF: {} | Mnemonic: {} | KHR: {} | USD: {} | MB: {} | By: {}",
-                    context.getCif(), context.getMnemonic(), context.getKhrAccount(),
-                    context.getUsdAccount(), context.getMbActivationCode(), submittedBy);
+            long duration = System.currentTimeMillis() - start;
+            log.info("[OpenAccountService] Account opened successfully. legalId={}, cif={}, mnemonic={}, khrAccount={}, usdAccount={}, durationMs={}, submittedBy={}",
+                    legalId, context.getCif(), context.getMnemonic(), context.getKhrAccount(),
+                    context.getUsdAccount(), duration, submittedBy);
 
             return OpenAccountResponseDto.builder()
                     .legalId(legalId)
@@ -120,8 +124,9 @@ public class OpenAccountServiceImpl implements OpenAccountService {
                     .build();
 
         } catch (Exception e) {
-            log.error("Account opening failed at step: {} | Legal ID: {} | Error: {}",
-                    currentStep, legalId, e.getMessage());
+            long duration = System.currentTimeMillis() - start;
+            log.error("[OpenAccountService] Account opening failed. step={}, legalId={}, durationMs={}, error={}",
+                    currentStep, legalId, duration, e.getMessage(), e);
             final String failureRemark = reportingService.buildFailureRemark(
                     currentStep, context.getCif(), context.getKhrAccount(),
                     context.getUsdAccount(), context.getAmlResult());

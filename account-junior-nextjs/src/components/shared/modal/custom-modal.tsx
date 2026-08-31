@@ -1,54 +1,105 @@
 "use client";
 
 import * as React from "react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+} from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
-
-export const SIZE_CLASSES = {
-  xs: "sm:max-w-md",
-  sm: "sm:max-w-md",
-  default: "sm:max-w-lg",
-  md: "sm:max-w-lg",
-  lg: "sm:max-w-lg",
-  xl: "sm:max-w-lg",
-  "2xl": "sm:max-w-lg",
-  "3xl": "sm:max-w-lg",
-  "4xl": "sm:max-w-lg",
-  "5xl": "sm:max-w-lg",
-  "6xl": "sm:max-w-lg",
-  full: "sm:max-w-lg",
-};
-
-export type ModalSize = keyof typeof SIZE_CLASSES;
 
 export interface CustomModalProps {
   isOpen: boolean;
   onClose: () => void;
   children: React.ReactNode;
-  size?: ModalSize;
   className?: string;
-  hideCloseButton?: boolean;
-  disableScrollWrapper?: boolean;
+  size?: "sm" | "md" | "lg" | "xl" | "2xl" | "full";
+  closeButtonClassName?: string;
 }
+
+const sizeClasses = {
+  sm: "sm:max-w-sm",
+  md: "sm:max-w-md",
+  lg: "sm:max-w-lg",
+  xl: "sm:max-w-xl",
+  "2xl": "sm:max-w-2xl",
+  full: "sm:max-w-4xl",
+};
 
 export function CustomModal({
   isOpen,
   onClose,
   children,
-  size = "default",
   className,
-  hideCloseButton = false,
-  disableScrollWrapper = false,
+  size = "md",
+  closeButtonClassName = "hidden",
 }: CustomModalProps) {
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent
-        className={cn("w-full max-h-[92vh] p-0 flex flex-col", SIZE_CLASSES[size], className)}
-        closeButtonClassName={hideCloseButton ? "hidden" : ""}
-        disableScrollWrapper={disableScrollWrapper}
+        className={cn(
+          "bg-white rounded-3xl sm:rounded-3xl border-0 shadow-2xl p-0 overflow-hidden flex flex-col max-h-[90vh]",
+          sizeClasses[size],
+          className
+        )}
+        closeButtonClassName={closeButtonClassName}
+        disableScrollWrapper
       >
         {children}
       </DialogContent>
     </Dialog>
+  );
+}
+
+export function CustomModalHeader({
+  className,
+  children,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) {
+  return (
+    <div
+      className={cn(
+        "px-6 pt-5 pb-2 bg-white flex items-center justify-between shrink-0 border-b-0",
+        className
+      )}
+      {...props}
+    >
+      {children}
+    </div>
+  );
+}
+
+export function CustomModalBody({
+  className,
+  children,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) {
+  return (
+    <div
+      className={cn(
+        "p-6 flex-1 overflow-y-auto space-y-4 text-slate-700",
+        className
+      )}
+      {...props}
+    >
+      {children}
+    </div>
+  );
+}
+
+export function CustomModalFooter({
+  className,
+  children,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) {
+  return (
+    <div
+      className={cn(
+        "px-6 py-4 bg-white flex flex-col-reverse sm:flex-row justify-end items-stretch sm:items-center gap-2.5 shrink-0 rounded-b-3xl border-t-0",
+        className
+      )}
+      {...props}
+    >
+      {children}
+    </div>
   );
 }

@@ -215,7 +215,7 @@ export default function ModalUser({
                     {/* Username */}
                     <div className="space-y-2">
                       <Label htmlFor="username" className="text-sm font-medium">
-                        ID Card{isCreate && <span className="text-red-500"> *</span>}
+                        User Identifier{isCreate && <span className="text-red-500"> *</span>}
                       </Label>
                       {isCreate ? (
                         <Controller

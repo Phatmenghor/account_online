@@ -20,10 +20,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ProvinceServiceImpl implements ProvinceService {
+
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ProvinceServiceImpl.class);
 
     private final ProvinceRepository provinceRepository;
     private final ProvinceMapper provinceMapper;

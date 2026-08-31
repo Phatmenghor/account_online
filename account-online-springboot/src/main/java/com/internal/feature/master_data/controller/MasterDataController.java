@@ -47,6 +47,7 @@ public class MasterDataController {
     @PostMapping("/init/address")
     public ResponseEntity<ApiResponse<LocationCodesDto>> initAddress(
             @Valid @RequestBody AddressRequestDto address) {
+        log.info("[MasterDataController] Initializing address location codes. address={}", address != null ? address.getAddress() : null);
         LocationCodesDto response = masterDataService.initAddress(address);
         return ResponseEntity.ok(ApiResponse.success(ResponseMessage.ADDRESS_INIT, response));
     }
@@ -54,6 +55,7 @@ public class MasterDataController {
     @PostMapping("/init/place-of-birth")
     public ResponseEntity<ApiResponse<LocationCodesDto>> initPob(
             @Valid @RequestBody AddressRequestDto address) {
+        log.info("[MasterDataController] Initializing POB location codes. address={}", address != null ? address.getAddress() : null);
         LocationCodesDto response = masterDataService.initPob(address);
         return ResponseEntity.ok(ApiResponse.success(ResponseMessage.POB_INIT, response));
     }
@@ -61,6 +63,7 @@ public class MasterDataController {
     @PostMapping("/province")
     public ResponseEntity<ApiResponse<PaginationResponse<ClsProvinceDto>>> getProvinces(
             @Valid @RequestBody AllMasterDataRequest request) {
+        log.info("[MasterDataController] Fetching provinces. search={}", request.getSearch());
         PaginationResponse<ClsProvinceDto> response = masterDataService.getProvince(request);
         return ResponseEntity.ok(ApiResponse.success(ResponseMessage.PROVINCES_RETRIEVED, response));
     }
@@ -69,6 +72,7 @@ public class MasterDataController {
     public ResponseEntity<ApiResponse<PaginationResponse<ClsDistrictDto>>> getDistricts(
             @PathVariable String provinceCode,
             @Valid @RequestBody AllMasterDataRequest request) {
+        log.info("[MasterDataController] Fetching districts. provinceCode={}, search={}", provinceCode, request.getSearch());
         PaginationResponse<ClsDistrictDto> response = masterDataService.getDistrict(request, provinceCode);
         return ResponseEntity.ok(ApiResponse.success(ResponseMessage.DISTRICTS_RETRIEVED, response));
     }
@@ -77,6 +81,7 @@ public class MasterDataController {
     public ResponseEntity<ApiResponse<PaginationResponse<ClsCommuneDto>>> getCommunes(
             @PathVariable String districtCode,
             @Valid @RequestBody AllMasterDataRequest request) {
+        log.info("[MasterDataController] Fetching communes. districtCode={}, search={}", districtCode, request.getSearch());
         PaginationResponse<ClsCommuneDto> response = masterDataService.getCommune(request, districtCode);
         return ResponseEntity.ok(ApiResponse.success(ResponseMessage.COMMUNES_RETRIEVED, response));
     }
@@ -85,6 +90,7 @@ public class MasterDataController {
     public ResponseEntity<ApiResponse<PaginationResponse<ClsVillageDto>>> getVillages(
             @PathVariable String communeCode,
             @Valid @RequestBody AllMasterDataRequest request) {
+        log.info("[MasterDataController] Fetching villages. communeCode={}, search={}", communeCode, request.getSearch());
         PaginationResponse<ClsVillageDto> response = masterDataService.getVillage(request, communeCode);
         return ResponseEntity.ok(ApiResponse.success(ResponseMessage.VILLAGES_RETRIEVED, response));
     }
@@ -92,13 +98,14 @@ public class MasterDataController {
     @PostMapping("/branch")
     public ResponseEntity<ApiResponse<PaginationResponse<ClsBranchDto>>> getBranches(
             @Valid @RequestBody AllMasterDataRequest request) {
+        log.info("[MasterDataController] Fetching branches. search={}", request.getSearch());
         PaginationResponse<ClsBranchDto> response = masterDataService.getBranch(request);
         return ResponseEntity.ok(ApiResponse.success(ResponseMessage.BRANCHES_RETRIEVED, response));
     }
 
     @PostMapping("/occupation/all")
     public ResponseEntity<ApiResponse<List<OccupationDto>>> getAllOccupations(@Valid @RequestBody PublicReferenceRequest request) {
-        log.info("API: Public request - Fetch all occupations");
+        log.info("[MasterDataController] Public request - Fetch all occupations. search={}", request.getSearch());
         List<OccupationDto> list = occupationService.getAllOccupationsPublic(request.getSearch());
         return ResponseEntity.ok(ApiResponse.success(ResponseMessage.retrieved(ResponseMessage.ALL_OCCUPATIONS), list));
     }
@@ -106,29 +113,29 @@ public class MasterDataController {
     @PostMapping("/marital-status/all")
     public ResponseEntity<ApiResponse<List<MaritalStatusDto>>> getAllMaritalStatus(@Valid @RequestBody(required = false) PublicReferenceRequest request) {
         String searchTerm = request != null ? request.getSearch() : null;
-        log.info("API: Public request - Fetch all marital statuses | Search: {}", searchTerm);
+        log.info("[MasterDataController] Public request - Fetch all marital statuses. search={}", searchTerm);
         List<MaritalStatusDto> list = maritalStatusService.getAllPublic(searchTerm);
-        log.info("API: Public request - Fetch all marital statuses completed | Items count: {}", list != null ? list.size() : 0);
+        log.info("[MasterDataController] Public request - Fetch all marital statuses completed. count={}", list != null ? list.size() : 0);
         return ResponseEntity.ok(ApiResponse.success(ResponseMessage.retrieved(ResponseMessage.ALL_MARITAL_STATUSES), list));
     }
 
     @PostMapping("/bank/all")
     public ResponseEntity<ApiResponse<List<ReferenceDto>>> getAllReferences(@Valid @RequestBody PublicReferenceRequest request) {
-        log.info("API: Public request - Fetch all banks");
+        log.info("[MasterDataController] Public request - Fetch all banks. search={}", request.getSearch());
         List<ReferenceDto> list = referenceService.getAllPublic(request.getSearch());
         return ResponseEntity.ok(ApiResponse.success(ResponseMessage.retrieved(ResponseMessage.ALL_BANKS), list));
     }
 
     @PostMapping("/legal-type/all")
     public ResponseEntity<ApiResponse<List<LegalTypeDto>>> getAllLegalTypes(@Valid @RequestBody PublicReferenceRequest request) {
-        log.info("API: Public request - Fetch all legal types");
+        log.info("[MasterDataController] Public request - Fetch all legal types. search={}", request.getSearch());
         List<LegalTypeDto> list = legalTypeService.getAllLegalTypePublic(request.getSearch());
         return ResponseEntity.ok(ApiResponse.success(ResponseMessage.retrieved(ResponseMessage.ALL_LEGAL_TYPES), list));
     }
 
     @PostMapping("/acc-online-category/all")
     public ResponseEntity<ApiResponse<List<AccOnlineCategoryDto>>> getAllAccOnlineCategories(@Valid @RequestBody PublicReferenceRequest request) {
-        log.info("API: Public request - Fetch all categories");
+        log.info("[MasterDataController] Public request - Fetch all account online categories. search={}", request.getSearch());
         List<AccOnlineCategoryDto> list = accOnlineCategoryService.getAll(request.getSearch());
         return ResponseEntity.ok(ApiResponse.success("Categories retrieved successfully.", list));
     }

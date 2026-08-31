@@ -14,53 +14,59 @@ public class XmlParser {
 
     /**
      * Extract CIF from T24 customer creation response
-     * Looks for <CUSTOMERType id="123456789">
+     * Validates that MNEMONIC is present to ensure customer was created cleanly.
      */
     public static String extractCif(Document document) {
         try {
-            // Try to find CUSTOMERType element
+            log.info("[XmlParser] Beginning CIF extraction from T24 customer creation XML...");
+
+            if (hasError(document)) {
+                String errMsg = extractErrorMessage(document);
+                log.warn("[XmlParser] Response contains T24 error: {}", errMsg);
+                return null;
+            }
+
+            // Check if MNEMONIC is present — valid T24 customer creation MUST return a MNEMONIC
+            String mnemonic = extractMnemonic(document);
+            if (mnemonic == null || mnemonic.isBlank()) {
+                String errMsg = extractErrorMessage(document);
+                log.warn("[XmlParser] T24 customer creation incomplete (missing MNEMONIC). Response error: {}", errMsg);
+                return null;
+            }
+
+            // Priority 1: Try to find CUSTOMERType element attribute 'id'
             NodeList customerNodes = document.getElementsByTagName("CUSTOMERType");
             if (customerNodes.getLength() > 0) {
                 Element customerElement = (Element) customerNodes.item(0);
                 String cif = customerElement.getAttribute("id");
-                if (!cif.trim().isEmpty()) {
-                    log.info("Extracted CIF: {}", cif);
-                    return cif.trim();
-                }
-            }
-
-            // Alternative: Try to find CUSTOMER element
-            customerNodes = document.getElementsByTagName("CUSTOMER");
-            if (customerNodes.getLength() > 0) {
-                Element customerElement = (Element) customerNodes.item(0);
-                String cif = customerElement.getAttribute("id");
-                if (!cif.trim().isEmpty()) {
-                    log.info("Extracted CIF from CUSTOMER: {}", cif);
-                    return cif.trim();
-                }
-            }
-
-            // Alternative: Try to find id element directly
-            NodeList idNodes = document.getElementsByTagName("id");
-            if (idNodes.getLength() > 0) {
-                String cif = idNodes.item(0).getTextContent();
                 if (cif != null && !cif.trim().isEmpty()) {
-                    log.info("Extracted CIF from id element: {}", cif);
+                    log.info("[XmlParser] Extracted CIF from <CUSTOMERType id=\"...\">: {}", cif.trim());
                     return cif.trim();
                 }
             }
 
-            log.warn("No CIF found in XML response");
+            // Priority 2: Check <transactionId> in <Status> tag if customer creation succeeded
+            NodeList transIdNodes = document.getElementsByTagName("transactionId");
+            if (transIdNodes.getLength() > 0) {
+                String transId = transIdNodes.item(0).getTextContent();
+                if (transId != null && !transId.trim().isEmpty() && isPureNumericAccount(transId.trim())) {
+                    log.info("[XmlParser] Extracted CIF from <transactionId> element: {}", transId.trim());
+                    return transId.trim();
+                }
+            }
+
+            log.warn("[XmlParser] No CIF found in XML response");
             return null;
 
         } catch (Exception e) {
-            log.error("Failed to extract CIF from XML: {}", e.getMessage(), e);
+            log.error("[XmlParser] Failed to extract CIF from XML: {}", e.getMessage(), e);
             return null;
         }
     }
 
     public static String extractMnemonic(Document document) {
         try {
+            log.info("[XmlParser] Beginning MNEMONIC extraction from T24 XML...");
             // Try with namespace first
             NodeList mnemonicNodes = document.getElementsByTagNameNS(
                     "http://temenos.com/CUSTOMER",
@@ -69,7 +75,7 @@ public class XmlParser {
             if (mnemonicNodes != null && mnemonicNodes.getLength() > 0) {
                 String mnemonic = mnemonicNodes.item(0).getTextContent();
                 if (mnemonic != null && !mnemonic.trim().isEmpty()) {
-                    log.info("Extracted MNEMONIC: {}", mnemonic);
+                    log.info("[XmlParser] Extracted MNEMONIC (with namespace): {}", mnemonic.trim());
                     return mnemonic.trim();
                 }
             }
@@ -79,69 +85,125 @@ public class XmlParser {
             if (mnemonicNodes != null && mnemonicNodes.getLength() > 0) {
                 String mnemonic = mnemonicNodes.item(0).getTextContent();
                 if (mnemonic != null && !mnemonic.trim().isEmpty()) {
-                    log.info("Extracted MNEMONIC (no namespace): {}", mnemonic);
+                    log.info("[XmlParser] Extracted MNEMONIC (without namespace): {}", mnemonic.trim());
                     return mnemonic.trim();
                 }
             }
 
-            log.warn("No MNEMONIC found in response");
+            log.warn("[XmlParser] No MNEMONIC found in response");
             return null;
 
         } catch (Exception e) {
-            log.error("Failed to extract MNEMONIC: {}", e.getMessage());
+            log.error("[XmlParser] Failed to extract MNEMONIC: {}", e.getMessage());
             return null;
         }
     }
 
     /**
-     * Extract account number from T24 account creation response
-     * Looks for <Status><transactionId>KH0012011123456789</transactionId></Status>
+     * Extract account number from T24 account creation response.
+     * Prioritizes pure numeric 8-18 digit account numbers (e.g. 000670814) from <LINKEDAPPLID> / <ACCOUNTNUMBER>.
      */
     public static String extractAccountNumber(Document document) {
         try {
-            // Try to find Status element with transactionId
-            NodeList statusNodes = document.getElementsByTagName("Status");
-            for (int i = 0; i < statusNodes.getLength(); i++) {
-                Element statusElement = (Element) statusNodes.item(i);
+            log.info("[XmlParser] Beginning T24 account number extraction from response document...");
 
-                // Check if this is an ACCOUNT application
-                NodeList appNodes = statusElement.getElementsByTagName("application");
-                if (appNodes.getLength() > 0 && "ACCOUNT".equals(appNodes.item(0).getTextContent())) {
-                    NodeList transIdNodes = statusElement.getElementsByTagName("transactionId");
-                    if (transIdNodes.getLength() > 0) {
-                        String accountNumber = transIdNodes.item(0).getTextContent();
-                        log.info("Extracted account number: {}", accountNumber);
-                        return accountNumber;
+            if (hasError(document)) {
+                String errMsg = extractErrorMessage(document);
+                log.warn("[XmlParser] Response contains T24 error: {}", errMsg);
+                return null;
+            }
+
+            // Step 1: Scan for pure numeric account number in dedicated tags first (LINKEDAPPLID, ACCOUNTNUMBER, etc.)
+            String[] numericTags = {
+                "LINKEDAPPLID", "LINKED_APPL_ID", "ACCOUNTNUMBER", "ACCOUNT.NUMBER", "ACCOUNT_NUMBER", 
+                "ACCOUNT.ID", "ACCOUNT_ID", "accountNumber", "accountNo", "AccountNo"
+            };
+
+            for (String tag : numericTags) {
+                NodeList nodes = document.getElementsByTagName(tag);
+                if (nodes.getLength() == 0) {
+                    nodes = document.getElementsByTagNameNS("*", tag);
+                }
+                for (int i = 0; i < nodes.getLength(); i++) {
+                    String val = nodes.item(i).getTextContent();
+                    if (val != null && isPureNumericAccount(val.trim())) {
+                        log.info("[XmlParser] Pure numeric account number extracted from element <{}>: {}", tag, val.trim());
+                        return val.trim();
                     }
                 }
             }
 
-            // Alternative: Direct transactionId lookup
-            NodeList transIdNodes = document.getElementsByTagName("transactionId");
-            if (transIdNodes.getLength() > 0) {
-                String accountNumber = transIdNodes.item(0).getTextContent();
-                log.info("Extracted account number from transactionId: {}", accountNumber);
-                return accountNumber;
-            }
-
-            // Alternative: Try to find ACCOUNTType element
-            NodeList accountNodes = document.getElementsByTagName("ACCOUNTType");
-            if (accountNodes.getLength() > 0) {
-                Element accountElement = (Element) accountNodes.item(0);
-                String accountNumber = accountElement.getAttribute("id");
-                if (!accountNumber.trim().isEmpty()) {
-                    log.info("Extracted account number from ACCOUNTType: {}", accountNumber);
-                    return accountNumber.trim();
+            // Step 2: Check Status element where application == ACCOUNT
+            NodeList statusNodes = document.getElementsByTagName("Status");
+            for (int i = 0; i < statusNodes.getLength(); i++) {
+                Element statusElement = (Element) statusNodes.item(i);
+                NodeList appNodes = statusElement.getElementsByTagName("application");
+                if (appNodes.getLength() > 0 && "ACCOUNT".equalsIgnoreCase(appNodes.item(0).getTextContent())) {
+                    NodeList transIdNodes = statusElement.getElementsByTagName("transactionId");
+                    if (transIdNodes.getLength() > 0) {
+                        String accNo = transIdNodes.item(0).getTextContent();
+                        if (accNo != null && isPureNumericAccount(accNo.trim())) {
+                            log.info("[XmlParser] Extracted account number from Status/ACCOUNT application: {}", accNo.trim());
+                            return accNo.trim();
+                        }
+                    }
                 }
             }
 
-            log.warn("No account number found in XML response");
+            // Step 3: Any non-numeric tag content fallback (e.g. LINKEDAPPLID, ACCOUNTNUMBER without strict numeric match)
+            for (String tag : numericTags) {
+                NodeList nodes = document.getElementsByTagName(tag);
+                if (nodes.getLength() == 0) {
+                    nodes = document.getElementsByTagNameNS("*", tag);
+                }
+                for (int i = 0; i < nodes.getLength(); i++) {
+                    String val = nodes.item(i).getTextContent();
+                    if (val != null && !val.trim().isEmpty()) {
+                        log.info("[XmlParser] Account number extracted from element <{}>: {}", tag, val.trim());
+                        return val.trim();
+                    }
+                }
+            }
+
+            // Step 4: Arrangement ID fallback (ARRANGEMENT, transactionId, etc.)
+            String[] arrangementTags = {"ARRANGEMENTACCOUNTID", "ArrangementAccountId", "ARRANGEMENTACCOUNT", "ARRANGEMENT"};
+            for (String tag : arrangementTags) {
+                NodeList nodes = document.getElementsByTagName(tag);
+                if (nodes.getLength() == 0) {
+                    nodes = document.getElementsByTagNameNS("*", tag);
+                }
+                for (int i = 0; i < nodes.getLength(); i++) {
+                    String val = nodes.item(i).getTextContent();
+                    if (val != null && !val.trim().isEmpty()) {
+                        log.info("[XmlParser] Arrangement ID extracted from element <{}>: {}", tag, val.trim());
+                        return val.trim();
+                    }
+                }
+            }
+
+            // Step 5: Direct transactionId fallback
+            NodeList transIdNodes = document.getElementsByTagName("transactionId");
+            if (transIdNodes.getLength() > 0) {
+                String val = transIdNodes.item(0).getTextContent();
+                if (val != null && !val.trim().isEmpty()) {
+                    log.info("[XmlParser] Account number extracted from transactionId: {}", val.trim());
+                    return val.trim();
+                }
+            }
+
+            log.warn("[XmlParser] No account number found in XML response document");
             return null;
 
         } catch (Exception e) {
-            log.error("Failed to extract account number from XML: {}", e.getMessage(), e);
+            log.error("[XmlParser] Failed to extract account number from XML: {}", e.getMessage(), e);
             return null;
         }
+    }
+
+    private static boolean isPureNumericAccount(String val) {
+        if (val == null) return false;
+        String trimmed = val.trim();
+        return trimmed.matches("^\\d{8,18}$");
     }
 
     /**
@@ -158,6 +220,12 @@ public class XmlParser {
                 }
             }
 
+            // Check for <messages> tag (e.g. <messages>CUSTOMER:1:1=MISSING CUSTOMER - RECORD</messages>)
+            NodeList messagesNodes = document.getElementsByTagName("messages");
+            if (messagesNodes.getLength() > 0) {
+                return true;
+            }
+
             NodeList errorNodes = document.getElementsByTagName("error");
             if (errorNodes.getLength() > 0) {
                 return true;
@@ -166,42 +234,67 @@ public class XmlParser {
             NodeList faultNodes = document.getElementsByTagName("faultstring");
             return faultNodes.getLength() > 0;
         } catch (Exception e) {
-            log.error("Error checking for XML errors: {}", e.getMessage());
+            log.error("[XmlParser] Error checking for XML errors: {}", e.getMessage());
             return false;
         }
     }
 
     /**
-     * Extract error message from XML response
+     * Extract error message from T24 XML response
      */
     public static String extractErrorMessage(Document document) {
         try {
-            // Check for <messages> tag (common in T24Error)
+            // Check for <messages> tag (common in T24 responses)
             NodeList messageNodes = document.getElementsByTagName("messages");
             if (messageNodes.getLength() > 0) {
-                StringBuilder errorMsg = new StringBuilder();
+                StringBuilder sb = new StringBuilder();
                 for (int i = 0; i < messageNodes.getLength(); i++) {
-                    if (i > 0)
-                        errorMsg.append("; ");
-                    errorMsg.append(messageNodes.item(i).getTextContent());
+                    if (i > 0) sb.append("; ");
+                    sb.append(messageNodes.item(i).getTextContent());
                 }
-                return errorMsg.toString();
+                if (!sb.toString().isBlank()) {
+                    return sb.toString();
+                }
             }
 
+            // Check field validation error messages inside CUSTOMERType
+            NodeList customerNodes = document.getElementsByTagName("CUSTOMERType");
+            if (customerNodes.getLength() > 0) {
+                Element customerElement = (Element) customerNodes.item(0);
+                NodeList allChildNodes = customerElement.getElementsByTagName("*");
+                StringBuilder sb = new StringBuilder();
+                for (int i = 0; i < allChildNodes.getLength(); i++) {
+                    Element el = (Element) allChildNodes.item(i);
+                    if (el.getChildNodes().getLength() == 1 && el.getFirstChild().getNodeType() == org.w3c.dom.Node.TEXT_NODE) {
+                        String text = el.getTextContent();
+                        if (text != null && (text.contains("MISSING") || text.contains("CANNOT") || text.contains("INVALID") || text.contains("ERROR") || text.contains("NOT ALLOWED"))) {
+                            if (sb.length() > 0) sb.append("; ");
+                            String tag = el.getLocalName() != null ? el.getLocalName() : el.getTagName();
+                            sb.append(tag).append(": ").append(text.trim());
+                        }
+                    }
+                }
+                if (sb.length() > 0) {
+                    return sb.toString();
+                }
+            }
+
+            NodeList textNodes = document.getElementsByTagName("text");
+            if (textNodes.getLength() > 0) {
+                return textNodes.item(0).getTextContent();
+            }
             NodeList errorNodes = document.getElementsByTagName("error");
             if (errorNodes.getLength() > 0) {
                 return errorNodes.item(0).getTextContent();
             }
-
             NodeList faultNodes = document.getElementsByTagName("faultstring");
             if (faultNodes.getLength() > 0) {
                 return faultNodes.item(0).getTextContent();
             }
-
-            return "Unknown T24 Error (T24Error indicator present but no message found)";
+            return "Unknown T24 error";
         } catch (Exception e) {
-            log.error("Failed to extract error message: {}", e.getMessage());
-            return "Error parsing response";
+            log.error("[XmlParser] Failed to extract error message: {}", e.getMessage());
+            return "Error extracting message";
         }
     }
 }

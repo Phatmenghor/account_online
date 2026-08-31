@@ -2,6 +2,7 @@
 target/
 .m2/
 *.jar
+!.mvn/wrapper/maven-wrapper.jar
 *.war
 *.zip
 
@@ -43,10 +44,3 @@ Dockerfile
 Thumbs.db
 .AppleDouble
 .LSOverride
-```
-
-**The "one more" you might be thinking of:**
-
-Looking at your CI/CD, you're generating the `Dockerfile` dynamically in the pipeline, so you should ignore it locally:
-```
-Dockerfile

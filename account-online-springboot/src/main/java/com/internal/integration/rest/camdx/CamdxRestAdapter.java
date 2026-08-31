@@ -76,7 +76,7 @@ public class CamdxRestAdapter implements CamdxService {
 
         log.error("NID Validation specific error: {}", ex.getMessage());
         sendErrorAlert(request, ex.getMessage());
-        throw new NidValidationException(502, AppConstants.NID_ERROR_SYSTEM);
+        throw new NidValidationException(502, AppConstants.MSG_502);
     }
 
     private void sendErrorAlert(CamdxValidateNidRequest request, String message) {

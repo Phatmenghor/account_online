@@ -26,26 +26,30 @@ public class TelegramMessageCleanupScheduler {
     // Run daily at 3:00 AM to check for messages that need to be deleted
     @Scheduled(cron = "0 0 3 * * ?", zone = "Asia/Phnom_Penh")
     public void cleanupOldMessages() {
-        log.info("Starting Telegram bot message cleanup task. Retention: {} days", retentionDays);
+        long start = System.currentTimeMillis();
+        log.info("[TelegramMessageCleanupScheduler] Scheduled message cleanup job started. retentionDays={}", retentionDays);
+        int deletedCount = 0;
         try {
             LocalDateTime threshold = LocalDateTime.now().minusDays(retentionDays);
             List<TelegramMessageLog> messagesToDelete = telegramMessageLogRepository.findByCreatedAtBefore(threshold);
 
             if (messagesToDelete.isEmpty()) {
-                log.info("No Telegram messages found for deletion (older than {} days).", retentionDays);
+                long duration = System.currentTimeMillis() - start;
+                log.info("[TelegramMessageCleanupScheduler] Scheduled message cleanup job completed. No messages older than {} days found. durationMs={}", retentionDays, duration);
                 return;
             }
 
-            log.info("Found {} Telegram messages to delete.", messagesToDelete.size());
+            log.info("[TelegramMessageCleanupScheduler] Processing deletion of {} Telegram messages.", messagesToDelete.size());
             for (TelegramMessageLog msg : messagesToDelete) {
-                // Call deleteMessage API
                 telegramService.deleteMessage(msg.getChatId(), msg.getMessageId());
-                // Delete log from database whether API succeeded or failed (e.g. 48h limit reached)
                 telegramMessageLogRepository.delete(msg);
+                deletedCount++;
             }
-            log.info("Telegram message cleanup task finished.");
+            long duration = System.currentTimeMillis() - start;
+            log.info("[TelegramMessageCleanupScheduler] Scheduled message cleanup job completed. deletedCount={}, durationMs={}", deletedCount, duration);
         } catch (Exception e) {
-            log.error("Error during Telegram message cleanup: {}", e.getMessage(), e);
+            long duration = System.currentTimeMillis() - start;
+            log.error("[TelegramMessageCleanupScheduler] Scheduled message cleanup job failed. deletedCount={}, durationMs={}, error={}", deletedCount, duration, e.getMessage(), e);
         }
     }
 }

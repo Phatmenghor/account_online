@@ -30,20 +30,19 @@ public class JuniorAccountXmlBuilder {
         String branchCode = xmlUtils.formatCompanyCode(request.getBranchCode(), defaultProperties.getBranchCode());
         String maritalStatus = xmlUtils.mapMaritalStatus(request.getMaritalStatus());
 
-        boolean isStaffRequest = xmlUtils.isAuthenticated();
-        String relationManager = isStaffRequest ? xmlUtils.getOrDefault(request.getRelationManager(), "") : "";
+        String relationManager = xmlUtils.getOrDefault(request.getRelationManager(), xmlUtils.getOrDefault(request.getReferralId(), ""));
 
         String legalAddress = xmlUtils.toSwiftSafe(xmlUtils.getOrDefault(request.getLegalAddress(), ""));
 
-        String custProvince = xmlUtils.getOrDefault(request.getCustomerCurrentProvince(), "12");
-        String custDistrict = xmlUtils.getOrDefault(request.getCustomerCurrentDistrict(), "1201");
-        String custCommune = xmlUtils.getOrDefault(request.getCustomerCurrentCommune(), "120101");
-        String custVillage = xmlUtils.getOrDefault(request.getCustomerCurrentVillage(), "12010101");
+        String custProvince = xmlUtils.safe(request.getCustomerCurrentProvince());
+        String custDistrict = xmlUtils.safe(request.getCustomerCurrentDistrict());
+        String custCommune = xmlUtils.safe(request.getCustomerCurrentCommune());
+        String custVillage = xmlUtils.safe(request.getCustomerCurrentVillage());
 
-        String pobProvince = xmlUtils.getOrDefault(request.getCustomerPobProvince(), custProvince);
-        String pobDistrict = xmlUtils.getOrDefault(request.getCustomerPobDistrict(), custDistrict);
-        String pobCommune = xmlUtils.getOrDefault(request.getCustomerPobCommune(), custCommune);
-        String pobVillage = xmlUtils.getOrDefault(request.getCustomerPobVillage(), custVillage);
+        String pobProvince = xmlUtils.safe(request.getCustomerPobProvince());
+        String pobDistrict = xmlUtils.safe(request.getCustomerPobDistrict());
+        String pobCommune = xmlUtils.safe(request.getCustomerPobCommune());
+        String pobVillage = xmlUtils.safe(request.getCustomerPobVillage());
 
         String dateOfBirth = xmlUtils.formatDateForT24(request.getDateOfBirth());
         String legalIssueDate = xmlUtils.formatLegalIssueDateWithDefault(request.getLegalIssueDate());
@@ -63,7 +62,7 @@ public class JuniorAccountXmlBuilder {
         String referralBy = xmlUtils.getOrDefault(request.getReferralId(), xmlUtils.getOrDefault(request.getReferralBy(), ""));
 
         String legalIdValue = xmlUtils.safe(request.getLegalId());
-        String legalHolderName = Boolean.FALSE.equals(request.getHasNid()) ? legalDocType : defaultProperties.getLegalHolderName();
+        String legalHolderName = xmlUtils.getOrDefault(request.getLegalHolderName(), xmlUtils.getOrDefault(englishFullName.trim(), Boolean.FALSE.equals(request.getHasNid()) ? legalDocType : defaultProperties.getLegalHolderName()));
 
         return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
                 + "<soapenv:Envelope xmlns:soapenv=\"" + AppConstants.SOAP_ENV_NS + "\" "
@@ -109,9 +108,9 @@ public class JuniorAccountXmlBuilder {
                 + "<cus:LegalId>" + legalIdValue + "</cus:LegalId>"
                 + "<cus:LegalDocName>" + legalDocType + "</cus:LegalDocName>"
                 + "<cus:LegalHolderName>" + legalHolderName + "</cus:LegalHolderName>"
-                + "<cus:LegalIssAuth>" + xmlUtils.getOrDefault(request.getLegalIssAuth(), request.getGivenName()) + "</cus:LegalIssAuth>"
+                + "<cus:LegalIssAuth>" + xmlUtils.getOrDefault(request.getLegalIssAuth(), xmlUtils.getOrDefault(request.getGivenName(), "NID")) + "</cus:LegalIssAuth>"
                 + "<cus:LegalIssDate>" + legalIssueDate + "</cus:LegalIssDate>"
-                + "<cus:LegalExpDate>" + legalExpDate + "</cus:LegalExpDate>"
+                + (legalExpDate == null || legalExpDate.isBlank() ? "<cus:LegalExpDate/>" : "<cus:LegalExpDate>" + legalExpDate + "</cus:LegalExpDate>")
                 + "</cus:mLEGALID></cus:gLEGALID>"
 
                 // Language
@@ -169,6 +168,9 @@ public class JuniorAccountXmlBuilder {
 
         String englishFullName = xmlUtils.safe(request.getFamilyName()) + " " + xmlUtils.safe(request.getGivenName());
         String khmerFullName = xmlUtils.safe(request.getLastNameKh() + " " + request.getFirstNameKh());
+        String productCode = (request.getProductAccount() != null && !request.getProductAccount().isBlank())
+                ? request.getProductAccount().trim()
+                : AppConstants.JUNIOR_PRODUCT;
 
         return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
                 + "<soapenv:Envelope xmlns:soapenv=\"" + AppConstants.SOAP_ENV_NS + "\" "
@@ -196,7 +198,7 @@ public class JuniorAccountXmlBuilder {
                 + "<aaar:Customer>" + cif + "</aaar:Customer>"
                 + "<aaar:CustomerRole>OWNER</aaar:CustomerRole>"
                 + "</aaar:mCUSTOMER>"
-                + (!Boolean.TRUE.equals(request.getHasNid()) && request.getGuardianCif() != null && !request.getGuardianCif().isBlank()
+                + (request.getGuardianCif() != null && !request.getGuardianCif().isBlank()
                         ? "<aaar:mCUSTOMER m=\"2\">"
                         + "<aaar:Customer>" + request.getGuardianCif() + "</aaar:Customer>"
                         + "<aaar:CustomerRole>JOINT.OWNER</aaar:CustomerRole>"
@@ -204,8 +206,8 @@ public class JuniorAccountXmlBuilder {
                         : "")
                 + "</aaar:gCUSTOMER>"
 
-                // PRODUCT + CURRENCY — Direct Junior Product (SAVE.JUNIOR.SAVING)
-                + "<aaar:Product>" + AppConstants.JUNIOR_PRODUCT + "</aaar:Product>"
+                // PRODUCT + CURRENCY — Category / Product lookup code
+                + "<aaar:Product>" + productCode + "</aaar:Product>"
                 + "<aaar:Currency>" + currency + "</aaar:Currency>"
 
                 // PROPERTY BLOCK

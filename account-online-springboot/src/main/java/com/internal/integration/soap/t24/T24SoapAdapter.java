@@ -60,6 +60,12 @@ public class T24SoapAdapter implements CoreBankingPort {
             headers.set("Accept", "text/xml; charset=UTF-8");
             headers.set("SOAPAction", operation);
 
+            String traceId = org.slf4j.MDC.get("traceId");
+            if (traceId != null && !traceId.isBlank()) {
+                headers.set("X-Request-ID", traceId);
+                headers.set("X-Trace-ID", traceId);
+            }
+
             // Send as raw UTF-8 bytes — bypasses any RestTemplate re-encoding
             byte[] requestBytes = xmlRequest.getBytes(StandardCharsets.UTF_8);
             HttpEntity<byte[]> entity = new HttpEntity<>(requestBytes, headers);
@@ -81,9 +87,9 @@ public class T24SoapAdapter implements CoreBankingPort {
 
             int responseSize = responseBody != null ? responseBody.length() : 0;
 
-            log.info("T24 Response Received | op={} | status={} | responseSize={} bytes | duration={} ms",
-                    operation, response.getStatusCode(), responseSize, duration);
-            log.info("T24 Response Body: {}", responseBody);
+            log.info("[T24SoapAdapter] T24 operation completed. operation={}, status={}, durationMs={}, sizeBytes={}",
+                    operation, response.getStatusCode(), duration, responseSize);
+            log.info("[T24SoapAdapter] FULL RAW XML RESPONSE | operation={}:\n{}", operation, responseBody);
 
             checkAndAlertSecurityViolation(responseBody, operation);
 

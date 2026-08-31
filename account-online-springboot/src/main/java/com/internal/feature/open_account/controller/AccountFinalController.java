@@ -26,14 +26,14 @@ public class AccountFinalController {
 
     @PostMapping()
     public ResponseEntity<ApiResponse<AccountOnlineFinalResponseDto>> getAccountByCifOrLegalId(@Valid @RequestBody AccountOnlineFinalLogRequestDto request) {
-        log.info("Fetching Account By CIF: {} , Legal Id: {}", request.getCif(), request.getLegalId());
+        log.info("[AccountFinalController] Fetching Account by cif={}, legalId={}", request.getCif(), request.getLegalId());
         AccountOnlineFinalResponseDto dto = accountFinalService.findAccountByCifOrLegalId(request);
         return ResponseEntity.ok(ApiResponse.success(ResponseMessage.ACCOUNT_RETRIEVED, dto));
     }
 
     @PostMapping("/success-list")
     public ResponseEntity<ApiResponse<AllAccountOnlineFinalResponseDto>> getSuccessOpenAccounts(@Valid @RequestBody AllAccountOnlineSuccessRequestDto request) {
-        log.info("Fetching success open accounts - Page: {}, Size: {}, Search: {}",
+        log.info("[AccountFinalController] Fetching success open accounts. page={}, size={}, search={}",
                 request.getPageNo(), request.getPageSize(), request.getSearch());
         AllAccountOnlineFinalResponseDto response = accountFinalService.getSuccessOpenAccount(request);
         return ResponseEntity.ok(ApiResponse.success(ResponseMessage.SUCCESS_ACCOUNTS_RETRIEVED, response));
@@ -41,7 +41,7 @@ public class AccountFinalController {
 
     @PostMapping("/success-list/excel")
     public ResponseEntity<ApiResponse<AllAccountOnlineFinalExcelResponseDto>> getSuccessOpenAccountExcels(@Valid @RequestBody AllAccountOnlineSuccessExcelRequestDto request) {
-        log.info("Fetching success open accounts report excel - from: {}, to: {}, Search: {}",
+        log.info("[AccountFinalController] Fetching success open accounts excel report. fromDate={}, toDate={}, search={}",
                 request.getFromDate(), request.getToDate(), request.getSearch());
         AllAccountOnlineFinalExcelResponseDto response = accountFinalService.getSuccessOpenAccountExcel(request);
         return ResponseEntity.ok(ApiResponse.success(ResponseMessage.SUCCESS_ACCOUNTS_RETRIEVED, response));

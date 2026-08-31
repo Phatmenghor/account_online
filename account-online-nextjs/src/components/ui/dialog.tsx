@@ -17,7 +17,7 @@ const DialogOverlay = React.forwardRef<
   <DialogPrimitive.Overlay
     ref={ref}
     className={cn(
-      "fixed inset-0 z-50 bg-black/80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
+      "fixed inset-0 z-50 bg-slate-950/40 backdrop-blur-xs data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
       className
     )}
     {...props}
@@ -74,7 +74,7 @@ const DialogContent = React.forwardRef<
       className={cn(
         // Default (md and up): standard centered dialog with the default shadcn entrance animation
         "fixed left-1/2 top-1/2 z-50 w-full max-w-lg -translate-x-1/2 -translate-y-1/2",
-        "border bg-background shadow-lg sm:rounded-lg outline-none overflow-hidden",
+        "border border-slate-200/80 bg-background shadow-2xl rounded-2xl outline-none overflow-hidden",
         "flex flex-col max-h-[85vh]",
         "duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out",
         "data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",

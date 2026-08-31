@@ -29,9 +29,9 @@ public class CamdxController {
      */
     @PostMapping("/validate")
     public ResponseEntity<ApiResponse<?>> validateNid(@Valid @RequestBody CamdxValidateNidRequest request) {
-        log.info("Processing NID validation request for ID: {}", request.getIdNumber());
+        log.info("[CamdxController] Processing NID validation request. idNumber={}", request.getIdNumber());
         JsonNode response = nidService.validateNid(request);
-        log.info("NID validation completed successfully for ID: {}", request.getIdNumber());
+        log.info("[CamdxController] NID validation completed successfully. idNumber={}", request.getIdNumber());
         return ResponseEntity.ok(ApiResponse.success("NID validated successfully", response));
     }
 
@@ -40,9 +40,9 @@ public class CamdxController {
      */
     @PostMapping("/extract")
     public ResponseEntity<ApiResponse<?>> extractNid(@Valid @RequestBody CamdxFaceRequest request) {
-        log.info("Processing NID OCR extraction request");
+        log.info("[CamdxController] Processing NID OCR extraction request.");
         JsonNode response = nidService.extractNid(request);
-        log.info("NID OCR extraction completed successfully");
+        log.info("[CamdxController] NID OCR extraction completed successfully.");
         return ResponseEntity.ok(ApiResponse.success("NID extracted successfully", response));
     }
 }

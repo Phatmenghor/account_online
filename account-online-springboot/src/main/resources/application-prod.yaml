@@ -3,10 +3,6 @@
 # Active when: spring.profiles.active=prod
 # ==============================================================
 
-email:
-  sender:
-    enabled: true     # prod: real email OTP sent to user
-
 ad:
   login:
     url: http://192.168.101.5:5050/api/v1/auth/login
@@ -15,8 +11,10 @@ ad:
 
 server:
   port: 7070
-  max-http-header-size: 65536
+  max-http-header-size: 10MB
   tomcat:
+    max-http-header-size: 10MB
+    max-http-request-header-size: 10MB
     connection-timeout: 90000 # match nginx 90s
     max-http-form-post-size: 200MB
     max-swallow-size: -1 # unlimited: prevents EOFException when client aborts large uploads
@@ -119,10 +117,10 @@ jwt:
 
 telegram:
   bot:
-    token: "8227113200:AAGq1I7Hs0CjkSW99M9rgrIdlHpgM8r6NMY"
-    dev-chat-id: "-1002740302492"
-    monitor-chat-id: "-1003115792160"
-    junior-chat-id: "-5590655829"
+    token: "${TELEGRAM_BOT_TOKEN:8854582996:AAEatNZ3VV0iOCFd6-A_XD0qAq3Vm9HNm68}"
+    dev-chat-id: "${TELEGRAM_DEV_CHAT_ID:-1002740302492}"
+    monitor-chat-id: "${TELEGRAM_MONITOR_CHAT_ID:-5590655829}"
+    junior-chat-id: "${TELEGRAM_JUNIOR_CHAT_ID:-5590655829}"
     compliance-mention: "@COMPLIANCE_TEAM"
     enabled: true
     message-retention-days: 30

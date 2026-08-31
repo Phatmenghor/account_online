@@ -180,6 +180,10 @@ public class BankingService {
                 log.info("Calling coreBankingPort.createCustomer() - Attempt {} of {}", attempt, maxRetries);
                 Document resp = coreBankingPort.createCustomer(request);
                 String cif = XmlParser.extractCif(resp);
+                if (cif == null || cif.isBlank()) {
+                    String errMsg = XmlParser.extractErrorMessage(resp);
+                    throw new AccountCreationException("Customer creation failed in T24: " + (errMsg != null && !errMsg.isBlank() ? errMsg : "Incomplete customer record"));
+                }
                 String mnemonic = XmlParser.extractMnemonic(resp);
                 log.info("New customer created: CIF={}, MNEMONIC={}", cif, mnemonic);
                 return new CustomerCreationResult(cif, mnemonic);
@@ -228,18 +232,18 @@ public class BankingService {
 
         if (validationService.hasAccount(customerInfo, currency)) {
             log.info("Step {}: CREATE_{}_ACCOUNT - skipped (already exists in CBS)",
-                    AppConstants.CURRENCY_KHR.equals(currency) ? 6 : 7, currency);
+                    AppConstants.CURRENCY_USD.equals(currency) ? 6 : 7, currency);
             return null;
         }
 
-        log.info("Step {}: CREATE_{}_ACCOUNT", AppConstants.CURRENCY_KHR.equals(currency) ? 6 : 7, currency);
+        log.info("Step {}: CREATE_{}_ACCOUNT", AppConstants.CURRENCY_USD.equals(currency) ? 6 : 7, currency);
         String account = createAccountWithRetry(request, customerInfo, cif, currency);
         if (account != null) {
             log.info("Step {} SUCCESS: {} account created: {}",
-                    AppConstants.CURRENCY_KHR.equals(currency) ? 6 : 7, currency, account);
+                    AppConstants.CURRENCY_USD.equals(currency) ? 6 : 7, currency, account);
         } else {
             log.warn("Step {} FAILED: {} account creation returned null",
-                    AppConstants.CURRENCY_KHR.equals(currency) ? 6 : 7, currency);
+                    AppConstants.CURRENCY_USD.equals(currency) ? 6 : 7, currency);
         }
         return account;
     }
@@ -267,6 +271,9 @@ public class BankingService {
                         // Check if account was actually created despite error
                         if (validationService.hasAccount(freshCustomerInfo, currency)) {
                             String existingAccount = freshCustomerInfo.get(currency);
+                            if (existingAccount == null || existingAccount.isEmpty()) {
+                                existingAccount = freshCustomerInfo.get("ACCT");
+                            }
                             log.info("{} account found in system: {}", currency, existingAccount);
                             return existingAccount;
                         }

@@ -134,6 +134,12 @@ public class HttpClientUtil {
                 MediaType.APPLICATION_JSON.getSubtype(), StandardCharsets.UTF_8));
         headers.setAcceptCharset(Collections.singletonList(StandardCharsets.UTF_8));
 
+        String traceId = org.slf4j.MDC.get("traceId");
+        if (traceId != null && !traceId.isBlank()) {
+            headers.set("X-Request-ID", traceId);
+            headers.set("X-Trace-ID", traceId);
+        }
+
         // Add custom headers if provided
         if (customHeaders != null && !customHeaders.isEmpty()) {
             customHeaders.forEach(headers::set);

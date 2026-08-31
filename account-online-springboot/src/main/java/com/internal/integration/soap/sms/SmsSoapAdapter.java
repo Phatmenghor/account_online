@@ -77,22 +77,21 @@ public class SmsSoapAdapter implements SmsPort {
                     "</soap:Body>" +
                     "</soap:Envelope>";
 
-            log.info("Sending SOAP SMS request - Phone: {}, RequestID: {}", phone, requestId);
+            log.info("[SmsSoapAdapter] Sending SOAP SMS request. phone={}, requestId={}", phone, requestId);
             String responseXml = soapComponent.sendSoapRequest(url, soapXml);
 
             // Extract <return> JSON payload from SOAP response
             Matcher matcher = Pattern.compile("<(?:\\w+:)?return>(.*?)</(?:\\w+:)?return>").matcher(responseXml);
             String jsonPayload = matcher.find() ? matcher.group(1) : null;
 
-            log.info("SOAP SMS raw response: {}", responseXml);
-            if (jsonPayload != null) {
-                log.info("SOAP SMS extracted payload: {}", jsonPayload);
+            if (log.isDebugEnabled()) {
+                log.debug("[SmsSoapAdapter] SOAP SMS raw response. requestId={}, responseXml={}", requestId, responseXml);
             }
 
             if (jsonPayload != null && jsonPayload.contains("\"rescode\":\"00\"")) {
-                log.info("SMS sent successfully to: {}", phone);
+                log.info("[SmsSoapAdapter] SMS sent successfully. phone={}, requestId={}", phone, requestId);
             } else {
-                log.warn("SMS sending may have failed - Phone: {}, Response: {}", phone, jsonPayload);
+                log.warn("[SmsSoapAdapter] SMS response indicates possible failure. phone={}, requestId={}, payload={}", phone, requestId, jsonPayload);
             }
 
             responseCode = "200";

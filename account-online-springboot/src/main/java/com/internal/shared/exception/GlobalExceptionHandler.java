@@ -33,7 +33,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(AccountExistsException.class)
     public ResponseEntity<ApiResponse<Object>> handleAccountExistsException(AccountExistsException ex) {
-        log.warn("Account already exists for CIF: {}", ex.getCif());
+        log.warn("[GlobalExceptionHandler] Account already exists. cif={}, error={}", ex.getCif(), ex.getMessage());
         Map<String, Object> details = new HashMap<>();
         if (ex.getCif() != null) {
             details.put("cif", ex.getCif());
@@ -47,58 +47,62 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(NidValidationException.class)
     public ResponseEntity<ApiResponse<Object>> handleNidValidationException(NidValidationException ex) {
-        log.error("NID Validation failed - Status: {}, Message: {}", ex.getStatusCode(), ex.getMessage());
+        log.error("[GlobalExceptionHandler] NID Validation failed. statusCode={}, message={}", ex.getStatusCode(), ex.getMessage(), ex);
         String msg = (ex.getMessage() != null && !ex.getMessage().isBlank())
                 ? ex.getMessage()
                 : AppConstants.MSG_502;
-        return buildErrorResponse(HttpStatus.BAD_REQUEST, msg);
+        HttpStatus httpStatus = HttpStatus.resolve(ex.getStatusCode());
+        if (httpStatus == null) {
+            httpStatus = HttpStatus.BAD_GATEWAY;
+        }
+        return buildErrorResponse(httpStatus, msg);
     }
 
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<ApiResponse<Object>> handleNotFoundException(NotFoundException ex) {
-        log.warn("Resource not found: {}", ex.getMessage());
+        log.warn("[GlobalExceptionHandler] Resource not found. message={}", ex.getMessage());
         return buildErrorResponse(HttpStatus.NOT_FOUND, ex.getMessage());
     }
 
     @ExceptionHandler(MasterDataServiceException.class)
     public ResponseEntity<ApiResponse<Object>> handleMasterDataException(MasterDataServiceException ex) {
-        log.error("Master data exception: {}", ex.getMessage(), ex);
+        log.error("[GlobalExceptionHandler] Master data exception. message={}", ex.getMessage(), ex);
         return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, AppConstants.MSG_GENERIC_ERROR);
     }
 
     @ExceptionHandler(AccountCreationException.class)
     public ResponseEntity<ApiResponse<Object>> handleAccountCreationException(AccountCreationException ex) {
-        log.warn("Account creation failed: {}", ex.getMessage());
+        log.warn("[GlobalExceptionHandler] Account creation failed. message={}", ex.getMessage(), ex);
         return buildErrorResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
 
     @ExceptionHandler(ValidateServiceException.class)
     public ResponseEntity<ApiResponse<Object>> handleValidateServiceException(ValidateServiceException ex) {
-        log.error("ValidateServiceException: {}", ex.getMessage(), ex);
+        log.error("[GlobalExceptionHandler] ValidateServiceException occurred. message={}", ex.getMessage(), ex);
         return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, AppConstants.MSG_GENERIC_ERROR);
     }
 
     @ExceptionHandler(DuplicateNameException.class)
     public ResponseEntity<ApiResponse<Object>> handleDuplicateNameException(DuplicateNameException ex) {
-        log.warn("Duplicate resource: {}", ex.getMessage());
+        log.warn("[GlobalExceptionHandler] Duplicate resource. message={}", ex.getMessage());
         return buildErrorResponse(HttpStatus.CONFLICT, ex.getMessage());
     }
 
     @ExceptionHandler(UnauthorizedException.class)
     public ResponseEntity<ApiResponse<Object>> handleUnauthorizedException(UnauthorizedException ex) {
-        log.warn("Unauthorized access: {}", ex.getMessage());
+        log.warn("[GlobalExceptionHandler] Unauthorized access attempt. message={}", ex.getMessage());
         return buildErrorResponse(HttpStatus.FORBIDDEN, ex.getMessage());
     }
 
     @ExceptionHandler(BadRequestException.class)
     public ResponseEntity<ApiResponse<Object>> handleBadRequestException(BadRequestException ex) {
-        log.warn("Bad request: {}", ex.getMessage());
+        log.warn("[GlobalExceptionHandler] Bad request. message={}", ex.getMessage());
         return buildErrorResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
 
     @ExceptionHandler(InvalidInputException.class)
     public ResponseEntity<ApiResponse<Object>> handleInvalidInputException(InvalidInputException ex) {
-        log.warn("Invalid input: {}", ex.getMessage());
+        log.warn("[GlobalExceptionHandler] Invalid input. message={}", ex.getMessage());
         return buildErrorResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
 
@@ -115,7 +119,7 @@ public class GlobalExceptionHandler {
                 .map(entry -> entry.getKey() + ": " + entry.getValue())
                 .collect(Collectors.joining(", "));
 
-        log.warn("Validation errors: {}", errorMessage);
+        log.warn("[GlobalExceptionHandler] DTO Validation failed. errors={}", errorMessage);
         return buildErrorResponse(HttpStatus.BAD_REQUEST, "សូមពិនិត្យព័ត៌មានដែលបានបញ្ចូល: " + errorMessage, errors);
     }
 
@@ -125,19 +129,19 @@ public class GlobalExceptionHandler {
                 .map(violation -> violation.getPropertyPath() + ": " + violation.getMessage())
                 .collect(Collectors.joining(", "));
 
-        log.warn("Constraint violation: {}", errorMessage);
+        log.warn("[GlobalExceptionHandler] Constraint violation. errors={}", errorMessage);
         return buildErrorResponse(HttpStatus.BAD_REQUEST, "សូមពិនិត្យព័ត៌មានដែលបានបញ្ចូល: " + errorMessage);
     }
 
     @ExceptionHandler({SQLException.class, org.springframework.dao.DataAccessException.class})
     public ResponseEntity<ApiResponse<Object>> handleSQLException(Exception ex) {
-        log.error("Database error: {}", ex.getMessage());
+        log.error("[GlobalExceptionHandler] Database error occurred. error={}", ex.getMessage(), ex);
         return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, AppConstants.MSG_DB_CONNECTION_ERR);
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ApiResponse<Object>> handleDataIntegrityViolation(DataIntegrityViolationException ex) {
-        log.error("Data integrity violation: {}", ex.getMessage());
+        log.error("[GlobalExceptionHandler] Data integrity violation. error={}", ex.getMessage(), ex);
         String message = ex.getMessage().contains("unique") || ex.getMessage().contains("duplicate")
                 ? AppConstants.MSG_ACCOUNT_EXISTS_ERR
                 : AppConstants.MSG_GENERIC_ERROR;
@@ -146,25 +150,25 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<ApiResponse<Object>> handleBadCredentialsException(BadCredentialsException ex) {
-        log.warn("Authentication failed: {}", ex.getMessage());
+        log.warn("[GlobalExceptionHandler] Bad credentials authentication failure. message={}", ex.getMessage());
         return buildErrorResponse(HttpStatus.UNAUTHORIZED, "ឈ្មោះអ្នកប្រើប្រាស់ ឬលេខកូដសម្ងាត់មិនត្រឹមត្រូវទេ។");
     }
 
     @ExceptionHandler({ResourceAccessException.class, SocketTimeoutException.class, TimeoutException.class, EOFException.class})
     public ResponseEntity<ApiResponse<Object>> handleTimeoutException(Exception ex) {
-        log.warn("Timeout/Connection error: {}", ex.getMessage());
+        log.error("[GlobalExceptionHandler] Connection/Timeout error. error={}", ex.getMessage(), ex);
         return buildErrorResponse(HttpStatus.GATEWAY_TIMEOUT, AppConstants.MSG_CONNECTION_TIMEOUT);
     }
 
     @ExceptionHandler(MultipartException.class)
     public ResponseEntity<ApiResponse<Object>> handleMultipartException(MultipartException ex) {
-        log.warn("File upload interrupted: {}", ex.getMessage());
+        log.warn("[GlobalExceptionHandler] File upload interrupted. error={}", ex.getMessage());
         return buildErrorResponse(HttpStatus.BAD_REQUEST, AppConstants.MSG_CONNECTION_TIMEOUT);
     }
 
     @ExceptionHandler(OpenAccountException.class)
     public ResponseEntity<ApiResponse<Object>> handleOpenAccountException(OpenAccountException ex) {
-        log.warn("Open account error [{}]: {}", ex.getErrorCode(), ex.getMessage());
+        log.warn("[GlobalExceptionHandler] Open account exception. errorCode={}, message={}", ex.getErrorCode(), ex.getMessage());
         Map<String, Object> details = new HashMap<>();
         details.put("errorCode", ex.getErrorCode());
         details.put("timestamp", LocalDateTime.now().toString());
@@ -176,13 +180,13 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(DatabaseConnectionException.class)
     public ResponseEntity<ApiResponse<Object>> handleDatabaseConnectionException(DatabaseConnectionException ex) {
-        log.error("Database connection error: {}", ex.getMessage());
+        log.error("[GlobalExceptionHandler] Database connection exception. error={}", ex.getMessage(), ex);
         return buildErrorResponse(HttpStatus.BAD_GATEWAY, AppConstants.MSG_DB_CONNECTION_ERR);
     }
 
     @ExceptionHandler(HighRiskCustomerException.class)
     public ResponseEntity<ApiResponse<Object>> handleHighRiskCustomerException(HighRiskCustomerException ex) {
-        log.warn("High-risk customer detected: Rating {}", ex.getRating());
+        log.warn("[GlobalExceptionHandler] High-risk customer detected. rating={}", ex.getRating());
         Map<String, Object> details = new HashMap<>();
         details.put("rating", ex.getRating());
         return buildErrorResponse(HttpStatus.FORBIDDEN, AppConstants.MSG_HIGH_RISK_ERR, details);
@@ -190,7 +194,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(T24ServiceException.class)
     public ResponseEntity<ApiResponse<Object>> handleT24ServiceException(T24ServiceException ex) {
-        log.error("T24 service error: {}", ex.getMessage());
+        log.error("[GlobalExceptionHandler] T24 service error. error={}", ex.getMessage(), ex);
         String userMsg = AppConstants.MSG_GENERIC_ERROR;
         if (ex.getMessage() != null && ex.getMessage().contains("រួចហើយ")) {
             userMsg = AppConstants.MSG_ACCOUNT_EXISTS_ERR;
@@ -202,14 +206,14 @@ public class GlobalExceptionHandler {
     // OTP Exceptions
     @ExceptionHandler(OtpInvalidException.class)
     public ResponseEntity<ApiResponse<Object>> handleOtpInvalidException(OtpInvalidException ex) {
-        log.warn("Invalid OTP - Message: {}", ex.getMessage());
+        log.warn("[GlobalExceptionHandler] Invalid OTP attempt. message={}", ex.getMessage());
         String msg = String.format("លេខកូដ OTP មិនត្រឹមត្រូវទេ។ លោកអ្នកនៅសល់ %d ដងទៀត។", ex.getRemainingAttempts());
         return buildErrorResponse(HttpStatus.BAD_REQUEST, msg);
     }
 
     @ExceptionHandler(OtpAttemptsExceededException.class)
     public ResponseEntity<ApiResponse<Object>> handleOtpAttemptsExceededException(OtpAttemptsExceededException ex) {
-        log.warn("OTP attempts exceeded - Message: {}", ex.getMessage());
+        log.warn("[GlobalExceptionHandler] OTP attempts exceeded limit. message={}", ex.getMessage());
         long remainingSeconds = ex.getLockoutMinutes();
         long minutes = remainingSeconds / 60;
         long seconds = remainingSeconds % 60;
@@ -221,14 +225,14 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(OtpCooldownException.class)
     public ResponseEntity<ApiResponse<Object>> handleOtpCooldownException(OtpCooldownException ex) {
-        log.warn("OTP cooldown active - Message: {}", ex.getMessage());
+        log.warn("[GlobalExceptionHandler] OTP cooldown active. message={}", ex.getMessage());
         String msg = String.format("សូមរង់ចាំ %d វិនាទី មុនពេលស្នើសុំលេខកូដ OTP ថ្មី។", ex.getRemainingSeconds());
         return buildErrorResponse(HttpStatus.TOO_MANY_REQUESTS, msg);
     }
 
     @ExceptionHandler(OtpNotFoundException.class)
     public ResponseEntity<ApiResponse<Object>> handleOtpNotFoundException(OtpNotFoundException ex) {
-        log.warn("OTP not found - Message: {}", ex.getMessage());
+        log.warn("[GlobalExceptionHandler] OTP not found. message={}", ex.getMessage());
         return buildErrorResponse(HttpStatus.NOT_FOUND, "មិនស្គាល់លេខកូដ OTP នេះទេ។ សូមស្នើសុំលេខកូដ OTP ថ្មី។");
     }
 
@@ -245,7 +249,7 @@ public class GlobalExceptionHandler {
             cause = cause.getCause();
         }
 
-        log.error("Unhandled exception: {}", ex.getMessage(), ex);
+        log.error("[GlobalExceptionHandler] Unhandled exception occurred. error={}", ex.getMessage(), ex);
         return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, AppConstants.MSG_GENERIC_ERROR);
     }
 
@@ -254,6 +258,9 @@ public class GlobalExceptionHandler {
     }
 
     private ResponseEntity<ApiResponse<Object>> buildErrorResponse(HttpStatus status, String message, Object details) {
+        if (message != null && !message.isBlank()) {
+            org.slf4j.MDC.put("responseMessage", message);
+        }
         ApiResponse<Object> response = ApiResponse.builder()
                 .status("error")
                 .success(false)

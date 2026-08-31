@@ -46,10 +46,10 @@ export const useMasterData = () => {
     }
   }, [maritalStatuses, selectedMaritalStatus]);
 
-  // Default to first item with lookupId === "6011" once list loads
+  // Default to item with lookupCode "SAVE.ACCT.ONLINE" once list loads
   useEffect(() => {
     if (accOnlineCategories.length > 0 && !selectedCategory) {
-      const defaultItem = accOnlineCategories.find((c) => c.lookupId === "6011");
+      const defaultItem = accOnlineCategories.find((c) => c.lookupCode === "SAVE.ACCT.ONLINE" || c.lookupId === "6011");
       if (defaultItem) setSelectedCategory(defaultItem);
     }
   }, [accOnlineCategories]);

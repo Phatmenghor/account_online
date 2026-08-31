@@ -84,12 +84,15 @@ public class JuniorAccountServiceImpl implements JuniorAccountService {
 
         // Junior account uses JUNIOR_SECTOR (6012) for T24 Customer Creation and JUNIOR_PRODUCT (SAVE.JUNIOR.SAVING) for Account Creation
         request.setSector(AppConstants.JUNIOR_SECTOR);
-        request.setProductAccount(AppConstants.JUNIOR_PRODUCT);
+        if (request.getProductAccount() == null || request.getProductAccount().isBlank()) {
+            request.setProductAccount(AppConstants.JUNIOR_PRODUCT);
+        }
 
         String currentStep = "START";
         String submittedBy = "Customer";
 
-        log.info("Processing Junior Account Opening | Has NID: {} | Legal ID: {} | Submitted by: {}",
+        long start = System.currentTimeMillis();
+        log.info("[JuniorAccountService] Processing Junior Account Opening started. hasNid={}, legalId={}, submittedBy={}",
                 hasNid, legalId, submittedBy);
 
         OpenAccountContext context = new OpenAccountContext();
@@ -97,18 +100,18 @@ public class JuniorAccountServiceImpl implements JuniorAccountService {
         context.setSubmittedBy(submittedBy);
 
         try {
-            log.info("Step 1: Testing connection | Legal ID: {}", legalId);
+            log.info("[JuniorAccountService] Step 1/10: Testing connection. legalId={}", legalId);
             currentStep = AppConstants.TEST_CONNECTION;
             juniorBankingService.testConnection();
 
             Map<String, String> customerInfo = null;
             if (hasNid) {
-                log.info("Step 2: Retrieving customer info | Legal ID: {}", legalId);
+                log.info("[JuniorAccountService] Step 2/10: Retrieving customer info. legalId={}", legalId);
                 currentStep = AppConstants.GET_CUSTOMER_INFO;
                 customerInfo = juniorBankingService.getCustomerInfo(legalId);
                 context.setCustomerInfo(customerInfo);
 
-                log.info("Step 3: Validating existing accounts | Legal ID: {}", legalId);
+                log.info("[JuniorAccountService] Step 3/10: Validating existing accounts. legalId={}", legalId);
                 currentStep = AppConstants.VALIDATE_EXISTING_ACCOUNT;
                 juniorBankingService.validateExistingAccounts(customerInfo);
             }
@@ -116,14 +119,14 @@ public class JuniorAccountServiceImpl implements JuniorAccountService {
             // Step 3.1: Validate Junior phone (must NOT be registered in MB Core OR existing Junior Accounts)
             if (request.getPhoneNumber() != null && !request.getPhoneNumber().isBlank()) {
                 String cleanJuniorPhone = request.getPhoneNumber().trim();
-                log.info("Step 3.1: Checking if Junior phone number is registered | Phone: {}", cleanJuniorPhone);
+                log.info("[JuniorAccountService] Step 3.1: Checking Junior phone registration. phone={}", cleanJuniorPhone);
                 currentStep = AppConstants.VALIDATE_EXISTING_ACCOUNT;
 
                 // Check 1: Check existing Junior Account database
                 var existingJuniorOpt = juniorAccountFinalRepository.findByPhoneNumber(cleanJuniorPhone);
                 if (existingJuniorOpt.isPresent()) {
                     String existingCif = existingJuniorOpt.get().getCif();
-                    log.warn("Junior Account creation REJECTED: Junior phone number {} is ALREADY registered in Junior Account database (CIF: {})",
+                    log.warn("[JuniorAccountService] Junior Account creation rejected. Phone {} is registered in Junior Account DB (CIF={})",
                             cleanJuniorPhone, existingCif);
                     throw new AccountExistsException(existingCif);
                 }
@@ -131,17 +134,17 @@ public class JuniorAccountServiceImpl implements JuniorAccountService {
                 // Check 2: Check MB Core database
                 var phoneCheckResult = phoneCheckService.checkPhone(cleanJuniorPhone);
                 if (phoneCheckResult != null && Boolean.TRUE.equals(phoneCheckResult.getHasAccount())) {
-                    log.warn("Junior Account creation REJECTED: Junior phone number {} is ALREADY registered in MB Core (CIF: {})",
+                    log.warn("[JuniorAccountService] Junior Account creation rejected. Phone {} is registered in MB Core (CIF={})",
                             cleanJuniorPhone, phoneCheckResult.getCif());
                     throw new AccountExistsException(phoneCheckResult.getCif());
                 }
             }
 
             if (request.getGuardianPhone() != null && !request.getGuardianPhone().isBlank()) {
-                log.info("Step 3.2: Checking if Guardian phone number is registered in MB Core | Phone: {}", request.getGuardianPhone());
+                log.info("[JuniorAccountService] Step 3.2: Checking Guardian phone registration in MB Core. phone={}", request.getGuardianPhone());
                 var guardianPhoneCheck = phoneCheckService.checkPhone(request.getGuardianPhone().trim());
                 if (guardianPhoneCheck == null || !Boolean.TRUE.equals(guardianPhoneCheck.getHasAccount())) {
-                    log.warn("Junior Account creation REJECTED: Guardian phone number {} is NOT registered in MB Core", request.getGuardianPhone());
+                    log.warn("[JuniorAccountService] Junior Account creation rejected. Guardian phone {} is not registered in MB Core", request.getGuardianPhone());
                     throw new com.internal.shared.exception.custom.BadRequestException("Guardian phone number must be registered with an active Mobile Banking account.");
                 }
                 if (request.getGuardianCif() == null || request.getGuardianCif().isBlank()) {
@@ -156,7 +159,7 @@ public class JuniorAccountServiceImpl implements JuniorAccountService {
                     if (parentInfo != null) {
                         if (parentInfo.getLegalId() != null && !parentInfo.getLegalId().isBlank() && (request.getGuardianLegalId() == null || request.getGuardianLegalId().isBlank())) {
                             request.setGuardianLegalId(parentInfo.getLegalId());
-                            log.info("Enriched request guardianLegalId with parent NID: {} for CIF: {}", parentInfo.getLegalId(), request.getGuardianCif());
+                            log.info("[JuniorAccountService] Enriched request guardianLegalId with parent NID for CIF={}", request.getGuardianCif());
                         }
                         if (request.getGuardianAddress() == null || request.getGuardianAddress().isBlank() || "N/A".equalsIgnoreCase(request.getGuardianAddress()) || "NA".equalsIgnoreCase(request.getGuardianAddress())) {
                             java.util.List<String> gAddrParts = new java.util.ArrayList<>();
@@ -168,59 +171,60 @@ public class JuniorAccountServiceImpl implements JuniorAccountService {
                             if (!gAddrParts.isEmpty()) {
                                 String formattedGAddr = String.join(" / ", gAddrParts);
                                 request.setGuardianAddress(formattedGAddr);
-                                log.info("Enriched request guardianAddress with parent address codes: {} for CIF: {}", formattedGAddr, request.getGuardianCif());
+                                log.info("[JuniorAccountService] Enriched request guardianAddress for CIF={}", request.getGuardianCif());
                             }
                         }
                     }
                 } catch (Exception e) {
-                    log.warn("Failed to enrich guardian details from CIF {}: {}", request.getGuardianCif(), e.getMessage());
+                    log.warn("[JuniorAccountService] Failed to enrich guardian details from CIF={}: {}", request.getGuardianCif(), e.getMessage());
                 }
             }
 
             String amlStatus = AmlStatusEnum.APPROVE.name();
             if (hasNid) {
-                log.info("Step 4: Performing AML check for Junior account opening (WITH NID) | Legal ID: {}", legalId);
+                log.info("[JuniorAccountService] Step 4/10: Performing AML check for Junior account opening (WITH NID). legalId={}", legalId);
                 currentStep = AppConstants.PROCESS_AML;
                 AmlStatusDto amlProcessResult = complianceService.processAml(request);
                 context.setAmlResult(amlProcessResult);
                 amlStatus = amlProcessResult.getStatus().name();
                 complianceService.sentMessageOnHighRisk(request, amlProcessResult);
             } else {
-                log.info("Step 4: Bypassing AML check for Junior account opening (NO NID in all cases) | Legal ID: {}", legalId);
+                log.info("[JuniorAccountService] Step 4/10: Bypassing AML check for Junior account opening (NO NID). legalId={}", legalId);
             }
 
-            log.info("Step 5: Creating customer in Core Banking | Legal ID: {}", legalId);
+            log.info("[JuniorAccountService] Step 5/10: Creating customer in Core Banking. legalId={}", legalId);
             currentStep = AppConstants.CREATE_CUSTOMER;
             CustomerCreationResult customerResult = juniorBankingService.createCustomerIfNeeded(request, customerInfo);
             context.setCif(customerResult.getCif());
             context.setMnemonic(customerResult.getMnemonic());
 
-            log.info("Step 6: Creating KHR account | CIF: {}", context.getCif());
-            currentStep = AppConstants.CREATE_KHR_ACCOUNT;
-            context.setKhrAccount(juniorBankingService.createAccountIfNeeded(request, customerInfo,
-                    context.getCif(), AppConstants.CURRENCY_KHR));
-
-            log.info("Step 7: Creating USD account | CIF: {}", context.getCif());
+            log.info("[JuniorAccountService] Step 6/10: Creating USD account ($). legalId={}, cif={}", legalId, context.getCif());
             currentStep = AppConstants.CREATE_USD_ACCOUNT;
             context.setUsdAccount(juniorBankingService.createAccountIfNeeded(request, customerInfo,
                     context.getCif(), AppConstants.CURRENCY_USD));
 
-            log.info("Step 8: Validating accounts created | CIF: {}", context.getCif());
+            log.info("[JuniorAccountService] Step 7/10: Creating KHR account. legalId={}, cif={}", legalId, context.getCif());
+            currentStep = AppConstants.CREATE_KHR_ACCOUNT;
+            context.setKhrAccount(juniorBankingService.createAccountIfNeeded(request, customerInfo,
+                    context.getCif(), AppConstants.CURRENCY_KHR));
+
+            log.info("[JuniorAccountService] Step 8/10: Validating accounts created. legalId={}, cif={}", legalId, context.getCif());
             currentStep = AppConstants.VALIDATE_ACCOUNT_CREATION;
             juniorBankingService.validateAllRequiredAccountsCreated(context.getCif(),
                     context.getKhrAccount(), context.getUsdAccount(), context.getCustomerInfo());
 
-            log.info("Step 9: Activating mobile banking | CIF: {}", context.getCif());
+            log.info("[JuniorAccountService] Step 9/10: Activating mobile banking. legalId={}, cif={}", legalId, context.getCif());
             currentStep = AppConstants.ACTIVATE_MOBILE_BANKING;
             context.setMbActivationCode(juniorBankingService.activateMobileBanking(request, context.getCif(),
                     context.getKhrAccount(), context.getUsdAccount()));
 
-            log.info("Step 10: Publishing JuniorAccountOpenedEvent & Telegram alert | Legal ID: {}", legalId);
+            log.info("[JuniorAccountService] Step 10/10: Publishing JuniorAccountOpenedEvent. legalId={}", legalId);
             currentStep = "SAVE_FINAL_JUNIOR_LOG";
             eventPublisher.publishEvent(new JuniorAccountOpenedEvent(this, request, context, amlStatus, hasNid));
 
-            log.info("Junior Account opened successfully | CIF: {} | KHR: {} | USD: {} | Has NID: {}",
-                    context.getCif(), context.getKhrAccount(), context.getUsdAccount(), hasNid);
+            long duration = System.currentTimeMillis() - start;
+            log.info("[JuniorAccountService] Junior Account opened successfully. legalId={}, cif={}, khrAccount={}, usdAccount={}, durationMs={}, hasNid={}",
+                    legalId, context.getCif(), context.getKhrAccount(), context.getUsdAccount(), duration, hasNid);
 
             return OpenAccountResponseDto.builder()
                     .legalId(legalId)
@@ -236,8 +240,9 @@ public class JuniorAccountServiceImpl implements JuniorAccountService {
                     .build();
 
         } catch (Exception e) {
-            log.error("Junior Account opening failed at step: {} | Legal ID: {} | Error: {}",
-                    currentStep, legalId, e.getMessage());
+            long duration = System.currentTimeMillis() - start;
+            log.error("[JuniorAccountService] Junior Account opening failed. step={}, legalId={}, durationMs={}, error={}",
+                    currentStep, legalId, duration, e.getMessage(), e);
 
             final String failureRemark = reportingService.buildFailureRemark(
                     currentStep, context.getCif(), context.getKhrAccount(),

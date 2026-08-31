@@ -70,7 +70,7 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public AuthResponseDTO login(LoginRequestDto loginDto) {
-        log.info("Processing login request for user: {}", loginDto.getUsername());
+        log.info("[AuthService] Processing login request. username={}", loginDto.getUsername());
         String clientIp = clientIpComponent.getClientIp();
 
         UserEntity userEntity = userRepository.findByUsername(loginDto.getUsername())
@@ -82,7 +82,7 @@ public class AuthServiceImpl implements AuthService {
                 });
 
         if (userEntity.getStatus() == StatusData.INACTIVE) {
-            log.warn("Login rejected: User {} account is inactive", loginDto.getUsername());
+            log.warn("[AuthService] Login rejected. Account is inactive. username={}", loginDto.getUsername());
             sendLoginFailAlert(loginDto.getUsername(), clientIp, "Account inactive");
             throw new UnauthorizedException(
                     "Your account \"" + loginDto.getUsername() + "\" is currently inactive. "
@@ -90,7 +90,7 @@ public class AuthServiceImpl implements AuthService {
         }
 
         if (userEntity.getStatus() == StatusData.DELETE) {
-            log.warn("Login rejected: User {} account has been deleted", loginDto.getUsername());
+            log.warn("[AuthService] Login rejected. Account deleted. username={}", loginDto.getUsername());
             sendLoginFailAlert(loginDto.getUsername(), clientIp, "Account deleted");
             throw new UnauthorizedException(
                     "Your account \"" + loginDto.getUsername() + "\" has been deactivated. "
@@ -98,7 +98,7 @@ public class AuthServiceImpl implements AuthService {
         }
 
         if (!passwordEncoder.matches(loginDto.getPassword(), userEntity.getPassword())) {
-            log.warn("Login failed: Incorrect password for user {}", loginDto.getUsername());
+            log.warn("[AuthService] Login failed. Incorrect password. username={}", loginDto.getUsername());
             sendLoginFailAlert(loginDto.getUsername(), clientIp, "Wrong password");
             throw new UnauthorizedException(
                     "The password you entered is incorrect. "
@@ -123,7 +123,7 @@ public class AuthServiceImpl implements AuthService {
         userDto.setLastLogin(userEntity.getLastLogin());
         userDto.setForcePasswordChange(forceChange);
         userDto.setPasswordExpired(passwordExpired);
-        log.info("User {} logged in successfully (forceChange={}, passwordExpired={})",
+        log.info("[AuthService] User logged in successfully. username={}, forceChange={}, passwordExpired={}",
                 loginDto.getUsername(), forceChange, passwordExpired);
 
         return new AuthResponseDTO(token, userDto);

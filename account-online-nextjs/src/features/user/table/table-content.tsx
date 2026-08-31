@@ -98,7 +98,7 @@ export const createUserTableColumns = ({
     },
     {
       key: "idCard",
-      label: "ID Card",
+      label: "User Identifier",
       truncate: true,
       maxWidth: "400px",
       minWidth: "150px",

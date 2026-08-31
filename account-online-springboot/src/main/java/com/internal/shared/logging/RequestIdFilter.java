@@ -16,15 +16,8 @@ import java.util.Set;
 import java.util.UUID;
 
 /**
- * First filter in the chain. Responsible for:
- *  - Generating / propagating X-Request-ID
- *  - Populating MDC with: requestId, method, path
- *  - Measuring request duration
- *  - Logging structured access log entry at INFO level
- *  - Clearing ALL MDC keys at the end of the request
+ * Deprecated: Merged into JWTAuthenticationFilter for 1 single unified HTTP Filter.
  */
-@Component
-@Order(Ordered.HIGHEST_PRECEDENCE)
 @Slf4j
 public class RequestIdFilter extends OncePerRequestFilter {
 
@@ -59,10 +52,13 @@ public class RequestIdFilter extends OncePerRequestFilter {
         String traceId = resolveOrGenerate(request);
         long start = System.currentTimeMillis();
 
+        String clientIp = getClientIp(request);
+
         MDC.put("traceId", traceId);
         MDC.put("requestId", traceId);
         MDC.put("method",  request.getMethod());
         MDC.put("path",    path);
+        MDC.put("clientIp", clientIp);
 
         // Echo back to caller for correlation
         response.setHeader(REQUEST_ID_HEADER, traceId);
@@ -77,22 +73,29 @@ public class RequestIdFilter extends OncePerRequestFilter {
             MDC.put("duration",   String.valueOf(duration));
 
             String responseMessage = MDC.get("responseMessage");
+            String detailMsg = (responseMessage != null && !responseMessage.isBlank()) ? " — " + responseMessage : "";
 
-            if (status >= 400 && responseMessage != null && !responseMessage.isBlank()) {
-                if (status >= 500) {
-                    log.error("{} {} → {} in {}ms — {}",
-                            request.getMethod(), path, status, duration, responseMessage);
-                } else {
-                    log.warn("{} {} → {} in {}ms — {}",
-                            request.getMethod(), path, status, duration, responseMessage);
-                }
+            if (status >= 500) {
+                log.error("[RequestIdFilter] {} {} → {} in {}ms (clientIp={}){}",
+                        request.getMethod(), path, status, duration, clientIp, detailMsg);
+            } else if (status >= 400) {
+                log.warn("[RequestIdFilter] {} {} → {} in {}ms (clientIp={}){}",
+                        request.getMethod(), path, status, duration, clientIp, detailMsg);
             } else {
-                log.info("{} {} → {} in {}ms",
+                log.info("[RequestIdFilter] {} {} → {} in {}ms",
                         request.getMethod(), path, status, duration);
             }
 
             MDC.clear();
         }
+    }
+
+    private String getClientIp(HttpServletRequest request) {
+        String xf = request.getHeader("X-Forwarded-For");
+        if (xf != null && !xf.isBlank()) {
+            return xf.split(",")[0].trim();
+        }
+        return request.getRemoteAddr() != null ? request.getRemoteAddr() : "UNKNOWN";
     }
 
     private boolean shouldSkipLogging(String path) {

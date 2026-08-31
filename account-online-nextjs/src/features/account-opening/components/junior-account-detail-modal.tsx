@@ -204,7 +204,7 @@ export default function JuniorAccountViewModal({
                         <ImagePreviewCell
                           imageId={docImage}
                           label={hasNid ? "NID / ID Card" : "Birth Certificate"}
-                          className="w-full h-64 rounded-lg object-cover"
+                          className="w-full h-64 rounded-xl object-contain bg-slate-900/5 p-1 border border-slate-200"
                         />
                       </div>
                     )}
@@ -216,7 +216,7 @@ export default function JuniorAccountViewModal({
                         <ImagePreviewCell
                           imageId={selfieImage}
                           label="Selfie Photo"
-                          className="w-full h-64 rounded-lg object-cover"
+                          className="w-full h-64 rounded-xl object-contain bg-slate-900/5 p-1 border border-slate-200"
                         />
                       </div>
                     )}

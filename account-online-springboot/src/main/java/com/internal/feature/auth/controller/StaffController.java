@@ -21,7 +21,7 @@ public class StaffController {
 
     @GetMapping("/{idCard}")
     public ResponseEntity<ApiResponse<StaffResponseDto>> getStaffByIdCard(@PathVariable String idCard) {
-        log.info("Staff lookup request for ID Card: {}", idCard);
+        log.info("[StaffController] Staff lookup request for idCard={}", idCard);
         StaffResponseDto staff = staffLookupService.findByIdCard(idCard);
         return ResponseEntity.ok(ApiResponse.success("Staff information found.", staff));
     }

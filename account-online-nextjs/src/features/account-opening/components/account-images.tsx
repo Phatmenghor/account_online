@@ -1,6 +1,6 @@
 import React from "react";
 import { Input } from "@/components/ui/input";
-import { Camera, CreditCard, ImagePlus, UploadCloud } from "lucide-react";
+import { Camera, CreditCard, ImagePlus } from "lucide-react";
 import { useFormState } from "@/providers/form-state-context";
 
 interface AccountImagesProps {
@@ -19,22 +19,25 @@ export const AccountImages: React.FC<AccountImagesProps> = ({
   const { validationErrors, isLoading, isValidating, isSubmitting, translate } = useFormState();
   const disabled = isLoading || isValidating || isSubmitting;
 
+  const nidPreview =
+    uploadedImage?.idImage && uploadedImage.idImage.trim() !== ""
+      ? uploadedImage.idImage
+      : null;
+  const selfieImgPreview =
+    selfiePreview && selfiePreview.trim() !== "" ? selfiePreview : null;
+
   const UploadCard = ({
     id,
     label,
-    hint,
     Icon,
     preview,
-    placeholder,
     hasError,
     onChange,
   }: {
     id: string;
     label: string;
-    hint: string;
     Icon: React.ElementType;
     preview?: string | null;
-    placeholder?: string;
     hasError?: boolean;
     onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   }) => (
@@ -47,7 +50,7 @@ export const AccountImages: React.FC<AccountImagesProps> = ({
         <p className="text-sm font-semibold text-gray-700">{label}</p>
       </div>
 
-      {/* Upload area — fixed h-40 on all screen sizes with clean subtle border */}
+      {/* Upload area — fixed h-40 on all screen sizes */}
       <label
         htmlFor={id}
         className={[
@@ -70,27 +73,32 @@ export const AccountImages: React.FC<AccountImagesProps> = ({
                 <div className="w-9 h-9 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
                   <ImagePlus className="w-5 h-5" />
                 </div>
-                <span className="text-xs font-semibold bg-black/40 px-2 py-0.5 rounded-full">Change photo</span>
+                <span className="text-xs font-semibold bg-black/40 px-2 py-0.5 rounded-full">
+                  {translate("changePhoto") || "ប្តូររូបថត"}
+                </span>
               </div>
             </div>
           </>
-        ) : placeholder ? (
-          <>
-            <img src={placeholder} alt={label} className="w-full h-full object-contain p-3" />
-            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all duration-200 flex items-center justify-center rounded-xl">
-              <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center gap-1.5 bg-black/60 text-white px-3 py-1.5 rounded-full text-xs font-semibold">
-                <UploadCloud className="w-3.5 h-3.5" />{hint}
-              </span>
-            </div>
-          </>
         ) : (
-          <div className="flex flex-col items-center gap-3 px-4 py-4 text-center pointer-events-none">
-            <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-colors ${hasError ? "bg-red-100" : "bg-gray-100 group-hover:bg-primary/10"}`}>
-              <Icon className={`w-6 h-6 transition-colors ${hasError ? "text-red-400" : "text-gray-300 group-hover:text-primary/50"}`} />
+          <div className="flex flex-col items-center gap-2.5 px-4 py-4 text-center pointer-events-none">
+            <div
+              className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-colors ${
+                hasError
+                  ? "bg-red-100 text-red-500"
+                  : "bg-primary/10 text-primary group-hover:bg-primary/20"
+              }`}
+            >
+              <Icon className="w-5.5 h-5.5" />
             </div>
             <div>
-              <p className={`text-sm font-semibold ${hasError ? "text-red-500" : "text-gray-400"}`}>{hint}</p>
-              <p className="text-xs text-gray-300 mt-0.5">PNG, JPG up to 10MB</p>
+              <p
+                className={`text-xs sm:text-sm font-semibold ${
+                  hasError ? "text-red-500" : "text-slate-700"
+                }`}
+              >
+                {label}
+              </p>
+              <p className="text-[11px] text-slate-400 mt-0.5">PNG, JPG up to 10MB</p>
             </div>
           </div>
         )}
@@ -118,20 +126,16 @@ export const AccountImages: React.FC<AccountImagesProps> = ({
       <UploadCard
         id="nid-upload"
         label={translate("img_card")}
-        hint="Upload ID card"
         Icon={CreditCard}
-        preview={uploadedImage?.idImage || null}
-        placeholder="/app/identity-card-4k.png"
+        preview={nidPreview}
         hasError={!!validationErrors.idImage}
         onChange={handleImageUpload}
       />
       <UploadCard
         id="selfie-upload"
         label={translate("img_selfie")}
-        hint="Upload selfie photo"
         Icon={Camera}
-        preview={selfiePreview}
-        placeholder="/app/image_selfie_4K.png"
+        preview={selfieImgPreview}
         hasError={!!validationErrors.selfieImage}
         onChange={handleSelfieUpload}
       />

@@ -26,14 +26,14 @@ public class DashboardController {
     public ResponseEntity<ApiResponse<List<DailyCountResponse>>> getAccountOpeningChart(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate) {
-        log.info("Fetching account opening chart between {} and {}", fromDate, toDate);
+        log.info("[DashboardController] Fetching account opening chart data. fromDate={}, toDate={}", fromDate, toDate);
         return ResponseEntity.ok(ApiResponse.success("Account opening chart data retrieved successfully",
                 dashboardService.getAccountOpeningChart(fromDate, toDate)));
     }
 
     @GetMapping("/top-users-open-account")
     public ResponseEntity<ApiResponse<List<TopUserOpenAccountResponse>>> getTopUsersOpenAccount() {
-        log.info("Fetching top users for account opening");
+        log.info("[DashboardController] Fetching top users for account opening");
         return ResponseEntity.ok(ApiResponse.success("Top account opening users retrieved successfully",
                 dashboardService.getTopUsersOpenAccount()));
     }
@@ -42,14 +42,14 @@ public class DashboardController {
     public ResponseEntity<ApiResponse<List<DailyCountResponse>>> getAmlHitsChart(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate) {
-        log.info("Fetching AML hits chart between {} and {}", fromDate, toDate);
+        log.info("[DashboardController] Fetching AML hits chart data. fromDate={}, toDate={}", fromDate, toDate);
         return ResponseEntity.ok(ApiResponse.success("AML hits chart data retrieved successfully",
                 dashboardService.getAmlHitsChart(fromDate, toDate)));
     }
 
     @GetMapping("/top-aml-action-users")
     public ResponseEntity<ApiResponse<List<TopAmlActionUserResponse>>> getTopAmlActionUsers() {
-        log.info("Fetching top AML action users");
+        log.info("[DashboardController] Fetching top AML action users");
         return ResponseEntity.ok(ApiResponse.success("Top AML action users retrieved successfully",
                 dashboardService.getTopAmlActionUsers()));
     }

@@ -20,8 +20,6 @@ import {
   UpdateUserProfileSchema,
 } from "@/features/auth/types/profile.schema";
 import { Status } from "@/constants/AppResource/display-list/enum/status";
-import { isAuthenticated } from "@/utils/local-storage/token";
-import { ROUTES } from "@/constants/AppRoutes/routes";
 import { Suspense } from "react";
 
 export interface Image {
@@ -35,25 +33,16 @@ function MyProfilePageContent() {
   const [activeTab, setActiveTab] = useState(
     searchParams.get("tab") === "password" ? "password" : "account"
   );
-  const [ready, setReady] = useState(false);
 
   useEffect(() => {
     setActiveTab(searchParams.get("tab") === "password" ? "password" : "account");
   }, [searchParams]);
+
   const [isLoading, setIsLoading] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [imageData, setImageData] = useState<Image | null>(null);
   const [user, setUser] = useState<UserModel | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  // Auth guard
-  useEffect(() => {
-    if (!isAuthenticated()) {
-      router.replace(ROUTES.AUTH.LOGIN);
-    } else {
-      setReady(true);
-    }
-  }, [router]);
 
   const profileForm = useForm<UpdateUserProfileForm>({
     resolver: zodResolver(UpdateUserProfileSchema),
@@ -71,10 +60,9 @@ function MyProfilePageContent() {
     },
   });
 
-  const { handleSubmit, reset, formState } = profileForm;
+  const { handleSubmit, reset } = profileForm;
 
   useEffect(() => {
-    if (!ready) return;
     const load = async () => {
       setIsLoading(true);
       try {
@@ -102,7 +90,7 @@ function MyProfilePageContent() {
       }
     };
     load();
-  }, [ready, reset]);
+  }, [reset]);
 
   const handleAvatarClick = () => fileInputRef.current?.click();
 
@@ -161,9 +149,13 @@ function MyProfilePageContent() {
     return () => { if (imagePreview) URL.revokeObjectURL(imagePreview); };
   }, [imagePreview]);
 
-  if (!ready) return null;
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+    router.push(`/my-profile?tab=${value}`, { scroll: false });
+  };
+
   if (isLoading) return (
-    <div className="min-h-screen flex flex-col bg-gray-50/60">
+    <div className="min-h-screen flex flex-col bg-slate-50/70">
       <PageHeader />
       <div className="flex-1 pt-16 flex items-center justify-center">
         <Loading />
@@ -172,20 +164,27 @@ function MyProfilePageContent() {
   );
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50/60">
+    <div className="min-h-screen flex flex-col bg-slate-50/70">
       <PageHeader />
 
       <main className="flex-1 pt-16 sm:pt-[60px]">
-        <div className="max-w-5xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-          <h1 className="text-2xl font-bold tracking-tight mb-6">My Profile</h1>
-
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-            <TabsList>
-              <TabsTrigger value="account" className="flex items-center gap-2">
-                <User className="h-4 w-4" /> Account
+        <div className="max-w-5xl mx-auto w-full px-3 sm:px-6 lg:px-8 py-5 sm:py-8 space-y-5 sm:space-y-6">
+          <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-5">
+            {/* Full-width responsive tab bar on mobile */}
+            <TabsList className="w-full grid grid-cols-2 bg-slate-200/60 p-1.5 rounded-2xl border border-slate-200/80 shadow-2xs h-auto gap-1">
+              <TabsTrigger
+                value="account"
+                className="flex items-center justify-center gap-2 rounded-xl py-2 px-3 text-xs sm:text-sm font-semibold data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-xs transition-all"
+              >
+                <User className="h-4 w-4 shrink-0 text-primary" />
+                <span>Account Details</span>
               </TabsTrigger>
-              <TabsTrigger value="password" className="flex items-center gap-2">
-                <Key className="h-4 w-4" /> Password
+              <TabsTrigger
+                value="password"
+                className="flex items-center justify-center gap-2 rounded-xl py-2 px-3 text-xs sm:text-sm font-semibold data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-xs transition-all"
+              >
+                <Key className="h-4 w-4 shrink-0 text-primary" />
+                <span>Change Password</span>
               </TabsTrigger>
             </TabsList>
 
@@ -216,5 +215,3 @@ export default function MyProfilePage() {
     </Suspense>
   );
 }
-
-

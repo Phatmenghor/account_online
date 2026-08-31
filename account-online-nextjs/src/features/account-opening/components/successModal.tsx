@@ -1,6 +1,14 @@
-import { CheckCircle, X } from "lucide-react";
+"use client";
+
+import { CheckCircle2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTranslations } from "next-intl";
+import {
+  CustomModal,
+  CustomModalHeader,
+  CustomModalBody,
+  CustomModalFooter,
+} from "@/components/shared/modal/custom-modal";
 
 interface SuccessModalProps {
   isOpen: boolean;
@@ -9,11 +17,7 @@ interface SuccessModalProps {
 }
 
 const SuccessModal = ({ isOpen, onClose, data }: SuccessModalProps) => {
-  
-  // change language
   const translate = useTranslations("NIDPage");
-
-  if (!isOpen) return null;
 
   const getFieldLabel = (field: string) => {
     const fieldLabels: { [key: string]: string } = {
@@ -30,53 +34,60 @@ const SuccessModal = ({ isOpen, onClose, data }: SuccessModalProps) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-xs" onClick={onClose} />
-      <div className="relative bg-white rounded-t-3xl sm:rounded-2xl shadow-2xl p-6 sm:max-w-[520px] w-full z-10 border border-gray-100 max-h-[90vh] flex flex-col overflow-hidden">
-        {/* Native Mobile Drag Handle Pill */}
-        <div className="w-12 h-1.5 bg-gray-300 rounded-full mx-auto mb-3 sm:hidden shrink-0" />
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
-              <CheckCircle className="w-5 h-5 text-white" />
-            </div>
-            <h2 className="text-lg font-semibold text-green-600">
-              {translate("valid_success")}
-            </h2>
+    <CustomModal isOpen={isOpen} onClose={onClose} size="md">
+      {/* Header */}
+      <CustomModalHeader>
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-2xl bg-emerald-50 border border-emerald-200/60 flex items-center justify-center text-emerald-600 shrink-0 shadow-xs">
+            <CheckCircle2 className="w-5 h-5" />
           </div>
-          <button
-            onClick={onClose}
-            className="text-gray-500 hover:text-gray-700"
-          >
-            <X className="w-5 h-5" />
-          </button>
+          <h3 className="text-base sm:text-lg font-bold text-emerald-700 tracking-tight leading-tight">
+            {translate("valid_success")}
+          </h3>
         </div>
-        <div className="space-y-3">
-          <p className="text-sm text-gray-600">{translate("completed")}</p>
-          <div className="bg-green-50 text-gray-600 p-3 rounded-lg">
-            <p className="text-sm">
-              <strong>{translate("score")}:</strong> {(data?.score || 0) * 100}%
-            </p>
-            <p className="text-sm mb-2">
-              <strong>{translate("warning")}</strong>
-            </p>
-            <ul className="list-disc list-inside text-sm text-yellow-500">
-              {data?.incorrectFields.map((field, index) => (
-                <li key={index}>{getFieldLabel(field)}</li>
-              ))}
-            </ul>
-          </div>
+        <button
+          type="button"
+          onClick={onClose}
+          className="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+          aria-label="Close"
+        >
+          <X className="w-4 h-4" />
+        </button>
+      </CustomModalHeader>
+
+      {/* Body */}
+      <CustomModalBody>
+        <p className="text-sm text-slate-600 leading-relaxed font-normal">{translate("completed")}</p>
+        <div className="bg-emerald-50/80 border border-emerald-200/70 text-slate-700 p-4 rounded-2xl space-y-2">
+          <p className="text-sm">
+            <strong className="font-semibold text-slate-900">{translate("score")}:</strong> {(data?.score || 0) * 100}%
+          </p>
+          {data?.incorrectFields && data.incorrectFields.length > 0 && (
+            <>
+              <p className="text-sm font-semibold text-amber-700 pt-1">
+                {translate("warning")}
+              </p>
+              <ul className="list-disc list-inside text-sm text-amber-800 space-y-0.5">
+                {data.incorrectFields.map((field, index) => (
+                  <li key={index}>{getFieldLabel(field)}</li>
+                ))}
+              </ul>
+            </>
+          )}
         </div>
-        <div className="flex justify-end mt-6">
-          <Button
-            onClick={onClose}
-            className="bg-green-600 hover:bg-green-700 text-white"
-          >
-            {translate("close")}
-          </Button>
-        </div>
-      </div>
-    </div>
+      </CustomModalBody>
+
+      {/* Footer */}
+      <CustomModalFooter>
+        <Button
+          type="button"
+          onClick={onClose}
+          className="w-full sm:w-auto h-11 px-6 text-sm font-semibold rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white shadow-md shadow-emerald-500/20 transition-all active:scale-[0.98]"
+        >
+          {translate("close")}
+        </Button>
+      </CustomModalFooter>
+    </CustomModal>
   );
 };
 

@@ -26,14 +26,14 @@ public class JuniorOtpSmsController {
 
     @PostMapping("/send")
     public ResponseEntity<ApiResponse<SendOtpResponse>> sendOtp(@Valid @RequestBody SendOtpRequest request) {
-        log.info("Junior OTP send request for phone: {}", request.getPhone());
+        log.info("[JuniorOtpSmsController] Junior OTP send request. phone={}", request.getPhone());
         SendOtpResponse response = juniorOtpSmsService.sendOtp(request);
         return ResponseEntity.ok(ApiResponse.success(ResponseMessage.OTP_SENT, response));
     }
 
     @PostMapping("/verify")
     public ResponseEntity<ApiResponse<VerifyOtpResponse>> verifyOtp(@Valid @RequestBody VerifyOtpRequest request) {
-        log.info("Junior OTP verify request for phone: {}", request.getPhone());
+        log.info("[JuniorOtpSmsController] Junior OTP verify request. phone={}", request.getPhone());
         VerifyOtpResponse response = juniorOtpSmsService.verifyOtp(request);
         return ResponseEntity.ok(ApiResponse.success(ResponseMessage.OTP_VERIFIED, response));
     }

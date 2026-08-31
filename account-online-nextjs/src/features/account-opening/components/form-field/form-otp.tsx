@@ -168,13 +168,31 @@ export default function OTPInput({
   }, [phoneNumber, isValidPhoneNumber, countdown, validateField, translate]);
 
   const handlePhoneBlur = async () => {
-    if (!phoneNumber.trim() || isOtpVerified || countdown > 0) return;
+    if (!phoneNumber.trim() || isOtpVerified || countdown > 0 || isSendingOtp || isOtpSent) return;
     if (isValidPhoneNumber(phoneNumber)) {
       await handleSendOtp();
     } else {
       validateField("phoneNumber", phoneNumber, translate("err_phoneNumber_regex"));
     }
   };
+
+  // Auto-send OTP when valid phone number is entered or when leaving input
+  useEffect(() => {
+    if (
+      phoneNumber.trim() &&
+      isValidPhoneNumber(phoneNumber) &&
+      !isOtpSent &&
+      !isSendingOtp &&
+      !isOtpVerified &&
+      countdown === 0 &&
+      !showPhoneWarning
+    ) {
+      const timer = setTimeout(() => {
+        handleSendOtp();
+      }, 600);
+      return () => clearTimeout(timer);
+    }
+  }, [phoneNumber, isValidPhoneNumber, isOtpSent, isSendingOtp, isOtpVerified, countdown, showPhoneWarning, handleSendOtp]);
 
   const handleOtpChange = (value: string) => {
     if (!phoneNumber.trim()) {

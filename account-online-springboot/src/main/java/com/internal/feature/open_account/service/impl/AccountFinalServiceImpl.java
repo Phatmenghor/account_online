@@ -71,13 +71,10 @@ public class AccountFinalServiceImpl implements AccountFinalService {
 
             // 1. Current user
             String submittedBy = "System";
-            UserEntity submittedByUser = null;
-            try {
-                submittedByUser = auditComponent.getCurrentUser();
-                if (submittedByUser != null) {
-                    submittedBy = submittedByUser.getUsername();
-                }
-            } catch (Exception ignored) {}
+            UserEntity submittedByUser = auditComponent.getCurrentUserOptional().orElse(null);
+            if (submittedByUser != null) {
+                submittedBy = submittedByUser.getUsername();
+            }
 
             // 2. Parse dates safely
             LocalDate dob = parseDate(request.getDateOfBirth());

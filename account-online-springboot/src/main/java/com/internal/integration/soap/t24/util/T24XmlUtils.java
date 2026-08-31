@@ -11,71 +11,46 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
-/**
- * Spring Component helper for T24 XML building, sanitization, date parsing, and escaping.
- * Injected into XML builders to eliminate direct static calls.
- */
 @Component
 @Slf4j
 public class T24XmlUtils {
 
-    public static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-    public static final DateTimeFormatter T24_DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd");
+    private static final DateTimeFormatter T24_DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd");
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
-    public String safe(String value) {
-        return value == null ? "" : xmlEscape(value.trim());
+    public String safe(String str) {
+        return str != null ? xmlEscape(str.trim()) : "";
     }
 
     public String getOrDefault(String value, String defaultValue) {
-        return (value != null && !value.trim().isEmpty()) ? value.trim() : defaultValue;
+        return (value != null && !value.trim().isEmpty()) ? xmlEscape(value.trim()) : defaultValue;
     }
 
-    public String formatCompanyCode(String code, String defaultCompanyCode) {
-        if (code == null || code.isBlank()) {
-            return (defaultCompanyCode != null && !defaultCompanyCode.isBlank())
-                    ? defaultCompanyCode.trim()
-                    : AppConstants.DEFAULT_BRANCH_CODE;
-        }
-        String trimmed = code.trim();
-        if (trimmed.startsWith("KH")) {
-            return trimmed;
-        }
-        if (trimmed.length() <= 3) {
-            return (defaultCompanyCode != null && !defaultCompanyCode.isBlank())
-                    ? defaultCompanyCode.trim()
-                    : AppConstants.DEFAULT_BRANCH_CODE;
-        }
-        return "KH001" + trimmed;
-    }
-
-    public String xmlEscape(String value) {
-        if (value == null) return "";
-        return value.replace("&", "&amp;")   // must be first
-                    .replace("<", "&lt;")
-                    .replace(">", "&gt;")
-                    .replace("\"", "&quot;")
-                    .replace("'", "&apos;");
+    public String xmlEscape(String input) {
+        if (input == null) return "";
+        return input.replace("&", "&amp;")
+                .replace("<", "&lt;")
+                .replace(">", "&gt;")
+                .replace("\"", "&quot;")
+                .replace("'", "&apos;");
     }
 
     public String toSwiftSafe(String input) {
         if (input == null) return "";
-        String original = input.trim();
-        if (original.isEmpty()) return "";
+        String cleaned = input.replaceAll("[^a-zA-Z0-9 space/?:().,'+-]", " ");
+        return xmlEscape(cleaned.trim());
+    }
 
-        String sanitized = original
-                .replaceAll("[^\\p{ASCII}]", " ")       // Remove non-ASCII characters
-                .replaceAll("[\\x00-\\x1F\\x7F]", " ") // Remove control characters
-                .replaceAll("[<>\"'&]", " ")            // Remove HTML-like characters
-                .replaceAll(" {2,}", " ")               // Collapse spaces
-                .trim();
-
-        return sanitized.isEmpty() ? "Address" : sanitized;
+    public String formatCompanyCode(String branchCode, String defaultBranch) {
+        String code = (branchCode != null && !branchCode.trim().isEmpty()) ? branchCode.trim() : defaultBranch;
+        if (code != null && code.startsWith("KH")) {
+            return code;
+        }
+        return "KH001" + (code != null ? code : "1011");
     }
 
     public String mapMaritalStatus(String status) {
-        if (status == null || status.trim().isEmpty()) {
-            return "SINGLE";
-        }
+        if (status == null || status.isBlank()) return "SINGLE";
         String upper = status.trim().toUpperCase(Locale.ROOT);
         return switch (upper) {
             case "MARRIED" -> "MARRIED";
@@ -141,34 +116,46 @@ public class T24XmlUtils {
                 LocalDate localDate = parseDate(date.trim());
                 return localDate.format(T24_DATE_FORMATTER);
             } catch (Exception e) {
-                log.warn("Could not format date '{}', using fallback +10 years", date);
+                log.warn("Could not format date '{}'", date);
             }
         }
-        return LocalDate.now().plusYears(10).format(T24_DATE_FORMATTER);
+        return "";
     }
 
-    public String formatLegalIssueDateWithDefault(String date) {
-        LocalDate today = LocalDate.now(ZoneId.of("Asia/Phnom_Penh"));
-        LocalDate maxAllowed = today.minusYears(1);
+    public String formatLegalIssueDate(String date) {
         if (date != null && !date.trim().isEmpty()) {
             try {
                 LocalDate localDate = parseDate(date.trim());
-                if (!localDate.isAfter(maxAllowed)) {
-                    return localDate.format(T24_DATE_FORMATTER);
+                LocalDate maxSafeDate = LocalDate.of(2025, 1, 1);
+                if (localDate.isAfter(maxSafeDate)) {
+                    localDate = maxSafeDate;
                 }
-            } catch (Exception ignored) {}
+                return localDate.format(T24_DATE_FORMATTER);
+            } catch (Exception e) {
+                log.warn("Could not parse legal issue date '{}'", date);
+            }
         }
-        return maxAllowed.format(T24_DATE_FORMATTER);
+        return "20250101";
     }
 
-    public String formatLegalExpireDateWithDefault(String date) {
+    public String formatLegalIssueDateWithDefault(String date) {
+        return formatLegalIssueDate(date);
+    }
+
+    public String formatLegalExpireDate(String date) {
         if (date != null && !date.trim().isEmpty()) {
             try {
                 LocalDate localDate = parseDate(date.trim());
                 return localDate.format(T24_DATE_FORMATTER);
-            } catch (Exception ignored) {}
+            } catch (Exception e) {
+                log.warn("Could not parse legal expire date '{}'", date);
+            }
         }
-        return LocalDate.now(ZoneId.of("Asia/Phnom_Penh")).plusYears(10).format(T24_DATE_FORMATTER);
+        return "";
+    }
+
+    public String formatLegalExpireDateWithDefault(String date) {
+        return formatLegalExpireDate(date);
     }
 
     public LocalDate parseDate(String dateStr) {

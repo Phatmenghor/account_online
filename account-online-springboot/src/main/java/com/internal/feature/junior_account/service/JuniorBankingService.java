@@ -77,6 +77,10 @@ public class JuniorBankingService {
                 log.info("Calling juniorCoreBankingPort.createCustomer() - Attempt {} of {}", attempt, maxRetries);
                 Document resp = juniorCoreBankingPort.createCustomer(request);
                 String cif = XmlParser.extractCif(resp);
+                if (cif == null || cif.isBlank()) {
+                    String errMsg = XmlParser.extractErrorMessage(resp);
+                    throw new AccountCreationException("Junior customer creation failed in T24: " + (errMsg != null && !errMsg.isBlank() ? errMsg : "Incomplete customer record"));
+                }
                 String mnemonic = XmlParser.extractMnemonic(resp);
                 log.info("New Junior customer created: CIF={}, MNEMONIC={}", cif, mnemonic);
                 return new CustomerCreationResult(cif, mnemonic);

@@ -47,14 +47,17 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
                             id="image-upload"
                             disabled={isLoading || isValidating || isSubmitting}
                         />
-                        <img
-                            src={
-                                uploadedImage?.idImage ||
-                                "/app/identity-card.png?height=192&width=320"
-                            }
-                            alt="ID Card"
-                            className="w-full h-full"
-                        />
+                        {uploadedImage?.idImage && uploadedImage.idImage.trim() !== "" ? (
+                            <img
+                                src={uploadedImage.idImage}
+                                alt="ID Card"
+                                className="w-full h-full object-cover"
+                            />
+                        ) : (
+                            <div className="w-full h-full flex flex-col items-center justify-center text-slate-400 gap-2 p-4">
+                                <span className="text-sm font-medium">{translate("img_card")}</span>
+                            </div>
+                        )}
                     </div>
                 </div>
                 {validationErrors.idImage && (
@@ -85,13 +88,17 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
                             id="image-upload-user"
                             disabled={isLoading || isValidating || isSubmitting}
                         />
-                        <img
-                            src={
-                                selfiePreview || "/app/image_selfie.jpg?height=192&width=320"
-                            }
-                            alt="Selfie"
-                            className="w-full h-full"
-                        />
+                        {selfiePreview && selfiePreview.trim() !== "" ? (
+                            <img
+                                src={selfiePreview}
+                                alt="Selfie"
+                                className="w-full h-full object-cover"
+                            />
+                        ) : (
+                            <div className="w-full h-full flex flex-col items-center justify-center text-slate-400 gap-2 p-4">
+                                <span className="text-sm font-medium">{translate("img_selfie")}</span>
+                            </div>
+                        )}
                     </div>
                 </div>
                 {validationErrors.selfieImage && (

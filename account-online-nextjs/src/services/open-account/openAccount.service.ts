@@ -2,7 +2,7 @@ import { CreateOpenAccountReq } from "@/features/account-opening/types/openAccou
 import { axiosClientWithAuth, ACCOUNT_CREATION_TIMEOUT } from "@/utils/axios";
 import axios from "axios";
 
-export async function createOpenAccountService(request: CreateOpenAccountReq) {
+export async function createOpenAccountService(request: CreateOpenAccountReq | Record<string, any>) {
   try {
     const response = await axiosClientWithAuth.post(
       "/api/v1/open-account/process",

@@ -27,14 +27,15 @@ public class ImageController {
     
     @PostMapping
     public ResponseEntity<ApiResponse<ImageDto>> uploadImage(@Valid @RequestBody ImageUploadRequest request) {
-        log.info("Image upload request received");
+        log.info("[ImageController] Image upload request received");
         ImageDto uploadedImage = imageService.uploadImage(request);
-        log.info("Image uploaded successfully with ID: {}", uploadedImage.getId());
+        log.info("[ImageController] Image uploaded successfully. id={}", uploadedImage.getId());
         return new ResponseEntity<>(ApiResponse.success("Image uploaded successfully", uploadedImage), HttpStatus.CREATED);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<byte[]> getImageData(@PathVariable UUID id) {
+        log.info("[ImageController] Fetching image data. id={}", id);
         ImageResponse imageResponse = imageService.getImageById(id);
         return ResponseEntity
                 .ok()
@@ -45,9 +46,9 @@ public class ImageController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> deleteImage(@PathVariable UUID id) {
-        log.info("Image deletion request for ID: {}", id);
+        log.info("[ImageController] Image deletion request. id={}", id);
         imageService.deleteImage(id);
-        log.info("Image deleted successfully: {}", id);
+        log.info("[ImageController] Image deleted successfully. id={}", id);
         return ResponseEntity.ok(ApiResponse.success("Image deleted successfully", null));
     }
 }

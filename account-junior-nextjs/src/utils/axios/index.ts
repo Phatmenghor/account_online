@@ -27,7 +27,9 @@ declare module "axios" {
 // Environment detection
 const isBrowser = typeof window !== "undefined";
 const isDevelopment =
-  isBrowser && process.env.NEXT_PUBLIC_NODE_ENV === "development";
+  isBrowser &&
+  (process.env.NODE_ENV === "development" ||
+    process.env.NEXT_PUBLIC_ENABLE_CONSOLE_LOGS === "true");
 
 // Colors for console output
 const colors = {
@@ -669,3 +671,4 @@ export { DEFAULT_TIMEOUT, ACCOUNT_CREATION_TIMEOUT };
 
 // Export logger and utilities
 export { logger, formatRequestData };
+export { handleServiceError, handleApiError } from "./handleError";

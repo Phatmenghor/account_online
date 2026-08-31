@@ -37,7 +37,7 @@ public class JuniorAmlController {
     @PostMapping("/all-status")
     public ResponseEntity<ApiResponse<PaginationResponse<JuniorAmlStatus>>> getAllJuniorAmlStatus(
             @Valid @RequestBody AllAmlRequestDto request) {
-        log.info("Fetching Junior AML status with search: {}", request.getSearch());
+        log.info("[JuniorAmlController] Fetching Junior AML status. search={}", request.getSearch());
         Pageable pageable = PaginationUtil.createPageable(request);
         Page<JuniorAmlStatus> page = juniorAmlService.getAllJuniorAmlStatus(request.getAmlStatusString(), request.getSearch(), pageable);
         return ResponseEntity.ok(ApiResponse.success(ResponseMessage.AML_STATUSES_RETRIEVED, PaginationResponse.fromPage(page)));
@@ -49,7 +49,7 @@ public class JuniorAmlController {
     @PostMapping("/all-history")
     public ResponseEntity<ApiResponse<PaginationResponse<JuniorAmlStatus>>> getAllJuniorAmlHistory(
             @Valid @RequestBody AllAmlHistoryRequestDto request) {
-        log.info("Fetching Junior AML history with search: {}", request.getSearch());
+        log.info("[JuniorAmlController] Fetching Junior AML history. search={}", request.getSearch());
         Pageable pageable = PaginationUtil.createPageable(request);
         Page<JuniorAmlStatus> page = juniorAmlService.getAllJuniorAmlHistory(request.getSearch(), pageable);
         return ResponseEntity.ok(ApiResponse.success(ResponseMessage.AML_HISTORY_RETRIEVED, PaginationResponse.fromPage(page)));
@@ -61,7 +61,7 @@ public class JuniorAmlController {
     @PostMapping("/history-records")
     public ResponseEntity<ApiResponse<PaginationResponse<JuniorAmlHistory>>> getJuniorAmlHistoryRecords(
             @Valid @RequestBody AllAmlHistoryRequestDto request) {
-        log.info("Fetching Junior AML history records with search: {}", request.getSearch());
+        log.info("[JuniorAmlController] Fetching Junior AML history records. search={}", request.getSearch());
         Page<JuniorAmlHistory> page = juniorAmlService.getJuniorAmlHistoryByStatusId(null, request);
         return ResponseEntity.ok(ApiResponse.success(ResponseMessage.AML_HISTORY_RETRIEVED, PaginationResponse.fromPage(page)));
     }
@@ -71,7 +71,7 @@ public class JuniorAmlController {
      */
     @GetMapping("/history/{id}")
     public ResponseEntity<ApiResponse<JuniorAmlHistory>> getJuniorAmlHistoryById(@PathVariable Long id) {
-        log.info("Fetching Junior AML history record by id: {}", id);
+        log.info("[JuniorAmlController] Fetching Junior AML history record by id={}", id);
         JuniorAmlHistory history = juniorAmlService.getJuniorAmlHistoryById(id);
         return ResponseEntity.ok(ApiResponse.success(ResponseMessage.AML_HISTORY_RETRIEVED, history));
     }
@@ -83,7 +83,7 @@ public class JuniorAmlController {
     public ResponseEntity<ApiResponse<JuniorAmlStatus>> updateJuniorAmlStatus(
             @PathVariable Long id,
             @Valid @RequestBody UpdateAmlStatusDto req) {
-        log.info("Updating Junior AML status for ID: {} to {}", id, req.getStatus());
+        log.info("[JuniorAmlController] Updating Junior AML status. id={}, newStatus={}", id, req.getStatus());
         JuniorAmlStatus updated = juniorAmlService.updateJuniorAmlStatus(id, req);
         return ResponseEntity.ok(ApiResponse.success(ResponseMessage.AML_STATUS_UPDATED, updated));
     }

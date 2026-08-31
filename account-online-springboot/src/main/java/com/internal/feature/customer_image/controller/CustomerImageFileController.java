@@ -25,9 +25,9 @@ public class CustomerImageFileController {
 
     @GetMapping("/{filename:.+}")
     public ResponseEntity<byte[]> getImage(@PathVariable String filename) {
-        log.info("IMAGE API: Received request for file: {}", filename);
+        log.info("[CustomerImageFileController] Received request for image file: {}", filename);
         if (filename == null || filename.contains("..") || filename.contains("/") || filename.contains("\\")) {
-            log.warn("IMAGE API: Rejected invalid filename request: {}", filename);
+            log.warn("[CustomerImageFileController] Rejected invalid filename path traversal attempt: {}", filename);
             return ResponseEntity.badRequest().build();
         }
 
@@ -35,7 +35,7 @@ public class CustomerImageFileController {
 
         return imageFile
                 .map(file -> {
-                    log.info("IMAGE API: [SUCCESS] Served file: {} | Size: {} bytes | Type: {}",
+                    log.info("[CustomerImageFileController] Served image file: {} | Size: {} bytes | Type: {}",
                             filename, file.getContent().length, file.getMediaType());
                     return ResponseEntity.ok()
                             .cacheControl(CacheControl.maxAge(1, TimeUnit.DAYS).cachePublic())
@@ -44,7 +44,7 @@ public class CustomerImageFileController {
                             .body(file.getContent());
                 })
                 .orElseGet(() -> {
-                    log.warn("IMAGE API: [NOT FOUND] File not found: {}", filename);
+                    log.warn("[CustomerImageFileController] Image file not found: {}", filename);
                     return ResponseEntity.notFound().build();
                 });
     }

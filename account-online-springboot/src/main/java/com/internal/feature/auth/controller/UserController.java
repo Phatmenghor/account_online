@@ -35,73 +35,74 @@ public class UserController {
 
     @PostMapping
     public ResponseEntity<ApiResponse<AllUserResponseDto>> getAllUsers(@Valid @RequestBody GetAllUserRequestDto request) {
-        log.info("Fetching users - page: {}, size: {}, search: '{}', status: {}",
+        log.info("[UserController] Fetching users. page={}, size={}, search={}, status={}",
                 request.getPageNo(), request.getPageSize(), request.getSearch(), request.getStatus());
         AllUserResponseDto result = userService.getAllUser(request);
-        log.info("Successfully retrieved {} users (page {}/{})", result.getContent() != null ? result.getContent().size() : 0, result.getPageNo(), result.getTotalPages());
+        log.info("[UserController] Successfully retrieved {} users (page {}/{})", result.getContent() != null ? result.getContent().size() : 0, result.getPageNo(), result.getTotalPages());
         return ResponseEntity.ok(ApiResponse.success(ResponseMessage.USERS_RETRIEVED, result));
     }
 
     @PostMapping("/getById/{id}")
     public ResponseEntity<ApiResponse<UserResponseDto>> getUserDetail(@PathVariable Long id) {
-        log.info("Fetching user details for ID: {}", id);
+        log.info("[UserController] Fetching user details for id={}", id);
         UserResponseDto user = userService.getUserById(id);
-        log.info("Successfully retrieved user details for ID: {}", id);
+        log.info("[UserController] Successfully retrieved user details for id={}", id);
         return ResponseEntity.ok(ApiResponse.success(ResponseMessage.USER_DETAIL_RETRIEVED, user));
     }
 
     @PostMapping("/token")
     public ResponseEntity<ApiResponse<UserResponseDto>> getUserByToken() {
+        log.info("[UserController] Fetching current authenticated user profile by token");
         UserResponseDto user = userService.getUserByToken();
         return ResponseEntity.ok(ApiResponse.success(ResponseMessage.CURRENT_USER_RETRIEVED, user));
     }
 
     @PostMapping("/create-user")
     public ResponseEntity<ApiResponse<UserResponseDto>> createUser(@Valid @RequestBody RegisterRequestDto registerDto) {
-        log.info("Admin user creation request for ID card: {}", registerDto.getUsername());
+        log.info("[UserController] Admin user creation request for username={}", registerDto.getUsername());
         UserResponseDto userResponse = authService.createUserByAdmin(registerDto);
-        log.info("Admin user creation successful for: {}", registerDto.getUsername());
+        log.info("[UserController] Admin user creation successful for username={}", registerDto.getUsername());
         return ResponseEntity.ok(ApiResponse.success(ResponseMessage.USER_CREATED, userResponse));
     }
 
     @PostMapping("/deleteById/{id}")
     public ResponseEntity<ApiResponse<UserResponseDto>> deleteUser(@PathVariable("id") Long userId) {
-        log.info("Deleting user with ID: {}", userId);
+        log.info("[UserController] Deleting user with id={}", userId);
         UserResponseDto deletedUser = userService.deleteUserId(userId);
-        log.info("Successfully deleted user: {} (ID: {})", deletedUser.getIdCard(), userId);
+        log.info("[UserController] Successfully deleted user idCard={} (id={})", deletedUser.getIdCard(), userId);
         return ResponseEntity.ok(ApiResponse.success(ResponseMessage.USER_DELETED, deletedUser));
     }
 
     @PostMapping("/updateById/{id}")
     public ResponseEntity<ApiResponse<UserResponseDto>> updateUser(@PathVariable("id") Long userId,
                                                                    @Valid @RequestBody UpdateUserRequestDto request) {
-        log.info("Updating user ID: {} with data: {}", userId, request);
+        log.info("[UserController] Updating user id={}", userId);
         UserResponseDto updatedUser = userService.updateUserId(userId, request);
-        log.info("Successfully updated user: {} (ID: {})", updatedUser.getIdCard(), userId);
+        log.info("[UserController] Successfully updated user idCard={} (id={})", updatedUser.getIdCard(), userId);
         return ResponseEntity.ok(ApiResponse.success(ResponseMessage.USER_UPDATED, updatedUser));
     }
 
     @PostMapping("/change-password")
     public ResponseEntity<ApiResponse<UserResponseDto>> changePassword(@Valid @RequestBody ChangePasswordRequestDto changePasswordDto) {
-        log.info("Password change request for current user");
+        log.info("[UserController] Password change request for current user");
         UserResponseDto userDto = userService.changePassword(changePasswordDto);
-        log.info("Successfully changed password for user: {}", userDto.getIdCard());
+        log.info("[UserController] Successfully changed password for user idCard={}", userDto.getIdCard());
         return ResponseEntity.ok(ApiResponse.success(ResponseMessage.PASSWORD_CHANGED, userDto));
     }
 
     @PostMapping("/change-password-by-admin")
     public ResponseEntity<ApiResponse<UserResponseDto>> changePasswordByAdmin(@Valid @RequestBody ChangePasswordByAdminRequestDto changePasswordDto) {
-        log.info("Admin password change request for user ID: {}", changePasswordDto.getId());
+        log.info("[UserController] Admin password change request for user id={}", changePasswordDto.getId());
         UserResponseDto userDto = userService.changePasswordByAdmin(changePasswordDto);
-        log.info("Admin successfully changed password for user ID: {}, username: {}", changePasswordDto.getId(), userDto.getIdCard());
+        log.info("[UserController] Admin successfully changed password for user id={}, username={}", changePasswordDto.getId(), userDto.getIdCard());
         return ResponseEntity.ok(ApiResponse.success(ResponseMessage.PASSWORD_CHANGED_BY_ADMIN, userDto));
     }
 
     @PostMapping("/force-change-password")
     public ResponseEntity<ApiResponse<AuthResponseDTO>> forceChangePassword(@Valid @RequestBody ForceChangePasswordRequestDto dto) {
-        log.info("Force password change request");
+        log.info("[UserController] Force password change request");
         AuthResponseDTO authResponse = userService.forceChangePassword(dto.getNewPassword(), dto.getConfirmNewPassword());
-        log.info("Force password change completed successfully");
+        log.info("[UserController] Force password change completed successfully");
         return ResponseEntity.ok(ApiResponse.success("Password updated successfully.", authResponse));
     }
 }

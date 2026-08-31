@@ -1,6 +1,10 @@
 import axios from "axios";
 
-export function handleApiError(error: any, fallbackMessage: string): never {
+/**
+ * Standardized custom service error handler for all API service calls.
+ * Extracts backend error messages cleanly and throws structured error objects.
+ */
+export function handleServiceError(error: any, fallbackMessage: string = "An error occurred"): never {
   let message = fallbackMessage;
   let raw: any = null;
 
@@ -15,7 +19,7 @@ export function handleApiError(error: any, fallbackMessage: string): never {
     } else if (error.message) {
       message = error.message;
     }
-    console.error("Axios error:", message, raw);
+    console.error("Axios error:", message);
   } else {
     if (error instanceof Error) {
       message = error.message;
@@ -30,3 +34,5 @@ export function handleApiError(error: any, fallbackMessage: string): never {
     rawError: raw || error,
   };
 }
+
+export const handleApiError = handleServiceError;

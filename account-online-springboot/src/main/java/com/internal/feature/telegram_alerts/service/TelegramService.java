@@ -4,6 +4,7 @@ import com.internal.feature.telegram_alerts.models.TelegramMessageLog;
 import com.internal.feature.telegram_alerts.repository.TelegramMessageLogRepository;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.http.HttpEntity;
@@ -37,7 +38,7 @@ public class TelegramService {
     private final TelegramMessageLogRepository telegramMessageLogRepository;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    public TelegramService(TaskExecutor taskExecutor, TelegramMessageLogRepository telegramMessageLogRepository) {
+    public TelegramService(@Qualifier("applicationTaskExecutor") TaskExecutor taskExecutor, TelegramMessageLogRepository telegramMessageLogRepository) {
         this.taskExecutor = taskExecutor;
         this.telegramMessageLogRepository = telegramMessageLogRepository;
     }
@@ -158,14 +159,20 @@ public class TelegramService {
     }
 
     public void sendPhoto(String chatId, String caption, Resource imageResource) {
-        if (chatId == null || chatId.trim().isEmpty()) {
+        if (chatId == null || chatId.trim().isEmpty() || imageResource == null) {
             return;
         }
         java.util.Map<String, String> contextMap = org.slf4j.MDC.getCopyOfContextMap();
         taskExecutor.execute(() -> {
             if (contextMap != null) org.slf4j.MDC.setContextMap(contextMap);
             try {
-                String url = String.format("https://api.telegram.org/bot%s/sendPhoto", botToken);
+                String filename = imageResource.getFilename() != null ? imageResource.getFilename().toLowerCase() : "";
+                boolean isPdf = filename.endsWith(".pdf") || filename.endsWith(".doc") || filename.endsWith(".docx");
+
+                String endpoint = isPdf ? "sendDocument" : "sendPhoto";
+                String fileField = isPdf ? "document" : "photo";
+
+                String url = String.format("https://api.telegram.org/bot%s/%s", botToken, endpoint);
 
                 HttpHeaders headers = new HttpHeaders();
                 headers.setContentType(MediaType.MULTIPART_FORM_DATA);
@@ -173,7 +180,7 @@ public class TelegramService {
                 MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
                 body.add("chat_id", chatId);
                 body.add("caption", caption);
-                body.add("photo", imageResource);
+                body.add(fileField, imageResource);
                 body.add("parse_mode", "Markdown");
 
                 HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
@@ -181,7 +188,7 @@ public class TelegramService {
                 String response = restTemplate.postForObject(url, requestEntity, String.class);
                 saveLog(response, chatId);
             } catch (Exception e) {
-                log.warn("Failed to send Telegram photo: {}", e.getMessage());
+                log.warn("Failed to send Telegram file/photo: {}", e.getMessage());
             } finally {
                 org.slf4j.MDC.clear();
             }

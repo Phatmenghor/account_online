@@ -160,7 +160,7 @@ public class CustomerImageStorageComponent {
             }
         }
 
-        // 4. Prefix/Timestamped matching (e.g. searching for selfie_010876574 matches selfie_010876574_20260730132357083_6e3edb.jpg)
+        // 4. Prefix/Timestamped matching (e.g. searching for selfie_010876574 matches selfie_010876574_20260730132357083.jpg)
         for (Path dir : candidateDirs) {
             if (Files.exists(dir)) {
                 Path latest = findLatestFileRecursive(dir, baseName);

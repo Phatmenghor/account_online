@@ -208,7 +208,7 @@ export const MasterDataFields: React.FC<MasterDataFieldsProps> = ({
 
       {/* Account Type */}
       {!isPublic && (
-        <div className="space-y-1 md:col-span-2">
+        <div className="space-y-1">
           {renderLabel("accountType")}
           <Select
             value={selectedCategory?.id.toString() || ""}
@@ -229,7 +229,7 @@ export const MasterDataFields: React.FC<MasterDataFieldsProps> = ({
             <SelectContent>
               {accOnlineCategories.map((cat) => (
                 <SelectItem key={cat.id} value={cat.id.toString()}>
-                  {cat.lookupId} - {cat.lookupName}
+                  {cat.lookupDesc || cat.lookupName || cat.lookupCode}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -240,8 +240,8 @@ export const MasterDataFields: React.FC<MasterDataFieldsProps> = ({
         </div>
       )}
 
-      {/* Relationship Manager / Staff ID (Single full-width row) */}
-      <div className="md:col-span-2 space-y-1">
+      {/* Relationship Manager / Staff ID */}
+      <div className={`space-y-1 ${isPublic ? "md:col-span-2" : ""}`}>
         {renderLabel(isPublic ? "referralId" : "relationshipManager")}
         <div className="relative">
           <Input

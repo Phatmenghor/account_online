@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { TabsContent } from "@/components/ui/tabs";
-import { Save, Loader2, Eye, EyeOff } from "lucide-react";
+import { Save, Loader2, Eye, EyeOff, ShieldCheck, Key } from "lucide-react";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -59,14 +59,14 @@ function PasswordInput({
         type={show ? "text" : "password"}
         placeholder={placeholder}
         disabled={disabled}
-        className="pr-10 h-11"
+        className="pr-10 h-10 text-xs sm:text-sm rounded-xl"
         {...field}
       />
       <button
         type="button"
         tabIndex={-1}
         onClick={() => setShow((v) => !v)}
-        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors focus:outline-none"
       >
         {show ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
       </button>
@@ -101,25 +101,34 @@ export default function ChangePasswordTab({ value }: { value: string }) {
   }
 
   return (
-    <TabsContent value={value}>
-      <Card className="border-enhanced">
-        <CardHeader>
-          <CardTitle>Change Password</CardTitle>
-          <CardDescription>
-            Update your password to keep your account secure.
-          </CardDescription>
+    <TabsContent value={value} className="mt-4 focus-visible:outline-none">
+      <Card className="rounded-2xl border border-slate-200/80 bg-white shadow-xs p-2 sm:p-4">
+        <CardHeader className="pb-4">
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shadow-2xs">
+              <Key className="h-5 w-5" />
+            </div>
+            <div>
+              <CardTitle className="text-lg font-bold text-slate-900">Change Password</CardTitle>
+              <CardDescription className="text-xs text-slate-500 mt-0.5">
+                Update your account password to keep your profile secure.
+              </CardDescription>
+            </div>
+          </div>
         </CardHeader>
 
         <CardContent>
           <Form {...form}>
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
               {/* Current password — full width */}
               <FormField
                 control={form.control}
                 name="currentPassword"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Current Password <span className="text-destructive">*</span></FormLabel>
+                    <FormLabel className="text-xs font-semibold text-slate-700">
+                      Current Password <span className="text-rose-500">*</span>
+                    </FormLabel>
                     <FormControl>
                       <PasswordInput
                         id="current-password"
@@ -128,7 +137,7 @@ export default function ChangePasswordTab({ value }: { value: string }) {
                         field={field}
                       />
                     </FormControl>
-                    <FormMessage />
+                    <FormMessage className="text-xs text-rose-500" />
                   </FormItem>
                 )}
               />
@@ -140,7 +149,9 @@ export default function ChangePasswordTab({ value }: { value: string }) {
                   name="newPassword"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>New Password <span className="text-destructive">*</span></FormLabel>
+                      <FormLabel className="text-xs font-semibold text-slate-700">
+                        New Password <span className="text-rose-500">*</span>
+                      </FormLabel>
                       <FormControl>
                         <PasswordInput
                           id="new-password"
@@ -149,7 +160,7 @@ export default function ChangePasswordTab({ value }: { value: string }) {
                           field={field}
                         />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className="text-xs text-rose-500" />
                     </FormItem>
                   )}
                 />
@@ -159,7 +170,9 @@ export default function ChangePasswordTab({ value }: { value: string }) {
                   name="confirmNewPassword"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Confirm New Password <span className="text-destructive">*</span></FormLabel>
+                      <FormLabel className="text-xs font-semibold text-slate-700">
+                        Confirm New Password <span className="text-rose-500">*</span>
+                      </FormLabel>
                       <FormControl>
                         <PasswordInput
                           id="confirm-new-password"
@@ -168,22 +181,26 @@ export default function ChangePasswordTab({ value }: { value: string }) {
                           field={field}
                         />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className="text-xs text-rose-500" />
                     </FormItem>
                   )}
                 />
               </div>
 
-              <div className="flex justify-end pt-2 border-t">
+              <div className="flex justify-end pt-4 border-t border-slate-200/80">
                 <Button
                   type="submit"
-                  className="w-full sm:w-auto"
+                  className="h-9.5 px-5 text-xs font-semibold rounded-xl gap-2 bg-primary hover:bg-primary/90 text-white shadow-sm"
                   disabled={isSubmitting || !isDirty}
                 >
                   {isSubmitting ? (
-                    <><Loader2 className="h-4 w-4 animate-spin mr-2" />Saving...</>
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" /> Saving...
+                    </>
                   ) : (
-                    <><Save className="h-4 w-4 mr-2" />Update Password</>
+                    <>
+                      <Save className="h-4 w-4" /> Update Password
+                    </>
                   )}
                 </Button>
               </div>
@@ -194,5 +211,3 @@ export default function ChangePasswordTab({ value }: { value: string }) {
     </TabsContent>
   );
 }
-
-

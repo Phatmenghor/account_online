@@ -33,7 +33,7 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<ApiResponse<AuthResponseDTO>> login(@Valid @RequestBody LoginRequestDto loginDto) {
-        log.info("Authentication attempt for user: {}", loginDto.getUsername());
+        log.info("[AuthController] Authentication attempt for username={}", loginDto.getUsername());
         AuthResponseDTO authResponse = authService.login(loginDto);
         return ResponseEntity.ok(ApiResponse.success(ResponseMessage.LOGIN_SUCCESS, authResponse));
     }
@@ -41,7 +41,7 @@ public class AuthController {
     @PostMapping("/register/public")
     public ResponseEntity<ApiResponse<AuthResponseDTO>> register(
             @Valid @RequestBody RegisterInitiateDto dto) {
-        log.info("Registration request for ID Card: {}", dto.getIdCard());
+        log.info("[AuthController] Registration request for idCard={}", dto.getIdCard());
         AuthResponseDTO authResponse = authService.register(dto);
         return ResponseEntity.ok(ApiResponse.success("Registration completed successfully.", authResponse));
     }
@@ -50,7 +50,7 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<ApiResponse<UserResponseDto>> createUserByAdmin(
             @Valid @RequestBody RegisterRequestDto registerDto) {
-        log.info("Admin user creation for: {}", registerDto.getUsername());
+        log.info("[AuthController] Admin user creation request for username={}", registerDto.getUsername());
         UserResponseDto userResponse = authService.createUserByAdmin(registerDto);
         return ResponseEntity.ok(ApiResponse.success("User created successfully.", userResponse));
     }
@@ -58,17 +58,20 @@ public class AuthController {
     @PostMapping("/logout")
     public ResponseEntity<ApiResponse<String>> logout() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        authService.logout(auth.getName());
+        log.info("[AuthController] User logout request. username={}", auth != null ? auth.getName() : "anonymous");
+        authService.logout(auth != null ? auth.getName() : "");
         return ResponseEntity.ok(ApiResponse.success(ResponseMessage.LOGOUT_SUCCESS, null));
     }
 
     @PostMapping("/roles")
     public ResponseEntity<ApiResponse<List<Map<String, Object>>>> getAvailableRoles() {
+        log.info("[AuthController] Fetching available user roles");
         return ResponseEntity.ok(ApiResponse.success(ResponseMessage.ROLES_RETRIEVED, authService.getAvailableRoles()));
     }
 
     @PostMapping("/validate-token")
     public ResponseEntity<ApiResponse<Boolean>> validateToken() {
+        log.info("[AuthController] Validating authentication token");
         boolean isValid = authService.validateToken();
         return ResponseEntity.ok(isValid
                 ? ApiResponse.success(ResponseMessage.TOKEN_VALID, true)
@@ -79,7 +82,8 @@ public class AuthController {
     public ResponseEntity<ApiResponse<UserResponseDto>> updateUserProfile(
             @Valid @RequestBody UpdateUserRequestDto requestDto) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        UserResponseDto userResponse = authService.updateUserProfile(requestDto, authentication.getName());
+        log.info("[AuthController] Profile update request for username={}", authentication != null ? authentication.getName() : "anonymous");
+        UserResponseDto userResponse = authService.updateUserProfile(requestDto, authentication != null ? authentication.getName() : "");
         return ResponseEntity.ok(ApiResponse.success(ResponseMessage.PROFILE_UPDATED, userResponse));
     }
 }

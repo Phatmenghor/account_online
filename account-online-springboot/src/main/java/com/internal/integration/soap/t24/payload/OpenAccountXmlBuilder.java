@@ -27,31 +27,35 @@ public class OpenAccountXmlBuilder {
         String branchCode = xmlUtils.formatCompanyCode(request.getBranchCode(), defaultProperties.getBranchCode());
         String maritalStatus = xmlUtils.mapMaritalStatus(request.getMaritalStatus());
 
-        boolean isStaffRequest = xmlUtils.isAuthenticated();
-        String relationManager = isStaffRequest ? xmlUtils.getOrDefault(request.getRelationManager(), "") : "";
-        String loanOfficer = isStaffRequest ? xmlUtils.getOrDefault(request.getLoanOfficer(), "") : "";
-        String staff = isStaffRequest ? xmlUtils.getOrDefault(request.getStaff(), "") : "";
-        String referralBy = isStaffRequest ? xmlUtils.getOrDefault(request.getReferralBy(), "") : "";
+        String relationManager = xmlUtils.getOrDefault(request.getRelationManager(), xmlUtils.getOrDefault(request.getReferralId(), ""));
+        String loanOfficer = xmlUtils.getOrDefault(request.getLoanOfficer(), "");
+        String staff = xmlUtils.getOrDefault(request.getStaff(), "");
+        String referralBy = xmlUtils.getOrDefault(request.getReferralBy(), "");
 
         String legalAddress = xmlUtils.toSwiftSafe(xmlUtils.getOrDefault(request.getLegalAddress(), ""));
 
-        String custProvince = xmlUtils.getOrDefault(request.getCustomerCurrentProvince(), "12");
-        String custDistrict = xmlUtils.getOrDefault(request.getCustomerCurrentDistrict(), "1201");
-        String custCommune = xmlUtils.getOrDefault(request.getCustomerCurrentCommune(), "120101");
-        String custVillage = xmlUtils.getOrDefault(request.getCustomerCurrentVillage(), "12010101");
+        String custProvince = xmlUtils.safe(request.getCustomerCurrentProvince());
+        String custDistrict = xmlUtils.safe(request.getCustomerCurrentDistrict());
+        String custCommune = xmlUtils.safe(request.getCustomerCurrentCommune());
+        String custVillage = xmlUtils.safe(request.getCustomerCurrentVillage());
 
-        String pobProvince = xmlUtils.getOrDefault(request.getCustomerPobProvince(), custProvince);
-        String pobDistrict = xmlUtils.getOrDefault(request.getCustomerPobDistrict(), custDistrict);
-        String pobCommune = xmlUtils.getOrDefault(request.getCustomerPobCommune(), custCommune);
-        String pobVillage = xmlUtils.getOrDefault(request.getCustomerPobVillage(), custVillage);
+        String pobProvince = xmlUtils.safe(request.getCustomerPobProvince());
+        String pobDistrict = xmlUtils.safe(request.getCustomerPobDistrict());
+        String pobCommune = xmlUtils.safe(request.getCustomerPobCommune());
+        String pobVillage = xmlUtils.safe(request.getCustomerPobVillage());
 
         String dateOfBirth = xmlUtils.formatDateForT24(request.getDateOfBirth());
         String legalIssueDate = xmlUtils.formatLegalIssueDateWithDefault(request.getLegalIssueDate());
+        String legalExpDate = xmlUtils.formatLegalExpireDateWithDefault(request.getLegalExpireDate());
+        String gender = xmlUtils.mapGender(request.getGender());
+        String legalDocType = xmlUtils.mapLegalDocType(request.getLegalDocType(), true);
 
         String title = xmlUtils.getOrDefault(request.getTitle(), xmlUtils.determineTitle(request.getGender()));
 
         String englishFullName = xmlUtils.safe(request.getFamilyName()) + " " + xmlUtils.safe(request.getGivenName());
         String khmerFullName = xmlUtils.safe(request.getLastNameKh()) + " " + xmlUtils.safe(request.getFirstNameKh());
+
+        String holderName = xmlUtils.getOrDefault(request.getLegalHolderName(), xmlUtils.getOrDefault(englishFullName.trim(), defaultProperties.getLegalHolderName()));
 
         return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
                 + "<soapenv:Envelope xmlns:soapenv=\"" + AppConstants.SOAP_ENV_NS + "\" "
@@ -95,11 +99,11 @@ public class OpenAccountXmlBuilder {
                 // Legal identification
                 + "<cus:gLEGALID g=\"1\"><cus:mLEGALID m=\"1\">"
                 + "<cus:LegalId>" + request.getLegalId() + "</cus:LegalId>"
-                + "<cus:LegalDocName>" + request.getLegalDocType() + "</cus:LegalDocName>"
-                + "<cus:LegalHolderName>" + defaultProperties.getLegalHolderName() + "</cus:LegalHolderName>"
-                + "<cus:LegalIssAuth>" + xmlUtils.getOrDefault(request.getLegalIssAuth(), request.getGivenName()) + "</cus:LegalIssAuth>"
+                + "<cus:LegalDocName>" + legalDocType + "</cus:LegalDocName>"
+                + "<cus:LegalHolderName>" + holderName + "</cus:LegalHolderName>"
+                + "<cus:LegalIssAuth>" + xmlUtils.getOrDefault(request.getLegalIssAuth(), xmlUtils.getOrDefault(request.getGivenName(), "NID")) + "</cus:LegalIssAuth>"
                 + "<cus:LegalIssDate>" + legalIssueDate + "</cus:LegalIssDate>"
-                + "<cus:LegalExpDate>" + request.getLegalExpireDate() + "</cus:LegalExpDate>"
+                + (legalExpDate == null || legalExpDate.isBlank() ? "<cus:LegalExpDate/>" : "<cus:LegalExpDate>" + legalExpDate + "</cus:LegalExpDate>")
                 + "</cus:mLEGALID></cus:gLEGALID>"
 
                 // Language
@@ -112,7 +116,7 @@ public class OpenAccountXmlBuilder {
                 + "<cus:TITLE>" + title + "</cus:TITLE>"
                 + "<cus:GIVENNAMES>" + request.getGivenName() + "</cus:GIVENNAMES>"
                 + "<cus:FAMILYNAME>" + request.getFamilyName() + "</cus:FAMILYNAME>"
-                + "<cus:Gender>" + request.getGender() + "</cus:Gender>"
+                + "<cus:Gender>" + gender + "</cus:Gender>"
                 + "<cus:DateofBirth>" + dateOfBirth + "</cus:DateofBirth>"
                 + "<cus:MaritalStatus>" + maritalStatus + "</cus:MaritalStatus>"
 
@@ -155,10 +159,14 @@ public class OpenAccountXmlBuilder {
 
         String username = cpbProperties.getT24().getUsername();
         String password = cpbProperties.getT24().getPassword();
-        String branchCode = xmlUtils.getOrDefault(request.getBranchCode(), defaultProperties.getBranchCode());
+        String branchCode = xmlUtils.formatCompanyCode(request.getBranchCode(), defaultProperties.getBranchCode());
 
         String englishFullName = xmlUtils.safe(request.getFamilyName()) + " " + xmlUtils.safe(request.getGivenName());
-        String khmerFullName = xmlUtils.safe(request.getLastNameKh() + " " + request.getFirstNameKh());
+        String khmerFullName = xmlUtils.safe(request.getLastNameKh()) + " " + xmlUtils.safe(request.getFirstNameKh());
+
+        String productCode = (request.getProductAccount() != null && !request.getProductAccount().isBlank())
+                ? request.getProductAccount().trim()
+                : AppConstants.PRODUCT_CODE;
 
         return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
                 + "<soapenv:Envelope xmlns:soapenv=\"" + AppConstants.SOAP_ENV_NS + "\" "
@@ -189,8 +197,8 @@ public class OpenAccountXmlBuilder {
                 + "</aaar:mCUSTOMER>"
                 + "</aaar:gCUSTOMER>"
 
-                // PRODUCT + CURRENCY — Direct Standard Product (SAVE.ACCT.ONLINE)
-                + "<aaar:Product>" + AppConstants.PRODUCT_CODE + "</aaar:Product>"
+                // PRODUCT + CURRENCY — Category / Product lookup code
+                + "<aaar:Product>" + productCode + "</aaar:Product>"
                 + "<aaar:Currency>" + currency + "</aaar:Currency>"
 
                 // PROPERTY BLOCK

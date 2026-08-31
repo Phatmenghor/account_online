@@ -30,33 +30,33 @@ public class AmlController {
 
     @PostMapping("/all-history")
     public ResponseEntity<ApiResponse<AllAmlHistoryResponseDto>> getAllHistory(@Valid @RequestBody AllAmlHistoryRequestDto request) {
-        log.info("Fetching all AML history");
+        log.info("[AmlController] Fetching all AML history");
         AllAmlHistoryResponseDto list = service.getAllAmlHistory(request);
-        log.info("Successfully retrieved {} AML history records", list.getContent() != null ? list.getContent().size() : 0);
+        log.info("[AmlController] Successfully retrieved {} AML history records", list.getContent() != null ? list.getContent().size() : 0);
         return ResponseEntity.ok(ApiResponse.success(ResponseMessage.AML_HISTORY_RETRIEVED, list));
     }
 
     @PostMapping("/all-status")
     public ResponseEntity<ApiResponse<AllAmlResponseDto>> getAllStatus(@Valid @RequestBody AllAmlRequestDto request) {
-        log.info("Fetching all AML statuses with search: {}", request.getSearch());
+        log.info("[AmlController] Fetching all AML statuses. search={}", request.getSearch());
         AllAmlResponseDto list = service.getAllAml(request);
-        log.info("Successfully retrieved {} AML status records", list.getContent() != null ? list.getContent().size() : 0);
+        log.info("[AmlController] Successfully retrieved {} AML status records", list.getContent() != null ? list.getContent().size() : 0);
         return ResponseEntity.ok(ApiResponse.success(ResponseMessage.AML_STATUSES_RETRIEVED, list));
     }
 
     @PostMapping("/status-by-id/{id}")
     public ResponseEntity<ApiResponse<AmlStatusDto>> getAmlById(@PathVariable Long id) {
-        log.info("Fetching AML status by id: {}", id);
+        log.info("[AmlController] Fetching AML status by id={}", id);
         AmlStatusDto amlStatusDto = service.getAmlById(id);
-        log.info("Successfully retrieved AML status record for id: {}", id);
+        log.info("[AmlController] Successfully retrieved AML status record. id={}", id);
         return ResponseEntity.ok(ApiResponse.success(ResponseMessage.AML_STATUS_RETRIEVED, amlStatusDto));
     }
 
     @PostMapping("/history-by-id/{id}")
     public ResponseEntity<ApiResponse<AmlHistoryDto>> getAmlHistoryById(@PathVariable Long id) {
-        log.info("Fetching AML history by id: {}", id);
+        log.info("[AmlController] Fetching AML history by id={}", id);
         AmlHistoryDto amlStatusDto = service.getAmlHistoryById(id);
-        log.info("Successfully retrieved AML history record for id: {}", id);
+        log.info("[AmlController] Successfully retrieved AML history record. id={}", id);
         return ResponseEntity.ok(ApiResponse.success(ResponseMessage.AML_STATUS_RETRIEVED, amlStatusDto));
     }
 
@@ -65,9 +65,9 @@ public class AmlController {
             @PathVariable Long id,
             @Valid @RequestBody UpdateAmlStatusDto req
     ) {
-        log.info("Updating AML status for ID: {} to {}", id, req.getStatus());
+        log.info("[AmlController] Updating AML status. id={}, newStatus={}", id, req.getStatus());
         AmlStatusDto updatedStatus = service.updateAmlStatus(id, req);
-        log.info("AML status updated successfully: {}", updatedStatus.getId());
+        log.info("[AmlController] AML status updated successfully. id={}", updatedStatus.getId());
         return ResponseEntity.ok(ApiResponse.success(
                 ResponseMessage.AML_STATUS_UPDATED, updatedStatus
         ));

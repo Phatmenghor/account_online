@@ -37,7 +37,7 @@ public class OtpController {
     public ResponseEntity<ApiResponse<PhoneCheckResponse>> checkPhone(
             @Valid @RequestBody PhoneCheckRequest request) {
 
-        log.info("API: Phone pre-check request for phone: {}", request.getPhone());
+        log.info("[OtpController] Phone pre-check request. phone={}", request.getPhone());
         PhoneCheckResponse response = phoneCheckService.checkPhone(request.getPhone());
 
         String message = response.getHasAccount()
@@ -51,7 +51,7 @@ public class OtpController {
     public ResponseEntity<ApiResponse<SendOtpResponse>> sendOtp(
             @Valid @RequestBody SendOtpRequest request) {
 
-        log.info("API: Send OTP request - Phone: {}", request.getPhone());
+        log.info("[OtpController] Send OTP request. phone={}", request.getPhone());
         SendOtpResponse response = otpService.sendOtp(request);
 
         return ResponseEntity.ok(
@@ -63,7 +63,7 @@ public class OtpController {
     public ResponseEntity<ApiResponse<VerifyOtpResponse>> verifyOtp(
             @Valid @RequestBody VerifyOtpRequest request) {
 
-        log.info("API: Verify OTP request - Phone: {}", request.getPhone());
+        log.info("[OtpController] Verify OTP request. phone={}", request.getPhone());
         VerifyOtpResponse response = otpService.verifyOtp(request);
 
         return ResponseEntity.ok(

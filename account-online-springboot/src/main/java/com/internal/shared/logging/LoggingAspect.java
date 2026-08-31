@@ -23,6 +23,9 @@ public class LoggingAspect {
     @Pointcut("within(@org.springframework.stereotype.Service *)")
     public void servicePointcut() {}
 
+    @Pointcut("within(@org.springframework.stereotype.Component *) && !within(com.internal.shared.logging..*) && !within(com.internal.config..*)")
+    public void componentPointcut() {}
+
     @Around("controllerPointcut()")
     public Object logController(ProceedingJoinPoint joinPoint) throws Throwable {
         HttpServletRequest request = getRequest();
@@ -31,38 +34,42 @@ public class LoggingAspect {
         String username = getUsername();
         String methodName = joinPoint.getSignature().toShortString();
 
-        log.debug("Received {} request to endpoint={} [user={}, method={}]", method, uri, username, methodName);
+        log.info("[Controller] Incoming {} request. endpoint={}, user={}, handler={}", method, uri, username, methodName);
 
         long start = System.currentTimeMillis();
         try {
             Object result = joinPoint.proceed();
             long duration = System.currentTimeMillis() - start;
-            log.debug("Request completed successfully endpoint={} [duration={}ms, user={}]", uri, duration, username);
+            log.info("[Controller] Request completed successfully. endpoint={}, durationMs={}, user={}", uri, duration, username);
             return result;
         } catch (Throwable ex) {
             long duration = System.currentTimeMillis() - start;
-            log.warn("Request failed endpoint={} [duration={}ms, user={}] - {}", uri, duration, username, ex.getMessage());
+            log.error("[Controller] Request failed with exception. endpoint={}, durationMs={}, user={}, error={}", uri, duration, username, ex.getMessage(), ex);
             throw ex;
         }
     }
 
-    @Around("servicePointcut()")
+    @Around("servicePointcut() || componentPointcut()")
     public Object logService(ProceedingJoinPoint joinPoint) throws Throwable {
         String methodName = joinPoint.getSignature().toShortString();
         Object[] args = joinPoint.getArgs();
         String sanitizedArgs = sanitizeArgs(args);
 
-        log.debug("Entering service method: {} with args={}", methodName, sanitizedArgs);
+        if (log.isDebugEnabled()) {
+            log.debug("[Service] Entering service. method={}, args={}", methodName, sanitizedArgs);
+        }
 
         long start = System.currentTimeMillis();
         try {
             Object result = joinPoint.proceed();
             long duration = System.currentTimeMillis() - start;
-            log.debug("Exiting service method: {} [duration={}ms, success=true]", methodName, duration);
+            if (log.isDebugEnabled()) {
+                log.debug("[Service] Exiting service. method={}, durationMs={}", methodName, duration);
+            }
             return result;
         } catch (Throwable ex) {
             long duration = System.currentTimeMillis() - start;
-            log.debug("Exception in service method: {} [duration={}ms] - {}", methodName, duration, ex.getMessage());
+            log.error("[Service] Service execution failed. method={}, durationMs={}, error={}", methodName, duration, ex.getMessage(), ex);
             throw ex;
         }
     }

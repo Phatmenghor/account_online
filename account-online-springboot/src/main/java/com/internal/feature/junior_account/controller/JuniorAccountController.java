@@ -45,7 +45,7 @@ public class JuniorAccountController {
     @PostMapping("/api/v1/public/junior-open-account/process")
     public Mono<ResponseEntity<ApiResponse<OpenAccountResponseDto>>> processJuniorAccountOpening(
             @Valid @RequestBody JuniorCustomerRequest request) {
-        log.info("Received Public Junior Account Opening request | Has NID: {} | Legal ID: {}",
+        log.info("[JuniorAccountController] Received Public Junior Account Opening request. hasNid={}, legalId={}",
                 request.getHasNid(), request.getLegalId());
 
         String traceId = org.slf4j.MDC.get("traceId");
@@ -54,9 +54,18 @@ public class JuniorAccountController {
                 .map(response -> {
                     if (traceId != null) org.slf4j.MDC.put("traceId", traceId);
                     try {
-                        log.info("Junior Account opened successfully | Legal ID: {} | CIF: {}",
+                        log.info("[JuniorAccountController] Junior Account opened successfully. legalId={}, cif={}",
                                 response.getLegalId(), response.getCif());
                         return ResponseEntity.ok(ApiResponse.success("Junior Account opened successfully", response));
+                    } finally {
+                        org.slf4j.MDC.clear();
+                    }
+                })
+                .doOnError(ex -> {
+                    if (traceId != null) org.slf4j.MDC.put("traceId", traceId);
+                    try {
+                        log.error("[JuniorAccountController] Junior Account opening failed. legalId={}, error={}",
+                                request.getLegalId(), ex.getMessage(), ex);
                     } finally {
                         org.slf4j.MDC.clear();
                     }

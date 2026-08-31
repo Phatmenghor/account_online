@@ -80,6 +80,14 @@ export const PersonalDetailsFields: React.FC<PersonalDetailsFieldsProps> = ({
     </div>
   );
 
+  const getPlaceholder = (labelKey: string) => {
+    const labelText = translate(labelKey);
+    if (!labelText || labelText === labelKey) return "";
+    if (labelText.startsWith("សូម") || labelText.startsWith("Enter")) return labelText;
+    const isKhmer = /[\u1780-\u17FF]/.test(labelText);
+    return isKhmer ? `សូមបញ្ចូល ${labelText}` : `Enter ${labelText}`;
+  };
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       {/* First Name (KH) */}
@@ -87,7 +95,7 @@ export const PersonalDetailsFields: React.FC<PersonalDetailsFieldsProps> = ({
         {renderLabel("firstNameKh")}
         <Input
           id="lastNameKh"
-          placeholder={translate("firstNameKh")}
+          placeholder={getPlaceholder("firstNameKh")}
           value={formData.lastNameKh}
           onChange={(e) => handleInputChange("lastNameKh", e.target.value)}
           className={`w-full h-9 text-sm rounded-xl ${validationErrors.lastNameKh ? "border-red-400 focus-visible:ring-red-300" : ""}`}
@@ -103,7 +111,7 @@ export const PersonalDetailsFields: React.FC<PersonalDetailsFieldsProps> = ({
         {renderLabel("lastNameKH")}
         <Input
           id="firstNameKh"
-          placeholder={translate("lastNameKH")}
+          placeholder={getPlaceholder("lastNameKH")}
           value={formData.firstNameKh}
           onChange={(e) => handleInputChange("firstNameKh", e.target.value)}
           className={`w-full h-9 text-sm rounded-xl ${validationErrors.firstNameKh ? "border-red-400 focus-visible:ring-red-300" : ""}`}
@@ -119,7 +127,7 @@ export const PersonalDetailsFields: React.FC<PersonalDetailsFieldsProps> = ({
         {renderLabel("familyNameEn")}
         <Input
           id="lastNameEn"
-          placeholder={translate("familyNameEn")}
+          placeholder={getPlaceholder("familyNameEn")}
           value={formData.lastNameEn}
           onChange={(e) => handleInputChange("lastNameEn", e.target.value)}
           className={`w-full h-9 text-sm rounded-xl ${validationErrors.lastNameEn ? "border-red-400 focus-visible:ring-red-300" : ""}`}
@@ -135,7 +143,7 @@ export const PersonalDetailsFields: React.FC<PersonalDetailsFieldsProps> = ({
         {renderLabel("givenNameEn")}
         <Input
           id="firstNameEn"
-          placeholder={translate("givenNameEn")}
+          placeholder={getPlaceholder("givenNameEn")}
           value={formData.firstNameEn}
           onChange={(e) => handleInputChange("firstNameEn", e.target.value)}
           className={`w-full h-9 text-sm rounded-xl ${validationErrors.firstNameEn ? "border-red-400 focus-visible:ring-red-300" : ""}`}
@@ -187,11 +195,11 @@ export const PersonalDetailsFields: React.FC<PersonalDetailsFieldsProps> = ({
         {renderLabel("legalId")}
         <Input
           id="idNumber"
-          placeholder={translate("legalId")}
+          placeholder={getPlaceholder("legalId")}
           value={formData.idNumber}
           onChange={(e) => handleInputChange("idNumber", e.target.value)}
           className={`w-full h-9 text-sm rounded-xl ${validationErrors.idNumber ? "border-red-400 focus-visible:ring-red-300" : ""}`}
-          disabled={isLoading || isValidating || isSubmitting}
+          disabled={isLoading || isValidating || isSubmitting || isNidExtracted}
         />
         {validationErrors.idNumber && (
           <p className="text-xs text-red-500">{translate("err_idNumber")}</p>
@@ -203,7 +211,7 @@ export const PersonalDetailsFields: React.FC<PersonalDetailsFieldsProps> = ({
         {renderLabel("pob")}
         <Input
           id="pob"
-          placeholder={translate("pob")}
+          placeholder={getPlaceholder("pob")}
           value={formData.pob}
           onChange={(e) => handleInputChange("pob", e.target.value)}
           className={`w-full h-9 text-sm rounded-xl ${validationErrors.pob ? "border-red-400 focus-visible:ring-red-300" : ""}`}
@@ -219,7 +227,7 @@ export const PersonalDetailsFields: React.FC<PersonalDetailsFieldsProps> = ({
         {renderLabel("address")}
         <Input
           id="address"
-          placeholder={translate("address")}
+          placeholder={getPlaceholder("address")}
           value={formData.address}
           onChange={(e) => handleInputChange("address", e.target.value)}
           className={`w-full h-9 text-sm rounded-xl ${validationErrors.address ? "border-red-400 focus-visible:ring-red-300" : ""}`}

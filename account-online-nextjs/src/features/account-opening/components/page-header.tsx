@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import { getUserInfo } from "@/utils/local-storage/userInfo";
 import { clearUserInfo } from "@/utils/local-storage/userInfo";
-import { logoutToken } from "@/utils/local-storage/token";
+import { logoutToken, isAuthenticated } from "@/utils/local-storage/token";
 import { logoutRole } from "@/utils/local-storage/roles";
 import { UserModel } from "@/features/user/types/user.response";
 import LanguageSwitcher from "@/components/shared/common/language-switcher";
@@ -61,6 +61,14 @@ export const PageHeader = () => {
     router.replace(ROUTES.AUTH.LOGIN);
   }
 
+  const handleLogoClick = () => {
+    if (isAuthenticated() || user) {
+      router.push(ROUTES.STAFF.OPENING);
+    } else {
+      router.push("/");
+    }
+  };
+
   const initials = user?.fullName
     ? user.fullName.split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase()
     : user?.idCard?.[0]?.toUpperCase() ?? "U";
@@ -80,7 +88,12 @@ export const PageHeader = () => {
           }`}
         >
           {/* Logo */}
-          <div className="flex items-center flex-shrink-0">
+          <div
+            onClick={handleLogoClick}
+            className="flex items-center flex-shrink-0 cursor-pointer hover:opacity-90 transition-opacity"
+            role="button"
+            tabIndex={0}
+          >
             <img src="/app/CP-bank-Logo.png" alt="CP Bank" className="h-9 sm:h-11 w-auto object-contain" />
           </div>
 
@@ -124,7 +137,7 @@ export const PageHeader = () => {
                     {/* Navigation items */}
                     <div className="p-2 border-b border-slate-100 space-y-0.5">
                       <Link
-                        href={ROUTES.MY_PROFILE}
+                        href={`${ROUTES.MY_PROFILE}?tab=account`}
                         onClick={() => setOpen(false)}
                         className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors duration-150 font-medium"
                       >

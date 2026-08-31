@@ -23,12 +23,7 @@ export default function DashboardLayout({
   const pathname = usePathname();
   const router = useRouter();
 
-  // Guard: block unauthenticated users and STAFF from all dashboard pages
-  useEffect(() => {
-    if (!isAuthenticated() || getRoles() === "STAFF") {
-      router.replace(ROUTES.AUTH.LOGIN);
-    }
-  }, [pathname, router]);
+
 
   // On mount: fetch fresh profile to catch admin-reset or expired-password situations
   useEffect(() => {

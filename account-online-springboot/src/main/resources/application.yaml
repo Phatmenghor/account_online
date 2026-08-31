@@ -2,6 +2,15 @@
 # BASE CONFIGURATION — truly shared settings only
 # Default active profile: prod
 # ==============================================================
+server:
+  max-http-header-size: 10MB
+  tomcat:
+    max-http-header-size: 10MB
+    max-http-request-header-size: 10MB
+    connection-timeout: 90000
+    max-http-form-post-size: 200MB
+    max-swallow-size: -1
+
 spring:
   profiles:
     active: uat
@@ -59,21 +68,6 @@ spring:
       pool-name: PostgreSQL-Pool
       connection-test-query: "SELECT 1"
 
-  mail:
-    host: 10.18.1.204
-    port: 25
-    username: ithelpdesk@cambodiapostbank.com.kh
-    password: ${SMTP_PASSWORD:}
-    properties:
-      mail:
-        smtp:
-          auth: true
-          starttls:
-            enable: false
-          ssl:
-            trust: "*"
-    default-encoding: UTF-8
-
   thymeleaf:
     cache: false
     prefix: classpath:/templates/
@@ -89,11 +83,6 @@ spring:
         thread-name-prefix: async-request-log-
     scheduling:
       enabled: true
-
-email:
-  sender:
-    address: ithelpdesk@cambodiapostbank.com.kh
-    enabled: true
 
 file:
   upload:
@@ -231,6 +220,8 @@ management:
   health:
     db:
       enabled: true
+    mail:
+      enabled: false
   metrics:
     export:
       simple:
@@ -238,4 +229,8 @@ management:
 
 telegram:
   bot:
+    token: "${TELEGRAM_BOT_TOKEN:8854582996:AAEatNZ3VV0iOCFd6-A_XD0qAq3Vm9HNm68}"
+    dev-chat-id: "${TELEGRAM_DEV_CHAT_ID:-1002740302492}"
+    monitor-chat-id: "${TELEGRAM_MONITOR_CHAT_ID:-5590655829}"
+    junior-chat-id: "${TELEGRAM_JUNIOR_CHAT_ID:-5590655829}"
     message-retention-days: 30

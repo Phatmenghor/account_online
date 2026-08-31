@@ -1,98 +1,106 @@
 package com.internal.feature.open_account.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Data
+@Getter
+@Setter
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class CustomerAmlRequest {
 
-    @JsonProperty("CUSTOMER_ID")
+    @JsonProperty("customer_id")
     private String customerId;
 
-    @JsonProperty("CUST_CREATE_DATE")
+    @JsonProperty("cust_create_date")
     private String custCreateDate;
 
-    @JsonProperty("CUSTOMER_TYPE")
+    @JsonProperty("customer_type")
     private String customerType;
 
-    @JsonProperty("CUST_NAME")
+    @JsonProperty("cust_name")
     private String custName;
 
-    @JsonProperty("SHORT_NAME")
+    @JsonProperty("short_name")
     private String shortName;
 
-    @JsonProperty("GIVEN_NAME")
+    @JsonProperty("given_name")
     private String givenName;
 
-    @JsonProperty("FAMILY_NAME")
+    @JsonProperty("family_name")
     private String familyName;
 
-    @JsonProperty("GENDER")
+    @JsonProperty("gender")
     private String gender;
 
-    @JsonProperty("DATE_OF_BIRTH")
+    @JsonProperty("date_of_birth")
     private String dateOfBirth;
 
-    @JsonProperty("NATIONALITY")
+    @JsonProperty("nationality")
     private String nationality;
 
-    @JsonProperty("ADDRESS")
+    @JsonProperty("address")
     private String legalAddress;
 
-    @JsonProperty("CUST_DISTRICT")
+    @JsonProperty("cust_district")
     private String custDistrict;
 
-    @JsonProperty("CUST_PROVINCE")
+    @JsonProperty("cust_province")
     private String custProvince;
 
-    @JsonProperty("COUNTRY")
+    @JsonProperty("country")
     private String country;
 
-    @JsonProperty("SMS_1")
+    @JsonProperty("sms_1")
     private String sms1;
 
-    @JsonProperty("PHONE_1")
+    @JsonProperty("phone_1")
     private String phoneNumber;
 
-    @JsonProperty("OFF_PHONE")
+    @JsonProperty("off_phone")
     private String offPhone;
 
-    @JsonProperty("OCCUPATION")
+    @JsonProperty("occupation")
     private String occupation;
 
-    @JsonProperty("LEGAL_ID")
+    @JsonProperty("legal_id")
     private String legalId;
 
-    @JsonProperty("MARITAL_STATUS")
+    @JsonProperty("marital_status")
     private String maritalStatus;
 
-    @JsonProperty("BUSINESS_SECTOR")
+    @JsonProperty("business_sector")
     private String businessSector;
 
-    @JsonProperty("TARGET")
+    @JsonProperty("target")
     private String target;
 
-    @JsonProperty("INCOME")
+    @JsonProperty("income")
     private Integer income;
 
-    @JsonProperty("DOBYear")
+    @JsonProperty("dob_year")
     private Integer dobYear;
 
-    @JsonProperty("DOBMonth")
+    @JsonProperty("dob_month")
     private Integer dobMonth;
 
-    @JsonProperty("DOBDay")
+    @JsonProperty("dob_day")
     private Integer dobDay;
 
-    @JsonProperty("LEGAL_DOC_NAME")
+    @JsonProperty("legal_doc_name")
     private String legalDocName;
 
-    @JsonProperty("LEGAL_EXP_DATE")
+    @JsonProperty("legal_exp_date")
     private String legalExpDate;
 
-    @JsonProperty("CUSTOMER_RATING")
+    @JsonProperty("customer_rating")
     private String customerRating;
 }
 

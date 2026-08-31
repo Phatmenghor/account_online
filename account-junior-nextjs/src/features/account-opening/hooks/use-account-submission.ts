@@ -43,13 +43,6 @@ interface UploadCache {
   selfieFileName: string | null;
 }
 
-const GENERIC_ERROR = {
-  title: "មានបញ្ហាកើតឡើង",
-  message:
-    "មានបញ្ហាបច្ចេកទេស។ សូមពិនិត្យការតភ្ជាប់អ៊ីនធឺណិតរបស់អ្នក ហើយព្យាយាមម្តងទៀត។",
-  variant: "error" as const,
-};
-
 export const useAccountSubmission = ({
   formData,
   uploadedImage,
@@ -92,7 +85,6 @@ export const useAccountSubmission = ({
     title: "",
     message: "",
   });
-  const [progressPercent, setProgressPercent] = useState<number>(0);
 
   const uploadCache = useRef<UploadCache>({
     nidFileName: null,
@@ -101,7 +93,6 @@ export const useAccountSubmission = ({
 
   const closeLoading = () => {
     setLoadingState({ isLoading: false, title: "", message: "" });
-    setProgressPercent(0);
   };
 
   /** Close loading modal first, then open error modal after transition gap */
@@ -109,8 +100,8 @@ export const useAccountSubmission = ({
     closeLoading();
     setTimeout(() => {
       setSubmitErrorData({
-        title: translate("err_generic_title") || GENERIC_ERROR.title,
-        message: translate("err_generic_message") || GENERIC_ERROR.message,
+        title: translate("err_generic_title"),
+        message: translate("err_generic_message"),
         variant: "error" as const,
         ...override,
       });
@@ -142,24 +133,20 @@ export const useAccountSubmission = ({
       return;
     }
 
-    setProgressPercent(5);
     setLoadingState({
       isLoading: true,
-      title: translate("submitting_title") || "កំពុងដំណើរការបង្កើតគណនី",
-      message: "សូមរង់ចាំបន្តិច ប្រព័ន្ធកំពុងដំណើរការស្នើសុំគណនីរបស់លោកអ្នក...",
+      title: translate("submitting_title"),
+      message: translate("submitting_message"),
     });
 
     try {
       // Step 1: Compress images client-side before uploading (reduces payload from ~5MB to ~150KB)
-      setProgressPercent(15);
       const [compressedNid, compressedSelfie] = await Promise.all([
         compressBase64Image(nidBase64Raw, 1200, 1200, 0.78),
         compressBase64Image(selfieBase64Raw, 1200, 1200, 0.78),
       ]);
 
       // Step 2: Upload Compressed Documents
-      setProgressPercent(35);
-
       if (
         !uploadCache.current.nidFileName ||
         !uploadCache.current.selfieFileName
@@ -187,69 +174,64 @@ export const useAccountSubmission = ({
 
       const { nidFileName, selfieFileName } = uploadCache.current;
 
-      // Step 3: Verifying and Creating Account
-      setProgressPercent(65);
-
+      // Step 3: Create Account Payload (clean 1-to-1 snake_case matching backend @JsonProperty)
       const accountData = {
-        legalId: formData.idNumber,
-        familyName: formData.lastNameEn,
-        givenName: formData.firstNameEn,
-        firstNameKh: formData.firstNameKh,
-        lastNameKh: formData.lastNameKh,
+        legal_id: formData.idNumber,
+        family_name: formData.lastNameEn,
+        given_name: formData.firstNameEn,
+        first_name_kh: formData.firstNameKh,
+        last_name_kh: formData.lastNameKh,
         gender: convertGenderToAPI(formData.gender),
-        dateOfBirth: formatDate(formData.dob),
-        legalAddress: formData.address,
-        placeOfBirth: formData.pob,
-        legalIssueDate: formatDate(formData.issuedDate),
-        legalExpireDate: formatDate(formData.expiredDate),
-        legalMrz1: formData.MRZ1,
-        legalMrz2: formData.MRZ2,
-        legalMrz3: formData.MRZ3,
-        legalDocType: selectedLegalType?.legalTypeValue || "",
-        phoneNumber: phoneNumber,
-        maritalStatus: selectedMaritalStatus
+        date_of_birth: formatDate(formData.dob),
+        address: formData.address,
+        place_of_birth: formData.pob,
+        legal_iss_date: formatDate(formData.issuedDate),
+        legal_exp_date: formatDate(formData.expiredDate),
+        legal_doc_name: selectedLegalType?.legalTypeValue || "",
+        sms: phoneNumber,
+        marital_status: selectedMaritalStatus
           ? getMaritalStatusString(selectedMaritalStatus.id.toString())
           : "",
         occupation: selectedOccupation?.occupationCode || "",
-        companyName: selectedReferenceBank?.nameEn || "",
-        referralId: staffCode || "",
-        releasedBy: staffCode || "",
-        relationManager: isPublic ? "" : (staffCode || ""),
-        branchCode: selectedBranch!.branchID,
-        customerCurrentProvince: locationData.currentAddress.province?.provinceCode || "",
-        customerCurrentDistrict: locationData.currentAddress.district?.districtCode || "",
-        customerCurrentCommune: locationData.currentAddress.commune?.communeCode || "",
-        customerCurrentVillage: locationData.currentAddress.village?.villageCode || "",
-        customerProvinceEn: locationData.currentAddress.province?.provinceEn || "",
-        customerDistrictEn: locationData.currentAddress.district?.districtEn || "",
-        customerCommuneEn: locationData.currentAddress.commune?.communeEn || "",
-        customerVillageEn: locationData.currentAddress.village?.villageEn || "",
-        customerProvinceKh: locationData.currentAddress.province?.provinceKh || "",
-        customerDistrictKh: locationData.currentAddress.district?.districtKh || "",
-        customerCommuneKh: locationData.currentAddress.commune?.communeKh || "",
-        customerVillageKh: locationData.currentAddress.village?.villageKh || "",
-        customerPobProvince: locationData.placeOfBirth.province?.provinceCode || "",
-        customerPobDistrict: locationData.placeOfBirth.district?.districtCode || "",
-        customerPobCommune: locationData.placeOfBirth.commune?.communeCode || "",
-        customerPobVillage: locationData.placeOfBirth.village?.villageCode || "",
-        customerPobProvinceEn: locationData.placeOfBirth.province?.provinceEn || "",
-        customerPobDistrictEn: locationData.placeOfBirth.district?.districtEn || "",
-        customerPobCommuneEn: locationData.placeOfBirth.commune?.communeEn || "",
-        customerPobVillageEn: locationData.placeOfBirth.village?.villageEn || "",
-        customerPobProvinceKh: locationData.placeOfBirth.province?.provinceKh || "",
-        customerPobDistrictKh: locationData.placeOfBirth.district?.districtKh || "",
-        customerPobCommuneKh: locationData.placeOfBirth.commune?.communeKh || "",
-        customerPobVillageKh: locationData.placeOfBirth.village?.villageKh || "",
-        nidImageName: nidFileName!,
-        selfieImageName: selfieFileName!,
-        customerRole: "OWNER",
-        accountType: isPublic ? "6011" : (selectedCategory?.lookupId || "6011"),
+        company: selectedReferenceBank?.nameEn || "",
+        staff_code: staffCode || "",
+        released_by: staffCode || "",
+        relation_manager: isPublic ? "" : (staffCode || ""),
+        branch_code: selectedBranch!.branchID,
+        cust_province: locationData.currentAddress.province?.provinceCode || "",
+        cust_district: locationData.currentAddress.district?.districtCode || "",
+        cust_commune: locationData.currentAddress.commune?.communeCode || "",
+        cust_village: locationData.currentAddress.village?.villageCode || "",
+        customer_province_en: locationData.currentAddress.province?.provinceEn || "",
+        customer_district_en: locationData.currentAddress.district?.districtEn || "",
+        customer_commune_en: locationData.currentAddress.commune?.communeEn || "",
+        customer_village_en: locationData.currentAddress.village?.villageEn || "",
+        customer_province_kh: locationData.currentAddress.province?.provinceKh || "",
+        customer_district_kh: locationData.currentAddress.district?.districtKh || "",
+        customer_commune_kh: locationData.currentAddress.commune?.communeKh || "",
+        customer_village_kh: locationData.currentAddress.village?.villageKh || "",
+        cust_pob_province: locationData.placeOfBirth.province?.provinceCode || "",
+        cust_pob_district: locationData.placeOfBirth.district?.districtCode || "",
+        cust_pob_commune: locationData.placeOfBirth.commune?.communeCode || "",
+        cust_pob_village: locationData.placeOfBirth.village?.villageCode || "",
+        customer_pob_province_en: locationData.placeOfBirth.province?.provinceEn || "",
+        customer_pob_district_en: locationData.placeOfBirth.district?.districtEn || "",
+        customer_pob_commune_en: locationData.placeOfBirth.commune?.communeEn || "",
+        customer_pob_village_en: locationData.placeOfBirth.village?.villageEn || "",
+        customer_pob_province_kh: locationData.placeOfBirth.province?.provinceKh || "",
+        customer_pob_district_kh: locationData.placeOfBirth.district?.districtKh || "",
+        customer_pob_commune_kh: locationData.placeOfBirth.commune?.communeKh || "",
+        customer_pob_village_kh: locationData.placeOfBirth.village?.villageKh || "",
+        nid_image_name: nidFileName!,
+        selfie_image_name: selfieFileName!,
+        customer_role: "OWNER",
+        product_account: isPublic ? "SAVE.JUNIOR.SAVING" : (selectedCategory?.lookupCode || "SAVE.JUNIOR.SAVING"),
+        account_type: isPublic ? "SAVE.JUNIOR.SAVING" : (selectedCategory?.lookupCode || "SAVE.JUNIOR.SAVING"),
       };
 
       const response = await createOpenAccountService(accountData);
 
       // Step 4: Finalizing & Success
-      setProgressPercent(100);
       uploadCache.current = { nidFileName: null, selfieFileName: null };
 
       // Close loading first, then show success modal smoothly
@@ -262,68 +244,32 @@ export const useAccountSubmission = ({
       // Clean up cache on failure so retry doesn't reuse partial/failed files
       resetUploadCache();
 
-      const rawErr = error?.rawError || error?.response?.data;
-      const statusCode = error?.status || error?.response?.status || rawErr?.code || rawErr?.statusCode;
+      const responseData = error?.response?.data || error?.rawError;
+      const statusCode = error?.response?.status || error?.status || responseData?.code;
+      const backendMessage = responseData?.message || responseData?.error || error?.message || translate("err_generic_message");
 
-      let extractedMsg =
-        error?.errorMessage ||
-        (typeof rawErr === "object" ? (rawErr?.message || rawErr?.error) : (typeof rawErr === "string" ? rawErr : null)) ||
-        error?.message;
-
-      if (extractedMsg && extractedMsg.includes("Request failed with status code")) {
-        const detailMsg = typeof rawErr === "object" ? (rawErr?.message || rawErr?.error) : (typeof rawErr === "string" ? rawErr : null);
-        extractedMsg = detailMsg || (statusCode === 409 ? "លោកអ្នកមានគណនីជាមួយធនាគាររួចហើយ។ សូមប្រើប្រាស់ជាមួយគណនីរបស់លោកអ្នក។" : null);
-      }
-
-      const errorMessage = extractedMsg;
-      const errorResponse = rawErr;
-
-      const isAccountExists =
-        statusCode === 409 ||
-        statusCode === "409" ||
-        (errorMessage != null && (
-          errorMessage.toLowerCase().includes("exist") ||
-          errorMessage.toLowerCase().includes("already") ||
-          errorMessage.includes("រួចហើយ") ||
-          errorMessage.includes("គណនីមាន") ||
-          errorMessage.includes("មានគណនី")
-        ));
-
-      if (isAccountExists) {
-        const friendlyMessage =
-          errorMessage ||
-          "លោកអ្នកមានគណនីជាមួយធនាគាររួចហើយ។ សូមប្រើប្រាស់ជាមួយគណនីរបស់លោកអ្នក។";
-
-        // Close loading first, then show account-exists modal smoothly
+      if (statusCode === 409) {
         closeLoading();
         setTimeout(() => {
           setAccountExistsData({
-            cif: errorResponse?.details?.cif || errorResponse?.data?.cif,
-            accountNumber: errorResponse?.details?.accountNumber || errorResponse?.data?.khrAccount,
-            accountName: errorResponse?.details?.accountName || errorResponse?.data?.legalHolderName,
-            message: friendlyMessage,
+            cif: responseData?.details?.cif || responseData?.data?.cif,
+            accountNumber: responseData?.details?.accountNumber || responseData?.data?.khrAccount,
+            accountName: responseData?.details?.accountName || responseData?.data?.legalHolderName,
+            message: backendMessage,
           });
           setShowAccountExistsModal(true);
         }, 350);
       } else {
-        const fullMsg =
-          errorMessage ||
-          (typeof error === "string" ? error : error?.message) ||
-          translate("err_generic_message") ||
-          "មានបញ្ហាកើតឡើងក្នុងការស្នើសុំគណនី។ សូមព្យាយាមម្តងទៀត។";
-
         showError({
-          title: translate("err_generic_title") || "ការស្នើសុំមិនជោគជ័យ",
-          message: fullMsg,
+          title: translate("err_generic_title"),
+          message: backendMessage,
         });
       }
     } finally {
       // Only close loading if not already handled inside catch block
-      // Use a flag to prevent double-close; individual branches call closeLoading() themselves
       setTimeout(() => {
         setLoadingState((prev) => (prev.isLoading ? { isLoading: false, title: "", message: "" } : prev));
-        setProgressPercent(0);
-      }, 50);
+      }, 350);
     }
   };
 
@@ -344,6 +290,5 @@ export const useAccountSubmission = ({
     setAccountExistsData,
     loadingState,
     setLoadingState,
-    progressPercent,
   };
 };

@@ -1,6 +1,5 @@
 import { AccountOnlineReportRequest } from "@/features/aml/types/chart/aml-chart.request";
-import { axiosClientWithAuth } from "@/utils/axios";
-import axios from "axios";
+import { axiosClientWithAuth, handleServiceError } from "@/utils/axios";
 
 export async function getAccountOnlineReportService(
   params: AccountOnlineReportRequest
@@ -14,21 +13,6 @@ export async function getAccountOnlineReportService(
 
     return response.data;
   } catch (error: any) {
-    if (axios.isAxiosError(error)) {
-      const raw = error.response?.data;
-      const message = raw?.message || "Failed to fetch account online report.";
-      console.error("Axios error:", message);
-
-      throw { errorMessage: message, rawError: raw };
-    } else {
-      console.error("Unexpected error:", error);
-      throw {
-        errorMessage:
-          "An unexpected error occurred while fetching account online report.",
-        rawError: error,
-      };
-    }
+    handleServiceError(error, "Failed to fetch account online report.");
   }
 }
-
-

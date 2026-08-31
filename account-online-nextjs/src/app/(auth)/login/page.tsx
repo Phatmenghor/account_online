@@ -6,7 +6,8 @@ import z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginService } from "@/features/auth/services/login.service";
 import { useForm } from "react-hook-form";
-import { Eye, EyeOff, Lock, IdCard, ShieldCheck, Loader2 } from "lucide-react";
+import { CustomFormField } from "@/components/shared/form-field/custom-form-field";
+import { Eye, EyeOff, Lock, User, ShieldCheck, Loader2 } from "lucide-react";
 import {
   Form,
   FormControl,
@@ -24,7 +25,7 @@ import { AppToast } from "@/components/shared/toast/app-toast";
 import ForceChangePasswordModal from "@/features/master-data/components/force-change-password-modal";
 
 const schema = z.object({
-  username: z.string().min(1, "Please enter your ID Card"),
+  username: z.string().min(1, "Please enter your User Identifier"),
   password: z.string().min(1, "Please enter your password"),
 });
 
@@ -169,77 +170,27 @@ export default function LoginPage() {
                 className="space-y-3.5"
                 autoComplete="off"
               >
-                <FormField
+                <CustomFormField
                   control={form.control}
                   name="username"
-                  render={({ field }) => (
-                    <FormItem className="space-y-1">
-                      <FormLabel className="text-xs font-semibold text-gray-700">
-                        User Identifier{" "}
-                        <span className="text-destructive">*</span>
-                      </FormLabel>
-                      <FormControl>
-                        <div className="relative">
-                          <IdCard className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-                          <Input
-                            {...field}
-                            type="text"
-                            placeholder="Please enter your ID Card"
-                            disabled={isLoading}
-                            autoComplete="off"
-                            readOnly
-                            onFocus={(e) =>
-                              e.target.removeAttribute("readonly")
-                            }
-                            className="h-9 pl-8 text-xs sm:text-sm rounded-xl"
-                          />
-                        </div>
-                      </FormControl>
-                      <FormMessage className="text-xs" />
-                    </FormItem>
-                  )}
+                  label="User Identifier"
+                  placeholder="Please enter your User Identifier"
+                  required
+                  disabled={isLoading}
+                  icon={User}
+                  error={form.formState.errors.username}
                 />
 
-                <FormField
+                <CustomFormField
                   control={form.control}
                   name="password"
-                  render={({ field }) => (
-                    <FormItem className="space-y-1">
-                      <FormLabel className="text-xs font-semibold text-gray-700">
-                        Password <span className="text-destructive">*</span>
-                      </FormLabel>
-                      <FormControl>
-                        <div className="relative">
-                          <Lock className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-                          <Input
-                            {...field}
-                            type={showPassword ? "text" : "password"}
-                            placeholder="Please enter your password"
-                            disabled={isLoading}
-                            autoComplete="new-password"
-                            readOnly
-                            onFocus={(e) =>
-                              e.target.removeAttribute("readonly")
-                            }
-                            className="h-9 pl-8 pr-8 text-xs sm:text-sm rounded-xl"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => setShowPassword((v) => !v)}
-                            className="absolute right-2 top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-gray-100"
-                            disabled={isLoading}
-                          >
-                            {showPassword ? (
-                              <EyeOff className="h-3.5 w-3.5" />
-                            ) : (
-                              <Eye className="h-3.5 w-3.5" />
-                            )}
-                          </button>
-                        </div>
-                      </FormControl>
-                      <FormMessage className="text-xs" />
-                    </FormItem>
-                  )}
+                  label="Password"
+                  type="password"
+                  placeholder="Please enter your password"
+                  required
+                  disabled={isLoading}
+                  icon={Lock}
+                  error={form.formState.errors.password}
                 />
 
                 <Button

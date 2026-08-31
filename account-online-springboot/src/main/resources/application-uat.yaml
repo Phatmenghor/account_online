@@ -3,10 +3,6 @@
 # Active when: spring.profiles.active=uat
 # ==============================================================
 
-email:
-  sender:
-    enabled: true
-
 ad:
   login:
     url: http://192.168.101.5:5050/api/v1/auth/login
@@ -15,8 +11,10 @@ ad:
 
 server:
   port: 7070
-  max-http-header-size: 65536
+  max-http-header-size: 10MB
   tomcat:
+    max-http-header-size: 10MB
+    max-http-request-header-size: 10MB
     connection-timeout: 90000
     max-http-form-post-size: 200MB
     max-swallow-size: -1           # Unlimited: prevents EOFException when client aborts large uploads
@@ -102,7 +100,7 @@ cpb:
   t24:
     url: http://192.168.127.31:7003
     username: LEANGHOURNG.PHOEUNG
-    password: ${T24_PASSWORD:LEang@321}
+    password: ${T24_PASSWORD:LEAng@321}
   mb:
     otpUrl: http://192.168.103.11:15004/CPBBank/services/CPBMobile?wsdl
     registerCodeUrl: http://192.168.103.13:8090/API/RegisterCustomerMB/
@@ -120,10 +118,10 @@ jwt:
 
 telegram:
   bot:
-    token: "${TELEGRAM_BOT_TOKEN:8227113200:AAGq1I7Hs0CjkSW99M9rgrIdlHpgM8r6NMY}"
-    dev-chat-id: "-1002740302492"
-    monitor-chat-id: "-1002740302492"
-    junior-chat-id: "-5590655829"
+    token: "${TELEGRAM_BOT_TOKEN:8854582996:AAEatNZ3VV0iOCFd6-A_XD0qAq3Vm9HNm68}"
+    dev-chat-id: "${TELEGRAM_DEV_CHAT_ID:-1002740302492}"
+    monitor-chat-id: "${TELEGRAM_MONITOR_CHAT_ID:-5590655829}"
+    junior-chat-id: "${TELEGRAM_JUNIOR_CHAT_ID:-5590655829}"
     compliance-mention: "@PHAT_MENGHOR"
     enabled: true
     message-retention-days: 30

@@ -21,7 +21,7 @@ public class OpenAccountController {
     @PostMapping({"/api/v1/open-account/process", "/api/v1/public/open-account/process"})
     public Mono<ResponseEntity<ApiResponse<OpenAccountResponseDto>>> processAccountOpening(
             @Valid @RequestBody CustomerRequest request) {
-        log.info("Received Standard Account Opening request | Legal ID: {}", request.getLegalId());
+        log.info("[OpenAccountController] Received Standard Account Opening request. legalId={}", request.getLegalId());
 
         String traceId = org.slf4j.MDC.get("traceId");
 
@@ -29,9 +29,18 @@ public class OpenAccountController {
                 .map(response -> {
                     if (traceId != null) org.slf4j.MDC.put("traceId", traceId);
                     try {
-                        log.info("Standard Account opened successfully | Legal ID: {} | CIF: {} | By: {}",
+                        log.info("[OpenAccountController] Standard Account opened successfully. legalId={}, cif={}, submittedBy={}",
                                 response.getLegalId(), response.getCif(), response.getSubmittedBy());
                         return ResponseEntity.ok(ApiResponse.success("Account opened successfully", response));
+                    } finally {
+                        org.slf4j.MDC.clear();
+                    }
+                })
+                .doOnError(ex -> {
+                    if (traceId != null) org.slf4j.MDC.put("traceId", traceId);
+                    try {
+                        log.error("[OpenAccountController] Standard Account opening failed. legalId={}, error={}",
+                                request.getLegalId(), ex.getMessage(), ex);
                     } finally {
                         org.slf4j.MDC.clear();
                     }
