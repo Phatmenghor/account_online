@@ -10,6 +10,7 @@ import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 import org.mapstruct.ReportingPolicy;
 
+import java.time.LocalDate;
 import java.util.Locale;
 
 /**
@@ -75,6 +76,36 @@ public interface JuniorAccountMapper {
         if (a != null && !a.isBlank()) return a;
         if (b != null && !b.isBlank()) return b;
         return null;
+    }
+
+    default LocalDate parseLocalDate(String dateStr) {
+        if (dateStr == null || dateStr.isBlank()) {
+            return null;
+        }
+        String trimmed = dateStr.trim();
+        try {
+            if (trimmed.matches("\\d{4}-\\d{2}-\\d{2}")) {
+                return LocalDate.parse(trimmed);
+            }
+            if (trimmed.matches("\\d{8}")) {
+                int year = Integer.parseInt(trimmed.substring(0, 4));
+                int month = Integer.parseInt(trimmed.substring(4, 6));
+                int day = Integer.parseInt(trimmed.substring(6, 8));
+                return LocalDate.of(year, month, day);
+            }
+            if (trimmed.contains("/")) {
+                String[] parts = trimmed.split("/");
+                if (parts.length == 3 && parts[0].matches("\\d{1,2}") && parts[1].matches("\\d{1,2}") && parts[2].matches("\\d{4}")) {
+                    int day = Integer.parseInt(parts[0]);
+                    int month = Integer.parseInt(parts[1]);
+                    int year = Integer.parseInt(parts[2]);
+                    return LocalDate.of(year, month, day);
+                }
+            }
+            return LocalDate.parse(trimmed);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
 

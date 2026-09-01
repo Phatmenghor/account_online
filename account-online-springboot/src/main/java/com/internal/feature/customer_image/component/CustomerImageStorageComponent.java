@@ -84,10 +84,14 @@ public class CustomerImageStorageComponent {
         if (!Files.exists(baseDir)) {
             return null;
         }
-        try (Stream<Path> walk = Files.walk(baseDir, 2)) {
+        String lowerPrefix = prefix.toLowerCase();
+        try (Stream<Path> walk = Files.walk(baseDir, 10)) {
             return walk
                     .filter(Files::isRegularFile)
-                    .filter(p -> p.getFileName().toString().startsWith(prefix))
+                    .filter(p -> {
+                        String name = p.getFileName().toString().toLowerCase();
+                        return name.startsWith(lowerPrefix) || name.contains("_" + lowerPrefix) || name.contains(lowerPrefix);
+                    })
                     .max(Comparator.comparingLong(p -> p.toFile().lastModified()))
                     .orElse(null);
         } catch (IOException e) {
@@ -108,17 +112,25 @@ public class CustomerImageStorageComponent {
                        : "nid";
 
         java.util.List<Path> candidateDirs = new java.util.ArrayList<>();
+        Path juniorBase = Paths.get(getJuniorUploadDir());
+        Path customerBase = Paths.get(getUploadDir());
+
         if (isJunior) {
-            Path juniorBase = Paths.get(getJuniorUploadDir());
             candidateDirs.add(juniorBase.resolve(typeSub));
             candidateDirs.add(juniorBase);
             candidateDirs.add(Paths.get("uploads/junior", typeSub));
             candidateDirs.add(Paths.get("uploads/junior"));
-        } else {
-            Path customerBase = Paths.get(getUploadDir());
             candidateDirs.add(customerBase.resolve(typeSub));
             candidateDirs.add(customerBase);
             candidateDirs.add(Paths.get("uploads/customer-image", typeSub));
+            candidateDirs.add(Paths.get("uploads"));
+        } else {
+            candidateDirs.add(customerBase.resolve(typeSub));
+            candidateDirs.add(customerBase);
+            candidateDirs.add(Paths.get("uploads/customer-image", typeSub));
+            candidateDirs.add(juniorBase.resolve(typeSub));
+            candidateDirs.add(juniorBase);
+            candidateDirs.add(Paths.get("uploads/junior", typeSub));
             candidateDirs.add(Paths.get("uploads"));
         }
 

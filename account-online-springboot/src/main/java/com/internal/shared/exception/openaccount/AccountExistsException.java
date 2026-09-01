@@ -11,5 +11,10 @@ public class AccountExistsException extends RuntimeException {
         super(AppConstants.MSG_ACCOUNT_EXISTS_ERR);
         this.cif = cif;
     }
+
+    public AccountExistsException(String cif, String customMessage) {
+        super(customMessage != null && !customMessage.isBlank() ? customMessage : AppConstants.MSG_ACCOUNT_EXISTS_ERR);
+        this.cif = cif;
+    }
 }
 

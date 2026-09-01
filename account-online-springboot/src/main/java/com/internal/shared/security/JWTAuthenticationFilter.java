@@ -123,6 +123,6 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
 
     private boolean shouldSkipLogging(String path) {
         if (path == null) return false;
-        return path.startsWith("/swagger-ui") || path.startsWith("/v3/api-docs") || path.startsWith("/actuator/health");
+        return path.startsWith("/swagger-ui") || path.startsWith("/v3/api-docs") || path.startsWith("/actuator/health") || path.startsWith("/api/customer-images");
     }
 }

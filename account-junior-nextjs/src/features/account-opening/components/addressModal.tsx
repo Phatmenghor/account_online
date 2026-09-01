@@ -493,7 +493,7 @@ const LocationModal = ({
 
           {/* Modal */}
           <div
-            className="relative bg-white w-full max-w-xl sm:max-w-[580px] lg:max-w-[640px] rounded-t-3xl sm:rounded-2xl shadow-2xl z-10 flex flex-col overflow-hidden border border-gray-100 max-h-[92vh]"
+            className="relative bg-white w-full max-w-xl sm:max-w-[580px] lg:max-w-[640px] rounded-t-3xl sm:rounded-2xl shadow-2xl z-10 flex flex-col overflow-hidden border border-slate-100 max-h-[92vh]"
           >
             {/* Primary top accent bar */}
             <div className="h-1.5 w-full bg-primary flex-shrink-0" />
@@ -502,34 +502,34 @@ const LocationModal = ({
             <div className="w-12 h-1.5 bg-gray-300 rounded-full mx-auto my-2 sm:hidden shrink-0" />
 
             {/* Header */}
-            <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-gray-100 flex-shrink-0">
+            <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-slate-100/80 flex-shrink-0 bg-white">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center shadow-sm flex-shrink-0">
+                <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center flex-shrink-0 text-primary border border-primary/20">
                   <MapPin
                     style={{ width: 20, height: 20 }}
-                    className="text-primary-foreground"
+                    className="text-primary"
                   />
                 </div>
                 <div>
-                  <h2 className="text-lg sm:text-xl font-bold text-gray-800 leading-tight">
+                  <h2 className="text-lg sm:text-xl font-bold text-slate-800 leading-tight">
                     {translate("locationInfo")}
                   </h2>
-                  <p className="text-sm text-gray-400 hidden sm:block">
+                  <p className="text-xs text-slate-400 hidden sm:block">
                     {translate("selectAddress")}
                   </p>
                 </div>
               </div>
               <button
                 onClick={onClose}
-                className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-all flex-shrink-0"
+                className="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-all flex-shrink-0"
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4" />
               </button>
             </div>
 
             {/* Auto-fill loading bar */}
             {(isLoadingAddress || isLoadingPob) && (
-              <div className="flex items-center gap-2 px-4 sm:px-6 py-2.5 bg-primary/5 border-b border-primary/20 flex-shrink-0">
+              <div className="flex items-center gap-2 px-4 sm:px-6 py-2.5 bg-primary/5 border-b border-primary/15 flex-shrink-0">
                 <Loader2 className="w-4 h-4 animate-spin text-primary flex-shrink-0" />
                 <span className="text-sm sm:text-base text-primary font-medium">
                   {translate("loading")}
@@ -544,12 +544,12 @@ const LocationModal = ({
               onTouchMove={(e) => e.stopPropagation()}
             >
               {/* === SECTION 1: Current Address === */}
-              <div className="bg-primary/5 border border-primary/20 rounded-2xl p-4 sm:p-5">
-                <div className="flex items-center gap-2.5 mb-4 pb-2 border-b border-primary/10">
-                  <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center flex-shrink-0">
-                    <Home className="w-4 h-4 text-primary-foreground" />
+              <div className="bg-orange-50/30 border border-orange-100/70 rounded-2xl p-4 sm:p-5">
+                <div className="flex items-center gap-2.5 mb-4 pb-2 border-b border-orange-100/60">
+                  <div className="w-7 h-7 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0 text-primary">
+                    <Home className="w-4 h-4 text-primary" />
                   </div>
-                  <h3 className="text-base font-bold text-gray-800">
+                  <h3 className="text-sm sm:text-base font-bold text-slate-800">
                     {translate("selectAddress")}
                   </h3>
                 </div>
@@ -682,12 +682,12 @@ const LocationModal = ({
               </div>
 
               {/* === SECTION 2: Place of Birth === */}
-              <div className="bg-primary/5 border border-primary/20 rounded-2xl p-4 sm:p-5">
-                <div className="flex items-center gap-2.5 mb-4 pb-2 border-b border-primary/10">
-                  <div className="w-8 h-8 bg-primary/80 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <Navigation className="w-4 h-4 text-primary-foreground" />
+              <div className="bg-orange-50/30 border border-orange-100/70 rounded-2xl p-4 sm:p-5">
+                <div className="flex items-center gap-2.5 mb-4 pb-2 border-b border-orange-100/60">
+                  <div className="w-7 h-7 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0 text-primary">
+                    <Navigation className="w-4 h-4 text-primary" />
                   </div>
-                  <h3 className="text-base font-bold text-gray-800">
+                  <h3 className="text-sm sm:text-base font-bold text-slate-800">
                     {translate("selectPlaceOfBirth")}
                   </h3>
                 </div>
@@ -809,17 +809,17 @@ const LocationModal = ({
             </div>
 
             {/* Footer Buttons */}
-            <div className="flex flex-col sm:flex-row sm:justify-end items-center gap-3 px-6 py-4 bg-gray-50/80 border-t border-gray-100 rounded-b-2xl flex-shrink-0">
+            <div className="flex flex-col sm:flex-row sm:justify-end items-center gap-3 px-6 py-4 bg-slate-50/50 border-t border-slate-100/80 rounded-b-2xl flex-shrink-0">
               <Button
                 onClick={onClose}
                 variant="outline"
-                className="w-full sm:w-auto h-10 px-5 text-sm font-medium rounded-xl border border-gray-200 bg-white text-gray-700 hover:bg-gray-100 transition-colors"
+                className="w-full sm:w-auto h-10 px-5 text-sm font-medium rounded-xl border border-slate-200/80 bg-white text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors shadow-2xs"
               >
                 {translate("close")}
               </Button>
               <Button
                 onClick={handleSubmit}
-                className="w-full sm:w-auto h-10 px-6 text-sm font-semibold rounded-xl bg-primary hover:bg-primary/90 text-white shadow-sm transition-all"
+                className="w-full sm:w-auto h-10 px-6 text-sm font-semibold rounded-xl bg-primary hover:bg-primary/90 text-white shadow-xs transition-all"
               >
                 {translate("submit")}
               </Button>

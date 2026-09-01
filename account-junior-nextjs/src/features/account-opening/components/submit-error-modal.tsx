@@ -223,7 +223,7 @@ export default function SubmitErrorModal({
           <motion.div
             initial={{ y: "100%", opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            exit={{ y: 0, opacity: 1 }}
+            exit={{ y: "100%", opacity: 0 }}
             transition={{ type: "spring", damping: 26, stiffness: 320 }}
             className="relative bg-white w-full max-w-lg sm:max-w-[480px] rounded-t-3xl sm:rounded-2xl shadow-2xl overflow-hidden z-10 border border-gray-100 flex flex-col max-h-[90vh]"
           >
@@ -234,7 +234,7 @@ export default function SubmitErrorModal({
             <div className="w-12 h-1.5 bg-gray-300 rounded-full mx-auto my-2 sm:hidden shrink-0" />
 
             {/* Header */}
-            <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between bg-white flex-shrink-0">
+            <div className="px-5 py-4 border-b border-slate-100/80 flex items-center justify-between bg-white flex-shrink-0">
               <div className="flex items-center gap-2.5">
                 <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${config.iconBg} flex items-center justify-center text-white flex-shrink-0 shadow-sm`}>
                   <Icon className="w-4 h-4" />
@@ -246,30 +246,30 @@ export default function SubmitErrorModal({
               <button
                 type="button"
                 onClick={onClose}
-                className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+                className="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
               >
-                <X className="w-4.5 h-4.5" />
+                <X className="w-4 h-4" />
               </button>
             </div>
 
             {/* Body - Left Aligned Message */}
             <div className="px-6 py-6 overflow-y-auto">
-              <p className="text-sm text-gray-700 leading-relaxed text-left font-medium">
+              <p className="text-sm text-slate-700 leading-relaxed text-left font-medium">
                 {message?.replace(/\(AML High Risk\)/gi, "").replace(/AML High Risk/gi, "").trim()}
               </p>
               {description && (
-                <p className="text-xs text-gray-500 mt-2 text-left">
+                <p className="text-xs text-slate-500 mt-2 text-left">
                   {description?.replace(/\(AML High Risk\)/gi, "").replace(/AML High Risk/gi, "").trim()}
                 </p>
               )}
             </div>
 
             {/* Footer */}
-            <div className="px-6 py-4 border-t border-gray-100 bg-gray-50/80 flex flex-col sm:flex-row justify-end items-center gap-3 rounded-b-2xl flex-shrink-0">
+            <div className="px-6 py-4 border-t border-slate-100/80 bg-slate-50/50 flex flex-col sm:flex-row justify-end items-center gap-3 rounded-b-2xl flex-shrink-0">
               <Button
                 type="button"
                 onClick={onClose}
-                className="w-full sm:w-auto h-10 px-5 text-sm font-medium rounded-xl border border-gray-200 bg-white text-gray-700 hover:bg-gray-100 transition-colors"
+                className="w-full sm:w-auto h-10 px-5 text-sm font-medium rounded-xl border border-slate-200/80 bg-white text-slate-700 hover:bg-slate-50 transition-colors"
               >
                 {translate("close") || "Close"}
               </Button>

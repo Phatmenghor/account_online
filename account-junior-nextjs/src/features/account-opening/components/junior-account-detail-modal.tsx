@@ -92,10 +92,9 @@ export default function JuniorAccountViewModal({
     try {
       p = typeof d.requestPayload === "string" ? JSON.parse(d.requestPayload) : d.requestPayload;
     } catch {}
-
   }
 
-  const hasNid = d.hasNid !== false && p.has_nid !== false && String(d.hasNid) !== "false";
+  const hasNid = d.hasNid !== false && p.has_nid !== false && String(d.hasNid) !== "false" && !d.legalId?.startsWith("JNR-");
 
   // Helper extractor from d -> p -> fallback
   const get = (key: string, ...aliases: string[]) => {
@@ -204,7 +203,7 @@ export default function JuniorAccountViewModal({
                         <ImagePreviewCell
                           imageId={docImage}
                           label={hasNid ? "NID / ID Card" : "Birth Certificate"}
-                          className="w-full h-64 rounded-lg object-cover"
+                          className="w-full h-64 rounded-xl object-contain bg-slate-900/5 p-1 border border-slate-200"
                         />
                       </div>
                     )}
@@ -216,7 +215,7 @@ export default function JuniorAccountViewModal({
                         <ImagePreviewCell
                           imageId={selfieImage}
                           label="Selfie Photo"
-                          className="w-full h-64 rounded-lg object-cover"
+                          className="w-full h-64 rounded-xl object-contain bg-slate-900/5 p-1 border border-slate-200"
                         />
                       </div>
                     )}
@@ -266,8 +265,8 @@ export default function JuniorAccountViewModal({
               </div>
             </div>
 
-            {/* ── Parent / Guardian Information ── */}
-            {(guardianName || guardianLegalId || !hasNid) && (
+            {/* ── Parent / Guardian Information (NO NID ONLY) ── */}
+            {!hasNid && (
               <>
                 <Separator />
                 <div className="space-y-4">

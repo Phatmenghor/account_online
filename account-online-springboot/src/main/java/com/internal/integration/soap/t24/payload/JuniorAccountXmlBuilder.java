@@ -32,17 +32,17 @@ public class JuniorAccountXmlBuilder {
 
         String relationManager = xmlUtils.getOrDefault(request.getRelationManager(), xmlUtils.getOrDefault(request.getReferralId(), ""));
 
-        String legalAddress = xmlUtils.toSwiftSafe(xmlUtils.getOrDefault(request.getLegalAddress(), ""));
+        String legalAddress = xmlUtils.toSwiftSafe(xmlUtils.getOrDefault(request.getLegalAddress(), xmlUtils.getOrDefault(request.getGuardianAddress(), "")));
 
-        String custProvince = xmlUtils.safe(request.getCustomerCurrentProvince());
-        String custDistrict = xmlUtils.safe(request.getCustomerCurrentDistrict());
-        String custCommune = xmlUtils.safe(request.getCustomerCurrentCommune());
-        String custVillage = xmlUtils.safe(request.getCustomerCurrentVillage());
+        String custProvince = xmlUtils.getOrDefault(request.getCustomerCurrentProvince(), "12");
+        String custDistrict = xmlUtils.getOrDefault(request.getCustomerCurrentDistrict(), "1201");
+        String custCommune = xmlUtils.getOrDefault(request.getCustomerCurrentCommune(), "120101");
+        String custVillage = xmlUtils.getOrDefault(request.getCustomerCurrentVillage(), "12010101");
 
-        String pobProvince = xmlUtils.safe(request.getCustomerPobProvince());
-        String pobDistrict = xmlUtils.safe(request.getCustomerPobDistrict());
-        String pobCommune = xmlUtils.safe(request.getCustomerPobCommune());
-        String pobVillage = xmlUtils.safe(request.getCustomerPobVillage());
+        String pobProvince = xmlUtils.getOrDefault(request.getCustomerPobProvince(), custProvince);
+        String pobDistrict = xmlUtils.getOrDefault(request.getCustomerPobDistrict(), custDistrict);
+        String pobCommune = xmlUtils.getOrDefault(request.getCustomerPobCommune(), custCommune);
+        String pobVillage = xmlUtils.getOrDefault(request.getCustomerPobVillage(), custVillage);
 
         String dateOfBirth = xmlUtils.formatDateForT24(request.getDateOfBirth());
         String legalIssueDate = xmlUtils.formatLegalIssueDateWithDefault(request.getLegalIssueDate());
@@ -192,15 +192,15 @@ public class JuniorAccountXmlBuilder {
                 + "<aaar:Arrangement>" + defaultProperties.getNewArrangement() + "</aaar:Arrangement>"
                 + "<aaar:Activity>" + defaultProperties.getAccountActivity() + "</aaar:Activity>"
 
-                // CUSTOMER & JOINT OWNER (GUARDIAN LINKED ONLY FOR NO-NID MODE)
+                // CUSTOMER & JOINT OWNER (GUARDIAN LINKED ONLY FOR NO-NID MODE AND NOT DUPLICATE OF CHILD CIF)
                 + "<aaar:gCUSTOMER g=\"1\">"
                 + "<aaar:mCUSTOMER m=\"1\">"
                 + "<aaar:Customer>" + cif + "</aaar:Customer>"
                 + "<aaar:CustomerRole>OWNER</aaar:CustomerRole>"
                 + "</aaar:mCUSTOMER>"
-                + (request.getGuardianCif() != null && !request.getGuardianCif().isBlank()
+                + (request.getGuardianCif() != null && !request.getGuardianCif().isBlank() && !request.getGuardianCif().trim().equalsIgnoreCase(cif.trim())
                         ? "<aaar:mCUSTOMER m=\"2\">"
-                        + "<aaar:Customer>" + request.getGuardianCif() + "</aaar:Customer>"
+                        + "<aaar:Customer>" + request.getGuardianCif().trim() + "</aaar:Customer>"
                         + "<aaar:CustomerRole>JOINT.OWNER</aaar:CustomerRole>"
                         + "</aaar:mCUSTOMER>"
                         : "")

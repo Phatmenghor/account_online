@@ -38,6 +38,14 @@ export function ParentVerificationSection({
   const tJunior = useTranslations("junior");
   const locale = useLocale();
 
+  const handlePhoneBlur = () => {
+    if (!guardianPhone || parentVerified || parentOtpSent || loading || parentCountdown > 0) return;
+    const clean = guardianPhone.replace(/\D/g, "");
+    if (clean.length >= 8 && clean.length <= 15) {
+      onSendOtp();
+    }
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2 mb-4 pb-2 border-b border-slate-100">
@@ -64,6 +72,7 @@ export function ParentVerificationSection({
               placeholder={translate("contactNumber")}
               value={guardianPhone || ""}
               onChange={(e) => onPhoneChange(e.target.value)}
+              onBlur={handlePhoneBlur}
               disabled={parentVerified || loading}
               className="w-full h-10 text-sm rounded-xl pr-32"
             />
@@ -118,7 +127,7 @@ export function ParentVerificationSection({
               placeholder={translate("otp6Digit")}
               value={parentOtpCode}
               onChange={(e) => onOtpCodeChange(e.target.value.replace(/\D/g, ""))}
-              disabled={loading}
+              disabled={parentVerified || loading}
               className="w-full h-10 text-sm rounded-xl font-mono tracking-wider pr-10"
             />
             {loading && parentOtpSent && !parentVerified && (

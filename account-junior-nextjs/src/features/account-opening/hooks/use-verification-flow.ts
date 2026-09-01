@@ -24,6 +24,7 @@ import { AccOnlineCategoryModel } from "@/features/master-data/types/acc-online-
 import { LocationSubmitData } from "@/features/account-opening/types/address/open-acc-address.request.model";
 import { applicationName } from "@/constants/AppResource/display-list/enum/status";
 import { calculateAge } from "@/utils/date/calculate-age";
+import { isAgeCheckDisabled } from "@/utils/date/disable-age-check";
 
 
 interface UseVerificationFlowProps {
@@ -166,9 +167,9 @@ export const useVerificationFlow = ({
   ) => {
     setIsValidating(true);
 
-    // Age Check for Adult Account Opening (Must be >= 18)
+    // Age Check for Junior Account Opening (Must be < 18)
     const age = calculateAge(formData.dob);
-    if (age !== null && age < 18) {
+    if (age !== null && age >= 18) {
       setAgeModalAge(age);
       setShowAgeModal(true);
       setIsValidating(false);
@@ -197,11 +198,33 @@ export const useVerificationFlow = ({
       };
 
       const response = await validateNIDService(validationData);
-      setValidationResult(response);
 
-      const incorrectFields = response.data.incorrectFields || [];
+      const rawIncorrectFields: string[] = response.data.incorrectFields || [];
 
-      // Check if any critical fields are in the incorrectFields array
+      // Skip check with CamDX on DOB (filter out 'dob' / 'dateOfBirth' / 'date_of_birth' / 'ថ្ងៃខែឆ្នាំកំណើត')
+      const incorrectFields = rawIncorrectFields.filter((field) => {
+        const normalized = String(field).toLowerCase().trim();
+        return !(
+          normalized === "dob" ||
+          normalized === "dateofbirth" ||
+          normalized === "date_of_birth" ||
+          normalized === "ថ្ងៃខែឆ្នាំកំណើត" ||
+          normalized.includes("dob") ||
+          normalized.includes("កំណើត")
+        );
+      });
+
+      const filteredResponse = {
+        ...response,
+        data: {
+          ...response.data,
+          incorrectFields,
+        },
+      };
+
+      setValidationResult(filteredResponse);
+
+      // Check if any critical fields remain in the incorrectFields array
       if (incorrectFields.length > 0) {
         setShowErrorModal(true);
       } else {

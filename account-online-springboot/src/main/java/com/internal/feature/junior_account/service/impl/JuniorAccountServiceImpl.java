@@ -105,6 +105,16 @@ public class JuniorAccountServiceImpl implements JuniorAccountService {
             juniorBankingService.testConnection();
 
             Map<String, String> customerInfo = null;
+            if (hasNid && legalId != null && !legalId.isBlank() && !legalId.startsWith("JNR-")) {
+                var existingJuniorNid = juniorAccountFinalRepository.findTopByLegalIdOrderByCreatedAtDesc(legalId.trim());
+                if (existingJuniorNid.isPresent() && "COMPLETED".equalsIgnoreCase(existingJuniorNid.get().getStatus())) {
+                    String existingCif = existingJuniorNid.get().getCif();
+                    log.warn("[JuniorAccountService] Junior Account creation rejected. Legal ID {} is registered in Junior Account DB (CIF={})",
+                            legalId, existingCif);
+                    throw new AccountExistsException(existingCif, "អត្តសញ្ញាណប័ណ្ណនេះមានគណនី Junior រួចហើយ។ សូមប្រើប្រាស់អត្តសញ្ញាណប័ណ្ណផ្សេងទៀត។");
+                }
+            }
+
             if (hasNid) {
                 log.info("[JuniorAccountService] Step 2/10: Retrieving customer info. legalId={}", legalId);
                 currentStep = AppConstants.GET_CUSTOMER_INFO;
@@ -116,39 +126,14 @@ public class JuniorAccountServiceImpl implements JuniorAccountService {
                 juniorBankingService.validateExistingAccounts(customerInfo);
             }
 
-            // Step 3.1: Validate Junior phone (must NOT be registered in MB Core OR existing Junior Accounts)
-            if (request.getPhoneNumber() != null && !request.getPhoneNumber().isBlank()) {
-                String cleanJuniorPhone = request.getPhoneNumber().trim();
-                log.info("[JuniorAccountService] Step 3.1: Checking Junior phone registration. phone={}", cleanJuniorPhone);
-                currentStep = AppConstants.VALIDATE_EXISTING_ACCOUNT;
-
-                // Check 1: Check existing Junior Account database
-                var existingJuniorOpt = juniorAccountFinalRepository.findByPhoneNumber(cleanJuniorPhone);
-                if (existingJuniorOpt.isPresent()) {
-                    String existingCif = existingJuniorOpt.get().getCif();
-                    log.warn("[JuniorAccountService] Junior Account creation rejected. Phone {} is registered in Junior Account DB (CIF={})",
-                            cleanJuniorPhone, existingCif);
-                    throw new AccountExistsException(existingCif);
-                }
-
-                // Check 2: Check MB Core database
-                var phoneCheckResult = phoneCheckService.checkPhone(cleanJuniorPhone);
-                if (phoneCheckResult != null && Boolean.TRUE.equals(phoneCheckResult.getHasAccount())) {
-                    log.warn("[JuniorAccountService] Junior Account creation rejected. Phone {} is registered in MB Core (CIF={})",
-                            cleanJuniorPhone, phoneCheckResult.getCif());
-                    throw new AccountExistsException(phoneCheckResult.getCif());
-                }
-            }
-
-            if (request.getGuardianPhone() != null && !request.getGuardianPhone().isBlank()) {
-                log.info("[JuniorAccountService] Step 3.2: Checking Guardian phone registration in MB Core. phone={}", request.getGuardianPhone());
-                var guardianPhoneCheck = phoneCheckService.checkPhone(request.getGuardianPhone().trim());
-                if (guardianPhoneCheck == null || !Boolean.TRUE.equals(guardianPhoneCheck.getHasAccount())) {
-                    log.warn("[JuniorAccountService] Junior Account creation rejected. Guardian phone {} is not registered in MB Core", request.getGuardianPhone());
-                    throw new com.internal.shared.exception.custom.BadRequestException("Guardian phone number must be registered with an active Mobile Banking account.");
-                }
-                if (request.getGuardianCif() == null || request.getGuardianCif().isBlank()) {
-                    request.setGuardianCif(guardianPhoneCheck.getCif());
+            if ((request.getGuardianCif() == null || request.getGuardianCif().isBlank()) && request.getGuardianPhone() != null && !request.getGuardianPhone().isBlank()) {
+                try {
+                    var guardianPhoneCheck = phoneCheckService.checkPhone(request.getGuardianPhone().trim());
+                    if (guardianPhoneCheck != null && guardianPhoneCheck.getCif() != null) {
+                        request.setGuardianCif(guardianPhoneCheck.getCif());
+                    }
+                } catch (Exception e) {
+                    log.warn("[JuniorAccountService] Soft check for guardian CIF by phone failed: {}", e.getMessage());
                 }
             }
 
@@ -172,6 +157,24 @@ public class JuniorAccountServiceImpl implements JuniorAccountService {
                                 String formattedGAddr = String.join(" / ", gAddrParts);
                                 request.setGuardianAddress(formattedGAddr);
                                 log.info("[JuniorAccountService] Enriched request guardianAddress for CIF={}", request.getGuardianCif());
+                            }
+                        }
+
+                        if (!hasNid || request.getCustomerCurrentProvince() == null || request.getCustomerCurrentProvince().isBlank()) {
+                            if (parentInfo.getProvince() != null && !parentInfo.getProvince().isBlank()) {
+                                request.setCustomerCurrentProvince(parentInfo.getProvince());
+                            }
+                            if (parentInfo.getDistrict() != null && !parentInfo.getDistrict().isBlank()) {
+                                request.setCustomerCurrentDistrict(parentInfo.getDistrict());
+                            }
+                            if (parentInfo.getCommune() != null && !parentInfo.getCommune().isBlank()) {
+                                request.setCustomerCurrentCommune(parentInfo.getCommune());
+                            }
+                            if (parentInfo.getVillage() != null && !parentInfo.getVillage().isBlank()) {
+                                request.setCustomerCurrentVillage(parentInfo.getVillage());
+                            }
+                            if (request.getLegalAddress() == null || request.getLegalAddress().isBlank()) {
+                                request.setLegalAddress(request.getGuardianAddress());
                             }
                         }
                     }

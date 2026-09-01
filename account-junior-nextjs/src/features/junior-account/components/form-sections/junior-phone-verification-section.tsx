@@ -35,6 +35,14 @@ export function JuniorPhoneVerificationSection({
   const tJunior = useTranslations("junior");
   const locale = useLocale();
 
+  const handlePhoneBlur = () => {
+    if (!phoneNumber || juniorVerified || juniorOtpSent || loading || juniorCountdown > 0) return;
+    const clean = phoneNumber.replace(/\D/g, "");
+    if (clean.length >= 8 && clean.length <= 15) {
+      onSendOtp();
+    }
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2 mb-4 pb-2 border-b border-slate-100">
@@ -61,6 +69,7 @@ export function JuniorPhoneVerificationSection({
               placeholder={translate("contactNumber")}
               value={phoneNumber || ""}
               onChange={(e) => onPhoneChange(e.target.value)}
+              onBlur={handlePhoneBlur}
               disabled={juniorVerified || loading}
               className="w-full h-10 text-sm rounded-xl pr-32"
             />
@@ -115,7 +124,7 @@ export function JuniorPhoneVerificationSection({
               placeholder={translate("otp6Digit")}
               value={juniorOtpCode}
               onChange={(e) => onOtpCodeChange(e.target.value.replace(/\D/g, ""))}
-              disabled={loading}
+              disabled={juniorVerified || loading}
               className="w-full h-10 text-sm rounded-xl font-mono tracking-wider pr-10"
             />
             {loading && juniorOtpSent && !juniorVerified && (

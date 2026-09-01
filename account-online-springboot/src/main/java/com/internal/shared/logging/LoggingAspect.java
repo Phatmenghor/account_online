@@ -26,6 +26,18 @@ public class LoggingAspect {
     @Pointcut("within(@org.springframework.stereotype.Component *) && !within(com.internal.shared.logging..*) && !within(com.internal.config..*)")
     public void componentPointcut() {}
 
+    private boolean isBusinessOrValidationException(Throwable ex) {
+        if (ex == null) return false;
+        return ex instanceof com.internal.shared.exception.otp.OtpInvalidException
+                || ex instanceof com.internal.shared.exception.otp.OtpExpiredException
+                || ex instanceof com.internal.shared.exception.otp.OtpNotFoundException
+                || ex instanceof com.internal.shared.exception.otp.OtpAttemptsExceededException
+                || ex instanceof com.internal.shared.exception.openaccount.AccountExistsException
+                || ex instanceof com.internal.shared.exception.custom.BadRequestException
+                || ex instanceof org.springframework.web.bind.MethodArgumentNotValidException
+                || ex instanceof IllegalArgumentException;
+    }
+
     @Around("controllerPointcut()")
     public Object logController(ProceedingJoinPoint joinPoint) throws Throwable {
         HttpServletRequest request = getRequest();
@@ -33,6 +45,10 @@ public class LoggingAspect {
         String uri = request != null ? request.getRequestURI() : "UNKNOWN";
         String username = getUsername();
         String methodName = joinPoint.getSignature().toShortString();
+
+        if (uri != null && uri.contains("/api/customer-images")) {
+            return joinPoint.proceed();
+        }
 
         log.info("[Controller] Incoming {} request. endpoint={}, user={}, handler={}", method, uri, username, methodName);
 
@@ -44,7 +60,11 @@ public class LoggingAspect {
             return result;
         } catch (Throwable ex) {
             long duration = System.currentTimeMillis() - start;
-            log.error("[Controller] Request failed with exception. endpoint={}, durationMs={}, user={}, error={}", uri, duration, username, ex.getMessage(), ex);
+            if (isBusinessOrValidationException(ex)) {
+                log.warn("[Controller] Request validation note. endpoint={}, durationMs={}, user={}, message={}", uri, duration, username, ex.getMessage());
+            } else {
+                log.error("[Controller] Request failed with exception. endpoint={}, durationMs={}, user={}, error={}", uri, duration, username, ex.getMessage(), ex);
+            }
             throw ex;
         }
     }
@@ -69,7 +89,11 @@ public class LoggingAspect {
             return result;
         } catch (Throwable ex) {
             long duration = System.currentTimeMillis() - start;
-            log.error("[Service] Service execution failed. method={}, durationMs={}, error={}", methodName, duration, ex.getMessage(), ex);
+            if (isBusinessOrValidationException(ex)) {
+                log.warn("[Service] Service validation note. method={}, durationMs={}, message={}", methodName, duration, ex.getMessage());
+            } else {
+                log.error("[Service] Service execution failed. method={}, durationMs={}, error={}", methodName, duration, ex.getMessage(), ex);
+            }
             throw ex;
         }
     }

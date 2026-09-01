@@ -37,41 +37,38 @@ export const ConfirmClearModal = ({
                         transition={{ type: "spring", damping: 26, stiffness: 320 }}
                         className="relative bg-white w-full max-w-[480px] rounded-t-3xl sm:rounded-2xl shadow-2xl overflow-hidden z-10 border border-gray-100 max-h-[90vh] flex flex-col"
                     >
-                        {/* Primary Top Accent */}
-                        <div className="h-1.5 w-full bg-red-500 flex-shrink-0" />
-
                         {/* Native Mobile Drag Handle Pill */}
-                        <div className="w-12 h-1.5 bg-gray-300 rounded-full mx-auto my-2 sm:hidden shrink-0" />
+                        <div className="w-12 h-1.5 bg-gray-300 rounded-full mx-auto my-2.5 sm:hidden shrink-0" />
                         {/* Header */}
-                        <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between bg-white">
+                        <div className="px-5 py-4 border-b border-slate-100/80 flex items-center justify-between bg-white">
                             <div className="flex items-center gap-2.5">
                                 <div className="w-8 h-8 rounded-lg bg-red-50 flex items-center justify-center text-red-500 flex-shrink-0">
                                     <Trash2 className="w-4 h-4" />
                                 </div>
-                                <h3 className="text-base font-bold text-gray-900 tracking-tight">{title || "Clear Form?"}</h3>
+                                <h3 className="text-base font-bold text-slate-900 tracking-tight">{title || "Clear Form?"}</h3>
                             </div>
                             <button
                                 type="button"
                                 onClick={onClose}
-                                className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+                                className="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
                             >
-                                <X className="w-4.5 h-4.5" />
+                                <X className="w-4 h-4" />
                             </button>
                         </div>
 
                         {/* Body */}
                         <div className="p-6 text-center sm:text-left">
-                            <p className="text-sm text-gray-600 leading-relaxed">
+                            <p className="text-sm text-slate-600 leading-relaxed">
                                 {message || "Are you sure you want to clear all fields? This action cannot be undone."}
                             </p>
                         </div>
 
                         {/* Footer */}
-                        <div className="px-6 py-4 border-t border-gray-100 bg-gray-50/80 flex flex-col sm:flex-row justify-end items-center gap-3 rounded-b-2xl">
+                        <div className="px-6 py-4 border-t border-slate-100/80 bg-slate-50/50 flex flex-col sm:flex-row justify-end items-center gap-3 rounded-b-2xl">
                             <button
                                 type="button"
                                 onClick={onClose}
-                                className="w-full sm:w-auto h-10 px-5 text-sm font-medium rounded-xl border border-gray-200 bg-white text-gray-700 hover:bg-gray-100 transition-colors"
+                                className="w-full sm:w-auto h-10 px-5 text-sm font-medium rounded-xl border border-slate-200/80 bg-white text-slate-700 hover:bg-slate-50 transition-colors"
                             >
                                 Cancel
                             </button>

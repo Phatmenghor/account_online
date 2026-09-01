@@ -84,16 +84,7 @@ export const createSuccessAccountTableColumns = ({
         return <span className="font-medium text-xs">{account.legalId || "---"}</span>;
       },
     },
-    {
-      key: "legalHolderName",
-      label: "Holder Name",
-      truncate: true,
-      maxWidth: "250px",
-      minWidth: "180px",
-      render: (account) => (
-        <span className="font-medium">{toProperCase(account.legalHolderName)}</span>
-      ),
-    },
+
     {
       key: "branchNameKh",
       label: "Branch",

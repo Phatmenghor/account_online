@@ -94,19 +94,7 @@ export const createJuniorSuccessAccountTableColumns = ({
         );
       },
     },
-    {
-      key: "legalHolderName",
-      label: "Holder Name",
-      minWidth: "160px",
-      render: (account) => (
-        <span className="font-medium text-xs">
-          {toProperCase(
-            account.legalHolderName ||
-              `${account.legalFirstNameEn || ""} ${account.legalLastNameEn || ""}`
-          )}
-        </span>
-      ),
-    },
+
     {
       key: "hasNid",
       label: "NID Mode",

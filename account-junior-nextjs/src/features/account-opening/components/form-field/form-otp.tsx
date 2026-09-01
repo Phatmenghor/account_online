@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Loader2, CheckCircle, AlertTriangle, XCircle } from "lucide-react";
@@ -54,7 +54,8 @@ export default function OTPInput({
   }, [countdown]);
 
   const isValidPhoneNumber = useCallback((phone: string): boolean => {
-    return /^[0-9]{9,15}$/.test(phone.replace(/\s/g, ""));
+    const clean = phone.replace(/\D/g, "");
+    return clean.length >= 8 && clean.length <= 15;
   }, []);
 
   const validateField = useCallback(
@@ -65,6 +66,8 @@ export default function OTPInput({
     },
     [onValidationChange]
   );
+
+  const lastAutoSentPhone = useRef<string>("");
 
   const handlePhoneChange = (value: string) => {
     const numericValue = value.replace(/\D/g, "");
@@ -84,6 +87,7 @@ export default function OTPInput({
       setOtpCode("");
       setOtpExpiresAt("");
       setCountdown(0);
+      lastAutoSentPhone.current = "";
       validateField("isPhoneVerified", false, translate("err_isPhoneVerified"));
     }
   };
@@ -155,6 +159,15 @@ export default function OTPInput({
       setIsSendingOtp(false);
     }
   }, [phoneNumber, isValidPhoneNumber, countdown, validateField, translate]);
+
+  const handlePhoneBlur = async () => {
+    if (!phoneNumber.trim() || isOtpVerified || countdown > 0 || isSendingOtp || isOtpSent) return;
+    if (isValidPhoneNumber(phoneNumber)) {
+      await handleSendOtp();
+    } else {
+      validateField("phoneNumber", phoneNumber, translate("err_phoneNumber_regex"));
+    }
+  };
 
   const handleOtpChange = (value: string) => {
     if (!phoneNumber.trim()) {
@@ -296,6 +309,7 @@ export default function OTPInput({
             placeholder={translate("contactNumber")}
             value={phoneNumber}
             onChange={(e) => handlePhoneChange(e.target.value)}
+            onBlur={handlePhoneBlur}
             className={`w-full h-10 text-sm rounded-xl pr-28 ${validationErrors.phoneNumber ? "border-red-400" : ""}`}
             disabled={disabled || isSendingOtp}
             maxLength={15}

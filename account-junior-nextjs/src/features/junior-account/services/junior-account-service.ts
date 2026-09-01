@@ -87,22 +87,22 @@ export async function checkPhone(phone: string): Promise<any> {
 }
 
 export async function sendGuardianOtp(phone: string): Promise<any> {
-  const response = await axiosClient.post('/api/v1/public/junior-otp/send', { phone });
+  const response = await axiosClient.post('/api/v1/public/junior-otp/send', { phone, type: 'GUARDIAN' });
   return response.data.data;
 }
 
 export async function verifyGuardianOtp(phone: string, otp: string): Promise<any> {
-  const response = await axiosClient.post('/api/v1/public/junior-otp/verify', { phone, code: otp });
+  const response = await axiosClient.post('/api/v1/public/junior-otp/verify', { phone, otpCode: otp, code: otp });
   return response.data.data;
 }
 
 export async function sendJuniorOtp(phone: string): Promise<any> {
-  const response = await axiosClient.post('/api/v1/public/junior-otp/send', { phone });
+  const response = await axiosClient.post('/api/v1/public/junior-otp/send', { phone, type: 'JUNIOR' });
   return response.data.data;
 }
 
 export async function verifyJuniorOtp(phone: string, otp: string): Promise<any> {
-  const response = await axiosClient.post('/api/v1/public/junior-otp/verify', { phone, code: otp });
+  const response = await axiosClient.post('/api/v1/public/junior-otp/verify', { phone, otpCode: otp, code: otp });
   return response.data.data;
 }
 

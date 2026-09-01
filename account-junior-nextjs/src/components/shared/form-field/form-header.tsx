@@ -39,42 +39,39 @@ export function FormHeader({
 
   const isDestructive = variant === "destructive";
   const iconBoxClass = isDestructive
-    ? "bg-destructive/10 border-destructive/30"
-    : "bg-primary/10 border-primary/30";
-  const iconColorClass = isDestructive ? "text-destructive" : "text-primary";
+    ? "bg-red-50 border border-red-200 text-red-600"
+    : "bg-primary/10 border border-primary/20 text-primary";
 
   return (
     <DialogHeader
       className={cn(
-        "-mx-4 -mt-4 px-4 py-4 md:-mx-6 md:-mt-4 md:px-6 md:py-5 border-b border-primary/30 flex-shrink-0",
+        "px-6 py-4 border-b border-slate-200 bg-white flex-shrink-0",
         className,
       )}
     >
       <div className="flex items-center gap-3">
-        {}
         {showAvatar ? (
           <CustomAvatar size="xl" name={avatarName} imageUrl={avatarImageUrl} />
         ) : (
           <div
             className={cn(
-              "flex h-9 w-9 md:h-10 md:w-10 items-center justify-center rounded-lg shrink-0",
+              "flex h-10 w-10 items-center justify-center rounded-xl shrink-0",
               iconBoxClass,
             )}
           >
             <Icon
-              className={cn("h-5 w-5", iconColorClass)}
+              className="h-5 w-5"
               strokeWidth={2.25}
             />
           </div>
         )}
 
-        {}
-        <div className="flex flex-col gap-0.5 flex-1 min-w-0">
-          <DialogTitle className="text-sm md:text-base font-semibold leading-tight text-foreground">
+        <div className="flex flex-col gap-0.5 flex-1 min-w-0 pr-6">
+          <DialogTitle className="text-base font-bold leading-tight text-slate-900 tracking-tight">
             {title}
           </DialogTitle>
           {description && (
-            <DialogDescription className="text-xs text-muted-foreground leading-snug">
+            <DialogDescription className="text-xs text-slate-500 leading-snug">
               {description}
             </DialogDescription>
           )}

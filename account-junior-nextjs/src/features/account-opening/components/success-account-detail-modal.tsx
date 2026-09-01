@@ -81,7 +81,6 @@ export default function SuccessAccountViewModal({
     try {
       p = typeof a.requestPayload === "string" ? JSON.parse(a.requestPayload) : a.requestPayload;
     } catch {}
-
   }
 
   const getVal = (key: string, ...aliases: string[]) => {
@@ -94,7 +93,7 @@ export default function SuccessAccountViewModal({
     return undefined;
   };
 
-  // Name fields — support both account-online (legalFirstNameEn/legalLastNameEn) and junior (givenName/familyName)
+  // Name fields — support both account-online and junior
   const givenName   = getVal("givenName", "legalFirstNameEn", "firstNameEn", "given_name");
   const familyName  = getVal("familyName", "legalLastNameEn", "lastNameEn", "family_name");
   const firstNameKh = getVal("firstNameKh", "legalFirstNameKh", "first_name_kh");
@@ -119,7 +118,7 @@ export default function SuccessAccountViewModal({
   const pobVillage  = getVal("customerPobVillage", "customerPobVillageKh", "customerPobVillageEn", "customerPobVillage", "customer_pob_village_kh", "customer_pob_village_en");
 
   // Image
-  const hasNid    = a.hasNid !== false && p.has_nid !== false && String(a.hasNid) !== "false";
+  const hasNid    = a.hasNid !== false && p.has_nid !== false && String(a.hasNid) !== "false" && !a.legalId?.startsWith("JNR-");
   const docImage  = a.nidImageName || a.referenceDocName || p.nid_image_name || p.reference_doc_name;
   const selfieImg = a.selfieImageName || p.selfie_image_name;
 
@@ -171,7 +170,7 @@ export default function SuccessAccountViewModal({
                         <ImagePreviewCell
                           imageId={docImage}
                           label={hasNid ? "NID / ID Card" : "Birth Certificate"}
-                          className="w-full h-64 rounded-lg object-cover"
+                          className="w-full h-64 rounded-xl object-contain bg-slate-900/5 p-1 border border-slate-200"
                         />
                       </div>
                     )}
@@ -183,7 +182,7 @@ export default function SuccessAccountViewModal({
                         <ImagePreviewCell
                           imageId={selfieImg}
                           label="Selfie Photo"
-                          className="w-full h-64 rounded-lg object-cover"
+                          className="w-full h-64 rounded-xl object-contain bg-slate-900/5 p-1 border border-slate-200"
                         />
                       </div>
                     )}
@@ -279,8 +278,8 @@ export default function SuccessAccountViewModal({
               </div>
             </div>
 
-            {/* ── Parent / Guardian Information ── */}
-            {(a.guardianName || a.guardianLegalId) && (
+            {/* ── Parent / Guardian Information (NO NID ONLY) ── */}
+            {!hasNid && (
               <>
                 <Separator />
                 <div className="space-y-4">

@@ -3,6 +3,7 @@
 import { Wallet, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTranslations } from "next-intl";
+import { useClientLocale } from "@/providers/local-provider";
 import {
   CustomModal,
   CustomModalHeader,
@@ -27,6 +28,10 @@ const AccountExistsModal = ({
   data,
 }: AccountExistsModalProps) => {
   const translate = useTranslations("NIDPage");
+  const { locale: currentLocale } = useClientLocale();
+  const isKhmer = currentLocale === "kh";
+
+  const title = isKhmer ? "គណនីរបស់អ្នកមានរួចហើយ" : "Account Already Exists";
 
   return (
     <CustomModal isOpen={isOpen} onClose={onClose} size="md">
@@ -41,9 +46,8 @@ const AccountExistsModal = ({
           </div>
           <div>
             <h3 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight leading-tight">
-              គណនីរបស់អ្នកមានរួចហើយ
+              {title}
             </h3>
-            <p className="text-xs text-primary font-medium">Account Already Exists</p>
           </div>
         </div>
 
@@ -62,11 +66,15 @@ const AccountExistsModal = ({
         <div className="bg-primary/5 border border-primary/20 rounded-2xl p-5 space-y-4">
           <p className="text-sm font-medium text-slate-800 leading-relaxed whitespace-pre-wrap">
             {data?.message ||
-              "លោកអ្នកមានគណនីជាមួយធនាគាររួចហើយ។ សូមប្រើប្រាស់ជាមួយគណនីរបស់លោកអ្នក។"}
+              (isKhmer
+                ? "លោកអ្នកមានគណនីជាមួយធនាគាររួចហើយ។ សូមប្រើប្រាស់ជាមួយគណនីរបស់លោកអ្នក។"
+                : "You already have an account with CPBank. Please use your existing account.")}
           </p>
 
           <div className="pt-3 border-t border-primary/15 text-xs text-slate-600 space-y-1">
-            <p className="font-semibold text-slate-700">ទំនាក់ទំនងគាំទ្រ៖ 070 200 002 | 1800 200 888</p>
+            <p className="font-semibold text-slate-700">
+              {isKhmer ? "ទំនាក់ទំនងគាំទ្រ៖" : "Support Contact:"} 070 200 002 | 1800 200 888
+            </p>
             <p className="text-slate-500">info@cambodiapostbank.com.kh</p>
           </div>
         </div>

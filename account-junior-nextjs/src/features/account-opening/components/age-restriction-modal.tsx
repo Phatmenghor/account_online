@@ -3,6 +3,7 @@
 import React from "react";
 import { UserX } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useClientLocale } from "@/providers/local-provider";
 
 export interface AgeRestrictionModalProps {
   isOpen: boolean;
@@ -18,17 +19,15 @@ export function AgeRestrictionModal({
   mode,
   calculatedAge,
 }: AgeRestrictionModalProps) {
+  const { locale: currentLocale } = useClientLocale();
   if (!isOpen) return null;
 
   const isJuniorMode = mode === "junior";
+  const isKhmer = currentLocale === "kh";
 
-  const titleKh = isJuniorMode
-    ? "មិនអាចបង្កើតគណនី Junior បានទេ"
-    : "មិនអាចបង្កើតគណនីមនុស្សពេញវ័យបានទេ";
-
-  const titleEn = isJuniorMode
-    ? "Cannot Open Junior Account"
-    : "Cannot Open Adult Account";
+  const title = isJuniorMode
+    ? (isKhmer ? "មិនអាចបង្កើតគណនី Junior បានទេ" : "Cannot Open Junior Account")
+    : (isKhmer ? "មិនអាចបង្កើតគណនីមនុស្សពេញវ័យបានទេ" : "Cannot Open Adult Account");
 
   const messageKh = isJuniorMode
     ? `លោកអ្នកមានអាយុចាប់ពី ១៨ ឆ្នាំឡើងទៅ ${
@@ -46,6 +45,9 @@ export function AgeRestrictionModal({
         calculatedAge !== null && calculatedAge !== undefined ? `(Current Age: ${calculatedAge})` : ""
       } and cannot open an Adult Account. Please apply for a CPBank Junior Savings account instead.`;
 
+  const bodyMessage = isKhmer ? messageKh : messageEn;
+  const buttonText = isKhmer ? "យល់ព្រម" : "Understood";
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs animate-in fade-in duration-200">
       <div className="relative bg-white border border-slate-200 w-full max-w-lg rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 text-center overflow-hidden">
@@ -57,23 +59,15 @@ export function AgeRestrictionModal({
         {/* Title */}
         <div className="space-y-1">
           <h3 className="text-lg sm:text-xl font-bold text-slate-900 leading-snug">
-            {titleKh}
+            {title}
           </h3>
-          <p className="text-xs font-semibold text-amber-700 uppercase tracking-wider">
-            {titleEn}
-          </p>
         </div>
 
         {/* Message Box */}
         <div className="bg-slate-50 p-4 sm:p-5 rounded-2xl border border-slate-200 text-left space-y-3">
           <p className="text-sm text-slate-800 font-medium leading-relaxed">
-            {messageKh}
+            {bodyMessage}
           </p>
-          <div className="border-t border-slate-200 pt-2.5">
-            <p className="text-xs text-slate-600 leading-relaxed italic">
-              {messageEn}
-            </p>
-          </div>
         </div>
 
         {/* Action Button */}
@@ -83,7 +77,7 @@ export function AgeRestrictionModal({
             onClick={onClose}
             className="w-full h-12 bg-amber-600 hover:bg-amber-700 text-white font-bold text-sm rounded-xl shadow-lg shadow-amber-600/20 transition-all flex items-center justify-center gap-2"
           >
-            <span>យល់ព្រម / Understood</span>
+            <span>{buttonText}</span>
           </Button>
         </div>
       </div>

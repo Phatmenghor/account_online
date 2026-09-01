@@ -167,18 +167,30 @@ public class CustomerImageServiceImpl implements CustomerImageService {
     @Override
     public Resource getNidImageResourceForEmail(String customerId) {
         try {
-            Optional<Path> found = storageComponent.findFileByName("junior/document", "ref_doc_" + customerId);
+            Optional<Path> found = storageComponent.findFileByName("junior/nid", "NID_" + customerId);
             if (found.isEmpty()) {
                 found = storageComponent.findFileByName("junior/nid", "nid_" + customerId);
             }
             if (found.isEmpty()) {
-                found = storageComponent.findFileByName("junior", "ref_doc_" + customerId);
+                found = storageComponent.findFileByName("nid", "NID_" + customerId);
+            }
+            if (found.isEmpty()) {
+                found = storageComponent.findFileByName("nid", "nid_" + customerId);
+            }
+            if (found.isEmpty()) {
+                found = storageComponent.findFileByName("junior/document", "ref_doc_" + customerId);
+            }
+            if (found.isEmpty()) {
+                found = storageComponent.findFileByName("document", "ref_doc_" + customerId);
+            }
+            if (found.isEmpty()) {
+                found = storageComponent.findFileByName("junior", "NID_" + customerId);
             }
             if (found.isEmpty()) {
                 found = storageComponent.findFileByName("junior", "nid_" + customerId);
             }
             if (found.isEmpty()) {
-                found = storageComponent.findFileByName("nid", "nid_" + customerId);
+                found = storageComponent.findFileByName("junior", "ref_doc_" + customerId);
             }
             if (found.isPresent() && Files.exists(found.get())) {
                 log.info("Found document/NID resource for Telegram/email: {}", found.get());
@@ -193,28 +205,14 @@ public class CustomerImageServiceImpl implements CustomerImageService {
     }
 
     @Override
-    public byte[] getNidImageBytes(String customerId) {
-        try {
-            Resource res = getNidImageResourceForEmail(customerId);
-            if (res != null && res.exists()) {
-                return Files.readAllBytes(res.getFile().toPath());
-            }
-            return null;
-        } catch (IOException e) {
-            log.error("Failed to read NID image bytes: {}", e.getMessage(), e);
-            return null;
-        }
-    }
-
-    @Override
     public Resource getSelfieImageResourceForEmail(String customerId) {
         try {
             Optional<Path> found = storageComponent.findFileByName("junior/selfie", "selfie_" + customerId);
             if (found.isEmpty()) {
-                found = storageComponent.findFileByName("junior", "selfie_" + customerId);
+                found = storageComponent.findFileByName("selfie", "selfie_" + customerId);
             }
             if (found.isEmpty()) {
-                found = storageComponent.findFileByName("selfie", "selfie_" + customerId);
+                found = storageComponent.findFileByName("junior", "selfie_" + customerId);
             }
             if (found.isPresent() && Files.exists(found.get())) {
                 log.info("Found Selfie resource for Telegram/email: {}", found.get());
@@ -224,6 +222,20 @@ public class CustomerImageServiceImpl implements CustomerImageService {
             return null;
         } catch (Exception e) {
             log.error("Failed to get Selfie image resource: {}", e.getMessage(), e);
+            return null;
+        }
+    }
+
+    @Override
+    public byte[] getNidImageBytes(String customerId) {
+        try {
+            Resource res = getNidImageResourceForEmail(customerId);
+            if (res != null && res.exists()) {
+                return Files.readAllBytes(res.getFile().toPath());
+            }
+            return null;
+        } catch (IOException e) {
+            log.error("Failed to read NID image bytes: {}", e.getMessage(), e);
             return null;
         }
     }

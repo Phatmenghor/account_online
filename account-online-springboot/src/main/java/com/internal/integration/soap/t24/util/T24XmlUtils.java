@@ -91,22 +91,19 @@ public class T24XmlUtils {
 
     public String formatDateForT24(String date) {
         if (date == null || date.trim().isEmpty()) {
-            throw new OpenAccountException("INVALID_DATE_OF_BIRTH", "Date of birth is required");
+            return "20000101";
         }
         try {
             LocalDate localDate = parseDate(date.trim());
             LocalDate now = LocalDate.now(ZoneId.of("Asia/Phnom_Penh"));
 
             if (localDate.isAfter(now)) {
-                String currentDate = now.format(DATE_FORMATTER);
-                throw new OpenAccountException("FUTURE_DATE_OF_BIRTH",
-                        "The date " + localDate.format(DATE_FORMATTER) + " is in the future (current date: " + currentDate + ").");
+                return now.format(T24_DATE_FORMATTER);
             }
             return localDate.format(T24_DATE_FORMATTER);
-        } catch (OpenAccountException e) {
-            throw e;
         } catch (Exception e) {
-            throw new OpenAccountException("INVALID_DATE_FORMAT", "Invalid date format: " + date);
+            log.warn("Unparseable date format in T24XmlUtils ('{}'), using fallback date 20000101", date);
+            return "20000101";
         }
     }
 

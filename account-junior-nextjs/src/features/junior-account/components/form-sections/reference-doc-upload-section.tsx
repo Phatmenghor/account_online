@@ -1,6 +1,4 @@
-"use client";
-
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { Label } from "@/components/ui/label";
 import {
@@ -10,7 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Upload, CheckCircle, Eye, EyeOff, FileText, RefreshCw } from "lucide-react";
+import { Upload, CheckCircle, Eye, EyeOff, FileText, RefreshCw, Download } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 interface ReferenceDocUploadSectionProps {
@@ -32,22 +30,43 @@ export function ReferenceDocUploadSection({
 }: ReferenceDocUploadSectionProps) {
   const tJunior = useTranslations("junior");
   const [showPreviewModal, setShowPreviewModal] = useState(false);
-  const [showInlinePreview, setShowInlinePreview] = useState(false);
+  const [pdfBlobUrl, setPdfBlobUrl] = useState<string | null>(null);
 
-  const getDocTypeLabel = (type: string) => {
-    switch (type) {
-      case "PARENT_NID":
-        return tJunior("parentNid");
-      case "BIRTH_CERTIFICATE":
-        return tJunior("childBirthCert");
-      case "FAMILY_BOOK":
-        return tJunior("familyBook");
-      case "PASSPORT":
-        return tJunior("passport");
-      default:
-        return tJunior("doc");
+  useEffect(() => {
+    if (showPreviewModal && refDocImagePreview) {
+      if (
+        refDocImagePreview.startsWith("data:application/pdf") ||
+        refDocFileName.toLowerCase().endsWith(".pdf")
+      ) {
+        try {
+          const base64Parts = refDocImagePreview.split(",");
+          const byteString = atob(base64Parts[1] || base64Parts[0]);
+          const mimeString = base64Parts[0].includes(":")
+            ? base64Parts[0].split(":")[1].split(";")[0]
+            : "application/pdf";
+          const ab = new ArrayBuffer(byteString.length);
+          const ia = new Uint8Array(ab);
+          for (let i = 0; i < byteString.length; i++) {
+            ia[i] = byteString.charCodeAt(i);
+          }
+          const blob = new Blob([ab], { type: mimeString });
+          const url = URL.createObjectURL(blob);
+          setPdfBlobUrl(url);
+
+          return () => {
+            URL.revokeObjectURL(url);
+            setPdfBlobUrl(null);
+          };
+        } catch (e) {
+          console.error("Error creating Blob URL for PDF preview:", e);
+        }
+      }
     }
-  };
+  }, [showPreviewModal, refDocImagePreview, refDocFileName]);
+
+  const isPdf =
+    Boolean(refDocImagePreview?.startsWith("data:application/pdf")) ||
+    refDocFileName.toLowerCase().endsWith(".pdf");
 
   return (
     <div className="space-y-3">
@@ -139,18 +158,58 @@ export function ReferenceDocUploadSection({
       {/* Full-Screen Document View Modal */}
       {refDocImagePreview && (
         <Dialog open={showPreviewModal} onOpenChange={setShowPreviewModal}>
-          <DialogContent className="max-w-2xl w-[95vw] p-3 max-h-[85vh] flex flex-col rounded-2xl">
-            <DialogHeader className="pb-1.5 border-b flex flex-row items-center justify-between">
-              <DialogTitle className="text-xs font-bold flex items-center gap-1.5 truncate">
+          <DialogContent className="max-w-4xl w-[95vw] p-0 max-h-[90vh] flex flex-col rounded-2xl overflow-hidden bg-white">
+            <DialogHeader className="px-4 py-3 border-b border-slate-100 flex flex-row items-center justify-between shrink-0">
+              <DialogTitle className="text-xs sm:text-sm font-bold flex items-center gap-1.5 truncate">
                 <FileText className="w-4 h-4 text-primary shrink-0" />
                 <span className="truncate">{refDocFileName}</span>
               </DialogTitle>
+              {isPdf && (pdfBlobUrl || refDocImagePreview) && (
+                <a
+                  href={pdfBlobUrl || refDocImagePreview}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  download={refDocFileName}
+                  className="px-3 py-1 bg-primary text-white font-bold text-xs rounded-xl flex items-center gap-1 hover:bg-primary/90 transition-all mr-6 cursor-pointer"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  <span>Open / Download PDF</span>
+                </a>
+              )}
             </DialogHeader>
-            <div className="flex-1 min-h-0 overflow-auto flex items-center justify-center p-2 bg-slate-900/90 rounded-xl mt-2">
-              {refDocImagePreview.startsWith("data:application/pdf") ? (
-                <iframe src={refDocImagePreview} className="w-full h-[55vh] rounded-lg" title="PDF Document" />
+            <div className="flex-1 min-h-[60vh] overflow-hidden flex items-center justify-center p-2 bg-slate-900/90 rounded-b-2xl">
+              {isPdf ? (
+                <object
+                  data={pdfBlobUrl || refDocImagePreview}
+                  type="application/pdf"
+                  className="w-full h-[65vh] rounded-lg"
+                >
+                  <iframe
+                    src={pdfBlobUrl || refDocImagePreview}
+                    className="w-full h-[65vh] rounded-lg"
+                    title="PDF Document"
+                  />
+                  <div className="text-center p-6 bg-slate-800 text-white rounded-xl space-y-3">
+                    <FileText className="w-10 h-10 mx-auto text-slate-400" />
+                    <p className="text-sm font-medium">{refDocFileName}</p>
+                    <a
+                      href={pdfBlobUrl || refDocImagePreview}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      download={refDocFileName}
+                      className="px-4 py-2 bg-primary text-white font-bold text-xs rounded-xl inline-flex items-center gap-2 shadow"
+                    >
+                      <Download className="w-4 h-4" />
+                      Open / Download PDF
+                    </a>
+                  </div>
+                </object>
               ) : (
-                <img src={refDocImagePreview} alt="Document Preview" className="max-h-[60vh] w-auto object-contain rounded-lg shadow-xl" />
+                <img
+                  src={refDocImagePreview}
+                  alt="Document Preview"
+                  className="max-h-[70vh] w-auto object-contain rounded-lg shadow-xl"
+                />
               )}
             </div>
           </DialogContent>

@@ -315,7 +315,7 @@ export function JuniorNoNidForm({ occupations = [], branches = [], maritalStatus
 
       showToast.success(tJunior("parentOtpVerifySuccess"));
     } catch (err: any) {
-      lastTriedParentOtpRef.current = "";
+      lastTriedParentOtpRef.current = parentOtpCode;
       const msg = err.response?.data?.message || err.message || tJunior("invalidOtpDesc");
       showAlertModal(tJunior("otpVerifyFailed"), msg);
     } finally {
@@ -370,7 +370,7 @@ export function JuniorNoNidForm({ occupations = [], branches = [], maritalStatus
       setJuniorCountdown(0);
       showToast.success(tJunior("juniorOtpVerifySuccess"));
     } catch (err: any) {
-      lastTriedJuniorOtpRef.current = "";
+      lastTriedJuniorOtpRef.current = juniorOtpCode;
       const msg = err.response?.data?.message || err.message || tJunior("invalidOtpDesc");
       showAlertModal(tJunior("otpVerifyFailed"), msg);
     } finally {
@@ -571,7 +571,12 @@ export function JuniorNoNidForm({ occupations = [], branches = [], maritalStatus
 
 
     try {
-      const res = await processJuniorAccountOpening(formData);
+      const payloadToSend: JuniorCustomerPayload = {
+        ...formData,
+        sms: formData.phone_number,
+        phone_number: formData.phone_number,
+      };
+      const res = await processJuniorAccountOpening(payloadToSend);
       setIsSubmittingModal(false);
       setSuccessData(res);
       setShowSuccessModal(true);

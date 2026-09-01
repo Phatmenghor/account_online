@@ -119,7 +119,7 @@ const DialogHeader = ({
 }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
     className={cn(
-      "flex flex-col space-y-1 text-left shrink-0 pb-3 border-b border-border/40",
+      "flex flex-col space-y-1 text-left shrink-0 px-6 py-4 border-b border-slate-200 bg-white",
       className
     )}
     {...props}
@@ -133,7 +133,7 @@ const DialogFooter = ({
 }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
     className={cn(
-      "flex flex-col gap-2 pt-3 border-t mt-auto shrink-0 pb-safe",
+      "flex flex-row items-center justify-end gap-3 px-6 py-4 border-t border-slate-200 bg-slate-100/90 mt-auto shrink-0 rounded-b-2xl",
       className
     )}
     {...props}

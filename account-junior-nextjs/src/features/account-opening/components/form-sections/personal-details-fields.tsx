@@ -94,14 +94,14 @@ export const PersonalDetailsFields: React.FC<PersonalDetailsFieldsProps> = ({
       <div className="space-y-1">
         {renderLabel("firstNameKh")}
         <Input
-          id="lastNameKh"
+          id="firstNameKh"
           placeholder={getPlaceholder("firstNameKh")}
-          value={formData.lastNameKh}
-          onChange={(e) => handleInputChange("lastNameKh", e.target.value)}
-          className={`w-full h-9 text-sm rounded-xl ${validationErrors.lastNameKh ? "border-red-400 focus-visible:ring-red-300" : ""}`}
+          value={formData.firstNameKh}
+          onChange={(e) => handleInputChange("firstNameKh", e.target.value)}
+          className={`w-full h-9 text-sm rounded-xl ${validationErrors.firstNameKh ? "border-red-400 focus-visible:ring-red-300" : ""}`}
           disabled={isLoading || isValidating || isSubmitting}
         />
-        {validationErrors.lastNameKh && (
+        {validationErrors.firstNameKh && (
           <p className="text-xs text-red-500">{translate("err_firstNameKh")}</p>
         )}
       </div>
@@ -110,14 +110,14 @@ export const PersonalDetailsFields: React.FC<PersonalDetailsFieldsProps> = ({
       <div className="space-y-1">
         {renderLabel("lastNameKH")}
         <Input
-          id="firstNameKh"
+          id="lastNameKh"
           placeholder={getPlaceholder("lastNameKH")}
-          value={formData.firstNameKh}
-          onChange={(e) => handleInputChange("firstNameKh", e.target.value)}
-          className={`w-full h-9 text-sm rounded-xl ${validationErrors.firstNameKh ? "border-red-400 focus-visible:ring-red-300" : ""}`}
+          value={formData.lastNameKh}
+          onChange={(e) => handleInputChange("lastNameKh", e.target.value)}
+          className={`w-full h-9 text-sm rounded-xl ${validationErrors.lastNameKh ? "border-red-400 focus-visible:ring-red-300" : ""}`}
           disabled={isLoading || isValidating || isSubmitting}
         />
-        {validationErrors.firstNameKh && (
+        {validationErrors.lastNameKh && (
           <p className="text-xs text-red-500">{translate("err_lastNameKh")}</p>
         )}
       </div>

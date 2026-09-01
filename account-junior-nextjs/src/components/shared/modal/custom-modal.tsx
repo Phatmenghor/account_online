@@ -58,7 +58,7 @@ export function CustomModalHeader({
   return (
     <div
       className={cn(
-        "px-6 pt-5 pb-2 bg-white flex items-center justify-between shrink-0 border-b-0",
+        "px-6 py-4 bg-white flex items-center justify-between shrink-0 border-b border-slate-200",
         className
       )}
       {...props}
@@ -94,7 +94,7 @@ export function CustomModalFooter({
   return (
     <div
       className={cn(
-        "px-6 py-4 bg-white flex flex-col-reverse sm:flex-row justify-end items-stretch sm:items-center gap-2.5 shrink-0 rounded-b-3xl border-t-0",
+        "px-6 pt-5 pb-6 bg-slate-100/90 flex flex-col-reverse sm:flex-row justify-end items-stretch sm:items-center gap-3 shrink-0 rounded-b-3xl border-t border-slate-200",
         className
       )}
       {...props}

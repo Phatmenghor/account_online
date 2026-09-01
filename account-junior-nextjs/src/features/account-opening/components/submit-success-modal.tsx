@@ -1,6 +1,5 @@
 "use client";
 
-import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { CheckCircle } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
@@ -13,8 +12,6 @@ interface SuccessModalProps {
 }
 
 export default function SubmitSuccessModal({ isOpen, onClose }: SuccessModalProps) {
-  const tJunior = useTranslations("junior");
-
   return (
     <AnimatePresence>
       {isOpen && (
@@ -47,27 +44,29 @@ export default function SubmitSuccessModal({ isOpen, onClose }: SuccessModalProp
               </div>
 
               <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">
-                {tJunior("welcomeTitle")}
+                សូមស្វាគមន៍មកកាន់ Cambodia Post Bank!
               </h2>
 
               <div className="w-full bg-primary/5 border border-primary/15 rounded-xl p-4 mt-3 text-left space-y-2">
                 <p className="text-sm text-gray-700 leading-relaxed">
-                  {tJunior("accountCreatedSuccessMessage")}
+                  គណនីធនាគាររបស់លោក/លោកស្រី
+                  <span className="font-bold text-primary"> ត្រូវបានបង្កើតដោយជោគជ័យ</span> រួចរាល់ហើយ។
                 </p>
                 <p className="text-xs text-gray-500 leading-relaxed">
-                  {tJunior("accountDetailsSmsNotice")}
+                  ព័ត៌មានលម្អិតគណនីត្រូវបានផ្ញើទៅកាន់ លេខទូរស័ព្ទរបស់លោក/លោកស្រីតាមរយៈ
+                  <span className="font-medium text-gray-700"> សារ SMS</span>។
                 </p>
               </div>
             </div>
 
             {/* Footer */}
-            <div className="px-6 py-4 border-t border-gray-100 bg-gray-50/80 flex justify-end items-center rounded-b-2xl flex-shrink-0">
+            <div className="px-6 py-4 border-t border-slate-100/80 bg-slate-50/50 flex justify-end items-center rounded-b-2xl flex-shrink-0">
               <Button
                 type="button"
                 onClick={onClose}
-                className="w-full sm:w-auto h-10 px-6 text-sm font-semibold rounded-xl bg-primary hover:bg-primary/90 text-white shadow-sm transition-all"
+                className="w-full sm:w-auto h-10 px-6 text-sm font-semibold rounded-xl bg-primary hover:bg-primary/90 text-white shadow-xs transition-all"
               >
-                {tJunior("ok")}
+                យល់ព្រម
               </Button>
             </div>
           </motion.div>
@@ -76,5 +75,3 @@ export default function SubmitSuccessModal({ isOpen, onClose }: SuccessModalProp
     </AnimatePresence>
   );
 }
-
-

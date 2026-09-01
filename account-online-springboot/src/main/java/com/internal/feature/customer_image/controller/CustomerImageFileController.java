@@ -25,27 +25,18 @@ public class CustomerImageFileController {
 
     @GetMapping("/{filename:.+}")
     public ResponseEntity<byte[]> getImage(@PathVariable String filename) {
-        log.info("[CustomerImageFileController] Received request for image file: {}", filename);
         if (filename == null || filename.contains("..") || filename.contains("/") || filename.contains("\\")) {
-            log.warn("[CustomerImageFileController] Rejected invalid filename path traversal attempt: {}", filename);
             return ResponseEntity.badRequest().build();
         }
 
         Optional<CustomerImageFileDto> imageFile = customerImageService.getCustomerImageFile(filename);
 
         return imageFile
-                .map(file -> {
-                    log.info("[CustomerImageFileController] Served image file: {} | Size: {} bytes | Type: {}",
-                            filename, file.getContent().length, file.getMediaType());
-                    return ResponseEntity.ok()
-                            .cacheControl(CacheControl.maxAge(1, TimeUnit.DAYS).cachePublic())
-                            .contentType(file.getMediaType())
-                            .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + filename + "\"")
-                            .body(file.getContent());
-                })
-                .orElseGet(() -> {
-                    log.warn("[CustomerImageFileController] Image file not found: {}", filename);
-                    return ResponseEntity.notFound().build();
-                });
+                .map(file -> ResponseEntity.ok()
+                        .cacheControl(CacheControl.maxAge(1, TimeUnit.DAYS).cachePublic())
+                        .contentType(file.getMediaType())
+                        .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + filename + "\"")
+                        .body(file.getContent()))
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 }

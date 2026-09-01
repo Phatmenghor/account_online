@@ -115,14 +115,21 @@ export function CustomDateTimePicker({
     return `${year}-${month}-${day}`;
   };
 
-  // Clicking a day sets pending only — does NOT fire onChange or close
+  // Clicking a day sets pending and applies immediately for mode="date"
   const handleDateSelect = (day: number) => {
     const newDate = new Date(viewDate.getFullYear(), viewDate.getMonth(), day);
-    if (mode === "datetime" && pendingDate) {
-      newDate.setHours(pendingDate.getHours());
-      newDate.setMinutes(pendingDate.getMinutes());
+    if (mode === "datetime") {
+      if (pendingDate) {
+        newDate.setHours(pendingDate.getHours());
+        newDate.setMinutes(pendingDate.getMinutes());
+      }
+      setPendingDate(newDate);
+    } else {
+      setSelectedDate(newDate);
+      setPendingDate(newDate);
+      onChange(formatDateForForm(newDate));
+      setIsOpen(false);
     }
-    setPendingDate(newDate);
   };
 
   // Build datetime from pending + time selectors and apply
@@ -160,11 +167,36 @@ export function CustomDateTimePicker({
 
   const handleMonthChange = (month: string) => {
     const monthIndex = MONTHS.indexOf(month as typeof MONTHS[number]);
-    setViewDate(new Date(viewDate.getFullYear(), monthIndex, 1));
+    const currentYear = viewDate.getFullYear();
+    const newViewDate = new Date(currentYear, monthIndex, 1);
+    setViewDate(newViewDate);
+
+    const baseDate = selectedDate || pendingDate;
+    if (baseDate) {
+      const maxDays = new Date(currentYear, monthIndex + 1, 0).getDate();
+      const targetDay = Math.min(baseDate.getDate(), maxDays);
+      const updatedDate = new Date(currentYear, monthIndex, targetDay);
+      setSelectedDate(updatedDate);
+      setPendingDate(updatedDate);
+      onChange(formatDateForForm(updatedDate));
+    }
   };
 
-  const handleYearChange = (year: string) => {
-    setViewDate(new Date(parseInt(year), viewDate.getMonth(), 1));
+  const handleYearChange = (yearStr: string) => {
+    const year = parseInt(yearStr);
+    const currentMonth = viewDate.getMonth();
+    const newViewDate = new Date(year, currentMonth, 1);
+    setViewDate(newViewDate);
+
+    const baseDate = selectedDate || pendingDate;
+    if (baseDate) {
+      const maxDays = new Date(year, currentMonth + 1, 0).getDate();
+      const targetDay = Math.min(baseDate.getDate(), maxDays);
+      const updatedDate = new Date(year, currentMonth, targetDay);
+      setSelectedDate(updatedDate);
+      setPendingDate(updatedDate);
+      onChange(formatDateForForm(updatedDate));
+    }
   };
 
   const navigateMonth = (direction: "prev" | "next") => {
@@ -198,8 +230,10 @@ export function CustomDateTimePicker({
 
   const generateYearOptions = () => {
     const currentYear = new Date().getFullYear();
+    const startYear = Math.min(1900, viewDate.getFullYear() - 10);
+    const endYear = Math.max(currentYear + 50, viewDate.getFullYear() + 10);
     const years: string[] = [];
-    for (let i = currentYear - YEAR_RANGE_OFFSET; i <= currentYear + YEAR_RANGE_OFFSET; i++) {
+    for (let i = startYear; i <= endYear; i++) {
       years.push(i.toString());
     }
     return years;

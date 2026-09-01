@@ -81,6 +81,20 @@ public class JuniorAccountOpenedEventListener {
                 }
             }
 
+            String nidData = (request.getNidImageName() != null && request.getNidImageName().startsWith("data:image"))
+                    ? request.getNidImageName()
+                    : null;
+
+            if (nidData != null && !nidData.isBlank()) {
+                try {
+                    String nidName = "nid_" + request.getLegalId() + ".jpg";
+                    customerImageService.saveBase64File(nidData, nidName, "junior_nid");
+                    request.setNidImageName(nidName);
+                } catch (Exception e) {
+                    log.warn("Could not save Junior NID image file to disk in listener: {}", e.getMessage());
+                }
+            }
+
             if (request.getReferenceDocImage() != null && !request.getReferenceDocImage().isBlank()) {
                 try {
                     String docExt = ".pdf";

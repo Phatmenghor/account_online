@@ -104,6 +104,7 @@ public class CustomerRequest {
 
     @NotBlank(message = "Phone number is required")
     @JsonProperty("sms")
+    @com.fasterxml.jackson.annotation.JsonAlias({"phone_number", "phone", "sms"})
     private String phoneNumber;
 
     @JsonProperty("customer_type")
